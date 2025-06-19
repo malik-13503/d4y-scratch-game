@@ -6,12 +6,11 @@ import {
 } from "@shared/schema";
 import { db } from "./db";
 import { eq } from "drizzle-orm";
-import connectPg from "connect-pg-simple";
 import session from "express-session";
-import { pool } from "./db";
+import MemoryStore from "memorystore";
 import { hashPassword } from "./utils"; // Import hashPassword
 
-const PostgresSessionStore = connectPg(session);
+const MemStore = MemoryStore(session);
 
 export interface IStorage {
   // Game methods
@@ -63,9 +62,8 @@ export class DatabaseStorage implements IStorage {
   public sessionStore: any;
 
   constructor() {
-    this.sessionStore = new PostgresSessionStore({ 
-      pool, 
-      createTableIfMissing: true 
+    this.sessionStore = new MemStore({
+      checkPeriod: 86400000 // prune expired entries every 24h
     });
 
     this.initializeSampleData();
