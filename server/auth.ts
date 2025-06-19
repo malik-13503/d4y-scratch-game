@@ -2,30 +2,14 @@ import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
 import { Express } from "express";
 import session from "express-session";
-import { scrypt, randomBytes, timingSafeEqual } from "crypto";
-import { promisify } from "util";
 import { storage } from "./storage";
 import { AdminUser } from "@shared/schema";
+import { hashPassword, comparePasswords } from "./utils";
 
 declare global {
   namespace Express {
     interface User extends AdminUser {}
   }
-}
-
-const scryptAsync = promisify(scrypt);
-
-async function hashPassword(password: string) {
-  const salt = randomBytes(16).toString("hex");
-  const buf = (await scryptAsync(password, salt, 64)) as Buffer;
-  return `${buf.toString("hex")}.${salt}`;
-}
-
-async function comparePasswords(supplied: string, stored: string) {
-  const [hashed, salt] = stored.split(".");
-  const hashedBuf = Buffer.from(hashed, "hex");
-  const suppliedBuf = (await scryptAsync(supplied, salt, 64)) as Buffer;
-  return timingSafeEqual(hashedBuf, suppliedBuf);
 }
 
 export function setupAuth(app: Express) {
@@ -51,21 +35,32 @@ export function setupAuth(app: Express) {
       { usernameField: "email" },
       async (email, password, done) => {
         try {
+          console.log("Attempting login for email:", email);
           const user = await storage.getAdminUserByEmail(email);
-          if (!user || !user.isActive) {
+          
+          if (!user) {
+            console.log("User not found:", email);
+            return done(null, false, { message: "Invalid credentials" });
+          }
+          
+          if (!user.isActive) {
+            console.log("User is inactive:", email);
             return done(null, false, { message: "Invalid credentials" });
           }
 
           const isValid = await comparePasswords(password, user.password);
           if (!isValid) {
+            console.log("Invalid password for user:", email);
             return done(null, false, { message: "Invalid credentials" });
           }
 
+          console.log("Login successful for user:", email);
           // Update last login time
           await storage.updateAdminUser(user.id, { lastLoginAt: new Date() });
           
           return done(null, user);
         } catch (error) {
+          console.error("Authentication error:", error);
           return done(error);
         }
       }
@@ -185,4 +180,3 @@ export function requireAuth(req: any, res: any, next: any) {
   res.status(401).json({ message: "Authentication required" });
 }
 
-export { hashPassword };

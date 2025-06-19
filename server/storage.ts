@@ -9,6 +9,7 @@ import { eq } from "drizzle-orm";
 import connectPg from "connect-pg-simple";
 import session from "express-session";
 import { pool } from "./db";
+import { hashPassword } from "./utils"; // Import hashPassword
 
 const PostgresSessionStore = connectPg(session);
 
@@ -19,40 +20,43 @@ export interface IStorage {
   createGame(game: InsertGame): Promise<Game>;
   updateGame(id: number, updates: Partial<Game>): Promise<Game | undefined>;
   deleteGame(id: number): Promise<boolean>;
-  
+
   // Player methods
   getPlayersByGameId(gameId: number): Promise<Player[]>;
   getPlayer(id: number): Promise<Player | undefined>;
   createPlayer(player: InsertPlayer): Promise<Player>;
   updatePlayer(id: number, updates: Partial<Player>): Promise<Player | undefined>;
-  
+
   // Game result methods
   getGameResult(gameId: number): Promise<GameResult | undefined>;
   createGameResult(result: InsertGameResult): Promise<GameResult>;
-  
+
   // Admin user methods
   getAdminUser(id: number): Promise<AdminUser | undefined>;
   getAdminUserByEmail(email: string): Promise<AdminUser | undefined>;
   createAdminUser(user: InsertAdminUser): Promise<AdminUser>;
   updateAdminUser(id: number, updates: Partial<AdminUser>): Promise<AdminUser | undefined>;
-  
+
   // Wheel segment methods
   getWheelSegmentsByGameId(gameId: number): Promise<WheelSegment[]>;
   createWheelSegment(segment: InsertWheelSegment): Promise<WheelSegment>;
   updateWheelSegment(id: number, updates: Partial<WheelSegment>): Promise<WheelSegment | undefined>;
   deleteWheelSegment(id: number): Promise<boolean>;
-  
+
   // System settings methods
   getSystemSettings(): Promise<SystemSetting[]>;
   getSystemSetting(key: string): Promise<SystemSetting | undefined>;
   updateSystemSetting(key: string, value: string): Promise<SystemSetting>;
-  
+
   // Notification methods
   createNotification(notification: InsertNotification): Promise<Notification>;
   getNotificationsByGameId(gameId: number): Promise<Notification[]>;
-  
+
   // Session store
   sessionStore: any;
+
+  // Ensure default admin user exists
+  ensureDefaultAdminUser(): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -63,8 +67,9 @@ export class DatabaseStorage implements IStorage {
       pool, 
       createTableIfMissing: true 
     });
-    
+
     this.initializeSampleData();
+    this.ensureDefaultAdminUser(); // Call ensureDefaultAdminUser on startup
   }
 
   private async initializeSampleData() {
@@ -73,6 +78,7 @@ export class DatabaseStorage implements IStorage {
       const adminExists = await db.select().from(adminUsers).limit(1);
       if (adminExists.length === 0) {
         // Create default admin user
+        // const hashedPassword = await hashPassword("admin123");
         await db.insert(adminUsers).values({
           email: "admin@example.com",
           password: "$2b$10$rKjNl0lVJ.K1vL5kGqrQ6u2Z8nHj3zt5xKj0H7LQG9s2A6hL1yV7i", // "admin123"
@@ -247,6 +253,26 @@ export class DatabaseStorage implements IStorage {
 
   async getNotificationsByGameId(gameId: number): Promise<Notification[]> {
     return await db.select().from(notifications).where(eq(notifications.gameId, gameId));
+  }
+
+  // Ensure default admin user exists
+  async ensureDefaultAdminUser(): Promise<void> {
+    try {
+      const existingAdmin = await this.getAdminUserByEmail("admin@example.com");
+      if (!existingAdmin) {
+        console.log("Creating default admin user...");
+        const hashedPassword = await hashPassword("admin123");
+        await this.createAdminUser({
+          email: "admin@example.com",
+          password: hashedPassword,
+          firstName: "Admin",
+          lastName: "User",
+        });
+        console.log("Default admin user created successfully");
+      }
+    } catch (error) {
+      console.error("Failed to ensure default admin user:", error);
+    }
   }
 }
 
