@@ -78,10 +78,10 @@ export class DatabaseStorage implements IStorage {
       const adminExists = await db.select().from(adminUsers).limit(1);
       if (adminExists.length === 0) {
         // Create default admin user
-        // const hashedPassword = await hashPassword("admin123");
+        const hashedPassword = await hashPassword("admin123");
         await db.insert(adminUsers).values({
           email: "admin@example.com",
-          password: "$2b$10$rKjNl0lVJ.K1vL5kGqrQ6u2Z8nHj3zt5xKj0H7LQG9s2A6hL1yV7i", // "admin123"
+          password: hashedPassword,
           firstName: "Admin",
           lastName: "User",
         });
@@ -269,6 +269,12 @@ export class DatabaseStorage implements IStorage {
           lastName: "User",
         });
         console.log("Default admin user created successfully");
+      } else if (existingAdmin.password.startsWith("$2b$")) {
+        // Fix existing bcrypt password to use scrypt format
+        console.log("Updating default admin user password format...");
+        const hashedPassword = await hashPassword("admin123");
+        await this.updateAdminUser(existingAdmin.id, { password: hashedPassword });
+        console.log("Default admin user password format updated");
       }
     } catch (error) {
       console.error("Failed to ensure default admin user:", error);
