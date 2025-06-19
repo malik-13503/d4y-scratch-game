@@ -58,7 +58,7 @@ export default function AdminDashboard() {
     enabled: !!selectedGame,
   });
 
-  const { data: players } = useQuery({
+  const { data: players } = useQuery<any[]>({
     queryKey: [`/api/admin/games/${selectedGame?.id}/players`],
     enabled: !!selectedGame,
   });
@@ -671,7 +671,7 @@ export default function AdminDashboard() {
                         </tr>
                       </thead>
                       <tbody>
-                        {players?.map((player: any) => (
+                        {(players || []).map((player: any) => (
                           <tr key={player.id} className="border-b hover:bg-gray-50">
                             <td className="p-2 font-medium">{player.playerName}</td>
                             <td className="p-2 text-gray-600">{player.email || "N/A"}</td>
