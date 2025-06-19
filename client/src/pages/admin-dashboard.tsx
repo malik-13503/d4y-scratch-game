@@ -63,16 +63,17 @@ export default function AdminDashboard() {
   const { toast } = useToast();
 
   // Check authentication
-  const { data: adminUser, isLoading: authLoading } = useQuery({
+  const { data: adminUser, isLoading: authLoading, error } = useQuery({
     queryKey: ["/api/admin/user"],
     retry: false,
   });
 
   useEffect(() => {
-    if (!authLoading && !adminUser) {
+    if (!authLoading && (!adminUser || error)) {
+      console.log("Redirecting to login - adminUser:", adminUser, "error:", error);
       setLocation("/admin-login");
     }
-  }, [adminUser, authLoading, setLocation]);
+  }, [adminUser, authLoading, error, setLocation]);
 
   // Dashboard stats with enhanced metrics
   const { data: dashboardStats, refetch: refetchStats } = useQuery<{

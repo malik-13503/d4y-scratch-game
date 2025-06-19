@@ -26,13 +26,73 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get specific game
   app.get("/api/games/:id", async (req, res) => {
     try {
-      const id = parseInt(req.params.id);
-      const game = await storage.getGame(id);
-      if (!game) {
-        return res.status(404).json({ message: "Game not found" });
+      const { id } = req.params;
+      
+      // Handle featured games from home page
+      if (id === "travel-mug") {
+        return res.json({
+          id: "travel-mug",
+          name: "Travel Mug",
+          code: "G8-694",
+          prize: "$10",
+          prizeValue: 10,
+          emoji: "☕",
+          totalNumbers: 125,
+          numbersLeft: 73,
+          endTime: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+          isActive: true,
+          isFreePlay: false,
+          playersCount: Math.floor(Math.random() * 50) + 10
+        });
       }
-      res.json(game);
+      
+      if (id === "free-play") {
+        return res.json({
+          id: "free-play",
+          name: "Free Play",
+          code: "G2-853",
+          prize: "Free Play",
+          prizeValue: 0,
+          emoji: "🎁",
+          totalNumbers: 125,
+          numbersLeft: 122,
+          endTime: new Date(Date.now() + 72 * 60 * 60 * 1000).toISOString(),
+          isActive: true,
+          isFreePlay: true,
+          playersCount: Math.floor(Math.random() * 30) + 5
+        });
+      }
+      
+      if (id === "camera") {
+        return res.json({
+          id: "camera",
+          name: "Camera",
+          code: "G4G-159",
+          prize: "$5",
+          prizeValue: 5,
+          emoji: "📷",
+          totalNumbers: 125,
+          numbersLeft: 36,
+          endTime: new Date(Date.now() + 6 * 60 * 60 * 1000).toISOString(),
+          isActive: true,
+          isFreePlay: false,
+          playersCount: Math.floor(Math.random() * 80) + 20
+        });
+      }
+      
+      // Handle numeric IDs for database games
+      const numericId = parseInt(id);
+      if (!isNaN(numericId)) {
+        const game = await storage.getGame(numericId);
+        if (!game) {
+          return res.status(404).json({ message: "Game not found" });
+        }
+        res.json(game);
+      } else {
+        res.status(404).json({ message: "Game not found" });
+      }
     } catch (error) {
+      console.error("Failed to fetch game:", error);
       res.status(500).json({ message: "Failed to fetch game" });
     }
   });

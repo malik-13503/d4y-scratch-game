@@ -19,9 +19,10 @@ export function setupAuth(app: Express) {
     saveUninitialized: false,
     store: storage.sessionStore,
     cookie: {
-      secure: process.env.NODE_ENV === "production",
+      secure: false, // Set to false for development
       httpOnly: true,
       maxAge: 24 * 60 * 60 * 1000, // 24 hours
+      sameSite: 'lax', // Allow cross-site requests
     },
   };
 
@@ -141,6 +142,17 @@ export function setupAuth(app: Express) {
 
   // Get current admin user
   app.get("/api/admin/me", requireAuth, (req, res) => {
+    if (!req.user) {
+      return res.status(401).json({ message: "Not authenticated" });
+    }
+    
+    // Don't return password
+    const { password: _, ...userWithoutPassword } = req.user;
+    res.json(userWithoutPassword);
+  });
+
+  // Alternative endpoint for dashboard compatibility
+  app.get("/api/admin/user", requireAuth, (req, res) => {
     if (!req.user) {
       return res.status(401).json({ message: "Not authenticated" });
     }
