@@ -108,10 +108,17 @@ export class MemStorage implements IStorage {
   async createGame(insertGame: InsertGame): Promise<Game> {
     const id = this.currentGameId++;
     const game: Game = {
-      ...insertGame,
       id,
-      numbersLeft: insertGame.totalNumbers,
+      name: insertGame.name,
+      code: insertGame.code,
+      prize: insertGame.prize,
+      prizeValue: insertGame.prizeValue,
+      totalNumbers: insertGame.totalNumbers || 125,
+      numbersLeft: insertGame.totalNumbers || 125,
+      endTime: insertGame.endTime,
       isActive: true,
+      isFreePlay: insertGame.isFreePlay || false,
+      emoji: insertGame.emoji || "🎮",
     };
     this.games.set(id, game);
     return game;
@@ -143,6 +150,7 @@ export class MemStorage implements IStorage {
     const player: Player = {
       ...insertPlayer,
       id,
+      selectedNumber: insertPlayer.selectedNumber || null,
       isWinner: false,
       joinedAt: new Date(),
     };
@@ -166,8 +174,10 @@ export class MemStorage implements IStorage {
   async createGameResult(insertResult: InsertGameResult): Promise<GameResult> {
     const id = this.currentResultId++;
     const result: GameResult = {
-      ...insertResult,
       id,
+      gameId: insertResult.gameId,
+      winningNumber: insertResult.winningNumber,
+      winnerId: insertResult.winnerId || null,
       completedAt: new Date(),
     };
     this.gameResults.set(id, result);

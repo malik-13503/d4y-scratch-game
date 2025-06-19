@@ -75,179 +75,221 @@ export default function AdminPage() {
   };
 
   return (
-    <div className="phone-container">
-      <div className="phone-screen">
-        {/* Header */}
-        <div className="bg-white px-4 py-3 flex items-center justify-between border-b">
-          <Button
-            variant="ghost"
-            size="sm"
-            className="text-xl text-gray-600 hover:text-gray-800 p-0 h-auto"
-            onClick={() => setLocation("/")}
-          >
-            ←
-          </Button>
-          
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogTrigger asChild>
-              <Button className="bg-brand-yellow hover:bg-yellow-400 text-black px-3 py-1 text-sm font-semibold">
-                + Add Game
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50">
+      {/* Header */}
+      <header className="bg-white shadow-lg border-b">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-gray-600 hover:text-gray-800 text-xl p-2"
+                onClick={() => setLocation("/")}
+              >
+                ←
               </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Create New Game</DialogTitle>
-              </DialogHeader>
-              <form onSubmit={handleCreateGame} className="space-y-4">
-                <div>
-                  <Label htmlFor="name">Game Name</Label>
-                  <Input id="name" name="name" required />
-                </div>
-                <div>
-                  <Label htmlFor="prize">Prize Description</Label>
-                  <Input id="prize" name="prize" required />
-                </div>
-                <div>
-                  <Label htmlFor="prizeValue">Prize Value ($)</Label>
-                  <Input id="prizeValue" name="prizeValue" type="number" min="0" />
-                </div>
-                <div>
-                  <Label htmlFor="totalNumbers">Total Numbers</Label>
-                  <Input id="totalNumbers" name="totalNumbers" type="number" defaultValue="125" />
-                </div>
-                <div>
-                  <Label htmlFor="duration">Duration (hours)</Label>
-                  <Input id="duration" name="duration" type="number" defaultValue="24" />
-                </div>
-                <div>
-                  <Label htmlFor="emoji">Emoji</Label>
-                  <Input id="emoji" name="emoji" defaultValue="🎮" />
-                </div>
-                <div className="flex items-center space-x-2">
-                  <input type="checkbox" id="isFreePlay" name="isFreePlay" />
-                  <Label htmlFor="isFreePlay">Free Play Game</Label>
-                </div>
-                <Button type="submit" className="w-full" disabled={createGameMutation.isPending}>
-                  {createGameMutation.isPending ? "Creating..." : "Create Game"}
-                </Button>
-              </form>
-            </DialogContent>
-          </Dialog>
-        </div>
-
-        {/* Game Selection */}
-        <div className="px-4 py-4">
-          <Label htmlFor="gameSelect">Select Game to Manage</Label>
-          <Select onValueChange={(value) => {
-            const game = games?.find(g => g.id === parseInt(value));
-            setSelectedGame(game || null);
-          }}>
-            <SelectTrigger>
-              <SelectValue placeholder="Choose a game..." />
-            </SelectTrigger>
-            <SelectContent>
-              {games?.map((game) => (
-                <SelectItem key={game.id} value={game.id.toString()}>
-                  {game.name} ({game.code})
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        {selectedGame && (
-          <>
-            {/* Drew Number Display */}
-            <div className="px-4 py-6 text-center">
-              <h2 className="text-lg text-gray-600 mb-2">Current Draw:</h2>
-              <div className="text-6xl font-bold text-gray-800">{drawnNumber}</div>
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900">Admin Dashboard</h1>
+                <p className="text-gray-600 text-sm">Manage games and monitor performance</p>
+              </div>
             </div>
             
-            {/* Game Stats */}
-            <div className="px-4 py-4">
-              <h3 className="text-lg font-semibold text-gray-800 mb-4">Game Statistics</h3>
-              
-              <div className="flex justify-between items-center mb-4">
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-gray-800">
-                    {gameStats?.totalPlayers || 0}
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+              <DialogTrigger asChild>
+                <Button className="bg-brand-yellow hover:bg-yellow-400 text-black px-6 py-2 text-lg font-semibold">
+                  + Add Game
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-md">
+                <DialogHeader>
+                  <DialogTitle>Create New Game</DialogTitle>
+                </DialogHeader>
+                <form onSubmit={handleCreateGame} className="space-y-4">
+                  <div>
+                    <Label htmlFor="name">Game Name</Label>
+                    <Input id="name" name="name" required />
                   </div>
-                  <div className="text-xs text-gray-500">Total Players</div>
-                  <div className="toggle-switch mt-2"></div>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-gray-800">
-                    {gameStats?.referrals || 0}
+                  <div>
+                    <Label htmlFor="prize">Prize Description</Label>
+                    <Input id="prize" name="prize" required />
                   </div>
-                  <div className="text-xs text-gray-500">Referrals</div>
-                  <div className="toggle-switch mt-2"></div>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-gray-800">
-                    {gameStats?.freePlays || 0}
+                  <div>
+                    <Label htmlFor="prizeValue">Prize Value ($)</Label>
+                    <Input id="prizeValue" name="prizeValue" type="number" min="0" />
                   </div>
-                  <div className="text-xs text-gray-500">Free Plays</div>
-                  <div className="toggle-switch off mt-2"></div>
-                </div>
-              </div>
-              
-              {/* Previous Numbers Display */}
-              <div className="mb-6">
-                <h4 className="text-md font-semibold text-gray-700 mb-3">Previous Numbers</h4>
-                <div className="flex justify-center space-x-4">
-                  {previousNumbers.map((number, index) => (
-                    <div key={index} className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center">
-                      <span className="font-bold text-gray-800">{number}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-              
-              {/* Game Info */}
-              <Card className="mb-4">
+                  <div>
+                    <Label htmlFor="totalNumbers">Total Numbers</Label>
+                    <Input id="totalNumbers" name="totalNumbers" type="number" defaultValue="125" />
+                  </div>
+                  <div>
+                    <Label htmlFor="duration">Duration (hours)</Label>
+                    <Input id="duration" name="duration" type="number" defaultValue="24" />
+                  </div>
+                  <div>
+                    <Label htmlFor="emoji">Emoji</Label>
+                    <Input id="emoji" name="emoji" defaultValue="🎮" />
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <input type="checkbox" id="isFreePlay" name="isFreePlay" />
+                    <Label htmlFor="isFreePlay">Free Play Game</Label>
+                  </div>
+                  <Button type="submit" className="w-full" disabled={createGameMutation.isPending}>
+                    {createGameMutation.isPending ? "Creating..." : "Create Game"}
+                  </Button>
+                </form>
+              </DialogContent>
+            </Dialog>
+          </div>
+        </div>
+      </header>
+
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Game Selection */}
+          <div className="lg:col-span-1">
+            <Card>
+              <CardHeader>
+                <CardTitle>Select Game</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Select onValueChange={(value) => {
+                  const game = games?.find(g => g.id === parseInt(value));
+                  setSelectedGame(game || null);
+                }}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Choose a game..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {games?.map((game) => (
+                      <SelectItem key={game.id} value={game.id.toString()}>
+                        {game.name} ({game.code})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </CardContent>
+            </Card>
+
+            {selectedGame && (
+              <Card className="mt-6">
                 <CardHeader>
-                  <CardTitle className="text-sm">Game Details</CardTitle>
+                  <CardTitle>Game Details</CardTitle>
                 </CardHeader>
-                <CardContent className="text-sm space-y-2">
+                <CardContent className="space-y-3">
                   <div className="flex justify-between">
-                    <span>Name:</span>
-                    <span>{selectedGame.name}</span>
+                    <span className="text-gray-600">Name:</span>
+                    <span className="font-medium">{selectedGame.name}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span>Code:</span>
-                    <span>{selectedGame.code}</span>
+                    <span className="text-gray-600">Code:</span>
+                    <span className="font-mono">{selectedGame.code}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span>Prize:</span>
-                    <span>{selectedGame.prize}</span>
+                    <span className="text-gray-600">Prize:</span>
+                    <span className="font-medium">{selectedGame.prize}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span>Numbers Left:</span>
+                    <span className="text-gray-600">Numbers:</span>
                     <span>{selectedGame.numbersLeft} / {selectedGame.totalNumbers}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span>Status:</span>
-                    <span className={selectedGame.isActive ? "text-green-600" : "text-red-600"}>
+                    <span className="text-gray-600">Status:</span>
+                    <span className={`font-medium ${selectedGame.isActive ? "text-green-600" : "text-red-600"}`}>
                       {selectedGame.isActive ? "Active" : "Completed"}
                     </span>
                   </div>
                 </CardContent>
               </Card>
-              
-              {/* Complete Game Button */}
-              <div className="text-center">
-                <Button
-                  onClick={handleCompleteGame}
-                  disabled={!selectedGame.isActive || completeGameMutation.isPending}
-                  className="bg-brand-blue hover:bg-blue-600 text-white px-8 py-3 text-lg w-full"
-                >
-                  {completeGameMutation.isPending ? "Completing..." : "Complete Game"}
-                </Button>
+            )}
+          </div>
+
+          {/* Main Content */}
+          <div className="lg:col-span-2">
+            {selectedGame ? (
+              <div className="space-y-8">
+                {/* Current Draw */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-center">You Drew:</CardTitle>
+                  </CardHeader>
+                  <CardContent className="text-center">
+                    <div className="text-8xl font-bold text-gray-800 mb-4">{drawnNumber}</div>
+                    <p className="text-gray-600">Current drawn number for this game</p>
+                  </CardContent>
+                </Card>
+
+                {/* Game Statistics */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Game Statistics</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-3 gap-6 mb-8">
+                      <div className="text-center">
+                        <div className="text-3xl font-bold text-gray-800 mb-2">
+                          {gameStats?.totalPlayers || 0}
+                        </div>
+                        <div className="text-sm text-gray-500 mb-3">Total Players</div>
+                        <div className="flex justify-center">
+                          <div className="toggle-switch"></div>
+                        </div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-3xl font-bold text-gray-800 mb-2">
+                          {gameStats?.referrals || 0}
+                        </div>
+                        <div className="text-sm text-gray-500 mb-3">Referrals</div>
+                        <div className="flex justify-center">
+                          <div className="toggle-switch"></div>
+                        </div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-3xl font-bold text-gray-800 mb-2">
+                          {gameStats?.freePlays || 0}
+                        </div>
+                        <div className="text-sm text-gray-500 mb-3">Free Plays</div>
+                        <div className="flex justify-center">
+                          <div className="toggle-switch off"></div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Previous Numbers */}
+                    <div className="mb-8">
+                      <h4 className="text-lg font-semibold text-gray-700 mb-4">Previous Numbers</h4>
+                      <div className="flex justify-center space-x-4">
+                        {previousNumbers.map((number, index) => (
+                          <div key={index} className="w-16 h-16 bg-gray-100 rounded-xl flex items-center justify-center shadow-sm">
+                            <span className="text-xl font-bold text-gray-800">{number}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Action Button */}
+                    <div className="text-center">
+                      <Button
+                        onClick={handleCompleteGame}
+                        disabled={!selectedGame.isActive || completeGameMutation.isPending}
+                        className="bg-brand-blue hover:bg-blue-600 text-white px-12 py-4 text-lg font-semibold"
+                      >
+                        {completeGameMutation.isPending ? "Completing..." : "Done"}
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
               </div>
-            </div>
-          </>
-        )}
-      </div>
+            ) : (
+              <div className="text-center py-12">
+                <div className="text-6xl mb-4">🎮</div>
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">Select a Game</h3>
+                <p className="text-gray-600">Choose a game from the sidebar to view details and statistics</p>
+              </div>
+            )}
+          </div>
+        </div>
+      </main>
     </div>
   );
 }

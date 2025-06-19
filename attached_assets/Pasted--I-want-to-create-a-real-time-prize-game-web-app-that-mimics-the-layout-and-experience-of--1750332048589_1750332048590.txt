@@ -1,0 +1,116 @@
+---
+
+I want to create a **real-time prize game web app** that mimics the layout and experience of the attached UI design image. This app should allow users to **join live prize games**, either by **spinning a prize wheel** or **pulling a number between 1 and 125**, with a chance to win real items like **cars, cash, or merchandise**.
+
+---
+
+### 🎮 USER-FACING REQUIREMENTS
+
+**✅ General Layout**
+
+* The app must be **fullscreen** (not locked to mobile-safe width).
+* The game UI (wheel, buttons, texts) must be **centered** and **responsive**, scaling perfectly across devices.
+* Match the **design style** from the image — clean, modern, playful, and professional.
+
+**✅ Functionality**
+
+* Show **active games list** (just like the "Home / Game List Screen" in image).
+* Games display:
+
+  * **Prize name + value**
+  * Remaining numbers
+  * Countdown timer
+  * Join/Play button
+* When joining a game:
+
+  * User can **spin a wheel** (based on prize configuration), or **draw a number from 1–125**
+  * Only one user will be the winner — others get “Thanks for playing” style result
+* **Display pulled number history** for the user
+* **Countdown timer** per game for when it ends
+* **Referral system**: Invite 3 friends = 1 free play
+* Optional: **Login/signup** via phone number or email (cookie/session-based if easier)
+
+**✅ UI Elements**
+
+* Realistic, beautiful **spinning wheel**:
+
+  * Fix any slice misalignment
+  * Animate spin with easing/physics
+  * Add glowing edges, celebratory animations (confetti, fireworks)
+  * **Display numbers properly and clearly on the wheel**
+* Beautiful **"You Drew X"** screen like in the Admin Panel image
+* Fullscreen **popup/modal** with result (with sound)
+* Add **spin sound**, **win sound**, and **lose sound**
+
+---
+
+### 🔐 ADMIN PANEL FEATURES
+
+**✅ Web-based Admin Dashboard**
+
+* Login system for admin
+* Admin can:
+
+  * Create, edit, delete multiple games
+  * Set:
+
+    * Prize name + image
+    * Entry price (including “Free Play”)
+    * Number range (default: 1–125)
+    * Win conditions (1 winner max)
+    * Timer/expiration
+  * View real-time player data:
+
+    * Numbers taken
+    * User info (name, phone/email)
+    * Referral stats
+  * End the game manually or auto-select winner when time runs out
+  * Notify the winner
+  * Export full game report (CSV/Excel)
+
+**✅ Bonus Admin Controls**
+
+* Toggle background music, video, sounds
+* Upload prize icons and wheel slices
+* Adjust slice colors and text
+* Control referral system behavior
+* View spin logs and analytics
+
+---
+
+### 🧰 TECHNOLOGY STACK
+
+**Frontend:**
+
+* HTML5, CSS3, JS (use modern styling like TailwindCSS or Bootstrap 5)
+* Optional: Use Phaser.js or Canvas API for wheel animation
+
+**Backend:**
+
+* PHP (Laravel or Core PHP acceptable)
+* MySQL database
+* WebSocket or Firebase Realtime DB for live updates
+
+**Admin Dashboard:**
+
+* Web-based, using same stack (HTML/CSS/JS + PHP + MySQL)
+
+**Hosting:**
+
+* Hostinger (preferred)
+* Ensure everything is self-hostable and easy to deploy
+
+---
+
+### 📌 ADDITIONAL NOTES
+
+* The app must be scalable — support **many games running live at once**
+* All UI and animations should match the **reference image** you’ve been given
+* Don’t create the game in a mobile-boxed layout — it must expand to **full browser width/height**
+* Focus on making it **visually addictive, emotionally satisfying**, and feel like a high-end product
+
+---
+
+✅ Final Output: A fully working front + back game system with a clean UI, accurate real-time gameplay, full admin control, and responsiveness across all devices.
+
+Let me know if you need the image file again or specific database schema.
