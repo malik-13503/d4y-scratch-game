@@ -1,16 +1,24 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertGameSchema, insertPlayerSchema, insertGameResultSchema } from "@shared/schema";
+import { setupAuth, requireAuth } from "./auth";
+import { 
+  insertGameSchema, insertPlayerSchema, insertGameResultSchema, 
+  insertWheelSegmentSchema, insertSystemSettingSchema, insertNotificationSchema 
+} from "@shared/schema";
 import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Get all active games
+  // Setup authentication
+  setupAuth(app);
+
+  // Public routes - Get all active games
   app.get("/api/games", async (req, res) => {
     try {
       const games = await storage.getGames();
       res.json(games);
     } catch (error) {
+      console.error("Failed to fetch games:", error);
       res.status(500).json({ message: "Failed to fetch games" });
     }
   });
@@ -160,7 +168,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const result = await storage.createGameResult({
         gameId,
         winningNumber: winner.selectedNumber!,
-        winnerId: winner.id
+        winnerId: winner.id,
+        totalParticipants: players.length,
+        totalSpins: playersWithNumbers.length
       });
 
       // Update winner status
@@ -184,13 +194,212 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const stats = {
         totalPlayers: players.length,
         playersWithNumbers: players.filter(p => p.selectedNumber !== null).length,
-        freePlays: players.filter(p => p.playerName.includes('Free')).length,
-        referrals: Math.floor(players.length * 0.3), // Mock referral calculation
+        freePlays: players.filter(p => p.referralCount > 0).length,
+        referrals: players.reduce((sum, p) => sum + p.referralCount, 0),
       };
 
       res.json(stats);
     } catch (error) {
+      console.error("Failed to fetch game stats:", error);
       res.status(500).json({ message: "Failed to fetch game stats" });
+    }
+  });
+
+  // ===== ADMIN PROTECTED ROUTES =====
+
+  // Admin game management
+  app.get("/api/admin/games", requireAuth, async (req, res) => {
+    try {
+      const games = await storage.getGames();
+      res.json(games);
+    } catch (error) {
+      console.error("Failed to fetch admin games:", error);
+      res.status(500).json({ message: "Failed to fetch games" });
+    }
+  });
+
+  app.post("/api/admin/games", requireAuth, async (req, res) => {
+    try {
+      const gameData = insertGameSchema.parse({
+        ...req.body,
+        createdBy: req.user!.id,
+      });
+      const game = await storage.createGame(gameData);
+      res.status(201).json(game);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid game data", errors: error.errors });
+      }
+      console.error("Failed to create game:", error);
+      res.status(500).json({ message: "Failed to create game" });
+    }
+  });
+
+  app.patch("/api/admin/games/:id", requireAuth, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const updates = req.body;
+      const game = await storage.updateGame(id, updates);
+      if (!game) {
+        return res.status(404).json({ message: "Game not found" });
+      }
+      res.json(game);
+    } catch (error) {
+      console.error("Failed to update game:", error);
+      res.status(500).json({ message: "Failed to update game" });
+    }
+  });
+
+  app.delete("/api/admin/games/:id", requireAuth, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const deleted = await storage.deleteGame(id);
+      if (!deleted) {
+        return res.status(404).json({ message: "Game not found" });
+      }
+      res.json({ message: "Game deleted successfully" });
+    } catch (error) {
+      console.error("Failed to delete game:", error);
+      res.status(500).json({ message: "Failed to delete game" });
+    }
+  });
+
+  // Wheel segments management
+  app.get("/api/admin/games/:id/segments", requireAuth, async (req, res) => {
+    try {
+      const gameId = parseInt(req.params.id);
+      const segments = await storage.getWheelSegmentsByGameId(gameId);
+      res.json(segments);
+    } catch (error) {
+      console.error("Failed to fetch wheel segments:", error);
+      res.status(500).json({ message: "Failed to fetch wheel segments" });
+    }
+  });
+
+  app.post("/api/admin/games/:id/segments", requireAuth, async (req, res) => {
+    try {
+      const gameId = parseInt(req.params.id);
+      const segmentData = insertWheelSegmentSchema.parse({
+        ...req.body,
+        gameId,
+      });
+      const segment = await storage.createWheelSegment(segmentData);
+      res.status(201).json(segment);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid segment data", errors: error.errors });
+      }
+      console.error("Failed to create wheel segment:", error);
+      res.status(500).json({ message: "Failed to create wheel segment" });
+    }
+  });
+
+  app.patch("/api/admin/segments/:id", requireAuth, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const updates = req.body;
+      const segment = await storage.updateWheelSegment(id, updates);
+      if (!segment) {
+        return res.status(404).json({ message: "Segment not found" });
+      }
+      res.json(segment);
+    } catch (error) {
+      console.error("Failed to update wheel segment:", error);
+      res.status(500).json({ message: "Failed to update wheel segment" });
+    }
+  });
+
+  app.delete("/api/admin/segments/:id", requireAuth, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const deleted = await storage.deleteWheelSegment(id);
+      if (!deleted) {
+        return res.status(404).json({ message: "Segment not found" });
+      }
+      res.json({ message: "Segment deleted successfully" });
+    } catch (error) {
+      console.error("Failed to delete wheel segment:", error);
+      res.status(500).json({ message: "Failed to delete wheel segment" });
+    }
+  });
+
+  // Players and analytics
+  app.get("/api/admin/games/:id/players", requireAuth, async (req, res) => {
+    try {
+      const gameId = parseInt(req.params.id);
+      const players = await storage.getPlayersByGameId(gameId);
+      res.json(players);
+    } catch (error) {
+      console.error("Failed to fetch game players:", error);
+      res.status(500).json({ message: "Failed to fetch players" });
+    }
+  });
+
+  app.get("/api/admin/dashboard/stats", requireAuth, async (req, res) => {
+    try {
+      const games = await storage.getGames();
+      const totalSpins = games.reduce((sum, game) => sum + (game.totalNumbers - game.numbersLeft), 0);
+      
+      const stats = {
+        totalGames: games.length,
+        activeGames: games.filter(g => g.isActive).length,
+        totalSpins,
+        totalPrizeValue: games.reduce((sum, game) => sum + parseFloat(game.prizeValue.toString()), 0),
+      };
+
+      res.json(stats);
+    } catch (error) {
+      console.error("Failed to fetch dashboard stats:", error);
+      res.status(500).json({ message: "Failed to fetch dashboard stats" });
+    }
+  });
+
+  // System settings
+  app.get("/api/admin/settings", requireAuth, async (req, res) => {
+    try {
+      const settings = await storage.getSystemSettings();
+      res.json(settings);
+    } catch (error) {
+      console.error("Failed to fetch system settings:", error);
+      res.status(500).json({ message: "Failed to fetch system settings" });
+    }
+  });
+
+  app.patch("/api/admin/settings/:key", requireAuth, async (req, res) => {
+    try {
+      const key = req.params.key;
+      const { value } = req.body;
+      const setting = await storage.updateSystemSetting(key, value);
+      res.json(setting);
+    } catch (error) {
+      console.error("Failed to update system setting:", error);
+      res.status(500).json({ message: "Failed to update system setting" });
+    }
+  });
+
+  // Notifications
+  app.get("/api/admin/games/:id/notifications", requireAuth, async (req, res) => {
+    try {
+      const gameId = parseInt(req.params.id);
+      const notifications = await storage.getNotificationsByGameId(gameId);
+      res.json(notifications);
+    } catch (error) {
+      console.error("Failed to fetch notifications:", error);
+      res.status(500).json({ message: "Failed to fetch notifications" });
+    }
+  });
+
+  app.post("/api/admin/notifications", requireAuth, async (req, res) => {
+    try {
+      const notificationData = insertNotificationSchema.parse(req.body);
+      const notification = await storage.createNotification(notificationData);
+      res.status(201).json(notification);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid notification data", errors: error.errors });
+      }
+      console.error("Failed to create notification:", error);
+      res.status(500).json({ message: "Failed to create notification" });
     }
   });
 

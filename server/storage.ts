@@ -126,7 +126,7 @@ export class DatabaseStorage implements IStorage {
 
   async deleteGame(id: number): Promise<boolean> {
     const result = await db.delete(games).where(eq(games.id, id));
-    return result.rowCount > 0;
+    return (result.rowCount || 0) > 0;
   }
 
   // Player methods
@@ -218,7 +218,7 @@ export class DatabaseStorage implements IStorage {
 
   async deleteWheelSegment(id: number): Promise<boolean> {
     const result = await db.delete(wheelSegments).where(eq(wheelSegments.id, id));
-    return result.rowCount > 0;
+    return (result.rowCount || 0) > 0;
   }
 
   // System settings methods
