@@ -1,4 +1,16 @@
-import { games, players, gameResults, users, type Game, type InsertGame, type Player, type InsertPlayer, type GameResult, type InsertGameResult, type User, type InsertUser } from "@shared/schema";
+import { 
+  games, players, gameResults, adminUsers, wheelSegments, systemSettings, adminSessions, notifications,
+  type Game, type InsertGame, type Player, type InsertPlayer, type GameResult, type InsertGameResult, 
+  type AdminUser, type InsertAdminUser, type WheelSegment, type InsertWheelSegment,
+  type SystemSetting, type InsertSystemSetting, type InsertNotification, type Notification
+} from "@shared/schema";
+import { db } from "./db";
+import { eq } from "drizzle-orm";
+import connectPg from "connect-pg-simple";
+import session from "express-session";
+import { pool } from "./db";
+
+const PostgresSessionStore = connectPg(session);
 
 export interface IStorage {
   // Game methods
@@ -18,186 +30,224 @@ export interface IStorage {
   getGameResult(gameId: number): Promise<GameResult | undefined>;
   createGameResult(result: InsertGameResult): Promise<GameResult>;
   
-  // User methods
-  getUser(id: number): Promise<User | undefined>;
-  getUserByUsername(username: string): Promise<User | undefined>;
-  createUser(user: InsertUser): Promise<User>;
+  // Admin user methods
+  getAdminUser(id: number): Promise<AdminUser | undefined>;
+  getAdminUserByEmail(email: string): Promise<AdminUser | undefined>;
+  createAdminUser(user: InsertAdminUser): Promise<AdminUser>;
+  updateAdminUser(id: number, updates: Partial<AdminUser>): Promise<AdminUser | undefined>;
+  
+  // Wheel segment methods
+  getWheelSegmentsByGameId(gameId: number): Promise<WheelSegment[]>;
+  createWheelSegment(segment: InsertWheelSegment): Promise<WheelSegment>;
+  updateWheelSegment(id: number, updates: Partial<WheelSegment>): Promise<WheelSegment | undefined>;
+  deleteWheelSegment(id: number): Promise<boolean>;
+  
+  // System settings methods
+  getSystemSettings(): Promise<SystemSetting[]>;
+  getSystemSetting(key: string): Promise<SystemSetting | undefined>;
+  updateSystemSetting(key: string, value: string): Promise<SystemSetting>;
+  
+  // Notification methods
+  createNotification(notification: InsertNotification): Promise<Notification>;
+  getNotificationsByGameId(gameId: number): Promise<Notification[]>;
+  
+  // Session store
+  sessionStore: any;
 }
 
-export class MemStorage implements IStorage {
-  private games: Map<number, Game>;
-  private players: Map<number, Player>;
-  private gameResults: Map<number, GameResult>;
-  private users: Map<number, User>;
-  private currentGameId: number;
-  private currentPlayerId: number;
-  private currentResultId: number;
-  private currentUserId: number;
+export class DatabaseStorage implements IStorage {
+  public sessionStore: any;
 
   constructor() {
-    this.games = new Map();
-    this.players = new Map();
-    this.gameResults = new Map();
-    this.users = new Map();
-    this.currentGameId = 1;
-    this.currentPlayerId = 1;
-    this.currentResultId = 1;
-    this.currentUserId = 1;
+    this.sessionStore = new PostgresSessionStore({ 
+      pool, 
+      createTableIfMissing: true 
+    });
     
-    // Initialize with sample games
     this.initializeSampleData();
   }
 
-  private initializeSampleData() {
-    const sampleGames: Game[] = [
-      {
-        id: 1,
-        name: "Travel Mug",
-        code: "G8.604",
-        prize: "$10",
-        prizeValue: 10,
-        totalNumbers: 125,
-        numbersLeft: 73,
-        endTime: new Date(Date.now() + 5000000), // ~1.4 hours from now
-        isActive: true,
-        isFreePlay: false,
-        emoji: "🍺"
-      },
-      {
-        id: 2,
-        name: "Free Play",
-        code: "GO.2163",
-        prize: "Free Play",
-        prizeValue: 0,
-        totalNumbers: 125,
-        numbersLeft: 122,
-        endTime: new Date(Date.now() + 290000000), // ~80 hours from now
-        isActive: true,
-        isFreePlay: true,
-        emoji: "🎁"
-      },
-      {
-        id: 3,
-        name: "Camera",
-        code: "140.160",
-        prize: "$5",
-        prizeValue: 5,
-        totalNumbers: 125,
-        numbersLeft: 36,
-        endTime: new Date(Date.now() + 11000000), // ~3 hours from now
-        isActive: true,
-        isFreePlay: false,
-        emoji: "📷"
+  private async initializeSampleData() {
+    try {
+      // Check if admin user exists
+      const adminExists = await db.select().from(adminUsers).limit(1);
+      if (adminExists.length === 0) {
+        // Create default admin user
+        await db.insert(adminUsers).values({
+          email: "admin@example.com",
+          password: "$2b$10$rKjNl0lVJ.K1vL5kGqrQ6u2Z8nHj3zt5xKj0H7LQG9s2A6hL1yV7i", // "admin123"
+          firstName: "Admin",
+          lastName: "User",
+        });
       }
-    ];
 
-    sampleGames.forEach(game => {
-      this.games.set(game.id, game);
-    });
-    this.currentGameId = 4;
+      // Initialize system settings
+      const settingsExists = await db.select().from(systemSettings).limit(1);
+      if (settingsExists.length === 0) {
+        await db.insert(systemSettings).values([
+          { key: "enable_background_music", value: "true", description: "Enable background music" },
+          { key: "enable_sound_effects", value: "true", description: "Enable sound effects" },
+          { key: "referral_bonus_enabled", value: "true", description: "Enable referral bonuses" },
+          { key: "referral_threshold", value: "3", description: "Number of referrals for bonus" },
+          { key: "max_games_per_admin", value: "10", description: "Maximum games per admin" },
+        ]);
+      }
+    } catch (error) {
+      console.error("Error initializing sample data:", error);
+    }
   }
 
+  // Game methods
   async getGames(): Promise<Game[]> {
-    return Array.from(this.games.values()).filter(game => game.isActive);
+    const result = await db.select().from(games).where(eq(games.isActive, true));
+    return result;
   }
 
   async getGame(id: number): Promise<Game | undefined> {
-    return this.games.get(id);
+    const [game] = await db.select().from(games).where(eq(games.id, id));
+    return game || undefined;
   }
 
   async createGame(insertGame: InsertGame): Promise<Game> {
-    const id = this.currentGameId++;
-    const game: Game = {
-      id,
-      name: insertGame.name,
-      code: insertGame.code,
-      prize: insertGame.prize,
-      prizeValue: insertGame.prizeValue,
-      totalNumbers: insertGame.totalNumbers || 125,
+    const [game] = await db.insert(games).values({
+      ...insertGame,
       numbersLeft: insertGame.totalNumbers || 125,
-      endTime: insertGame.endTime,
-      isActive: true,
-      isFreePlay: insertGame.isFreePlay || false,
-      emoji: insertGame.emoji || "🎮",
-    };
-    this.games.set(id, game);
+    }).returning();
     return game;
   }
 
   async updateGame(id: number, updates: Partial<Game>): Promise<Game | undefined> {
-    const game = this.games.get(id);
-    if (!game) return undefined;
-    
-    const updatedGame = { ...game, ...updates };
-    this.games.set(id, updatedGame);
-    return updatedGame;
+    const [game] = await db.update(games)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(games.id, id))
+      .returning();
+    return game || undefined;
   }
 
   async deleteGame(id: number): Promise<boolean> {
-    return this.games.delete(id);
+    const result = await db.delete(games).where(eq(games.id, id));
+    return result.rowCount > 0;
   }
 
+  // Player methods
   async getPlayersByGameId(gameId: number): Promise<Player[]> {
-    return Array.from(this.players.values()).filter(player => player.gameId === gameId);
+    return await db.select().from(players).where(eq(players.gameId, gameId));
   }
 
   async getPlayer(id: number): Promise<Player | undefined> {
-    return this.players.get(id);
+    const [player] = await db.select().from(players).where(eq(players.id, id));
+    return player || undefined;
   }
 
   async createPlayer(insertPlayer: InsertPlayer): Promise<Player> {
-    const id = this.currentPlayerId++;
-    const player: Player = {
+    const [player] = await db.insert(players).values({
       ...insertPlayer,
-      id,
-      selectedNumber: insertPlayer.selectedNumber || null,
-      isWinner: false,
-      joinedAt: new Date(),
-    };
-    this.players.set(id, player);
+      email: insertPlayer.email || null,
+      phone: insertPlayer.phone || null,
+      selectedSegment: insertPlayer.selectedSegment || null,
+      referralCount: insertPlayer.referralCount || 0,
+      ipAddress: insertPlayer.ipAddress || null,
+      userAgent: insertPlayer.userAgent || null,
+    }).returning();
     return player;
   }
 
   async updatePlayer(id: number, updates: Partial<Player>): Promise<Player | undefined> {
-    const player = this.players.get(id);
-    if (!player) return undefined;
-    
-    const updatedPlayer = { ...player, ...updates };
-    this.players.set(id, updatedPlayer);
-    return updatedPlayer;
+    const [player] = await db.update(players)
+      .set(updates)
+      .where(eq(players.id, id))
+      .returning();
+    return player || undefined;
   }
 
+  // Game result methods
   async getGameResult(gameId: number): Promise<GameResult | undefined> {
-    return Array.from(this.gameResults.values()).find(result => result.gameId === gameId);
+    const [result] = await db.select().from(gameResults).where(eq(gameResults.gameId, gameId));
+    return result || undefined;
   }
 
   async createGameResult(insertResult: InsertGameResult): Promise<GameResult> {
-    const id = this.currentResultId++;
-    const result: GameResult = {
-      id,
-      gameId: insertResult.gameId,
-      winningNumber: insertResult.winningNumber,
+    const [result] = await db.insert(gameResults).values({
+      ...insertResult,
       winnerId: insertResult.winnerId || null,
-      completedAt: new Date(),
-    };
-    this.gameResults.set(id, result);
+    }).returning();
     return result;
   }
 
-  async getUser(id: number): Promise<User | undefined> {
-    return this.users.get(id);
+  // Admin user methods
+  async getAdminUser(id: number): Promise<AdminUser | undefined> {
+    const [user] = await db.select().from(adminUsers).where(eq(adminUsers.id, id));
+    return user || undefined;
   }
 
-  async getUserByUsername(username: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(user => user.username === username);
+  async getAdminUserByEmail(email: string): Promise<AdminUser | undefined> {
+    const [user] = await db.select().from(adminUsers).where(eq(adminUsers.email, email));
+    return user || undefined;
   }
 
-  async createUser(insertUser: InsertUser): Promise<User> {
-    const id = this.currentUserId++;
-    const user: User = { ...insertUser, id };
-    this.users.set(id, user);
+  async createAdminUser(insertUser: InsertAdminUser): Promise<AdminUser> {
+    const [user] = await db.insert(adminUsers).values(insertUser).returning();
     return user;
+  }
+
+  async updateAdminUser(id: number, updates: Partial<AdminUser>): Promise<AdminUser | undefined> {
+    const [user] = await db.update(adminUsers)
+      .set(updates)
+      .where(eq(adminUsers.id, id))
+      .returning();
+    return user || undefined;
+  }
+
+  // Wheel segment methods
+  async getWheelSegmentsByGameId(gameId: number): Promise<WheelSegment[]> {
+    return await db.select().from(wheelSegments).where(eq(wheelSegments.gameId, gameId));
+  }
+
+  async createWheelSegment(segment: InsertWheelSegment): Promise<WheelSegment> {
+    const [result] = await db.insert(wheelSegments).values(segment).returning();
+    return result;
+  }
+
+  async updateWheelSegment(id: number, updates: Partial<WheelSegment>): Promise<WheelSegment | undefined> {
+    const [segment] = await db.update(wheelSegments)
+      .set(updates)
+      .where(eq(wheelSegments.id, id))
+      .returning();
+    return segment || undefined;
+  }
+
+  async deleteWheelSegment(id: number): Promise<boolean> {
+    const result = await db.delete(wheelSegments).where(eq(wheelSegments.id, id));
+    return result.rowCount > 0;
+  }
+
+  // System settings methods
+  async getSystemSettings(): Promise<SystemSetting[]> {
+    return await db.select().from(systemSettings);
+  }
+
+  async getSystemSetting(key: string): Promise<SystemSetting | undefined> {
+    const [setting] = await db.select().from(systemSettings).where(eq(systemSettings.key, key));
+    return setting || undefined;
+  }
+
+  async updateSystemSetting(key: string, value: string): Promise<SystemSetting> {
+    const [setting] = await db.update(systemSettings)
+      .set({ value, updatedAt: new Date() })
+      .where(eq(systemSettings.key, key))
+      .returning();
+    return setting;
+  }
+
+  // Notification methods
+  async createNotification(notification: InsertNotification): Promise<Notification> {
+    const [result] = await db.insert(notifications).values(notification).returning();
+    return result;
+  }
+
+  async getNotificationsByGameId(gameId: number): Promise<Notification[]> {
+    return await db.select().from(notifications).where(eq(notifications.gameId, gameId));
   }
 }
 
-export const storage = new MemStorage();
+export const storage = new DatabaseStorage();
