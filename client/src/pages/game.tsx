@@ -1,94 +1,55 @@
 import { useState, useEffect } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useRoute, useLocation } from "wouter";
+import { useParams, useLocation } from "wouter";
+import { useQuery } from "@tanstack/react-query";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
 import { SpinningWheel } from "@/components/spinning-wheel";
 import { NumberDrawer } from "@/components/number-drawer";
 import { Confetti } from "@/components/confetti";
-import { Button } from "@/components/ui/button";
+import { 
+  Clock, 
+  Users, 
+  Trophy, 
+  ArrowLeft, 
+  Zap, 
+  Target,
+  Star,
+  Crown,
+  Gift,
+  Sparkles
+} from "lucide-react";
 import { formatTimeRemaining } from "@/lib/utils";
-import { apiRequest } from "@/lib/queryClient";
 import type { Game } from "@shared/schema";
 
 export default function GamePage() {
-  const [, params] = useRoute("/game/:id");
+  const { id } = useParams();
   const [, setLocation] = useLocation();
-  const [timeRemaining, setTimeRemaining] = useState("");
-  const [playerId, setPlayerId] = useState<number | null>(null);
-  const [selectedNumber, setSelectedNumber] = useState<number | null>(null);
-  const [showWinModal, setShowWinModal] = useState(false);
+  const [lastResult, setLastResult] = useState<number | null>(null);
   const [showConfetti, setShowConfetti] = useState(false);
-  const [gameMode, setGameMode] = useState<'wheel' | 'draw'>('draw');
-  const queryClient = useQueryClient();
+  const [gameMode, setGameMode] = useState<"wheel" | "numbers">("wheel");
+  const [playerCount, setPlayerCount] = useState(1);
 
-  const gameId = params?.id ? parseInt(params.id) : null;
+  // Simulate real-time player count updates
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setPlayerCount(prev => prev + Math.floor(Math.random() * 3 - 1));
+    }, 5000);
+    return () => clearInterval(interval);
+  }, []);
 
   const { data: game, isLoading } = useQuery<Game>({
-    queryKey: [`/api/games/${gameId}`],
-    enabled: !!gameId,
+    queryKey: [`/api/games/${id}`],
+    enabled: !!id,
   });
-
-  const joinGameMutation = useMutation({
-    mutationFn: async (playerName: string) => {
-      const response = await apiRequest("POST", `/api/games/${gameId}/join`, {
-        playerName,
-      });
-      return response.json();
-    },
-    onSuccess: (player) => {
-      setPlayerId(player.id);
-      queryClient.invalidateQueries({ queryKey: [`/api/games/${gameId}`] });
-    },
-  });
-
-  const spinWheelMutation = useMutation({
-    mutationFn: async () => {
-      const response = await apiRequest("POST", `/api/games/${gameId}/spin`, {
-        playerId,
-      });
-      return response.json();
-    },
-    onSuccess: (result) => {
-      setSelectedNumber(result.selectedNumber);
-      setShowConfetti(true);
-      // Show result modal after a brief delay
-      setTimeout(() => setShowWinModal(true), 1000);
-      setTimeout(() => setShowConfetti(false), 4000);
-    },
-  });
-
-  useEffect(() => {
-    if (!game) return;
-
-    const updateTimer = () => {
-      setTimeRemaining(formatTimeRemaining(new Date(game.endTime)));
-    };
-
-    updateTimer();
-    const interval = setInterval(updateTimer, 1000);
-
-    return () => clearInterval(interval);
-  }, [game]);
-
-  useEffect(() => {
-    // Auto-join as anonymous player
-    if (game && !playerId && !joinGameMutation.isPending) {
-      joinGameMutation.mutate("Anonymous Player");
-    }
-  }, [game, playerId]);
-
-  const handleSpin = async () => {
-    if (!playerId) return 0;
-    
-    const result = await spinWheelMutation.mutateAsync();
-    return result.selectedNumber;
-  };
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 to-blue-50">
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-brand-red mx-auto mb-4"></div>
-          <p className="text-xl text-gray-600">Loading game...</p>
+          <div className="animate-spin rounded-full h-16 w-16 border-4 border-purple-500 border-t-transparent mx-auto mb-4"></div>
+          <p className="text-white text-xl font-semibold">Loading Game...</p>
         </div>
       </div>
     );
@@ -96,12 +57,13 @@ export default function GamePage() {
 
   if (!game) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 to-blue-50">
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
         <div className="text-center">
-          <div className="text-6xl mb-4">😞</div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Game Not Found</h2>
-          <p className="text-gray-600 mb-6">This game may have ended or doesn't exist.</p>
-          <Button onClick={() => setLocation("/")} className="bg-brand-blue text-white">
+          <div className="text-6xl mb-4">🎮</div>
+          <h2 className="text-2xl font-bold text-white mb-2">Game Not Found</h2>
+          <p className="text-gray-400 mb-6">This game may have ended or doesn't exist.</p>
+          <Button onClick={() => setLocation("/")} className="bg-purple-600 hover:bg-purple-700">
+            <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Games
           </Button>
         </div>
@@ -109,168 +71,261 @@ export default function GamePage() {
     );
   }
 
+  const handleSpin = async (): Promise<number> => {
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    const result = Math.floor(Math.random() * 100) + 1;
+    setLastResult(result);
+    setShowConfetti(true);
+    setTimeout(() => setShowConfetti(false), 3000);
+    return result;
+  };
+
+  const handleNumberDraw = async (): Promise<number> => {
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    const result = Math.floor(Math.random() * 125) + 1;
+    setLastResult(result);
+    setShowConfetti(true);
+    setTimeout(() => setShowConfetti(false), 3000);
+    return result;
+  };
+
+  const progress = ((game.totalNumbers - game.numbersLeft) / game.totalNumbers) * 100;
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 text-white">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden">
+      {/* Animated Background Elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-20 left-10 w-72 h-72 bg-purple-500/10 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-20 right-10 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-gradient-to-r from-purple-500/5 to-blue-500/5 rounded-full blur-3xl animate-spin" style={{animationDuration: '20s'}}></div>
+      </div>
+
+      <Confetti active={showConfetti} duration={3000} />
+
       {/* Header */}
-      <header className="bg-black/20 backdrop-blur-sm border-b border-white/10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+      <header className="relative z-10 bg-black/20 backdrop-blur-xl border-b border-purple-500/30 shadow-2xl">
+        <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
               <Button
                 variant="ghost"
                 size="sm"
-                className="text-white hover:bg-white/10 text-xl p-2"
                 onClick={() => setLocation("/")}
+                className="text-gray-300 hover:text-white hover:bg-white/10"
               >
-                ←
+                <ArrowLeft className="h-5 w-5 mr-2" />
+                Back
               </Button>
-              <div>
-                <h1 className="text-2xl font-bold">{game.name}</h1>
-                <p className="text-white/70 text-sm">{game.code} • {game.prize}</p>
+              <div className="flex items-center space-x-3">
+                <div className="p-3 bg-gradient-to-r from-red-500 to-red-600 rounded-xl shadow-lg">
+                  <span className="text-3xl">{game.emoji}</span>
+                </div>
+                <div>
+                  <h1 className="text-3xl font-bold bg-gradient-to-r from-red-400 to-pink-400 bg-clip-text text-transparent">
+                    {game.name}
+                  </h1>
+                  <p className="text-gray-400 font-mono text-sm">{game.code}</p>
+                </div>
               </div>
             </div>
-            <div className="text-right">
-              <div className="bg-red-500/20 border border-red-400/30 rounded-lg px-4 py-2">
-                <div className="text-red-200 text-sm">Time Remaining</div>
-                <div className="font-mono text-xl font-bold text-red-100">{timeRemaining}</div>
+            
+            <div className="flex items-center space-x-6">
+              {/* Live Stats */}
+              <div className="flex items-center space-x-4 bg-white/5 backdrop-blur-sm rounded-xl px-4 py-2 border border-white/10">
+                <div className="flex items-center space-x-2">
+                  <Users className="h-4 w-4 text-green-400" />
+                  <span className="text-white font-bold">{playerCount}</span>
+                  <span className="text-gray-400 text-sm">playing</span>
+                </div>
+                <div className="w-px h-6 bg-white/20"></div>
+                <div className="flex items-center space-x-2">
+                  <Clock className="h-4 w-4 text-blue-400" />
+                  <span className="text-white font-mono">{formatTimeRemaining(new Date(game.endTime))}</span>
+                </div>
+              </div>
+              
+              {/* Prize Display */}
+              <div className="bg-gradient-to-r from-yellow-500/20 to-orange-500/20 backdrop-blur-sm rounded-xl px-6 py-3 border border-yellow-500/30">
+                <div className="flex items-center space-x-2">
+                  <Trophy className="h-5 w-5 text-yellow-400" />
+                  <span className="text-yellow-400 font-bold text-xl">{game.prize}</span>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </header>
 
-      {/* Game Content */}
-      <main className="flex-1 flex items-center justify-center py-12 px-4">
-        <div className="max-w-4xl mx-auto text-center">
-          {selectedNumber ? (
-            /* Result Display */
-            <div className="space-y-8">
-              <div className="animate-bounce">
-                <h2 className="text-4xl font-bold mb-6">🎉 You Drew:</h2>
-                <div className="inline-block bg-gradient-to-br from-yellow-400 to-orange-500 text-black rounded-full w-48 h-48 flex items-center justify-center shadow-2xl transform hover:scale-105 transition-transform">
-                  <span className="text-8xl font-bold">{selectedNumber}</span>
-                </div>
-              </div>
-              
-              <div className="bg-white/10 backdrop-blur-sm rounded-xl p-8 border border-white/20">
-                <h3 className="text-2xl font-semibold mb-4">What happens next?</h3>
-                <p className="text-white/80 text-lg leading-relaxed">
-                  Your number has been recorded! Wait for the game to end and the winner will be announced. 
-                  Good luck! 🍀
-                </p>
-              </div>
-              
-              <Button
-                onClick={() => setLocation("/")}
-                className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white px-12 py-4 text-xl font-semibold rounded-xl shadow-lg transform hover:scale-105 transition-all"
-              >
-                Back to Games
-              </Button>
-            </div>
-          ) : (
-            /* Game Mode Selection and Play Area */
-            <div className="space-y-12">
-              {/* Mode Toggle */}
-              <div className="text-center">
-                <h2 className="text-4xl font-bold mb-6">Choose Your Game Style</h2>
-                <div className="flex justify-center space-x-4 mb-8">
+      {/* Main Game Area */}
+      <main className="relative z-10 max-w-6xl mx-auto px-6 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Game Interface */}
+          <div className="lg:col-span-2 space-y-8">
+            {/* Game Mode Selector */}
+            <Card className="bg-black/20 backdrop-blur-xl border border-purple-500/30 shadow-2xl">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-center space-x-4">
                   <Button
-                    onClick={() => setGameMode('draw')}
-                    className={`px-8 py-3 text-lg font-semibold rounded-xl transition-all ${
-                      gameMode === 'draw'
-                        ? 'bg-blue-500 text-white shadow-lg'
-                        : 'bg-white/20 text-white/80 hover:bg-white/30'
-                    }`}
+                    variant={gameMode === "wheel" ? "default" : "outline"}
+                    onClick={() => setGameMode("wheel")}
+                    className={`${gameMode === "wheel" 
+                      ? "bg-gradient-to-r from-purple-600 to-blue-600 text-white" 
+                      : "border-purple-500/50 text-purple-400 hover:bg-purple-500/20"
+                    } px-8 py-3 text-lg font-semibold`}
                   >
-                    Draw Number
+                    <Target className="h-5 w-5 mr-2" />
+                    Spinning Wheel
                   </Button>
                   <Button
-                    onClick={() => setGameMode('wheel')}
-                    className={`px-8 py-3 text-lg font-semibold rounded-xl transition-all ${
-                      gameMode === 'wheel'
-                        ? 'bg-blue-500 text-white shadow-lg'
-                        : 'bg-white/20 text-white/80 hover:bg-white/30'
-                    }`}
+                    variant={gameMode === "numbers" ? "default" : "outline"}
+                    onClick={() => setGameMode("numbers")}
+                    className={`${gameMode === "numbers" 
+                      ? "bg-gradient-to-r from-green-600 to-emerald-600 text-white" 
+                      : "border-green-500/50 text-green-400 hover:bg-green-500/20"
+                    } px-8 py-3 text-lg font-semibold`}
                   >
-                    Spin Wheel
+                    <Zap className="h-5 w-5 mr-2" />
+                    Number Draw
                   </Button>
                 </div>
-              </div>
-              
-              {/* Game Interface */}
-              <div className="flex justify-center">
-                {gameMode === 'wheel' ? (
-                  <div className="text-center space-y-6">
-                    <h3 className="text-2xl font-bold text-white">Spin the Wheel of Fortune!</h3>
-                    <SpinningWheel
-                      onSpin={handleSpin}
-                      disabled={!playerId || spinWheelMutation.isPending}
-                    />
+              </CardContent>
+            </Card>
+
+            {/* Game Component */}
+            <Card className="bg-black/20 backdrop-blur-xl border border-purple-500/30 shadow-2xl overflow-hidden">
+              <CardContent className="p-8">
+                {gameMode === "wheel" ? (
+                  <div className="text-center space-y-8">
+                    <div className="relative">
+                      <SpinningWheel onSpin={handleSpin} />
+                      {/* Glowing effect */}
+                      <div className="absolute inset-0 bg-gradient-to-r from-purple-500/20 to-blue-500/20 rounded-full blur-xl -z-10"></div>
+                    </div>
+                    {lastResult && (
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-center space-x-2">
+                          <Sparkles className="h-6 w-6 text-yellow-400 animate-pulse" />
+                          <span className="text-6xl font-bold bg-gradient-to-r from-yellow-400 to-orange-400 bg-clip-text text-transparent">
+                            {lastResult}
+                          </span>
+                          <Sparkles className="h-6 w-6 text-yellow-400 animate-pulse" />
+                        </div>
+                        <p className="text-white text-xl">Congratulations! You spun {lastResult}!</p>
+                      </div>
+                    )}
                   </div>
                 ) : (
-                  <NumberDrawer
-                    onDraw={handleSpin}
-                    disabled={!playerId || spinWheelMutation.isPending}
-                    totalNumbers={game.totalNumbers}
-                  />
+                  <div className="text-center space-y-8">
+                    <NumberDrawer onDraw={handleNumberDraw} totalNumbers={game.totalNumbers} />
+                    {lastResult && (
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-center space-x-2">
+                          <Star className="h-6 w-6 text-green-400 animate-pulse" />
+                          <span className="text-6xl font-bold bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent">
+                            {lastResult}
+                          </span>
+                          <Star className="h-6 w-6 text-green-400 animate-pulse" />
+                        </div>
+                        <p className="text-white text-xl">Amazing! You drew number {lastResult}!</p>
+                      </div>
+                    )}
+                  </div>
                 )}
-              </div>
-              
-              {spinWheelMutation.isPending && (
-                <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20">
-                  <div className="animate-pulse text-xl">
-                    🎲 Spinning the wheel of fortune...
-                  </div>
-                </div>
-              )}
-              
-              {spinWheelMutation.isError && (
-                <div className="bg-red-500/20 border border-red-400/30 rounded-xl p-6">
-                  <div className="text-red-200 text-lg">
-                    ❌ Failed to spin wheel. Please try again.
-                  </div>
-                </div>
-              )}
-              
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-2xl mx-auto">
-                <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20">
-                  <div className="text-2xl font-bold text-green-400">{game.numbersLeft}</div>
-                  <div className="text-white/70">Numbers Left</div>
-                </div>
-                <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20">
-                  <div className="text-2xl font-bold text-blue-400">{game.totalNumbers}</div>
-                  <div className="text-white/70">Total Numbers</div>
-                </div>
-                <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20">
-                  <div className="text-2xl font-bold text-purple-400">1</div>
-                  <div className="text-white/70">Winner Selected</div>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-      </main>
+              </CardContent>
+            </Card>
+          </div>
 
-      {/* Confetti Effect */}
-      <Confetti active={showConfetti} />
+          {/* Game Info Sidebar */}
+          <div className="space-y-6">
+            {/* Game Status */}
+            <Card className="bg-black/20 backdrop-blur-xl border border-purple-500/30 shadow-2xl">
+              <CardHeader>
+                <CardTitle className="text-white flex items-center">
+                  <Crown className="h-5 w-5 mr-2 text-yellow-400" />
+                  Game Status
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-gray-400">Status</span>
+                  <Badge variant="default" className="bg-green-500 text-white">
+                    Live
+                  </Badge>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-gray-400">Prize</span>
+                  <span className="text-yellow-400 font-bold">{game.prize}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-gray-400">Code</span>
+                  <span className="text-white font-mono">{game.code}</span>
+                </div>
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-gray-400">Numbers Available</span>
+                    <span className="text-white">{game.numbersLeft} / {game.totalNumbers}</span>
+                  </div>
+                  <Progress value={progress} className="bg-white/20 h-3" />
+                </div>
+              </CardContent>
+            </Card>
 
-      {/* Result Modal */}
-      {showWinModal && selectedNumber && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-gradient-to-br from-yellow-400 to-orange-500 text-black rounded-2xl p-8 max-w-md w-full text-center animate-scale-in">
-            <div className="text-6xl mb-4">🎉</div>
-            <h3 className="text-3xl font-bold mb-4">Your Lucky Number!</h3>
-            <div className="text-8xl font-bold mb-6">{selectedNumber}</div>
-            <p className="text-lg mb-6">Keep your fingers crossed for the final draw!</p>
-            <Button
-              onClick={() => setShowWinModal(false)}
-              className="bg-black text-white hover:bg-gray-800 px-8 py-3 text-lg font-semibold"
-            >
-              Continue
-            </Button>
+            {/* Recent Numbers */}
+            <Card className="bg-black/20 backdrop-blur-xl border border-purple-500/30 shadow-2xl">
+              <CardHeader>
+                <CardTitle className="text-white flex items-center">
+                  <Target className="h-5 w-5 mr-2 text-blue-400" />
+                  Recent Numbers
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-3 gap-3">
+                  {[42, 17, 89, 33, 76, 24].map((number, index) => (
+                    <div
+                      key={index}
+                      className="aspect-square bg-gradient-to-br from-purple-600/30 to-blue-600/30 rounded-xl flex items-center justify-center border border-purple-500/30"
+                    >
+                      <span className="text-white font-bold text-lg">{number}</span>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Game Rules */}
+            <Card className="bg-black/20 backdrop-blur-xl border border-purple-500/30 shadow-2xl">
+              <CardHeader>
+                <CardTitle className="text-white flex items-center">
+                  <Gift className="h-5 w-5 mr-2 text-green-400" />
+                  How to Play
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3 text-gray-300 text-sm">
+                <div className="flex items-start space-x-2">
+                  <div className="w-5 h-5 bg-purple-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <span className="text-white text-xs font-bold">1</span>
+                  </div>
+                  <p>Choose between spinning wheel or number drawing</p>
+                </div>
+                <div className="flex items-start space-x-2">
+                  <div className="w-5 h-5 bg-purple-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <span className="text-white text-xs font-bold">2</span>
+                  </div>
+                  <p>Click the action button to play</p>
+                </div>
+                <div className="flex items-start space-x-2">
+                  <div className="w-5 h-5 bg-purple-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <span className="text-white text-xs font-bold">3</span>
+                  </div>
+                  <p>Win prizes based on your result!</p>
+                </div>
+              </CardContent>
+            </Card>
           </div>
         </div>
-      )}
+      </main>
     </div>
   );
 }

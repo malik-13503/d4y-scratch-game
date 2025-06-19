@@ -1,142 +1,216 @@
-import { useState, useRef } from "react";
-import { motion } from "framer-motion";
+import { useState, useRef, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Target, Zap, Sparkles } from "lucide-react";
 
 interface SpinningWheelProps {
   onSpin: () => Promise<number>;
   disabled?: boolean;
+  totalNumbers?: number;
 }
 
-const wheelNumbers = [12, 8, 7, 16, 55, 32, 89, 25, 58, 15, 20, 27];
-const wheelColors = [
-  "#E74C3C", "#F39C12", "#27AE60", "#3498DB", 
-  "#9B59B6", "#E67E22", "#1ABC9C", "#F1C40F",
-  "#E74C3C", "#27AE60", "#3498DB", "#9B59B6"
+const wheelSegments = [
+  { number: 12, color: "#ef4444", textColor: "#ffffff" },
+  { number: 8, color: "#3b82f6", textColor: "#ffffff" },
+  { number: 7, color: "#10b981", textColor: "#ffffff" },
+  { number: 16, color: "#f59e0b", textColor: "#000000" },
+  { number: 55, color: "#8b5cf6", textColor: "#ffffff" },
+  { number: 42, color: "#06b6d4", textColor: "#ffffff" },
+  { number: 38, color: "#84cc16", textColor: "#000000" },
+  { number: 91, color: "#ec4899", textColor: "#ffffff" },
+  { number: 25, color: "#f97316", textColor: "#ffffff" },
+  { number: 73, color: "#6366f1", textColor: "#ffffff" },
+  { number: 58, color: "#14b8a6", textColor: "#ffffff" },
+  { number: 47, color: "#a855f7", textColor: "#ffffff" },
 ];
 
-export function SpinningWheel({ onSpin, disabled = false }: SpinningWheelProps) {
+export function SpinningWheel({ onSpin, disabled = false, totalNumbers = 125 }: SpinningWheelProps) {
   const [isSpinning, setIsSpinning] = useState(false);
   const [rotation, setRotation] = useState(0);
+  const [result, setResult] = useState<number | null>(null);
   const wheelRef = useRef<HTMLDivElement>(null);
+  const [glowIntensity, setGlowIntensity] = useState(0);
+
+  // Pulsing glow effect
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setGlowIntensity(prev => (prev + 1) % 100);
+    }, 50);
+    return () => clearInterval(interval);
+  }, []);
 
   const handleSpin = async () => {
     if (isSpinning || disabled) return;
-    
+
     setIsSpinning(true);
-    
-    try {
-      const result = await onSpin();
-      
-      // Calculate rotation based on result - make it land on a random segment
-      const segmentAngle = 360 / wheelNumbers.length;
-      const randomIndex = Math.floor(Math.random() * wheelNumbers.length);
-      const baseRotation = rotation + 1440 + Math.random() * 720; // 4-6 full rotations
-      const targetRotation = baseRotation + (360 - (randomIndex * segmentAngle));
-      
-      setRotation(targetRotation);
-      
-      // Reset after animation
-      setTimeout(() => {
-        setIsSpinning(false);
-      }, 4000);
-    } catch (error) {
-      setIsSpinning(false);
-      console.error("Spin failed:", error);
-    }
+    setResult(null);
+
+    // Visual spinning animation
+    const spinDuration = 3000;
+    const finalRotation = rotation + 1440 + Math.random() * 720; // At least 4 full rotations
+    setRotation(finalRotation);
+
+    // Start the API call
+    const resultPromise = onSpin();
+
+    // Wait for both animation and API call
+    await Promise.all([
+      new Promise(resolve => setTimeout(resolve, spinDuration)),
+      resultPromise.then(setResult)
+    ]);
+
+    setIsSpinning(false);
   };
 
+  const segmentAngle = 360 / wheelSegments.length;
+
   return (
-    <div className="relative w-80 h-80 mx-auto">
-      {/* Glow Effect */}
-      <div className="absolute inset-0 rounded-full bg-gradient-to-br from-yellow-400/20 to-orange-500/20 blur-xl animate-pulse"></div>
-      
-      {/* Wheel container */}
-      <motion.div
-        ref={wheelRef}
-        className="w-full h-full relative z-10"
-        animate={{ rotate: rotation }}
-        transition={{ 
-          duration: isSpinning ? 4 : 0, 
-          ease: [0.17, 0.67, 0.12, 0.99],
-          type: "tween"
-        }}
-      >
-        {/* Outer ring */}
-        <div className="absolute inset-0 rounded-full border-8 border-yellow-400 shadow-2xl bg-gradient-to-br from-yellow-100 to-orange-100">
-          {/* Wheel segments */}
-          <div className="absolute inset-2 rounded-full overflow-hidden">
-            {wheelNumbers.map((number, index) => {
-              const segmentAngle = 360 / wheelNumbers.length;
-              const startAngle = index * segmentAngle;
-              
+    <div className="flex flex-col items-center space-y-8">
+      {/* Wheel Container */}
+      <div className="relative">
+        {/* Glow Effect */}
+        <div 
+          className="absolute inset-0 rounded-full blur-2xl opacity-50 animate-pulse"
+          style={{
+            background: `conic-gradient(from 0deg, #8b5cf6, #3b82f6, #10b981, #f59e0b, #ef4444, #ec4899, #8b5cf6)`,
+            transform: `scale(${1.2 + Math.sin(glowIntensity * 0.1) * 0.1})`
+          }}
+        ></div>
+
+        {/* Outer Ring */}
+        <div className="relative w-80 h-80 rounded-full border-8 border-gradient-to-r from-purple-500 to-blue-500 shadow-2xl">
+          
+          {/* Pointer */}
+          <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1 z-20">
+            <div className="w-0 h-0 border-l-[15px] border-r-[15px] border-b-[25px] border-l-transparent border-r-transparent border-b-yellow-400 drop-shadow-lg"></div>
+            <div className="w-6 h-6 bg-yellow-400 rounded-full mx-auto -mt-1 border-2 border-yellow-500 shadow-lg"></div>
+          </div>
+
+          {/* Spinning Wheel */}
+          <div
+            ref={wheelRef}
+            className="w-full h-full rounded-full relative overflow-hidden transition-transform duration-[3000ms] ease-out"
+            style={{
+              transform: `rotate(${rotation}deg)`,
+              background: `conic-gradient(${wheelSegments.map((segment, index) => 
+                `${segment.color} ${index * segmentAngle}deg ${(index + 1) * segmentAngle}deg`
+              ).join(', ')})`
+            }}
+          >
+            {/* Segments with Numbers */}
+            {wheelSegments.map((segment, index) => {
+              const angle = index * segmentAngle + segmentAngle / 2;
               return (
                 <div
                   key={index}
-                  className="absolute w-1/2 h-1/2 origin-bottom-right"
+                  className="absolute inset-0 flex items-center justify-center"
                   style={{
-                    transform: `rotate(${startAngle}deg)`,
-                    clipPath: `polygon(0 0, 0 100%, 86.6% 50%)`,
-                    backgroundColor: wheelColors[index],
+                    transform: `rotate(${angle}deg)`,
+                    transformOrigin: 'center'
                   }}
                 >
                   <div
-                    className="absolute text-white font-bold text-lg flex items-center justify-center w-12 h-12 rounded-full bg-black/20 backdrop-blur-sm border-2 border-white/30"
-                    style={{
-                      top: "20px",
-                      right: "20px",
-                      textShadow: "2px 2px 4px rgba(0,0,0,0.8)",
-                      fontSize: "16px",
+                    className="font-bold text-2xl drop-shadow-lg"
+                    style={{ 
+                      color: segment.textColor,
+                      transform: 'translateY(-100px)'
                     }}
                   >
-                    {number}
+                    {segment.number}
                   </div>
                 </div>
               );
             })}
+
+            {/* Center Hub */}
+            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-16 h-16 bg-gradient-to-br from-gray-800 to-black rounded-full border-4 border-gray-600 shadow-xl flex items-center justify-center">
+              <div className="w-6 h-6 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full shadow-inner"></div>
+            </div>
           </div>
         </div>
-        
-        {/* Center spin button */}
-        <div className="absolute inset-0 flex items-center justify-center">
-          <button
-            onClick={handleSpin}
-            disabled={isSpinning || disabled}
-            className="w-24 h-24 bg-gradient-to-br from-red-500 to-red-700 text-white font-bold text-lg rounded-full shadow-2xl hover:from-red-600 hover:to-red-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 transform hover:scale-105 active:scale-95 border-4 border-white"
-          >
-            {isSpinning ? (
-              <div className="flex flex-col items-center">
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mb-1"></div>
-                <span className="text-xs">SPINNING</span>
+
+        {/* Spinning Indicator */}
+        {isSpinning && (
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <div className="bg-black/50 backdrop-blur-sm rounded-full px-6 py-3 border border-white/20">
+              <div className="flex items-center space-x-2 text-white">
+                <div className="animate-spin">
+                  <Target className="h-5 w-5" />
+                </div>
+                <span className="font-semibold">Spinning...</span>
               </div>
-            ) : (
-              "SPIN"
-            )}
-          </button>
-        </div>
-      </motion.div>
-      
-      {/* Pointer */}
-      <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-4 z-20">
-        <div className="flex flex-col items-center">
-          <div className="w-0 h-0 border-l-[15px] border-r-[15px] border-b-[30px] border-l-transparent border-r-transparent border-b-yellow-400 shadow-lg"></div>
-          <div className="w-2 h-8 bg-yellow-400 shadow-lg"></div>
-        </div>
+            </div>
+          </div>
+        )}
       </div>
-      
-      {/* Decorative elements */}
-      <div className="absolute inset-0 pointer-events-none">
-        {[...Array(8)].map((_, i) => (
-          <div
-            key={i}
-            className="absolute w-3 h-3 bg-yellow-300 rounded-full animate-ping"
-            style={{
-              top: `${20 + Math.sin(i * Math.PI / 4) * 30}%`,
-              left: `${20 + Math.cos(i * Math.PI / 4) * 30}%`,
-              animationDelay: `${i * 0.2}s`,
-              animationDuration: '2s'
-            }}
-          />
-        ))}
-      </div>
+
+      {/* Result Display */}
+      {result && !isSpinning && (
+        <div className="text-center space-y-4 animate-fade-in">
+          <div className="flex items-center justify-center space-x-3">
+            <Sparkles className="h-8 w-8 text-yellow-400 animate-bounce" />
+            <div className="text-6xl font-bold bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 bg-clip-text text-transparent">
+              {result}
+            </div>
+            <Sparkles className="h-8 w-8 text-yellow-400 animate-bounce" />
+          </div>
+          <div className="bg-gradient-to-r from-green-500/20 to-emerald-500/20 backdrop-blur-sm rounded-xl px-6 py-3 border border-green-500/30">
+            <p className="text-green-400 font-semibold text-lg">Congratulations! You spun {result}!</p>
+          </div>
+        </div>
+      )}
+
+      {/* Spin Button */}
+      <Button
+        onClick={handleSpin}
+        disabled={isSpinning || disabled}
+        className={`
+          relative overflow-hidden px-12 py-4 text-xl font-bold transition-all duration-300
+          ${isSpinning 
+            ? 'bg-gray-600 cursor-not-allowed' 
+            : 'bg-gradient-to-r from-purple-600 via-blue-600 to-purple-600 hover:from-purple-700 hover:via-blue-700 hover:to-purple-700 hover:scale-105 hover:shadow-2xl'
+          }
+          shadow-lg border-2 border-purple-500/50
+        `}
+      >
+        {/* Button Glow Effect */}
+        {!isSpinning && (
+          <div className="absolute inset-0 bg-gradient-to-r from-purple-400/20 to-blue-400/20 animate-pulse"></div>
+        )}
+        
+        <div className="relative flex items-center space-x-3">
+          {isSpinning ? (
+            <>
+              <div className="animate-spin">
+                <Target className="h-6 w-6" />
+              </div>
+              <span>Spinning...</span>
+            </>
+          ) : (
+            <>
+              <Zap className="h-6 w-6" />
+              <span>SPIN TO WIN</span>
+            </>
+          )}
+        </div>
+      </Button>
+
+      {/* Particles Effect */}
+      {result && !isSpinning && (
+        <div className="absolute inset-0 pointer-events-none">
+          {[...Array(20)].map((_, i) => (
+            <div
+              key={i}
+              className="absolute w-2 h-2 bg-yellow-400 rounded-full animate-ping"
+              style={{
+                left: `${20 + Math.random() * 60}%`,
+                top: `${20 + Math.random() * 60}%`,
+                animationDelay: `${Math.random() * 2}s`,
+                animationDuration: `${1 + Math.random()}s`
+              }}
+            ></div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

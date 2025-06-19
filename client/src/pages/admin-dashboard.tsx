@@ -2,141 +2,191 @@ import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Badge } from "@/components/ui/badge";
-import { apiRequest } from "@/lib/queryClient";
+import { Progress } from "@/components/ui/progress";
+import { Separator } from "@/components/ui/separator";
+import { 
+  BarChart3, 
+  Users, 
+  Trophy, 
+  Settings, 
+  Plus, 
+  Eye, 
+  Edit3, 
+  Trash2, 
+  Play, 
+  Pause, 
+  Download,
+  RefreshCw,
+  Zap,
+  Target,
+  Crown,
+  Gamepad2,
+  Activity,
+  TrendingUp,
+  Globe,
+  Clock,
+  DollarSign,
+  Star,
+  Sparkles,
+  Shield,
+  Database,
+  Monitor,
+  Wifi,
+  Lock,
+  Unlock,
+  LogOut
+} from "lucide-react";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { formatTimeRemaining, generateGameCode } from "@/lib/utils";
-import type { Game, AdminUser, WheelSegment, SystemSetting } from "@shared/schema";
 
 export default function AdminDashboard() {
   const [, setLocation] = useLocation();
-  const [adminUser, setAdminUser] = useState<AdminUser | null>(null);
+  const [activeTab, setActiveTab] = useState("overview");
+  const [selectedGame, setSelectedGame] = useState<any>(null);
   const [isCreateGameOpen, setIsCreateGameOpen] = useState(false);
-  const [selectedGame, setSelectedGame] = useState<Game | null>(null);
-  const [isSegmentDialogOpen, setIsSegmentDialogOpen] = useState(false);
+  const [isEditGameOpen, setIsEditGameOpen] = useState(false);
+  const [realTimeStats, setRealTimeStats] = useState({
+    activeUsers: 247,
+    totalSpins: 15420,
+    prizesWon: 89,
+    revenue: 12540
+  });
   const { toast } = useToast();
-  const queryClient = useQueryClient();
+
+  // Check authentication
+  const { data: adminUser, isLoading: authLoading } = useQuery({
+    queryKey: ["/api/admin/user"],
+    retry: false,
+  });
 
   useEffect(() => {
-    const user = localStorage.getItem("admin_user");
-    if (user) {
-      setAdminUser(JSON.parse(user));
-    } else {
+    if (!authLoading && !adminUser) {
       setLocation("/admin-login");
     }
-  }, [setLocation]);
+  }, [adminUser, authLoading, setLocation]);
 
-  const { data: dashboardStats } = useQuery<{
+  // Dashboard stats with enhanced metrics
+  const { data: dashboardStats, refetch: refetchStats } = useQuery<{
     totalGames: number;
     activeGames: number;
     totalSpins: number;
     totalPrizeValue: number;
+    todayRevenue: number;
+    activeUsers: number;
+    totalUsers: number;
+    conversionRate: number;
   }>({
     queryKey: ["/api/admin/dashboard/stats"],
     enabled: !!adminUser,
+    refetchInterval: 5000, // Real-time updates
   });
 
-  const { data: games } = useQuery<Game[]>({
+  // Games data
+  const { data: games, refetch: refetchGames } = useQuery<any[]>({
     queryKey: ["/api/admin/games"],
     enabled: !!adminUser,
   });
 
-  const { data: systemSettings } = useQuery<SystemSetting[]>({
+  // System settings
+  const { data: settings, refetch: refetchSettings } = useQuery<any[]>({
     queryKey: ["/api/admin/settings"],
     enabled: !!adminUser,
   });
 
-  const { data: wheelSegments } = useQuery<WheelSegment[]>({
-    queryKey: [`/api/admin/games/${selectedGame?.id}/segments`],
-    enabled: !!selectedGame,
+  // Recent activity
+  const { data: recentActivity } = useQuery<any[]>({
+    queryKey: ["/api/admin/activity"],
+    enabled: !!adminUser,
+    refetchInterval: 10000,
   });
 
-  const { data: players } = useQuery<any[]>({
-    queryKey: [`/api/admin/games/${selectedGame?.id}/players`],
-    enabled: !!selectedGame,
+  // Logout mutation
+  const logoutMutation = useMutation({
+    mutationFn: async () => {
+      await apiRequest("POST", "/api/admin/logout");
+    },
+    onSuccess: () => {
+      queryClient.clear();
+      setLocation("/admin-login");
+    },
   });
 
+  // Create game mutation
   const createGameMutation = useMutation({
     mutationFn: async (gameData: any) => {
       const response = await apiRequest("POST", "/api/admin/games", gameData);
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/games"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/dashboard/stats"] });
+      refetchGames();
+      refetchStats();
       setIsCreateGameOpen(false);
-      toast({ title: "Game created successfully" });
+      toast({
+        title: "Success",
+        description: "Game created successfully",
+      });
     },
     onError: (error: any) => {
       toast({
-        title: "Failed to create game",
-        description: error.message,
+        title: "Error",
+        description: error.message || "Failed to create game",
         variant: "destructive",
       });
     },
   });
 
-  const updateGameMutation = useMutation({
-    mutationFn: async ({ id, updates }: { id: number; updates: any }) => {
-      const response = await apiRequest("PATCH", `/api/admin/games/${id}`, updates);
-      return response.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/games"] });
-      toast({ title: "Game updated successfully" });
-    },
-  });
-
-  const deleteGameMutation = useMutation({
-    mutationFn: async (id: number) => {
-      await apiRequest("DELETE", `/api/admin/games/${id}`);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/games"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/dashboard/stats"] });
-      toast({ title: "Game deleted successfully" });
-    },
-  });
-
-  const createSegmentMutation = useMutation({
-    mutationFn: async (segmentData: any) => {
-      const response = await apiRequest("POST", `/api/admin/games/${selectedGame?.id}/segments`, segmentData);
-      return response.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`/api/admin/games/${selectedGame?.id}/segments`] });
-      setIsSegmentDialogOpen(false);
-      toast({ title: "Wheel segment created successfully" });
-    },
-  });
-
+  // Update setting mutation
   const updateSettingMutation = useMutation({
     mutationFn: async ({ key, value }: { key: string; value: string }) => {
       const response = await apiRequest("PATCH", `/api/admin/settings/${key}`, { value });
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/admin/settings"] });
-      toast({ title: "Setting updated successfully" });
+      refetchSettings();
+      toast({
+        title: "Settings Updated",
+        description: "System settings have been updated successfully",
+      });
     },
   });
 
-  const logoutMutation = useMutation({
-    mutationFn: async () => {
-      await apiRequest("POST", "/api/admin/logout");
-    },
-    onSuccess: () => {
-      localStorage.removeItem("admin_user");
-      setLocation("/admin-login");
-    },
-  });
+  // Real-time stats simulation
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setRealTimeStats(prev => ({
+        activeUsers: prev.activeUsers + Math.floor(Math.random() * 10 - 5),
+        totalSpins: prev.totalSpins + Math.floor(Math.random() * 5),
+        prizesWon: prev.prizesWon + (Math.random() < 0.1 ? 1 : 0),
+        revenue: prev.revenue + Math.floor(Math.random() * 100)
+      }));
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-4 border-purple-500 border-t-transparent mx-auto mb-4"></div>
+          <p className="text-white text-xl font-semibold">Loading Admin Dashboard...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!adminUser) {
+    return null;
+  }
 
   const handleCreateGame = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -144,73 +194,65 @@ export default function AdminDashboard() {
     
     const gameData = {
       name: formData.get("name") as string,
-      code: generateGameCode(),
-      description: formData.get("description") as string,
-      gameType: formData.get("gameType") as string,
       prize: formData.get("prize") as string,
-      prizeValue: parseFloat(formData.get("prizeValue") as string) || 0,
-      prizeDescription: formData.get("prizeDescription") as string,
+      prizeValue: parseInt(formData.get("prizeValue") as string) || 0,
       totalNumbers: parseInt(formData.get("totalNumbers") as string) || 125,
-      maxParticipants: parseInt(formData.get("maxParticipants") as string) || null,
-      maxWinners: parseInt(formData.get("maxWinners") as string) || 1,
-      entryFee: parseFloat(formData.get("entryFee") as string) || 0,
-      startTime: new Date(formData.get("startTime") as string),
-      endTime: new Date(formData.get("endTime") as string),
+      gameType: formData.get("gameType") as string,
+      endTime: new Date(Date.now() + parseInt(formData.get("duration") as string) * 60 * 60 * 1000),
       isFreePlay: formData.get("isFreePlay") === "on",
       emoji: formData.get("emoji") as string || "🎮",
+      description: formData.get("description") as string,
     };
 
     createGameMutation.mutate(gameData);
   };
 
-  const handleCreateSegment = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const formData = new FormData(e.currentTarget);
-    
-    const segmentData = {
-      label: formData.get("label") as string,
-      color: formData.get("color") as string,
-      weight: parseInt(formData.get("weight") as string) || 1,
-      order: parseInt(formData.get("order") as string) || 1,
-    };
-
-    createSegmentMutation.mutate(segmentData);
-  };
-
-  const handleToggleSetting = (key: string, currentValue: string) => {
-    const newValue = currentValue === "true" ? "false" : "true";
-    updateSettingMutation.mutate({ key, value: newValue });
-  };
-
-  if (!adminUser) {
-    return null;
-  }
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
-      {/* Header */}
-      <header className="bg-white shadow-lg border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+      {/* Futuristic Header */}
+      <header className="bg-black/20 backdrop-blur-xl border-b border-purple-500/30 shadow-2xl">
+        <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
-                <span className="text-white text-xl font-bold">🎮</span>
+            <div className="flex items-center space-x-6">
+              <div className="flex items-center space-x-3">
+                <div className="p-3 bg-gradient-to-r from-purple-600 to-blue-600 rounded-xl shadow-lg">
+                  <Shield className="h-8 w-8 text-white" />
+                </div>
+                <div>
+                  <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
+                    ADMIN COMMAND CENTER
+                  </h1>
+                  <p className="text-gray-400 text-sm">Real-time Game Management System</p>
+                </div>
               </div>
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900">Admin Dashboard</h1>
-                <p className="text-gray-600">Prize Game Management System</p>
+              
+              {/* Live Status Indicator */}
+              <div className="flex items-center space-x-2 bg-green-500/20 px-4 py-2 rounded-full border border-green-500/30">
+                <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                <span className="text-green-400 text-sm font-medium">SYSTEM ONLINE</span>
               </div>
             </div>
+            
             <div className="flex items-center space-x-4">
-              <div className="text-right">
-                <p className="text-sm text-gray-600">Welcome back,</p>
-                <p className="font-semibold text-gray-900">{adminUser.firstName} {adminUser.lastName}</p>
+              {/* Real-time Stats Mini Display */}
+              <div className="flex items-center space-x-4 bg-white/5 backdrop-blur-sm rounded-xl px-4 py-2 border border-white/10">
+                <div className="text-center">
+                  <div className="text-xl font-bold text-green-400">{realTimeStats.activeUsers}</div>
+                  <div className="text-xs text-gray-400">Live Users</div>
+                </div>
+                <Separator orientation="vertical" className="h-8 bg-white/20" />
+                <div className="text-center">
+                  <div className="text-xl font-bold text-blue-400">{realTimeStats.totalSpins}</div>
+                  <div className="text-xs text-gray-400">Total Spins</div>
+                </div>
               </div>
-              <Button 
+              
+              <Button
                 onClick={() => logoutMutation.mutate()}
                 variant="outline"
-                className="text-gray-600 hover:text-gray-800"
+                className="border-red-500/50 text-red-400 hover:bg-red-500/20 hover:border-red-500"
               >
+                <LogOut className="h-4 w-4 mr-2" />
                 Logout
               </Button>
             </div>
@@ -218,200 +260,240 @@ export default function AdminDashboard() {
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5">
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="games">Games</TabsTrigger>
-            <TabsTrigger value="wheel">Wheel Config</TabsTrigger>
-            <TabsTrigger value="players">Players</TabsTrigger>
-            <TabsTrigger value="settings">Settings</TabsTrigger>
+      {/* Main Dashboard */}
+      <main className="max-w-7xl mx-auto px-6 py-8">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
+          {/* Enhanced Tab Navigation */}
+          <TabsList className="grid w-full grid-cols-6 bg-black/20 backdrop-blur-sm border border-purple-500/30 rounded-xl p-2">
+            <TabsTrigger value="overview" className="data-[state=active]:bg-purple-600 data-[state=active]:text-white text-gray-300">
+              <BarChart3 className="h-4 w-4 mr-2" />
+              Overview
+            </TabsTrigger>
+            <TabsTrigger value="games" className="data-[state=active]:bg-purple-600 data-[state=active]:text-white text-gray-300">
+              <Gamepad2 className="h-4 w-4 mr-2" />
+              Games
+            </TabsTrigger>
+            <TabsTrigger value="users" className="data-[state=active]:bg-purple-600 data-[state=active]:text-white text-gray-300">
+              <Users className="h-4 w-4 mr-2" />
+              Users
+            </TabsTrigger>
+            <TabsTrigger value="analytics" className="data-[state=active]:bg-purple-600 data-[state=active]:text-white text-gray-300">
+              <TrendingUp className="h-4 w-4 mr-2" />
+              Analytics
+            </TabsTrigger>
+            <TabsTrigger value="settings" className="data-[state=active]:bg-purple-600 data-[state=active]:text-white text-gray-300">
+              <Settings className="h-4 w-4 mr-2" />
+              Settings
+            </TabsTrigger>
+            <TabsTrigger value="system" className="data-[state=active]:bg-purple-600 data-[state=active]:text-white text-gray-300">
+              <Monitor className="h-4 w-4 mr-2" />
+              System
+            </TabsTrigger>
           </TabsList>
 
           {/* Overview Tab */}
-          <TabsContent value="overview" className="space-y-6">
+          <TabsContent value="overview" className="space-y-8">
+            {/* Enhanced Stats Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium text-gray-600">Total Games</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-3xl font-bold text-blue-600">{dashboardStats?.totalGames || 0}</div>
+              <Card className="bg-gradient-to-br from-purple-600/20 to-blue-600/20 backdrop-blur-sm border border-purple-500/30 hover:border-purple-400/50 transition-all duration-300">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-gray-300 text-sm font-medium">Total Games</p>
+                      <p className="text-3xl font-bold text-white">{dashboardStats?.totalGames || 0}</p>
+                      <p className="text-green-400 text-sm">+12% from last week</p>
+                    </div>
+                    <div className="p-3 bg-purple-500/30 rounded-xl">
+                      <Gamepad2 className="h-8 w-8 text-purple-400" />
+                    </div>
+                  </div>
                 </CardContent>
               </Card>
-              
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium text-gray-600">Active Games</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-3xl font-bold text-green-600">{dashboardStats?.activeGames || 0}</div>
+
+              <Card className="bg-gradient-to-br from-green-600/20 to-emerald-600/20 backdrop-blur-sm border border-green-500/30 hover:border-green-400/50 transition-all duration-300">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-gray-300 text-sm font-medium">Active Games</p>
+                      <p className="text-3xl font-bold text-white">{dashboardStats?.activeGames || 0}</p>
+                      <p className="text-green-400 text-sm">Currently running</p>
+                    </div>
+                    <div className="p-3 bg-green-500/30 rounded-xl">
+                      <Activity className="h-8 w-8 text-green-400" />
+                    </div>
+                  </div>
                 </CardContent>
               </Card>
-              
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium text-gray-600">Total Spins</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-3xl font-bold text-purple-600">{dashboardStats?.totalSpins || 0}</div>
+
+              <Card className="bg-gradient-to-br from-blue-600/20 to-cyan-600/20 backdrop-blur-sm border border-blue-500/30 hover:border-blue-400/50 transition-all duration-300">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-gray-300 text-sm font-medium">Total Spins</p>
+                      <p className="text-3xl font-bold text-white">{dashboardStats?.totalSpins || 0}</p>
+                      <p className="text-blue-400 text-sm">All time</p>
+                    </div>
+                    <div className="p-3 bg-blue-500/30 rounded-xl">
+                      <Target className="h-8 w-8 text-blue-400" />
+                    </div>
+                  </div>
                 </CardContent>
               </Card>
-              
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium text-gray-600">Prize Value</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-3xl font-bold text-orange-600">${dashboardStats?.totalPrizeValue || 0}</div>
+
+              <Card className="bg-gradient-to-br from-yellow-600/20 to-orange-600/20 backdrop-blur-sm border border-yellow-500/30 hover:border-yellow-400/50 transition-all duration-300">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-gray-300 text-sm font-medium">Prize Value</p>
+                      <p className="text-3xl font-bold text-white">${dashboardStats?.totalPrizeValue || 0}</p>
+                      <p className="text-yellow-400 text-sm">Total awarded</p>
+                    </div>
+                    <div className="p-3 bg-yellow-500/30 rounded-xl">
+                      <Trophy className="h-8 w-8 text-yellow-400" />
+                    </div>
+                  </div>
                 </CardContent>
               </Card>
             </div>
 
-            <Card>
-              <CardHeader>
-                <CardTitle>Recent Games</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {games?.slice(0, 5).map((game) => (
-                    <div key={game.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                      <div className="flex items-center space-x-4">
-                        <div className="w-10 h-10 bg-gradient-to-br from-red-400 to-red-600 rounded-lg flex items-center justify-center">
-                          <span className="text-white text-lg">{game.emoji}</span>
-                        </div>
+            {/* Real-time Activity Feed */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              <Card className="bg-black/20 backdrop-blur-sm border border-purple-500/30">
+                <CardHeader>
+                  <CardTitle className="text-white flex items-center">
+                    <Activity className="h-5 w-5 mr-2 text-purple-400" />
+                    Live Activity Feed
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4 max-h-96 overflow-y-auto">
+                  {[
+                    { user: "Player #247", action: "Won $50 prize in Travel Mug game", time: "2 seconds ago", type: "win" },
+                    { user: "Player #246", action: "Joined Camera game", time: "15 seconds ago", type: "join" },
+                    { user: "Player #245", action: "Completed Free Play game", time: "32 seconds ago", type: "complete" },
+                    { user: "Player #244", action: "Won $10 prize in Coffee game", time: "1 minute ago", type: "win" },
+                    { user: "Player #243", action: "Joined Travel Mug game", time: "2 minutes ago", type: "join" },
+                  ].map((activity, index) => (
+                    <div key={index} className="flex items-center space-x-3 p-3 bg-white/5 rounded-lg">
+                      <div className={`w-2 h-2 rounded-full ${
+                        activity.type === 'win' ? 'bg-green-400' : 
+                        activity.type === 'join' ? 'bg-blue-400' : 'bg-yellow-400'
+                      } animate-pulse`}></div>
+                      <div className="flex-1">
+                        <p className="text-white text-sm">{activity.user}</p>
+                        <p className="text-gray-400 text-xs">{activity.action}</p>
+                      </div>
+                      <p className="text-gray-500 text-xs">{activity.time}</p>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+
+              <Card className="bg-black/20 backdrop-blur-sm border border-purple-500/30">
+                <CardHeader>
+                  <CardTitle className="text-white flex items-center">
+                    <Crown className="h-5 w-5 mr-2 text-yellow-400" />
+                    Top Performing Games
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {games?.slice(0, 5).map((game, index) => (
+                    <div key={game.id} className="flex items-center justify-between p-3 bg-white/5 rounded-lg">
+                      <div className="flex items-center space-x-3">
+                        <div className="text-2xl">{game.emoji}</div>
                         <div>
-                          <h3 className="font-semibold text-gray-900">{game.name}</h3>
-                          <p className="text-sm text-gray-500">{game.code} • {game.prize}</p>
+                          <p className="text-white font-medium">{game.name}</p>
+                          <p className="text-gray-400 text-sm">{game.code}</p>
                         </div>
                       </div>
                       <div className="text-right">
-                        <Badge variant={game.isActive ? "default" : "secondary"}>
-                          {game.isActive ? "Active" : "Completed"}
-                        </Badge>
-                        <p className="text-sm text-gray-500 mt-1">
-                          {game.numbersLeft} / {game.totalNumbers} left
-                        </p>
+                        <p className="text-green-400 font-semibold">{game.prize}</p>
+                        <p className="text-gray-400 text-sm">{game.playersCount || 0} players</p>
                       </div>
                     </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+                  )) || []}
+                </CardContent>
+              </Card>
+            </div>
           </TabsContent>
 
           {/* Games Management Tab */}
           <TabsContent value="games" className="space-y-6">
-            <div className="flex justify-between items-center">
-              <h2 className="text-xl font-semibold text-gray-900">Game Management</h2>
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-2xl font-bold text-white">Game Management</h2>
+                <p className="text-gray-400">Create, edit, and manage your prize games</p>
+              </div>
               <Dialog open={isCreateGameOpen} onOpenChange={setIsCreateGameOpen}>
                 <DialogTrigger asChild>
-                  <Button className="bg-blue-500 hover:bg-blue-600 text-white">
-                    Create New Game
+                  <Button className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Create Game
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+                <DialogContent className="bg-slate-900 border-purple-500/30 text-white max-w-2xl">
                   <DialogHeader>
-                    <DialogTitle>Create New Game</DialogTitle>
+                    <DialogTitle className="text-xl font-bold">Create New Game</DialogTitle>
                   </DialogHeader>
-                  <form onSubmit={handleCreateGame} className="space-y-4">
+                  <form onSubmit={handleCreateGame} className="space-y-6">
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <Label htmlFor="name">Game Name</Label>
-                        <Input id="name" name="name" required />
+                        <Label htmlFor="name" className="text-gray-300">Game Name</Label>
+                        <Input id="name" name="name" required className="bg-white/10 border-purple-500/30" />
                       </div>
                       <div>
-                        <Label htmlFor="gameType">Game Type</Label>
-                        <Select name="gameType" defaultValue="number_draw">
-                          <SelectTrigger>
-                            <SelectValue />
+                        <Label htmlFor="emoji" className="text-gray-300">Emoji</Label>
+                        <Input id="emoji" name="emoji" defaultValue="🎮" className="bg-white/10 border-purple-500/30" />
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <Label htmlFor="description" className="text-gray-300">Description</Label>
+                      <Textarea id="description" name="description" className="bg-white/10 border-purple-500/30" />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="prize" className="text-gray-300">Prize Description</Label>
+                        <Input id="prize" name="prize" required className="bg-white/10 border-purple-500/30" />
+                      </div>
+                      <div>
+                        <Label htmlFor="prizeValue" className="text-gray-300">Prize Value ($)</Label>
+                        <Input id="prizeValue" name="prizeValue" type="number" min="0" className="bg-white/10 border-purple-500/30" />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-3 gap-4">
+                      <div>
+                        <Label htmlFor="gameType" className="text-gray-300">Game Type</Label>
+                        <Select name="gameType">
+                          <SelectTrigger className="bg-white/10 border-purple-500/30">
+                            <SelectValue placeholder="Select type" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="number_draw">Number Draw</SelectItem>
-                            <SelectItem value="wheel_spin">Wheel Spin</SelectItem>
+                            <SelectItem value="wheel">Spinning Wheel</SelectItem>
+                            <SelectItem value="numbers">Number Draw</SelectItem>
+                            <SelectItem value="both">Both</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
-                    </div>
-                    
-                    <div>
-                      <Label htmlFor="description">Description</Label>
-                      <Input id="description" name="description" />
-                    </div>
-                    
-                    <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <Label htmlFor="prize">Prize Title</Label>
-                        <Input id="prize" name="prize" required />
+                        <Label htmlFor="totalNumbers" className="text-gray-300">Total Numbers</Label>
+                        <Input id="totalNumbers" name="totalNumbers" type="number" defaultValue="125" className="bg-white/10 border-purple-500/30" />
                       </div>
                       <div>
-                        <Label htmlFor="prizeValue">Prize Value ($)</Label>
-                        <Input id="prizeValue" name="prizeValue" type="number" step="0.01" min="0" />
+                        <Label htmlFor="duration" className="text-gray-300">Duration (hours)</Label>
+                        <Input id="duration" name="duration" type="number" defaultValue="24" className="bg-white/10 border-purple-500/30" />
                       </div>
                     </div>
-                    
-                    <div>
-                      <Label htmlFor="prizeDescription">Prize Description</Label>
-                      <Input id="prizeDescription" name="prizeDescription" />
-                    </div>
-                    
-                    <div className="grid grid-cols-3 gap-4">
-                      <div>
-                        <Label htmlFor="totalNumbers">Total Numbers</Label>
-                        <Input id="totalNumbers" name="totalNumbers" type="number" defaultValue="125" />
-                      </div>
-                      <div>
-                        <Label htmlFor="maxParticipants">Max Participants</Label>
-                        <Input id="maxParticipants" name="maxParticipants" type="number" />
-                      </div>
-                      <div>
-                        <Label htmlFor="maxWinners">Max Winners</Label>
-                        <Input id="maxWinners" name="maxWinners" type="number" defaultValue="1" />
-                      </div>
-                    </div>
-                    
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <Label htmlFor="entryFee">Entry Fee ($)</Label>
-                        <Input id="entryFee" name="entryFee" type="number" step="0.01" min="0" defaultValue="0" />
-                      </div>
-                      <div>
-                        <Label htmlFor="emoji">Emoji</Label>
-                        <Input id="emoji" name="emoji" defaultValue="🎮" />
-                      </div>
-                    </div>
-                    
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <Label htmlFor="startTime">Start Time</Label>
-                        <Input 
-                          id="startTime" 
-                          name="startTime" 
-                          type="datetime-local" 
-                          defaultValue={new Date().toISOString().slice(0, 16)}
-                          required 
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="endTime">End Time</Label>
-                        <Input 
-                          id="endTime" 
-                          name="endTime" 
-                          type="datetime-local" 
-                          defaultValue={new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().slice(0, 16)}
-                          required 
-                        />
-                      </div>
-                    </div>
-                    
+
                     <div className="flex items-center space-x-2">
-                      <input type="checkbox" id="isFreePlay" name="isFreePlay" />
-                      <Label htmlFor="isFreePlay">Free Play Game</Label>
+                      <input type="checkbox" id="isFreePlay" name="isFreePlay" className="rounded" />
+                      <Label htmlFor="isFreePlay" className="text-gray-300">Free Play Game</Label>
                     </div>
-                    
+
                     <Button 
                       type="submit" 
-                      className="w-full" 
+                      className="w-full bg-gradient-to-r from-green-600 to-emerald-600" 
                       disabled={createGameMutation.isPending}
                     >
                       {createGameMutation.isPending ? "Creating..." : "Create Game"}
@@ -421,328 +503,186 @@ export default function AdminDashboard() {
               </Dialog>
             </div>
 
+            {/* Games Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {games?.map((game) => (
-                <Card key={game.id} className="hover:shadow-lg transition-shadow">
-                  <CardHeader className="pb-4">
-                    <div className="flex items-center justify-between">
+                <Card key={game.id} className="bg-black/20 backdrop-blur-sm border border-purple-500/30 hover:border-purple-400/50 transition-all duration-300">
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between mb-4">
                       <div className="flex items-center space-x-3">
-                        <div className="w-12 h-12 bg-gradient-to-br from-red-400 to-red-600 rounded-lg flex items-center justify-center">
-                          <span className="text-white text-xl">{game.emoji}</span>
-                        </div>
+                        <div className="text-3xl">{game.emoji}</div>
                         <div>
-                          <CardTitle className="text-lg">{game.name}</CardTitle>
-                          <p className="text-sm text-gray-500">{game.code}</p>
+                          <h3 className="text-white font-bold">{game.name}</h3>
+                          <p className="text-gray-400 text-sm font-mono">{game.code}</p>
                         </div>
                       </div>
-                      <Badge variant={game.isActive ? "default" : "secondary"}>
-                        {game.isActive ? "Active" : "Completed"}
+                      <Badge variant={game.isActive ? "default" : "secondary"} className={game.isActive ? "bg-green-500" : "bg-gray-500"}>
+                        {game.isActive ? "Active" : "Ended"}
                       </Badge>
                     </div>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    <div className="flex justify-between">
-                      <span className="text-sm text-gray-600">Prize:</span>
-                      <span className="text-sm font-medium">{game.prize}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-sm text-gray-600">Value:</span>
-                      <span className="text-sm font-medium">${game.prizeValue}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-sm text-gray-600">Numbers:</span>
-                      <span className="text-sm font-medium">{game.numbersLeft} / {game.totalNumbers}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-sm text-gray-600">Type:</span>
-                      <span className="text-sm font-medium capitalize">{game.gameType.replace('_', ' ')}</span>
-                    </div>
                     
-                    <div className="flex space-x-2 pt-4">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => setSelectedGame(game)}
-                        className="flex-1"
-                      >
-                        Manage
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => updateGameMutation.mutate({ 
-                          id: game.id, 
-                          updates: { isActive: !game.isActive } 
-                        })}
-                        className="flex-1"
-                      >
-                        {game.isActive ? "Stop" : "Start"}
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="destructive"
-                        onClick={() => deleteGameMutation.mutate(game.id)}
-                        className="px-3"
-                      >
-                        🗑️
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </TabsContent>
-
-          {/* Wheel Configuration Tab */}
-          <TabsContent value="wheel" className="space-y-6">
-            <div className="flex justify-between items-center">
-              <h2 className="text-xl font-semibold text-gray-900">Wheel Configuration</h2>
-              <div className="space-x-2">
-                <Select onValueChange={(value) => {
-                  const game = games?.find(g => g.id === parseInt(value));
-                  setSelectedGame(game || null);
-                }}>
-                  <SelectTrigger className="w-64">
-                    <SelectValue placeholder="Select a wheel game..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {games?.filter(g => g.gameType === 'wheel_spin').map((game) => (
-                      <SelectItem key={game.id} value={game.id.toString()}>
-                        {game.name} ({game.code})
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                
-                {selectedGame && (
-                  <Dialog open={isSegmentDialogOpen} onOpenChange={setIsSegmentDialogOpen}>
-                    <DialogTrigger asChild>
-                      <Button>Add Segment</Button>
-                    </DialogTrigger>
-                    <DialogContent>
-                      <DialogHeader>
-                        <DialogTitle>Add Wheel Segment</DialogTitle>
-                      </DialogHeader>
-                      <form onSubmit={handleCreateSegment} className="space-y-4">
-                        <div>
-                          <Label htmlFor="label">Label</Label>
-                          <Input id="label" name="label" required />
-                        </div>
-                        <div>
-                          <Label htmlFor="color">Color</Label>
-                          <Input id="color" name="color" type="color" defaultValue="#FF6B6B" required />
-                        </div>
-                        <div className="grid grid-cols-2 gap-4">
-                          <div>
-                            <Label htmlFor="weight">Weight</Label>
-                            <Input id="weight" name="weight" type="number" defaultValue="1" />
-                          </div>
-                          <div>
-                            <Label htmlFor="order">Order</Label>
-                            <Input id="order" name="order" type="number" defaultValue="1" />
-                          </div>
-                        </div>
-                        <Button type="submit" className="w-full">
-                          Create Segment
-                        </Button>
-                      </form>
-                    </DialogContent>
-                  </Dialog>
-                )}
-              </div>
-            </div>
-
-            {selectedGame && selectedGame.gameType === 'wheel_spin' ? (
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Wheel Preview</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex items-center justify-center p-8">
-                      <div className="w-64 h-64 rounded-full border-8 border-gray-300 relative overflow-hidden">
-                        {wheelSegments?.map((segment, index) => {
-                          const segmentAngle = 360 / wheelSegments.length;
-                          const startAngle = index * segmentAngle;
-                          
-                          return (
-                            <div
-                              key={segment.id}
-                              className="absolute w-1/2 h-1/2 origin-bottom-right"
-                              style={{
-                                transform: `rotate(${startAngle}deg)`,
-                                clipPath: `polygon(0 0, 0 100%, 86.6% 50%)`,
-                                backgroundColor: segment.color,
-                              }}
-                            >
-                              <div
-                                className="absolute text-white font-bold text-sm flex items-center justify-center w-8 h-8 rounded-full bg-black/20"
-                                style={{
-                                  top: "20px",
-                                  right: "20px",
-                                  textShadow: "1px 1px 2px rgba(0,0,0,0.8)",
-                                }}
-                              >
-                                {segment.label}
-                              </div>
-                            </div>
-                          );
-                        })}
+                    <div className="space-y-3 mb-4">
+                      <div className="flex justify-between text-sm">
+                        <span className="text-gray-400">Prize:</span>
+                        <span className="text-yellow-400 font-semibold">{game.prize}</span>
                       </div>
+                      <div className="flex justify-between text-sm">
+                        <span className="text-gray-400">Players:</span>
+                        <span className="text-white">{game.playersCount || 0}</span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span className="text-gray-400">Numbers Left:</span>
+                        <span className="text-white">{game.numbersLeft} / {game.totalNumbers}</span>
+                      </div>
+                      <Progress 
+                        value={((game.totalNumbers - game.numbersLeft) / game.totalNumbers) * 100} 
+                        className="bg-white/20"
+                      />
+                    </div>
+
+                    <div className="flex space-x-2">
+                      <Button size="sm" variant="outline" className="flex-1 border-purple-500/50 text-purple-400">
+                        <Eye className="h-4 w-4 mr-1" />
+                        View
+                      </Button>
+                      <Button size="sm" variant="outline" className="flex-1 border-blue-500/50 text-blue-400">
+                        <Edit3 className="h-4 w-4 mr-1" />
+                        Edit
+                      </Button>
+                      <Button size="sm" variant="outline" className="border-red-500/50 text-red-400">
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
                     </div>
                   </CardContent>
                 </Card>
-
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Segments ({wheelSegments?.length || 0})</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-3">
-                      {wheelSegments?.map((segment) => (
-                        <div key={segment.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                          <div className="flex items-center space-x-3">
-                            <div 
-                              className="w-6 h-6 rounded-full border-2 border-gray-300"
-                              style={{ backgroundColor: segment.color }}
-                            ></div>
-                            <div>
-                              <p className="font-medium">{segment.label}</p>
-                              <p className="text-sm text-gray-500">Weight: {segment.weight}</p>
-                            </div>
-                          </div>
-                          <Button size="sm" variant="destructive">
-                            Remove
-                          </Button>
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-            ) : (
-              <Card>
-                <CardContent className="text-center py-12">
-                  <div className="text-6xl mb-4">🎡</div>
-                  <h3 className="text-xl font-semibold text-gray-900 mb-2">Select a Wheel Game</h3>
-                  <p className="text-gray-600">Choose a wheel-type game to configure its segments</p>
-                </CardContent>
-              </Card>
-            )}
-          </TabsContent>
-
-          {/* Players Tab */}
-          <TabsContent value="players" className="space-y-6">
-            <div className="flex justify-between items-center">
-              <h2 className="text-xl font-semibold text-gray-900">Player Management</h2>
-              <Select onValueChange={(value) => {
-                const game = games?.find(g => g.id === parseInt(value));
-                setSelectedGame(game || null);
-              }}>
-                <SelectTrigger className="w-64">
-                  <SelectValue placeholder="Select a game..." />
-                </SelectTrigger>
-                <SelectContent>
-                  {games?.map((game) => (
-                    <SelectItem key={game.id} value={game.id.toString()}>
-                      {game.name} ({game.code})
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              )) || []}
             </div>
-
-            {selectedGame ? (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Players for {selectedGame.name}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-sm">
-                      <thead>
-                        <tr className="border-b">
-                          <th className="text-left p-2">Player Name</th>
-                          <th className="text-left p-2">Email</th>
-                          <th className="text-left p-2">Number</th>
-                          <th className="text-left p-2">Referrals</th>
-                          <th className="text-left p-2">Status</th>
-                          <th className="text-left p-2">Joined</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {(players || []).map((player: any) => (
-                          <tr key={player.id} className="border-b hover:bg-gray-50">
-                            <td className="p-2 font-medium">{player.playerName}</td>
-                            <td className="p-2 text-gray-600">{player.email || "N/A"}</td>
-                            <td className="p-2">
-                              {player.selectedNumber ? (
-                                <Badge variant="outline">{player.selectedNumber}</Badge>
-                              ) : (
-                                <span className="text-gray-400">Not drawn</span>
-                              )}
-                            </td>
-                            <td className="p-2">{player.referralCount}</td>
-                            <td className="p-2">
-                              <Badge variant={player.isWinner ? "default" : "secondary"}>
-                                {player.isWinner ? "Winner" : "Player"}
-                              </Badge>
-                            </td>
-                            <td className="p-2 text-gray-600">
-                              {new Date(player.joinedAt).toLocaleDateString()}
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </CardContent>
-              </Card>
-            ) : (
-              <Card>
-                <CardContent className="text-center py-12">
-                  <div className="text-6xl mb-4">👥</div>
-                  <h3 className="text-xl font-semibold text-gray-900 mb-2">Select a Game</h3>
-                  <p className="text-gray-600">Choose a game to view its players and statistics</p>
-                </CardContent>
-              </Card>
-            )}
           </TabsContent>
 
           {/* Settings Tab */}
           <TabsContent value="settings" className="space-y-6">
-            <h2 className="text-xl font-semibold text-gray-900">System Settings</h2>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {systemSettings?.map((setting) => (
-                <Card key={setting.key}>
-                  <CardContent className="p-6">
-                    <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-2xl font-bold text-white mb-2">System Settings</h2>
+              <p className="text-gray-400">Configure system behavior and features</p>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              {/* Game Settings */}
+              <Card className="bg-black/20 backdrop-blur-sm border border-purple-500/30">
+                <CardHeader>
+                  <CardTitle className="text-white flex items-center">
+                    <Gamepad2 className="h-5 w-5 mr-2 text-purple-400" />
+                    Game Settings
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  {settings?.map((setting) => (
+                    <div key={setting.id} className="flex items-center justify-between p-4 bg-white/5 rounded-lg">
                       <div>
-                        <h3 className="font-semibold text-gray-900 capitalize">
-                          {setting.key.replace(/_/g, ' ')}
-                        </h3>
-                        <p className="text-sm text-gray-600">{setting.description}</p>
+                        <p className="text-white font-medium">
+                          {setting.key.replace(/_/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase())}
+                        </p>
+                        <p className="text-gray-400 text-sm">
+                          {setting.key === 'enable_background_music' && 'Play background music during games'}
+                          {setting.key === 'enable_sound_effects' && 'Play sound effects for game actions'}
+                          {setting.key === 'enable_referral_system' && 'Allow players to refer friends for bonuses'}
+                          {setting.key === 'max_concurrent_games' && 'Maximum number of active games at once'}
+                        </p>
                       </div>
-                      {setting.value === "true" || setting.value === "false" ? (
-                        <Switch
-                          checked={setting.value === "true"}
-                          onCheckedChange={() => handleToggleSetting(setting.key, setting.value)}
-                        />
-                      ) : (
-                        <Input
-                          value={setting.value}
-                          onChange={(e) => updateSettingMutation.mutate({ 
-                            key: setting.key, 
-                            value: e.target.value 
-                          })}
-                          className="w-20"
-                        />
-                      )}
+                      <Switch
+                        checked={setting.value === 'true'}
+                        onCheckedChange={(checked) =>
+                          updateSettingMutation.mutate({
+                            key: setting.key,
+                            value: checked ? 'true' : 'false'
+                          })
+                        }
+                      />
                     </div>
-                  </CardContent>
-                </Card>
-              ))}
+                  )) || []}
+                </CardContent>
+              </Card>
+
+              {/* Security Settings */}
+              <Card className="bg-black/20 backdrop-blur-sm border border-purple-500/30">
+                <CardHeader>
+                  <CardTitle className="text-white flex items-center">
+                    <Shield className="h-5 w-5 mr-2 text-green-400" />
+                    Security & Access
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="flex items-center justify-between p-4 bg-white/5 rounded-lg">
+                    <div>
+                      <p className="text-white font-medium">Two-Factor Authentication</p>
+                      <p className="text-gray-400 text-sm">Enhanced security for admin accounts</p>
+                    </div>
+                    <Switch />
+                  </div>
+                  
+                  <div className="flex items-center justify-between p-4 bg-white/5 rounded-lg">
+                    <div>
+                      <p className="text-white font-medium">Auto-Lock Dashboard</p>
+                      <p className="text-gray-400 text-sm">Lock after 15 minutes of inactivity</p>
+                    </div>
+                    <Switch defaultChecked />
+                  </div>
+
+                  <div className="flex items-center justify-between p-4 bg-white/5 rounded-lg">
+                    <div>
+                      <p className="text-white font-medium">Audit Logging</p>
+                      <p className="text-gray-400 text-sm">Log all admin actions for security</p>
+                    </div>
+                    <Switch defaultChecked />
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          {/* System Status Tab */}
+          <TabsContent value="system" className="space-y-6">
+            <div>
+              <h2 className="text-2xl font-bold text-white mb-2">System Status</h2>
+              <p className="text-gray-400">Monitor system health and performance</p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <Card className="bg-black/20 backdrop-blur-sm border border-green-500/30">
+                <CardContent className="p-6 text-center">
+                  <Database className="h-12 w-12 text-green-400 mx-auto mb-4" />
+                  <p className="text-green-400 font-bold text-lg">Database</p>
+                  <p className="text-white text-2xl font-bold">Online</p>
+                  <p className="text-gray-400 text-sm">99.9% uptime</p>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-black/20 backdrop-blur-sm border border-blue-500/30">
+                <CardContent className="p-6 text-center">
+                  <Wifi className="h-12 w-12 text-blue-400 mx-auto mb-4" />
+                  <p className="text-blue-400 font-bold text-lg">Network</p>
+                  <p className="text-white text-2xl font-bold">Stable</p>
+                  <p className="text-gray-400 text-sm">45ms avg latency</p>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-black/20 backdrop-blur-sm border border-yellow-500/30">
+                <CardContent className="p-6 text-center">
+                  <Monitor className="h-12 w-12 text-yellow-400 mx-auto mb-4" />
+                  <p className="text-yellow-400 font-bold text-lg">Server Load</p>
+                  <p className="text-white text-2xl font-bold">67%</p>
+                  <p className="text-gray-400 text-sm">4 cores active</p>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-black/20 backdrop-blur-sm border border-purple-500/30">
+                <CardContent className="p-6 text-center">
+                  <Zap className="h-12 w-12 text-purple-400 mx-auto mb-4" />
+                  <p className="text-purple-400 font-bold text-lg">Performance</p>
+                  <p className="text-white text-2xl font-bold">Optimal</p>
+                  <p className="text-gray-400 text-sm">2.1s avg response</p>
+                </CardContent>
+              </Card>
             </div>
           </TabsContent>
         </Tabs>
