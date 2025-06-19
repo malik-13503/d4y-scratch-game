@@ -24,7 +24,12 @@ export default function AdminPage() {
     queryKey: ["/api/games"],
   });
 
-  const { data: gameStats } = useQuery({
+  const { data: gameStats } = useQuery<{
+    totalPlayers: number;
+    playersWithNumbers: number;
+    freePlays: number;
+    referrals: number;
+  }>({
     queryKey: [`/api/games/${selectedGame?.id}/stats`],
     enabled: !!selectedGame,
   });

@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRoute, useLocation } from "wouter";
 import { SpinningWheel } from "@/components/spinning-wheel";
+import { NumberDrawer } from "@/components/number-drawer";
+import { Confetti } from "@/components/confetti";
 import { Button } from "@/components/ui/button";
 import { formatTimeRemaining } from "@/lib/utils";
 import { apiRequest } from "@/lib/queryClient";
@@ -14,6 +16,8 @@ export default function GamePage() {
   const [playerId, setPlayerId] = useState<number | null>(null);
   const [selectedNumber, setSelectedNumber] = useState<number | null>(null);
   const [showWinModal, setShowWinModal] = useState(false);
+  const [showConfetti, setShowConfetti] = useState(false);
+  const [gameMode, setGameMode] = useState<'wheel' | 'draw'>('draw');
   const queryClient = useQueryClient();
 
   const gameId = params?.id ? parseInt(params.id) : null;
@@ -45,8 +49,10 @@ export default function GamePage() {
     },
     onSuccess: (result) => {
       setSelectedNumber(result.selectedNumber);
+      setShowConfetti(true);
       // Show result modal after a brief delay
       setTimeout(() => setShowWinModal(true), 1000);
+      setTimeout(() => setShowConfetti(false), 4000);
     },
   });
 
@@ -162,18 +168,52 @@ export default function GamePage() {
               </Button>
             </div>
           ) : (
-            /* Spinning Wheel */
+            /* Game Mode Selection and Play Area */
             <div className="space-y-12">
-              <div>
-                <h2 className="text-4xl font-bold mb-4">Spin to Win!</h2>
-                <p className="text-white/80 text-xl">Press the spin button to draw your lucky number</p>
+              {/* Mode Toggle */}
+              <div className="text-center">
+                <h2 className="text-4xl font-bold mb-6">Choose Your Game Style</h2>
+                <div className="flex justify-center space-x-4 mb-8">
+                  <Button
+                    onClick={() => setGameMode('draw')}
+                    className={`px-8 py-3 text-lg font-semibold rounded-xl transition-all ${
+                      gameMode === 'draw'
+                        ? 'bg-blue-500 text-white shadow-lg'
+                        : 'bg-white/20 text-white/80 hover:bg-white/30'
+                    }`}
+                  >
+                    Draw Number
+                  </Button>
+                  <Button
+                    onClick={() => setGameMode('wheel')}
+                    className={`px-8 py-3 text-lg font-semibold rounded-xl transition-all ${
+                      gameMode === 'wheel'
+                        ? 'bg-blue-500 text-white shadow-lg'
+                        : 'bg-white/20 text-white/80 hover:bg-white/30'
+                    }`}
+                  >
+                    Spin Wheel
+                  </Button>
+                </div>
               </div>
               
+              {/* Game Interface */}
               <div className="flex justify-center">
-                <SpinningWheel
-                  onSpin={handleSpin}
-                  disabled={!playerId || spinWheelMutation.isPending}
-                />
+                {gameMode === 'wheel' ? (
+                  <div className="text-center space-y-6">
+                    <h3 className="text-2xl font-bold text-white">Spin the Wheel of Fortune!</h3>
+                    <SpinningWheel
+                      onSpin={handleSpin}
+                      disabled={!playerId || spinWheelMutation.isPending}
+                    />
+                  </div>
+                ) : (
+                  <NumberDrawer
+                    onDraw={handleSpin}
+                    disabled={!playerId || spinWheelMutation.isPending}
+                    totalNumbers={game.totalNumbers}
+                  />
+                )}
               </div>
               
               {spinWheelMutation.isPending && (
@@ -210,6 +250,9 @@ export default function GamePage() {
           )}
         </div>
       </main>
+
+      {/* Confetti Effect */}
+      <Confetti active={showConfetti} />
 
       {/* Result Modal */}
       {showWinModal && selectedNumber && (
