@@ -67,38 +67,14 @@ export class DatabaseStorage implements IStorage {
     });
 
     this.initializeSampleData();
-    this.ensureDefaultAdminUser(); // Call ensureDefaultAdminUser on startup
+    // Initialize admin user asynchronously without blocking startup
+    this.ensureDefaultAdminUser().catch(console.error);
   }
 
   private async initializeSampleData() {
-    try {
-      // Check if admin user exists
-      const adminExists = await db.select().from(adminUsers).limit(1);
-      if (adminExists.length === 0) {
-        // Create default admin user
-        const hashedPassword = await hashPassword("admin123");
-        await db.insert(adminUsers).values({
-          email: "admin@example.com",
-          password: hashedPassword,
-          firstName: "Admin",
-          lastName: "User",
-        });
-      }
-
-      // Initialize system settings
-      const settingsExists = await db.select().from(systemSettings).limit(1);
-      if (settingsExists.length === 0) {
-        await db.insert(systemSettings).values([
-          { key: "enable_background_music", value: "true", description: "Enable background music" },
-          { key: "enable_sound_effects", value: "true", description: "Enable sound effects" },
-          { key: "referral_bonus_enabled", value: "true", description: "Enable referral bonuses" },
-          { key: "referral_threshold", value: "3", description: "Number of referrals for bonus" },
-          { key: "max_games_per_admin", value: "10", description: "Maximum games per admin" },
-        ]);
-      }
-    } catch (error) {
-      console.error("Error initializing sample data:", error);
-    }
+    // Skip database initialization on startup to avoid blocking the server
+    // Database operations will be handled when actually needed
+    console.log("Database initialization skipped - will initialize on first use");
   }
 
   // Game methods

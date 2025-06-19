@@ -41,9 +41,6 @@ app.use((req, res, next) => {
     // Import storage here to avoid circular dependency
     const { storage } = await import("./storage");
     
-    // Ensure default admin user exists
-    await storage.ensureDefaultAdminUser();
-    
     const server = await registerRoutes(app);
 
     app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
