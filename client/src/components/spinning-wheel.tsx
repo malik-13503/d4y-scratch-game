@@ -51,21 +51,23 @@ export function SpinningWheel({ onSpin, disabled = false, totalNumbers = 125 }: 
     // Enhanced spinning animation - 8 seconds duration
     const spinDuration = 8000;
     const finalRotation = rotation + 2880 + Math.random() * 1440; // At least 8 full rotations
+    
+    // Apply rotation immediately for visual feedback
     setRotation(finalRotation);
 
-    // Start the API call
+    // Start the API call but don't wait for it initially
     const resultPromise = onSpin();
 
-    // Wait for both animation and API call
-    const [, spinResult] = await Promise.all([
-      new Promise(resolve => setTimeout(resolve, spinDuration)),
-      resultPromise
-    ]);
+    // Wait for the full spinning animation to complete
+    await new Promise(resolve => setTimeout(resolve, spinDuration));
 
+    // Then get the result
+    const spinResult = await resultPromise;
+    
     setResult(spinResult);
     setIsSpinning(false);
     
-    // Show result modal after a brief delay
+    // Show result modal after spinning completes
     setTimeout(() => {
       setShowResultModal(true);
     }, 500);
@@ -86,27 +88,28 @@ export function SpinningWheel({ onSpin, disabled = false, totalNumbers = 125 }: 
           }}
         ></div>
 
-        {/* Outer Ring */}
-        <div className="relative w-80 h-80 rounded-full border-8 border-gradient-to-r from-purple-500 to-blue-500 shadow-2xl">
+        {/* Outer Ring - Removed border */}
+        <div className="relative w-80 h-80 rounded-full shadow-2xl">
           
-          {/* Enhanced Pointer - Fixed positioning */}
-          <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-2 z-30">
+          {/* Enhanced Pointer - Pointing downward */}
+          <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-2 z-30">
             <div className="flex flex-col items-center">
-              {/* Arrow tip */}
-              <div className="w-0 h-0 border-l-[20px] border-r-[20px] border-b-[35px] border-l-transparent border-r-transparent border-b-gradient-to-b from-yellow-400 to-orange-500 drop-shadow-2xl"></div>
               {/* Arrow base */}
-              <div className="w-8 h-8 bg-gradient-to-br from-yellow-400 via-orange-500 to-red-500 rounded-full -mt-2 border-4 border-white shadow-2xl flex items-center justify-center">
+              <div className="w-8 h-8 bg-gradient-to-br from-yellow-400 via-orange-500 to-red-500 rounded-full border-4 border-white shadow-2xl flex items-center justify-center">
                 <div className="w-2 h-2 bg-white rounded-full"></div>
               </div>
+              {/* Arrow tip pointing down */}
+              <div className="w-0 h-0 border-l-[20px] border-r-[20px] border-t-[35px] border-l-transparent border-r-transparent border-t-gradient-to-t from-yellow-400 to-orange-500 drop-shadow-2xl -mt-2"></div>
             </div>
           </div>
 
           {/* Spinning Wheel */}
           <div
             ref={wheelRef}
-            className="w-full h-full rounded-full relative overflow-hidden transition-transform duration-[8000ms] ease-out"
+            className="w-full h-full rounded-full relative overflow-hidden transition-transform ease-out"
             style={{
               transform: `rotate(${rotation}deg)`,
+              transitionDuration: isSpinning ? '8s' : '0s',
               background: `conic-gradient(${wheelSegments.map((segment, index) => 
                 `${segment.color} ${index * segmentAngle}deg ${(index + 1) * segmentAngle}deg`
               ).join(', ')})`
