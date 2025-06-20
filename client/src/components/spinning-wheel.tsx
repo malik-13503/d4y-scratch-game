@@ -1,6 +1,8 @@
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Target, Zap, Sparkles } from "lucide-react";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Target, Zap, Sparkles, Trophy, Star, Crown, PartyPopper } from "lucide-react";
+import { Confetti } from "./confetti";
 
 interface SpinningWheelProps {
   onSpin: () => Promise<number>;
@@ -27,6 +29,7 @@ export function SpinningWheel({ onSpin, disabled = false, totalNumbers = 125 }: 
   const [isSpinning, setIsSpinning] = useState(false);
   const [rotation, setRotation] = useState(0);
   const [result, setResult] = useState<number | null>(null);
+  const [showResultModal, setShowResultModal] = useState(false);
   const wheelRef = useRef<HTMLDivElement>(null);
   const [glowIntensity, setGlowIntensity] = useState(0);
 
@@ -43,22 +46,29 @@ export function SpinningWheel({ onSpin, disabled = false, totalNumbers = 125 }: 
 
     setIsSpinning(true);
     setResult(null);
+    setShowResultModal(false);
 
-    // Visual spinning animation
-    const spinDuration = 3000;
-    const finalRotation = rotation + 1440 + Math.random() * 720; // At least 4 full rotations
+    // Enhanced spinning animation - 8 seconds duration
+    const spinDuration = 8000;
+    const finalRotation = rotation + 2880 + Math.random() * 1440; // At least 8 full rotations
     setRotation(finalRotation);
 
     // Start the API call
     const resultPromise = onSpin();
 
     // Wait for both animation and API call
-    await Promise.all([
+    const [, spinResult] = await Promise.all([
       new Promise(resolve => setTimeout(resolve, spinDuration)),
-      resultPromise.then(setResult)
+      resultPromise
     ]);
 
+    setResult(spinResult);
     setIsSpinning(false);
+    
+    // Show result modal after a brief delay
+    setTimeout(() => {
+      setShowResultModal(true);
+    }, 500);
   };
 
   const segmentAngle = 360 / wheelSegments.length;
