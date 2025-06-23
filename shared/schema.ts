@@ -20,20 +20,20 @@ export const games = pgTable("games", {
   name: text("name").notNull(),
   code: text("code").notNull().unique(),
   description: text("description"),
-  gameType: text("game_type").notNull().default("number_draw"), // "wheel_spin" | "number_draw"
+  gameType: text("game_type").notNull().default("wheel_spin"), // Only wheel_spin now
   prize: text("prize").notNull(),
   prizeValue: decimal("prize_value", { precision: 10, scale: 2 }).notNull(),
   prizeDescription: text("prize_description"),
-  totalNumbers: integer("total_numbers").notNull().default(125),
+  totalNumbers: integer("total_numbers").notNull().default(200),
   numbersLeft: integer("numbers_left").notNull(),
+  freePlayStart: integer("free_play_start").notNull().default(151), // Free play numbers start
+  freePlayEnd: integer("free_play_end").notNull().default(200), // Free play numbers end
   maxParticipants: integer("max_participants"),
   maxWinners: integer("max_winners").notNull().default(1),
-  entryFee: decimal("entry_fee", { precision: 10, scale: 2 }).notNull().default("0"),
   startTime: timestamp("start_time").notNull(),
   endTime: timestamp("end_time").notNull(),
   isActive: boolean("is_active").notNull().default(false),
   isScheduled: boolean("is_scheduled").notNull().default(false),
-  isFreePlay: boolean("is_free_play").notNull().default(false),
   emoji: text("emoji").notNull().default("🎮"),
   backgroundImage: text("background_image"),
   createdBy: integer("created_by").notNull(),
@@ -59,10 +59,10 @@ export const players = pgTable("players", {
   playerName: text("player_name").notNull(),
   email: text("email"),
   phone: text("phone"),
-  selectedNumber: integer("selected_number"),
-  selectedSegment: text("selected_segment"),
+  ownedNumbers: text("owned_numbers").array().notNull().default([]), // Numbers player owns
+  totalSpent: decimal("total_spent", { precision: 10, scale: 2 }).notNull().default("0"),
+  freeSpins: integer("free_spins").notNull().default(0),
   isWinner: boolean("is_winner").notNull().default(false),
-  referralCount: integer("referral_count").notNull().default(0),
   ipAddress: text("ip_address"),
   userAgent: text("user_agent"),
   joinedAt: timestamp("joined_at").notNull().defaultNow(),
@@ -87,6 +87,17 @@ export const systemSettings = pgTable("system_settings", {
   value: text("value").notNull(),
   description: text("description"),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+// Spin results table - tracks each individual spin
+export const spinResults = pgTable("spin_results", {
+  id: serial("id").primaryKey(),
+  gameId: integer("game_id").notNull(),
+  playerId: integer("player_id").notNull(),
+  spunNumber: integer("spun_number").notNull(),
+  isFreePlay: boolean("is_free_play").notNull().default(false),
+  amountCharged: decimal("amount_charged", { precision: 10, scale: 2 }).notNull().default("0"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
 // Admin sessions for JWT alternative
@@ -149,6 +160,11 @@ export const insertNotificationSchema = createInsertSchema(notifications).omit({
   sentAt: true,
 });
 
+export const insertSpinResultSchema = createInsertSchema(spinResults).omit({
+  id: true,
+  createdAt: true,
+});
+
 // Type exports
 export type InsertAdminUser = z.infer<typeof insertAdminUserSchema>;
 export type AdminUser = typeof adminUsers.$inferSelect;
@@ -164,6 +180,8 @@ export type InsertSystemSetting = z.infer<typeof insertSystemSettingSchema>;
 export type SystemSetting = typeof systemSettings.$inferSelect;
 export type InsertNotification = z.infer<typeof insertNotificationSchema>;
 export type Notification = typeof notifications.$inferSelect;
+export type InsertSpinResult = z.infer<typeof insertSpinResultSchema>;
+export type SpinResult = typeof spinResults.$inferSelect;
 
 // Legacy compatibility
 export const users = adminUsers;

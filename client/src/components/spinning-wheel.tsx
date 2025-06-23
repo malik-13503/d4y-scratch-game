@@ -1,7 +1,15 @@
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { Target, Zap, Sparkles, Trophy, Star, Crown, PartyPopper } from "lucide-react";
+import {
+  Target,
+  Zap,
+  Sparkles,
+  Trophy,
+  Star,
+  Crown,
+  PartyPopper,
+} from "lucide-react";
 import { Confetti } from "./confetti";
 
 interface SpinningWheelProps {
@@ -25,7 +33,11 @@ const wheelSegments = [
   { number: 47, color: "#a855f7", textColor: "#ffffff" },
 ];
 
-export function SpinningWheel({ onSpin, disabled = false, totalNumbers = 125 }: SpinningWheelProps) {
+export function SpinningWheel({
+  onSpin,
+  disabled = false,
+  totalNumbers = 125,
+}: SpinningWheelProps) {
   const [isSpinning, setIsSpinning] = useState(false);
   const [rotation, setRotation] = useState(0);
   const [result, setResult] = useState<number | null>(null);
@@ -36,7 +48,7 @@ export function SpinningWheel({ onSpin, disabled = false, totalNumbers = 125 }: 
   // Pulsing glow effect
   useEffect(() => {
     const interval = setInterval(() => {
-      setGlowIntensity(prev => (prev + 1) % 100);
+      setGlowIntensity((prev) => (prev + 1) % 100);
     }, 50);
     return () => clearInterval(interval);
   }, []);
@@ -51,7 +63,7 @@ export function SpinningWheel({ onSpin, disabled = false, totalNumbers = 125 }: 
     // Enhanced spinning animation - 8 seconds duration
     const spinDuration = 8000;
     const finalRotation = rotation + 2880 + Math.random() * 1440; // At least 8 full rotations
-    
+
     // Apply rotation immediately for visual feedback
     setRotation(finalRotation);
 
@@ -59,14 +71,14 @@ export function SpinningWheel({ onSpin, disabled = false, totalNumbers = 125 }: 
     const resultPromise = onSpin();
 
     // Wait for the full spinning animation to complete
-    await new Promise(resolve => setTimeout(resolve, spinDuration));
+    await new Promise((resolve) => setTimeout(resolve, spinDuration));
 
     // Then get the result
     const spinResult = await resultPromise;
-    
+
     setResult(spinResult);
     setIsSpinning(false);
-    
+
     // Show result modal after spinning completes
     setTimeout(() => {
       setShowResultModal(true);
@@ -80,26 +92,25 @@ export function SpinningWheel({ onSpin, disabled = false, totalNumbers = 125 }: 
       {/* Wheel Container */}
       <div className="relative">
         {/* Glow Effect */}
-        <div 
+        <div
           className="absolute inset-0 rounded-full blur-2xl opacity-50 animate-pulse"
           style={{
             background: `conic-gradient(from 0deg, #8b5cf6, #3b82f6, #10b981, #f59e0b, #ef4444, #ec4899, #8b5cf6)`,
-            transform: `scale(${1.2 + Math.sin(glowIntensity * 0.1) * 0.1})`
+            transform: `scale(${1.2 + Math.sin(glowIntensity * 0.1) * 0.1})`,
           }}
         ></div>
 
         {/* Outer Ring - Removed border */}
         <div className="relative w-80 h-80 rounded-full shadow-2xl">
-          
           {/* Enhanced Pointer - Pointing downward */}
-          <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-2 z-30">
+          <div className="absolute bottom-85 left-1/2 transform -translate-x-1/2 translate-y-2 z-30">
             <div className="flex flex-col items-center">
               {/* Arrow base */}
-              <div className="w-8 h-8 bg-gradient-to-br from-yellow-400 via-orange-500 to-red-500 rounded-full border-4 border-white shadow-2xl flex items-center justify-center">
+              {/* <div className="w-8 h-8 bg-gradient-to-br from-yellow-400 via-orange-500 to-red-500 rounded-full border-4 border-white shadow-2xl flex items-center justify-center">
                 <div className="w-2 h-2 bg-white rounded-full"></div>
-              </div>
+              </div> */}
               {/* Arrow tip pointing down */}
-              <div className="w-0 h-0 border-l-[20px] border-r-[20px] border-t-[35px] border-l-transparent border-r-transparent border-t-gradient-to-t from-yellow-400 to-orange-500 drop-shadow-2xl -mt-2"></div>
+              <div className="w-0 h-0 border-l-[20px] border-r-[20px] border-t-[35px] border-l-transparent border-r-transparent border-t-gradient-to-t from-yellow-400 to-orange-500 drop-shadow-2xl -mt-4"></div>
             </div>
           </div>
 
@@ -109,10 +120,13 @@ export function SpinningWheel({ onSpin, disabled = false, totalNumbers = 125 }: 
             className="w-full h-full rounded-full relative overflow-hidden transition-transform ease-out"
             style={{
               transform: `rotate(${rotation}deg)`,
-              transitionDuration: isSpinning ? '8s' : '0s',
-              background: `conic-gradient(${wheelSegments.map((segment, index) => 
-                `${segment.color} ${index * segmentAngle}deg ${(index + 1) * segmentAngle}deg`
-              ).join(', ')})`
+              transitionDuration: isSpinning ? "8s" : "0s",
+              background: `conic-gradient(${wheelSegments
+                .map(
+                  (segment, index) =>
+                    `${segment.color} ${index * segmentAngle}deg ${(index + 1) * segmentAngle}deg`,
+                )
+                .join(", ")})`,
             }}
           >
             {/* Segments with Numbers */}
@@ -124,14 +138,14 @@ export function SpinningWheel({ onSpin, disabled = false, totalNumbers = 125 }: 
                   className="absolute inset-0 flex items-center justify-center"
                   style={{
                     transform: `rotate(${angle}deg)`,
-                    transformOrigin: 'center'
+                    transformOrigin: "center",
                   }}
                 >
                   <div
                     className="font-bold text-2xl drop-shadow-lg"
-                    style={{ 
+                    style={{
                       color: segment.textColor,
-                      transform: 'translateY(-100px)'
+                      transform: "translateY(-100px)",
                     }}
                   >
                     {segment.number}
@@ -168,10 +182,10 @@ export function SpinningWheel({ onSpin, disabled = false, totalNumbers = 125 }: 
           <div className="relative p-8 text-center">
             {/* Confetti Effect */}
             <Confetti active={showResultModal} duration={5000} />
-            
+
             {/* Background Effects */}
             <div className="absolute inset-0 bg-gradient-to-r from-yellow-400/10 via-orange-500/10 to-red-500/10 animate-pulse"></div>
-            
+
             {/* Floating Particles */}
             <div className="absolute inset-0 overflow-hidden">
               {[...Array(15)].map((_, i) => (
@@ -203,7 +217,9 @@ export function SpinningWheel({ onSpin, disabled = false, totalNumbers = 125 }: 
                 <h2 className="text-3xl font-bold bg-gradient-to-r from-yellow-300 via-orange-400 to-red-400 bg-clip-text text-transparent">
                   🎉 WINNER! 🎉
                 </h2>
-                <p className="text-white/80 text-lg">You spun the lucky number!</p>
+                <p className="text-white/80 text-lg">
+                  You spun the lucky number!
+                </p>
               </div>
 
               {/* Result Number */}
@@ -220,11 +236,14 @@ export function SpinningWheel({ onSpin, disabled = false, totalNumbers = 125 }: 
               <div className="bg-gradient-to-r from-green-500/20 to-emerald-500/20 backdrop-blur-sm rounded-xl p-4 border border-green-400/30">
                 <div className="flex items-center justify-center space-x-2 mb-2">
                   <Trophy className="h-6 w-6 text-yellow-400" />
-                  <span className="text-xl font-bold text-green-300">Congratulations!</span>
+                  <span className="text-xl font-bold text-green-300">
+                    Congratulations!
+                  </span>
                   <Trophy className="h-6 w-6 text-yellow-400" />
                 </div>
                 <p className="text-green-200">
-                  Amazing spin! Your lucky number is <span className="font-bold text-yellow-300">{result}</span>
+                  Amazing spin! Your lucky number is{" "}
+                  <span className="font-bold text-yellow-300">{result}</span>
                 </p>
               </div>
 
@@ -271,9 +290,10 @@ export function SpinningWheel({ onSpin, disabled = false, totalNumbers = 125 }: 
         disabled={isSpinning || disabled}
         className={`
           relative overflow-hidden px-12 py-4 text-xl font-bold transition-all duration-300
-          ${isSpinning 
-            ? 'bg-gray-600 cursor-not-allowed' 
-            : 'bg-gradient-to-r from-purple-600 via-blue-600 to-purple-600 hover:from-purple-700 hover:via-blue-700 hover:to-purple-700 hover:scale-105 hover:shadow-2xl'
+          ${
+            isSpinning
+              ? "bg-gray-600 cursor-not-allowed"
+              : "bg-gradient-to-r from-purple-600 via-blue-600 to-purple-600 hover:from-purple-700 hover:via-blue-700 hover:to-purple-700 hover:scale-105 hover:shadow-2xl"
           }
           shadow-lg border-2 border-purple-500/50
         `}
@@ -282,7 +302,7 @@ export function SpinningWheel({ onSpin, disabled = false, totalNumbers = 125 }: 
         {!isSpinning && (
           <div className="absolute inset-0 bg-gradient-to-r from-purple-400/20 to-blue-400/20 animate-pulse"></div>
         )}
-        
+
         <div className="relative flex items-center space-x-3">
           {isSpinning ? (
             <>
@@ -311,7 +331,7 @@ export function SpinningWheel({ onSpin, disabled = false, totalNumbers = 125 }: 
                 left: `${20 + Math.random() * 60}%`,
                 top: `${20 + Math.random() * 60}%`,
                 animationDelay: `${Math.random() * 2}s`,
-                animationDuration: `${1 + Math.random()}s`
+                animationDuration: `${1 + Math.random()}s`,
               }}
             ></div>
           ))}
