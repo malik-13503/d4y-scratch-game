@@ -18,32 +18,63 @@ interface SpinningWheelProps {
   totalNumbers?: number;
 }
 
-const wheelSegments = [
-  { number: 12, color: "#ef4444", textColor: "#ffffff" },
-  { number: 8, color: "#3b82f6", textColor: "#ffffff" },
-  { number: 7, color: "#10b981", textColor: "#ffffff" },
-  { number: 16, color: "#f59e0b", textColor: "#000000" },
-  { number: 55, color: "#8b5cf6", textColor: "#ffffff" },
-  { number: 42, color: "#06b6d4", textColor: "#ffffff" },
-  { number: 38, color: "#84cc16", textColor: "#000000" },
-  { number: 91, color: "#ec4899", textColor: "#ffffff" },
-  { number: 25, color: "#f97316", textColor: "#ffffff" },
-  { number: 73, color: "#6366f1", textColor: "#ffffff" },
-  { number: 58, color: "#14b8a6", textColor: "#ffffff" },
-  { number: 47, color: "#a855f7", textColor: "#ffffff" },
-];
+interface WheelSegment {
+  number: number;
+  color: string;
+  textColor: string;
+  isFreePlay: boolean;
+  label: string;
+}
+
+// Generate wheel segments dynamically
+const generateWheelSegments = (totalNumbers: number, freePlayStart: number): WheelSegment[] => {
+  const segments: WheelSegment[] = [];
+  const colors = [
+    "#ef4444", "#3b82f6", "#10b981", "#f59e0b", "#8b5cf6", "#06b6d4",
+    "#84cc16", "#ec4899", "#f97316", "#6366f1", "#14b8a6", "#a855f7"
+  ];
+  
+  // Sample 12 numbers from the total range
+  const selectedNumbers: number[] = [];
+  for (let i = 0; i < 12; i++) {
+    let number: number;
+    do {
+      number = Math.floor(Math.random() * totalNumbers) + 1;
+    } while (selectedNumbers.includes(number));
+    selectedNumbers.push(number);
+  }
+  
+  selectedNumbers.forEach((number, index) => {
+    const isFreePlay = number >= freePlayStart;
+    segments.push({
+      number,
+      color: colors[index % colors.length],
+      textColor: "#ffffff",
+      isFreePlay,
+      label: isFreePlay ? "FREE" : number.toString()
+    });
+  });
+  
+  return segments;
+};
 
 export function SpinningWheel({
   onSpin,
   disabled = false,
-  totalNumbers = 125,
+  totalNumbers = 200,
 }: SpinningWheelProps) {
   const [isSpinning, setIsSpinning] = useState(false);
   const [rotation, setRotation] = useState(0);
   const [result, setResult] = useState<number | null>(null);
   const [showResultModal, setShowResultModal] = useState(false);
+  const [isFreePlay, setIsFreePlay] = useState(false);
+  const [amountCharged, setAmountCharged] = useState<number>(0);
   const wheelRef = useRef<HTMLDivElement>(null);
   const [glowIntensity, setGlowIntensity] = useState(0);
+  
+  // Generate wheel segments with free play range (151-200 for 200 total numbers)
+  const freePlayStart = Math.floor(totalNumbers * 0.75) + 1; // Last 25% are free plays
+  const wheelSegments = generateWheelSegments(totalNumbers, freePlayStart);
 
   // Pulsing glow effect
   useEffect(() => {
@@ -77,6 +108,12 @@ export function SpinningWheel({
     const spinResult = await resultPromise;
 
     setResult(spinResult);
+    
+    // Determine if it's a free play and calculate charges
+    const isFree = spinResult >= freePlayStart;
+    setIsFreePlay(isFree);
+    setAmountCharged(isFree ? 0 : spinResult);
+    
     setIsSpinning(false);
 
     // Show result modal after spinning completes

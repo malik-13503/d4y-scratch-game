@@ -138,14 +138,12 @@ export default function Home() {
                 
                 <CardContent className="relative p-6">
                   {/* Prize Highlight */}
-                  {!game.isFreePlay && (
-                    <div className="absolute top-4 right-4">
-                      <div className={`bg-gradient-to-r ${game.color} text-white px-3 py-1 rounded-full text-sm font-bold shadow-lg flex items-center space-x-1`}>
-                        <Trophy className="h-3 w-3" />
-                        <span>{game.prize}</span>
-                      </div>
+                  <div className="absolute top-4 right-4">
+                    <div className={`bg-gradient-to-r ${game.color} text-white px-3 py-1 rounded-full text-sm font-bold shadow-lg flex items-center space-x-1`}>
+                      <Trophy className="h-3 w-3" />
+                      <span>{game.prize}</span>
                     </div>
-                  )}
+                  </div>
 
                   <div className="flex items-center space-x-4 mb-6">
                     <div className={`relative p-4 rounded-2xl bg-gradient-to-r ${game.color} text-white shadow-xl group-hover:scale-110 transition-transform duration-300`}>
@@ -156,12 +154,10 @@ export default function Home() {
                       <h3 className="text-2xl font-bold text-gray-900 mb-1">{game.name}</h3>
                       <div className="flex items-center space-x-2">
                         <div className="text-gray-500 text-sm font-mono bg-gray-100 px-2 py-1 rounded">{game.code}</div>
-                        {game.isFreePlay && (
-                          <Badge className="bg-gradient-to-r from-green-500 to-emerald-500 text-white font-bold px-3 py-1 shadow-lg">
-                            <Gift className="h-3 w-3 mr-1" />
-                            Free Play
-                          </Badge>
-                        )}
+                        <Badge className="bg-gradient-to-r from-blue-500 to-cyan-500 text-white font-bold px-3 py-1 shadow-lg">
+                          <Zap className="h-3 w-3 mr-1" />
+                          Spin to Win
+                        </Badge>
                       </div>
                     </div>
                   </div>
@@ -207,17 +203,8 @@ export default function Home() {
                   `}>
                     <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                     <div className="relative flex items-center justify-center space-x-2">
-                      {game.isFreePlay ? (
-                        <>
-                          <Gift className="h-5 w-5" />
-                          <span>Play Free</span>
-                        </>
-                      ) : (
-                        <>
-                          <Sparkles className="h-5 w-5" />
-                          <span>Join Game</span>
-                        </>
-                      )}
+                      <Sparkles className="h-5 w-5" />
+                      <span>Spin Wheel</span>
                     </div>
                   </Button>
                 </CardContent>
