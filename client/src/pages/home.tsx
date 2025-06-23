@@ -5,17 +5,18 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Coffee, Camera, Gift, Trophy, Star, Zap, Crown, Sparkles } from "lucide-react";
 
-// Featured games from design reference - Updated for new mechanics
+// Featured games with exact payment mechanics
 const featuredGames = [
   {
     id: "travel-mug",
-    name: "Travel Mug",
-    prize: "$10",
-    prizeValue: 10,
-    code: "G8-694",
-    numbersLeft: 73,
-    totalNumbers: 200,
-    freePlayRange: "151-200",
+    name: "Premium Travel Mug",
+    prize: "$89.99",
+    prizeValue: 89.99,
+    code: "MUG002",
+    numbersLeft: 142,
+    totalNumbers: 150,
+    freePlayRange: "126-150",
+    paidRange: "1-125",
     timeLeft: "01:23:14",
     icon: Coffee,
     color: "from-red-500 to-red-600",
@@ -24,13 +25,14 @@ const featuredGames = [
   },
   {
     id: "camera",
-    name: "Camera",
-    prize: "$5",
-    prizeValue: 5,
-    code: "G4G-159",
-    numbersLeft: 86,
+    name: "Premium Camera",
+    prize: "$299.99",
+    prizeValue: 299.99,
+    code: "CAM001",
+    numbersLeft: 186,
     totalNumbers: 200,
-    freePlayRange: "176-200",
+    freePlayRange: "151-200",
+    paidRange: "1-150",
     timeLeft: "03:07:56",
     icon: Camera,
     color: "from-blue-500 to-blue-600",
@@ -39,13 +41,14 @@ const featuredGames = [
   },
   {
     id: "gift-card",
-    name: "Gift Card",
-    prize: "$25",
-    prizeValue: 25,
-    code: "G9-821",
-    numbersLeft: 124,
+    name: "Gift Card Bundle",
+    prize: "$250.00",
+    prizeValue: 250.00,
+    code: "GFT003",
+    numbersLeft: 194,
     totalNumbers: 200,
-    freePlayRange: "181-200",
+    freePlayRange: "176-200",
+    paidRange: "1-175",
     timeLeft: "12:34:18",
     icon: Gift,
     color: "from-purple-500 to-purple-600",
@@ -175,11 +178,21 @@ export default function Home() {
                       </div>
                     </div>
                     
-                    {/* Free Play Range Info */}
-                    <div className="bg-green-50 border border-green-200 rounded-lg p-2 mb-3">
-                      <div className="flex items-center justify-between text-sm">
-                        <span className="text-green-700 font-medium">Free Play Range:</span>
-                        <span className="text-green-800 font-bold">{game.freePlayRange}</span>
+                    {/* Payment Information */}
+                    <div className="space-y-2 mb-3">
+                      <div className="bg-blue-50 border border-blue-200 rounded-lg p-2">
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-blue-700 font-medium">Paid Numbers:</span>
+                          <span className="text-blue-800 font-bold">{game.paidRange}</span>
+                        </div>
+                        <p className="text-xs text-blue-600 mt-1">Pay exact number amount (e.g., #47 = $47)</p>
+                      </div>
+                      <div className="bg-green-50 border border-green-200 rounded-lg p-2">
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-green-700 font-medium">Free Play Range:</span>
+                          <span className="text-green-800 font-bold">{game.freePlayRange}</span>
+                        </div>
+                        <p className="text-xs text-green-600 mt-1">No charge - free numbers!</p>
                       </div>
                     </div>
                     

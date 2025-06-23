@@ -61,6 +61,7 @@ export interface IStorage {
   spinWheel(gameId: number, playerId: number): Promise<SpinResult>;
   isNumberAvailable(gameId: number, number: number): Promise<boolean>;
   getAvailableNumbers(gameId: number): Promise<number[]>;
+  selectGameWinner(gameId: number): Promise<void>;
 
   // Session store
   sessionStore: any;
@@ -292,14 +293,14 @@ export class DatabaseStorage implements IStorage {
     }
 
     if (availableNumbers.length === 0) {
-      throw new Error("No numbers available");
+      throw new Error("All numbers have been claimed - game is complete!");
     }
 
     // Randomly select from available numbers
     const randomIndex = Math.floor(Math.random() * availableNumbers.length);
     const spunNumber = availableNumbers[randomIndex];
 
-    // Determine if it's a free play
+    // Determine if it's a free play based on the free play range
     const isFreePlay = spunNumber >= game.freePlayStart && spunNumber <= game.freePlayEnd;
     const amountCharged = isFreePlay ? "0" : spunNumber.toString();
 
@@ -326,9 +327,17 @@ export class DatabaseStorage implements IStorage {
     }
 
     // Update game numbers left
+    const newNumbersLeft = game.numbersLeft - 1;
     await this.updateGame(gameId, {
-      numbersLeft: game.numbersLeft - 1,
+      numbersLeft: newNumbersLeft,
     });
+
+    // Check if game is complete (all numbers claimed)
+    if (newNumbersLeft === 0) {
+      // Game is complete - select winner
+      await this.selectGameWinner(gameId);
+      await this.updateGame(gameId, { isActive: false });
+    }
 
     return spinResult;
   }
@@ -353,6 +362,50 @@ export class DatabaseStorage implements IStorage {
       }
     }
     return availableNumbers;
+  }
+
+  // Winner selection logic
+  async selectGameWinner(gameId: number): Promise<void> {
+    try {
+      const game = await this.getGame(gameId);
+      if (!game) {
+        throw new Error("Game not found");
+      }
+
+      // Get all spin results for this game
+      const spinResults = await this.getSpinResultsByGameId(gameId);
+      if (spinResults.length === 0) {
+        throw new Error("No spin results found for game");
+      }
+
+      // Perform final winning draw from all claimed numbers
+      const allClaimedNumbers = spinResults.map(spin => spin.spunNumber);
+      const winningNumberIndex = Math.floor(Math.random() * allClaimedNumbers.length);
+      const winningNumber = allClaimedNumbers[winningNumberIndex];
+
+      // Find the winner (player who owns the winning number)
+      const winningSpinResult = spinResults.find(spin => spin.spunNumber === winningNumber);
+      if (!winningSpinResult) {
+        throw new Error("Could not find winning spin result");
+      }
+
+      // Create game result
+      await this.createGameResult({
+        gameId,
+        winningNumber,
+        winnerId: winningSpinResult.playerId,
+        totalParticipants: new Set(spinResults.map(spin => spin.playerId)).size,
+        totalSpins: spinResults.length
+      });
+
+      // Update winner status
+      await this.updatePlayer(winningSpinResult.playerId, { isWinner: true });
+
+      console.log(`Game ${gameId} completed. Winner: Player ${winningSpinResult.playerId} with number ${winningNumber}`);
+    } catch (error) {
+      console.error("Error selecting game winner:", error);
+      throw error;
+    }
   }
 }
 

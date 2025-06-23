@@ -249,13 +249,13 @@ export function SpinningWheel({
                 </div>
               </div>
 
-              {/* Winner Announcement */}
+              {/* Result Announcement */}
               <div className="space-y-2">
                 <h2 className="text-3xl font-bold bg-gradient-to-r from-yellow-300 via-orange-400 to-red-400 bg-clip-text text-transparent">
-                  🎉 WINNER! 🎉
+                  {isFreePlay ? "🎁 FREE PLAY! 🎁" : "✨ NUMBER CLAIMED! ✨"}
                 </h2>
                 <p className="text-white/80 text-lg">
-                  You spun the lucky number!
+                  {isFreePlay ? "Lucky you - this one's free!" : "You've claimed this number!"}
                 </p>
               </div>
 
@@ -267,6 +267,35 @@ export function SpinningWheel({
                 <div className="absolute inset-0 text-8xl font-black text-yellow-400/20 blur-sm">
                   {result}
                 </div>
+              </div>
+
+              {/* Payment Information */}
+              <div className="bg-black/30 backdrop-blur-sm rounded-xl p-6 border border-white/20">
+                {isFreePlay ? (
+                  <div className="text-center space-y-2">
+                    <div className="text-2xl font-bold text-green-300">
+                      💰 $0.00 CHARGED
+                    </div>
+                    <p className="text-green-200 text-sm">
+                      This number is in the free play range - no payment required!
+                    </p>
+                    <p className="text-white/70 text-xs">
+                      Number {result} has been added to your entry list
+                    </p>
+                  </div>
+                ) : (
+                  <div className="text-center space-y-2">
+                    <div className="text-2xl font-bold text-blue-300">
+                      💳 ${amountCharged}.00 CHARGED
+                    </div>
+                    <p className="text-blue-200 text-sm">
+                      Your card has been charged the exact number amount
+                    </p>
+                    <p className="text-white/70 text-xs">
+                      Number {result} has been added to your entry list
+                    </p>
+                  </div>
+                )}
               </div>
 
               {/* Celebration Message */}
