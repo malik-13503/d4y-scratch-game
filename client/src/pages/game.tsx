@@ -72,13 +72,49 @@ export default function GamePage() {
   }
 
   const handleSpin = async (): Promise<number> => {
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    const result = Math.floor(Math.random() * 100) + 1;
-    setLastResult(result);
-    setShowConfetti(true);
-    setTimeout(() => setShowConfetti(false), 3000);
-    return result;
+    if (!game) throw new Error("Game not found");
+    
+    try {
+      // Create a temporary player for this spin
+      const playerResponse = await fetch("/api/players", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          gameId: parseInt(id!),
+          name: `Player-${Date.now()}`,
+          email: `player-${Date.now()}@example.com`
+        })
+      });
+      
+      if (!playerResponse.ok) {
+        throw new Error("Failed to create player");
+      }
+      
+      const player = await playerResponse.json();
+      
+      // Perform the spin
+      const spinResponse = await fetch(`/api/games/${id}/spin`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ playerId: player.id })
+      });
+      
+      if (!spinResponse.ok) {
+        const error = await spinResponse.json();
+        throw new Error(error.message || "Failed to spin wheel");
+      }
+      
+      const spinResult = await spinResponse.json();
+      setLastResult(spinResult.spunNumber);
+      setShowConfetti(true);
+      
+      setTimeout(() => setShowConfetti(false), 3000);
+      
+      return spinResult.spunNumber;
+    } catch (error) {
+      console.error("Spin error:", error);
+      throw error;
+    }
   };
 
   const handleNumberDraw = async (): Promise<number> => {
