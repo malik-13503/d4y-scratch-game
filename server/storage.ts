@@ -1,8 +1,9 @@
 import { 
-  games, players, gameResults, adminUsers, wheelSegments, systemSettings, adminSessions, notifications,
+  games, players, gameResults, adminUsers, wheelSegments, systemSettings, adminSessions, notifications, spinResults,
   type Game, type InsertGame, type Player, type InsertPlayer, type GameResult, type InsertGameResult, 
   type AdminUser, type InsertAdminUser, type WheelSegment, type InsertWheelSegment,
-  type SystemSetting, type InsertSystemSetting, type InsertNotification, type Notification
+  type SystemSetting, type InsertSystemSetting, type InsertNotification, type Notification,
+  type SpinResult, type InsertSpinResult
 } from "@shared/schema";
 import { db } from "./db";
 import { eq } from "drizzle-orm";
@@ -50,6 +51,16 @@ export interface IStorage {
   // Notification methods
   createNotification(notification: InsertNotification): Promise<Notification>;
   getNotificationsByGameId(gameId: number): Promise<Notification[]>;
+
+  // Spin result methods
+  createSpinResult(spinResult: InsertSpinResult): Promise<SpinResult>;
+  getSpinResultsByGameId(gameId: number): Promise<SpinResult[]>;
+  getSpinResultsByPlayerId(playerId: number): Promise<SpinResult[]>;
+
+  // Game logic methods
+  spinWheel(gameId: number, playerId: number): Promise<SpinResult>;
+  isNumberAvailable(gameId: number, number: number): Promise<boolean>;
+  getAvailableNumbers(gameId: number): Promise<number[]>;
 
   // Session store
   sessionStore: any;
@@ -120,15 +131,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createPlayer(insertPlayer: InsertPlayer): Promise<Player> {
-    const [player] = await db.insert(players).values({
-      ...insertPlayer,
-      email: insertPlayer.email || null,
-      phone: insertPlayer.phone || null,
-      selectedSegment: insertPlayer.selectedSegment || null,
-      referralCount: insertPlayer.referralCount || 0,
-      ipAddress: insertPlayer.ipAddress || null,
-      userAgent: insertPlayer.userAgent || null,
-    }).returning();
+    const [player] = await db.insert(players).values(insertPlayer).returning();
     return player;
   }
 
@@ -253,6 +256,103 @@ export class DatabaseStorage implements IStorage {
     } catch (error) {
       console.error("Failed to ensure default admin user:", error);
     }
+  }
+
+  // Spin result methods
+  async createSpinResult(spinResult: InsertSpinResult): Promise<SpinResult> {
+    const [result] = await db.insert(spinResults).values(spinResult).returning();
+    return result;
+  }
+
+  async getSpinResultsByGameId(gameId: number): Promise<SpinResult[]> {
+    return await db.select().from(spinResults).where(eq(spinResults.gameId, gameId));
+  }
+
+  async getSpinResultsByPlayerId(playerId: number): Promise<SpinResult[]> {
+    return await db.select().from(spinResults).where(eq(spinResults.playerId, playerId));
+  }
+
+  // Game logic methods
+  async spinWheel(gameId: number, playerId: number): Promise<SpinResult> {
+    const game = await this.getGame(gameId);
+    if (!game) {
+      throw new Error("Game not found");
+    }
+
+    // Get all spun numbers for this game
+    const existingSpins = await this.getSpinResultsByGameId(gameId);
+    const spunNumbers = existingSpins.map(spin => spin.spunNumber);
+    
+    // Generate available numbers (1 to totalNumbers)
+    const availableNumbers = [];
+    for (let i = 1; i <= game.totalNumbers; i++) {
+      if (!spunNumbers.includes(i)) {
+        availableNumbers.push(i);
+      }
+    }
+
+    if (availableNumbers.length === 0) {
+      throw new Error("No numbers available");
+    }
+
+    // Randomly select from available numbers
+    const randomIndex = Math.floor(Math.random() * availableNumbers.length);
+    const spunNumber = availableNumbers[randomIndex];
+
+    // Determine if it's a free play
+    const isFreePlay = spunNumber >= game.freePlayStart && spunNumber <= game.freePlayEnd;
+    const amountCharged = isFreePlay ? "0" : spunNumber.toString();
+
+    // Create spin result
+    const spinResult = await this.createSpinResult({
+      gameId,
+      playerId,
+      spunNumber,
+      isFreePlay,
+      amountCharged,
+    });
+
+    // Update player's owned numbers and total spent
+    const player = await this.getPlayer(playerId);
+    if (player) {
+      const newOwnedNumbers = [...(player.ownedNumbers || []), spunNumber.toString()];
+      const newTotalSpent = parseFloat(player.totalSpent || "0") + parseFloat(amountCharged);
+      
+      await this.updatePlayer(playerId, {
+        ownedNumbers: newOwnedNumbers,
+        totalSpent: newTotalSpent.toString(),
+        freeSpins: isFreePlay ? (player.freeSpins || 0) + 1 : player.freeSpins,
+      });
+    }
+
+    // Update game numbers left
+    await this.updateGame(gameId, {
+      numbersLeft: game.numbersLeft - 1,
+    });
+
+    return spinResult;
+  }
+
+  async isNumberAvailable(gameId: number, number: number): Promise<boolean> {
+    const existingSpins = await this.getSpinResultsByGameId(gameId);
+    const spunNumbers = existingSpins.map(spin => spin.spunNumber);
+    return !spunNumbers.includes(number);
+  }
+
+  async getAvailableNumbers(gameId: number): Promise<number[]> {
+    const game = await this.getGame(gameId);
+    if (!game) return [];
+
+    const existingSpins = await this.getSpinResultsByGameId(gameId);
+    const spunNumbers = existingSpins.map(spin => spin.spunNumber);
+    
+    const availableNumbers = [];
+    for (let i = 1; i <= game.totalNumbers; i++) {
+      if (!spunNumbers.includes(i)) {
+        availableNumbers.push(i);
+      }
+    }
+    return availableNumbers;
   }
 }
 

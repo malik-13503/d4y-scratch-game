@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Coffee, Camera, Gift, Trophy, Star, Zap, Crown, Sparkles } from "lucide-react";
 
-// Featured games from design reference
+// Featured games from design reference - Updated for new mechanics
 const featuredGames = [
   {
     id: "travel-mug",
@@ -14,7 +14,8 @@ const featuredGames = [
     prizeValue: 10,
     code: "G8-694",
     numbersLeft: 73,
-    totalNumbers: 125,
+    totalNumbers: 200,
+    freePlayRange: "151-200",
     timeLeft: "01:23:14",
     icon: Coffee,
     color: "from-red-500 to-red-600",
@@ -22,33 +23,34 @@ const featuredGames = [
     borderColor: "border-red-500/30"
   },
   {
-    id: "free-play",
-    name: "Free Play",
-    prize: "Free Play",
-    prizeValue: 0,
-    code: "G2-853",
-    numbersLeft: 122,
-    totalNumbers: 125,
-    timeLeft: "60:45:32",
-    icon: Gift,
-    color: "from-green-500 to-green-600",
-    bgColor: "bg-green-500/10",
-    borderColor: "border-green-500/30",
-    isFreePlay: true
-  },
-  {
     id: "camera",
     name: "Camera",
     prize: "$5",
     prizeValue: 5,
     code: "G4G-159",
-    numbersLeft: 36,
-    totalNumbers: 125,
+    numbersLeft: 86,
+    totalNumbers: 200,
+    freePlayRange: "176-200",
     timeLeft: "03:07:56",
     icon: Camera,
     color: "from-blue-500 to-blue-600",
     bgColor: "bg-blue-500/10",
     borderColor: "border-blue-500/30"
+  },
+  {
+    id: "gift-card",
+    name: "Gift Card",
+    prize: "$25",
+    prizeValue: 25,
+    code: "G9-821",
+    numbersLeft: 124,
+    totalNumbers: 200,
+    freePlayRange: "181-200",
+    timeLeft: "12:34:18",
+    icon: Gift,
+    color: "from-purple-500 to-purple-600",
+    bgColor: "bg-purple-500/10",
+    borderColor: "border-purple-500/30"
   }
 ];
 
@@ -176,6 +178,15 @@ export default function Home() {
                         <span>{game.timeLeft}</span>
                       </div>
                     </div>
+                    
+                    {/* Free Play Range Info */}
+                    <div className="bg-green-50 border border-green-200 rounded-lg p-2 mb-3">
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-green-700 font-medium">Free Play Range:</span>
+                        <span className="text-green-800 font-bold">{game.freePlayRange}</span>
+                      </div>
+                    </div>
+                    
                     <div className="relative">
                       <Progress 
                         value={progress} 
@@ -184,7 +195,7 @@ export default function Home() {
                       <div className={`absolute inset-0 bg-gradient-to-r ${game.color} opacity-80 rounded-full h-3`} style={{ width: `${progress}%` }}></div>
                     </div>
                     <div className="text-xs text-gray-500 mt-1 text-center">
-                      {Math.round(progress)}% Complete
+                      {Math.round(progress)}% Complete • {game.totalNumbers} Total Numbers
                     </div>
                   </div>
 
