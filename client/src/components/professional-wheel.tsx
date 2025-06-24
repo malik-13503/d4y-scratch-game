@@ -135,12 +135,12 @@ export function ProfessionalWheel({
         {/* Spinning indicator */}
         {isSpinning && (
           <div className="absolute inset-0 flex items-center justify-center bg-black/20 rounded-full">
-            <div className="bg-white/90 backdrop-blur-sm rounded-full px-4 py-2">
+            <div className="bg-white/90 backdrop-blur-sm rounded-full px-3 py-2 sm:px-4 sm:py-2">
               <div className="flex items-center space-x-2 text-gray-800">
                 <div className="animate-spin">
-                  <Play className="h-5 w-5" />
+                  <Play className="h-4 w-4 sm:h-5 sm:w-5" />
                 </div>
-                <span className="font-semibold">Spinning...</span>
+                <span className="font-semibold text-sm sm:text-base">Spinning...</span>
               </div>
             </div>
           </div>
