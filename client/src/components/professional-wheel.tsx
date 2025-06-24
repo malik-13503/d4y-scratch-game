@@ -25,12 +25,15 @@ export function ProfessionalWheel({
   
   const freePlayStart = Math.floor(totalNumbers * 0.75) + 1;
   
-  // Professional wheel colors
+  // Professional wheel colors and numbers
   const segmentColors = [
     "#FF6B6B", "#4ECDC4", "#45B7D1", "#96CEB4", 
     "#FECA57", "#FF9FF3", "#54A0FF", "#5F27CD", 
     "#00D2D3", "#FF9F43", "#10AC84", "#EE5A24"
   ];
+  
+  // Sample numbers for wheel display
+  const wheelNumbers = [15, 47, 182, 9, 156, 78, 195, 23, 167, 91, 189, 34];
 
   const handleSpin = async () => {
     if (isSpinning || disabled) return;
@@ -74,19 +77,19 @@ export function ProfessionalWheel({
   };
 
   return (
-    <div className="flex flex-col items-center space-y-6 w-full max-w-md mx-auto px-4">
+    <div className="flex flex-col items-center space-y-4 sm:space-y-6 w-full max-w-lg mx-auto px-2 sm:px-4">
       {/* Wheel Container */}
       <div className="relative">
         {/* Pointer */}
-        <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-2 z-20">
-          <div className="w-0 h-0 border-l-[15px] border-r-[15px] border-b-[25px] border-l-transparent border-r-transparent border-b-yellow-400 drop-shadow-lg"></div>
+        <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1 z-20">
+          <div className="w-0 h-0 border-l-[12px] border-r-[12px] border-b-[20px] sm:border-l-[15px] sm:border-r-[15px] sm:border-b-[25px] border-l-transparent border-r-transparent border-b-yellow-400 drop-shadow-lg"></div>
         </div>
 
         {/* Wheel */}
         <div className="relative">
           <div 
             ref={wheelRef}
-            className="w-80 h-80 sm:w-96 sm:h-96 rounded-full relative overflow-hidden shadow-2xl border-8 border-yellow-400"
+            className="w-64 h-64 sm:w-80 sm:h-80 md:w-96 md:h-96 rounded-full relative overflow-hidden shadow-2xl border-4 sm:border-8 border-yellow-400"
             style={{
               transform: `rotate(${rotation}deg)`,
               transition: isSpinning ? `transform 4s cubic-bezier(0.25, 0.1, 0.25, 1)` : 'none'
@@ -108,23 +111,23 @@ export function ProfessionalWheel({
                 >
                   {/* Segment number - positioned better */}
                   <div 
-                    className="absolute text-white font-bold text-lg sm:text-xl"
+                    className="absolute text-white font-bold text-sm sm:text-lg md:text-xl"
                     style={{
-                      top: '25%',
+                      top: '35%',
                       left: '50%',
                       transform: `translate(-50%, -50%) rotate(${angle + (360 / segmentColors.length) / 2}deg)`,
-                      textShadow: '1px 1px 2px rgba(0,0,0,0.7)'
+                      textShadow: '2px 2px 4px rgba(0,0,0,0.8)'
                     }}
                   >
-                    {Math.floor(Math.random() * totalNumbers) + 1}
+                    {wheelNumbers[index]}
                   </div>
                 </div>
               );
             })}
             
             {/* Center hub */}
-            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-16 h-16 bg-gradient-to-br from-yellow-300 to-yellow-500 rounded-full border-4 border-white shadow-lg flex items-center justify-center">
-              <div className="w-8 h-8 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-full"></div>
+            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-br from-yellow-300 to-yellow-500 rounded-full border-2 sm:border-4 border-white shadow-lg flex items-center justify-center">
+              <div className="w-6 h-6 sm:w-8 sm:h-8 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-full"></div>
             </div>
           </div>
         </div>
@@ -148,18 +151,18 @@ export function ProfessionalWheel({
       <Button
         onClick={handleSpin}
         disabled={isSpinning || disabled}
-        className="w-full max-w-xs bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-white font-bold py-4 px-8 rounded-xl text-lg shadow-lg transition-all duration-300 disabled:opacity-50"
+        className="w-full max-w-xs bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-white font-bold py-3 sm:py-4 px-6 sm:px-8 rounded-xl text-base sm:text-lg shadow-lg transition-all duration-300 disabled:opacity-50 touch-manipulation"
       >
         {isSpinning ? (
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center justify-center space-x-2">
             <div className="animate-spin">
-              <Play className="h-5 w-5" />
+              <Play className="h-4 w-4 sm:h-5 sm:w-5" />
             </div>
             <span>Spinning...</span>
           </div>
         ) : (
-          <div className="flex items-center space-x-2">
-            <Sparkles className="h-5 w-5" />
+          <div className="flex items-center justify-center space-x-2">
+            <Sparkles className="h-4 w-4 sm:h-5 sm:w-5" />
             <span>SPIN THE WHEEL</span>
           </div>
         )}

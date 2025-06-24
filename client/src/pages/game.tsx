@@ -27,7 +27,7 @@ export default function GamePage() {
   const [, setLocation] = useLocation();
   const [lastResult, setLastResult] = useState<number | null>(null);
   const [showConfetti, setShowConfetti] = useState(false);
-  const [gameMode, setGameMode] = useState<"wheel" | "numbers">("wheel");
+
   const [playerCount, setPlayerCount] = useState(1);
 
   // Simulate real-time player count updates
@@ -198,76 +198,23 @@ export default function GamePage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Game Interface */}
           <div className="lg:col-span-2 space-y-8">
-            {/* Game Mode Selector */}
-            <Card className="bg-black/20 backdrop-blur-xl border border-purple-500/30 shadow-2xl">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-center space-x-4">
-                  <Button
-                    variant={gameMode === "wheel" ? "default" : "outline"}
-                    onClick={() => setGameMode("wheel")}
-                    className={`${gameMode === "wheel" 
-                      ? "bg-gradient-to-r from-purple-600 to-blue-600 text-white" 
-                      : "border-purple-500/50 text-purple-400 hover:bg-purple-500/20"
-                    } px-8 py-3 text-lg font-semibold`}
-                  >
-                    <Target className="h-5 w-5 mr-2" />
-                    Spinning Wheel
-                  </Button>
-                  <Button
-                    variant={gameMode === "numbers" ? "default" : "outline"}
-                    onClick={() => setGameMode("numbers")}
-                    className={`${gameMode === "numbers" 
-                      ? "bg-gradient-to-r from-green-600 to-emerald-600 text-white" 
-                      : "border-green-500/50 text-green-400 hover:bg-green-500/20"
-                    } px-8 py-3 text-lg font-semibold`}
-                  >
-                    <Zap className="h-5 w-5 mr-2" />
-                    Number Draw
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Game Component */}
+            {/* Professional Spinning Wheel */}
             <Card className="bg-black/20 backdrop-blur-xl border border-purple-500/30 shadow-2xl overflow-hidden">
-              <CardContent className="p-8">
-                {gameMode === "wheel" ? (
-                  <div className="text-center space-y-8">
-                    <div className="relative">
-                      <SpinningWheel onSpin={handleSpin} />
-                      {/* Glowing effect */}
-                      <div className="absolute inset-0 bg-gradient-to-r from-purple-500/20 to-blue-500/20 rounded-full blur-xl -z-10"></div>
-                    </div>
-                    {lastResult && (
-                      <div className="space-y-4">
-                        <div className="flex items-center justify-center space-x-2">
-                          <Sparkles className="h-6 w-6 text-yellow-400 animate-pulse" />
-                          <span className="text-6xl font-bold bg-gradient-to-r from-yellow-400 to-orange-400 bg-clip-text text-transparent">
-                            {lastResult}
-                          </span>
-                          <Sparkles className="h-6 w-6 text-yellow-400 animate-pulse" />
-                        </div>
-                        <p className="text-white text-xl">Congratulations! You spun {lastResult}!</p>
-                      </div>
-                    )}
-                  </div>
-                ) : (
-                  <div className="text-center space-y-8">
-                    <NumberDrawer onDraw={handleNumberDraw} totalNumbers={game.totalNumbers} />
-                    {lastResult && (
-                      <div className="space-y-4">
-                        <div className="flex items-center justify-center space-x-2">
-                          <Star className="h-6 w-6 text-green-400 animate-pulse" />
-                          <span className="text-6xl font-bold bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent">
-                            {lastResult}
-                          </span>
-                          <Star className="h-6 w-6 text-green-400 animate-pulse" />
-                        </div>
-                        <p className="text-white text-xl">Amazing! You drew number {lastResult}!</p>
-                      </div>
-                    )}
-                  </div>
-                )}
+              <CardHeader className="text-center pb-4">
+                <CardTitle className="text-3xl font-bold text-white flex items-center justify-center space-x-2">
+                  <Target className="h-8 w-8 text-purple-400" />
+                  <span>Spin to Win</span>
+                </CardTitle>
+                <p className="text-slate-400 text-lg">Click the wheel to spin and claim your number!</p>
+              </CardHeader>
+              <CardContent className="p-4 sm:p-8">
+                <div className="text-center">
+                  <ProfessionalWheel 
+                    onSpin={handleSpin} 
+                    disabled={false}
+                    totalNumbers={game?.totalNumbers || 200}
+                  />
+                </div>
               </CardContent>
             </Card>
           </div>
