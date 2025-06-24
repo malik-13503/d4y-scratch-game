@@ -1,0 +1,83 @@
+camera:1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was receivedUnderstand this error
+index.js:39 Uncaught TypeError: Cannot read properties of undefined (reading 'getURL')
+    at Object.ready (index.js:39:46)
+    at Image.<anonymous> (jquery.Jcrop.min.js:21:220)
+    at a.Jcrop.Loader (jquery.Jcrop.min.js:21:649)
+    at Image.<anonymous> (jquery.Jcrop.min.js:21:109)
+    at r.each (jquery.min.js:2:2815)
+    at r.fn.init.each (jquery.min.js:2:1003)
+    at a.fn.Jcrop (jquery.Jcrop.min.js:20:983)
+    at init (index.js:21:20)
+    at index.js:196:5Understand this error
+invalid/:1 
+            
+            
+           Failed to load resource: net::ERR_FAILEDUnderstand this error
+index.js:39 Uncaught TypeError: Cannot read properties of undefined (reading 'getURL')
+    at Object.ready (index.js:39:46)
+    at Image.<anonymous> (jquery.Jcrop.min.js:21:220)
+    at a.Jcrop.Loader (jquery.Jcrop.min.js:21:649)
+    at Image.<anonymous> (jquery.Jcrop.min.js:21:109)
+    at r.each (jquery.min.js:2:2815)
+    at r.fn.init.each (jquery.min.js:2:1003)
+    at a.fn.Jcrop (jquery.Jcrop.min.js:20:983)
+    at init (index.js:21:20)
+    at index.js:196:5Understand this error
+invalid/:1 
+            
+            
+           Failed to load resource: net::ERR_FAILEDUnderstand this error
+index.js:39 Uncaught TypeError: Cannot read properties of undefined (reading 'getURL')
+    at Object.ready (index.js:39:46)
+    at Image.<anonymous> (jquery.Jcrop.min.js:21:220)
+    at a.Jcrop.Loader (jquery.Jcrop.min.js:21:649)
+    at Image.<anonymous> (jquery.Jcrop.min.js:21:109)
+    at r.each (jquery.min.js:2:2815)
+    at r.fn.init.each (jquery.min.js:2:1003)
+    at a.fn.Jcrop (jquery.Jcrop.min.js:20:983)
+    at init (index.js:21:20)
+    at index.js:196:5
+ready @ index.js:39
+(anonymous) @ jquery.Jcrop.min.js:21
+a.Jcrop.Loader @ jquery.Jcrop.min.js:21
+(anonymous) @ jquery.Jcrop.min.js:21
+each @ jquery.min.js:2
+each @ jquery.min.js:2
+a.fn.Jcrop @ jquery.Jcrop.min.js:20
+init @ index.js:21
+(anonymous) @ index.js:196
+setTimeout
+(anonymous) @ index.js:194Understand this error
+invalid/:1 
+            
+            
+           GET chrome-extension://invalid/ net::ERR_FAILED
+Image
+clone @ jquery.min.js:3
+(anonymous) @ jquery.min.js:3
+(anonymous) @ jquery.min.js:2
+map @ jquery.min.js:2
+map @ jquery.min.js:2
+clone @ jquery.min.js:3
+a.Jcrop @ jquery.Jcrop.min.js:11
+(anonymous) @ jquery.Jcrop.min.js:21
+a.Jcrop.Loader @ jquery.Jcrop.min.js:21
+(anonymous) @ jquery.Jcrop.min.js:21
+each @ jquery.min.js:2
+each @ jquery.min.js:2
+a.fn.Jcrop @ jquery.Jcrop.min.js:20
+init @ index.js:21
+(anonymous) @ index.js:196
+setTimeout
+(anonymous) @ index.js:194Understand this error
+Node cannot be found in the current page.Understand this warning
+index.js:39 Uncaught TypeError: Cannot read properties of undefined (reading 'getURL')
+    at Object.ready (index.js:39:46)
+    at Image.<anonymous> (jquery.Jcrop.min.js:21:220)
+    at a.Jcrop.Loader (jquery.Jcrop.min.js:21:649)
+    at Image.<anonymous> (jquery.Jcrop.min.js:21:109)
+    at r.each (jquery.min.js:2:2815)
+    at r.fn.init.each (jquery.min.js:2:1003)
+    at a.fn.Jcrop (jquery.Jcrop.min.js:20:983)
+    at init (index.js:21:20)
+    at index.js:196:5

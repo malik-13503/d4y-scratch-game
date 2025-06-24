@@ -5,8 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { SpinningWheel } from "@/components/spinning-wheel";
-import { NumberDrawer } from "@/components/number-drawer";
+import { ProfessionalWheel } from "@/components/professional-wheel";
 import { Confetti } from "@/components/confetti";
 import { 
   Clock, 
