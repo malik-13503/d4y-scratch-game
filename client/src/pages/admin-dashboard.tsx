@@ -456,26 +456,29 @@ export default function AdminDashboard() {
               <CardContent className="space-y-6 p-6">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   {/* Server Status */}
-                  <div className="space-y-3 bg-slate-700/30 p-4 rounded-lg border border-slate-600/20">
-                    <h4 className="text-sm font-bold text-slate-100">Server Health</h4>
+                  <div className="space-y-3 bg-gradient-to-br from-green-600/40 to-emerald-600/40 p-5 rounded-lg border border-green-400/50 shadow-lg">
+                    <h4 className="text-sm font-bold text-white drop-shadow-lg flex items-center">
+                      <Monitor className="h-4 w-4 mr-2 text-green-200" />
+                      Server Health
+                    </h4>
                     <div className="space-y-3">
-                      <div className="flex items-center justify-between text-sm">
-                        <span className="text-slate-200 font-medium">API Server</span>
-                        <Badge className="bg-green-600/80 text-green-100 border-green-500/50 font-semibold">
+                      <div className="flex items-center justify-between text-sm bg-white/10 p-2 rounded border border-white/20">
+                        <span className="text-white font-semibold">API Server</span>
+                        <Badge className="bg-green-700 text-green-100 border-green-600 font-bold shadow-sm">
                           <div className="w-2 h-2 bg-green-200 rounded-full mr-2 animate-pulse"></div>
                           Online
                         </Badge>
                       </div>
-                      <div className="flex items-center justify-between text-sm">
-                        <span className="text-slate-200 font-medium">Database</span>
-                        <Badge className="bg-green-600/80 text-green-100 border-green-500/50 font-semibold">
+                      <div className="flex items-center justify-between text-sm bg-white/10 p-2 rounded border border-white/20">
+                        <span className="text-white font-semibold">Database</span>
+                        <Badge className="bg-green-700 text-green-100 border-green-600 font-bold shadow-sm">
                           <Database className="w-3 h-3 mr-1" />
                           Connected
                         </Badge>
                       </div>
-                      <div className="flex items-center justify-between text-sm">
-                        <span className="text-slate-200 font-medium">Cache</span>
-                        <Badge className="bg-yellow-600/80 text-yellow-100 border-yellow-500/50 font-semibold">
+                      <div className="flex items-center justify-between text-sm bg-white/10 p-2 rounded border border-white/20">
+                        <span className="text-white font-semibold">Cache</span>
+                        <Badge className="bg-yellow-700 text-yellow-100 border-yellow-600 font-bold shadow-sm">
                           <Zap className="w-3 h-3 mr-1" />
                           Active
                         </Badge>
@@ -484,19 +487,22 @@ export default function AdminDashboard() {
                   </div>
 
                   {/* Quick Actions */}
-                  <div className="space-y-3 bg-slate-700/30 p-4 rounded-lg border border-slate-600/20">
-                    <h4 className="text-sm font-bold text-slate-100">Quick Actions</h4>
-                    <div className="space-y-2">
-                      <Button size="sm" variant="outline" className="w-full justify-start text-left border-slate-500/50 hover:bg-slate-600/50 text-slate-100 hover:text-white font-medium"
+                  <div className="space-y-3 bg-gradient-to-br from-blue-600/40 to-purple-600/40 p-5 rounded-lg border border-blue-400/50 shadow-lg">
+                    <h4 className="text-sm font-bold text-white drop-shadow-lg flex items-center">
+                      <Zap className="h-4 w-4 mr-2 text-yellow-300" />
+                      Quick Actions
+                    </h4>
+                    <div className="space-y-3">
+                      <Button size="sm" className="w-full justify-start text-left bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white border-0 shadow-lg font-semibold"
                               onClick={() => { refetchStats(); refetchGames(); }}>
                         <RefreshCw className="h-4 w-4 mr-2" />
                         Refresh Stats
                       </Button>
-                      <Button size="sm" variant="outline" className="w-full justify-start text-left border-slate-500/50 hover:bg-slate-600/50 text-slate-100 hover:text-white font-medium">
+                      <Button size="sm" className="w-full justify-start text-left bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white border-0 shadow-lg font-semibold">
                         <Download className="h-4 w-4 mr-2" />
                         Export Data
                       </Button>
-                      <Button size="sm" variant="outline" className="w-full justify-start text-left border-slate-500/50 hover:bg-slate-600/50 text-slate-100 hover:text-white font-medium">
+                      <Button size="sm" className="w-full justify-start text-left bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white border-0 shadow-lg font-semibold">
                         <Wifi className="h-4 w-4 mr-2" />
                         Test Connection
                       </Button>
@@ -504,23 +510,26 @@ export default function AdminDashboard() {
                   </div>
 
                   {/* Security Panel */}
-                  <div className="space-y-3 bg-slate-700/30 p-4 rounded-lg border border-slate-600/20">
-                    <h4 className="text-sm font-bold text-slate-100">Security</h4>
+                  <div className="space-y-3 bg-gradient-to-br from-orange-600/40 to-red-600/40 p-5 rounded-lg border border-orange-400/50 shadow-lg">
+                    <h4 className="text-sm font-bold text-white drop-shadow-lg flex items-center">
+                      <Shield className="h-4 w-4 mr-2 text-orange-200" />
+                      Security
+                    </h4>
                     <div className="space-y-3">
-                      <div className="flex items-center justify-between text-sm">
-                        <span className="text-slate-200 font-medium">Session Timeout</span>
-                        <span className="text-emerald-300 font-semibold">24h</span>
+                      <div className="flex items-center justify-between text-sm bg-white/10 p-2 rounded border border-white/20">
+                        <span className="text-white font-semibold">Session Timeout</span>
+                        <span className="text-green-200 font-bold bg-green-700/50 px-2 py-1 rounded">24h</span>
                       </div>
-                      <div className="flex items-center justify-between text-sm">
-                        <span className="text-slate-200 font-medium">SSL Status</span>
-                        <Badge className="bg-green-600/80 text-green-100 border-green-500/50 font-semibold">
+                      <div className="flex items-center justify-between text-sm bg-white/10 p-2 rounded border border-white/20">
+                        <span className="text-white font-semibold">SSL Status</span>
+                        <Badge className="bg-green-700 text-green-100 border-green-600 font-bold shadow-sm">
                           <Lock className="w-3 h-3 mr-1" />
                           Secured
                         </Badge>
                       </div>
-                      <div className="flex items-center justify-between text-sm">
-                        <span className="text-slate-200 font-medium">Last Backup</span>
-                        <span className="text-blue-300 font-semibold">2 hours ago</span>
+                      <div className="flex items-center justify-between text-sm bg-white/10 p-2 rounded border border-white/20">
+                        <span className="text-white font-semibold">Last Backup</span>
+                        <span className="text-blue-200 font-bold bg-blue-700/50 px-2 py-1 rounded">2 hours ago</span>
                       </div>
                     </div>
                   </div>
