@@ -333,58 +333,58 @@ export default function AdminDashboard() {
 
             {/* Quick Action Cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <Card className="bg-gradient-to-br from-green-600/20 to-emerald-600/20 backdrop-blur-sm border border-green-500/30 hover:border-green-400/50 transition-all duration-300 cursor-pointer"
+              <Card className="bg-gradient-to-br from-green-500/30 to-emerald-500/30 backdrop-blur-sm border border-green-400/40 hover:border-green-300/60 transition-all duration-300 cursor-pointer hover:shadow-2xl hover:shadow-green-500/20"
                     onClick={() => setIsCreateGameOpen(true)}>
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <h3 className="text-xl font-bold text-white mb-2">🎮 Create New Game</h3>
-                      <p className="text-gray-300 text-sm">Launch a new spinning wheel game instantly</p>
-                      <Button className="mt-4 bg-green-600 hover:bg-green-700">
+                      <h3 className="text-xl font-bold text-green-100 mb-2">🎮 Create New Game</h3>
+                      <p className="text-green-200 text-sm mb-4">Launch a new spinning wheel game instantly</p>
+                      <Button className="bg-green-600 hover:bg-green-700 text-white border-0 shadow-lg">
                         <Plus className="h-4 w-4 mr-2" />
                         Create Game
                       </Button>
                     </div>
-                    <div className="p-4 bg-green-500/30 rounded-full">
-                      <Gamepad2 className="h-8 w-8 text-green-400" />
+                    <div className="p-4 bg-green-400/40 rounded-full border border-green-300/20">
+                      <Gamepad2 className="h-8 w-8 text-green-200" />
                     </div>
                   </div>
                 </CardContent>
               </Card>
 
-              <Card className="bg-gradient-to-br from-blue-600/20 to-cyan-600/20 backdrop-blur-sm border border-blue-500/30 hover:border-blue-400/50 transition-all duration-300 cursor-pointer"
+              <Card className="bg-gradient-to-br from-blue-500/30 to-cyan-500/30 backdrop-blur-sm border border-blue-400/40 hover:border-blue-300/60 transition-all duration-300 cursor-pointer hover:shadow-2xl hover:shadow-blue-500/20"
                     onClick={() => setActiveTab("games")}>
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <h3 className="text-xl font-bold text-white mb-2">⚙️ Manage Games</h3>
-                      <p className="text-gray-300 text-sm">Edit, pause, or delete existing games</p>
-                      <Button className="mt-4 bg-blue-600 hover:bg-blue-700">
+                      <h3 className="text-xl font-bold text-blue-100 mb-2">⚙️ Manage Games</h3>
+                      <p className="text-blue-200 text-sm mb-4">Edit, pause, or delete existing games</p>
+                      <Button className="bg-blue-600 hover:bg-blue-700 text-white border-0 shadow-lg">
                         <Settings className="h-4 w-4 mr-2" />
                         Manage
                       </Button>
                     </div>
-                    <div className="p-4 bg-blue-500/30 rounded-full">
-                      <Settings className="h-8 w-8 text-blue-400" />
+                    <div className="p-4 bg-blue-400/40 rounded-full border border-blue-300/20">
+                      <Settings className="h-8 w-8 text-blue-200" />
                     </div>
                   </div>
                 </CardContent>
               </Card>
 
-              <Card className="bg-gradient-to-br from-purple-600/20 to-pink-600/20 backdrop-blur-sm border border-purple-500/30 hover:border-purple-400/50 transition-all duration-300 cursor-pointer"
+              <Card className="bg-gradient-to-br from-purple-500/30 to-pink-500/30 backdrop-blur-sm border border-purple-400/40 hover:border-purple-300/60 transition-all duration-300 cursor-pointer hover:shadow-2xl hover:shadow-purple-500/20"
                     onClick={() => setActiveTab("analytics")}>
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <h3 className="text-xl font-bold text-white mb-2">📊 View Analytics</h3>
-                      <p className="text-gray-300 text-sm">Detailed insights and performance metrics</p>
-                      <Button className="mt-4 bg-purple-600 hover:bg-purple-700">
+                      <h3 className="text-xl font-bold text-purple-100 mb-2">📊 View Analytics</h3>
+                      <p className="text-purple-200 text-sm mb-4">Detailed insights and performance metrics</p>
+                      <Button className="bg-purple-600 hover:bg-purple-700 text-white border-0 shadow-lg">
                         <BarChart3 className="h-4 w-4 mr-2" />
                         Analytics
                       </Button>
                     </div>
-                    <div className="p-4 bg-purple-500/30 rounded-full">
-                      <TrendingUp className="h-8 w-8 text-purple-400" />
+                    <div className="p-4 bg-purple-400/40 rounded-full border border-purple-300/20">
+                      <TrendingUp className="h-8 w-8 text-purple-200" />
                     </div>
                   </div>
                 </CardContent>
@@ -393,53 +393,53 @@ export default function AdminDashboard() {
 
             {/* Advanced Management Features */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              <Card className="bg-gradient-to-br from-orange-600/20 to-red-600/20 backdrop-blur-sm border border-orange-500/30 hover:border-orange-400/50 transition-all duration-300 cursor-pointer"
+              <Card className="bg-gradient-to-br from-orange-500/40 to-red-500/40 backdrop-blur-sm border border-orange-400/50 hover:border-orange-300/70 transition-all duration-300 cursor-pointer hover:shadow-xl hover:shadow-orange-500/25"
                     onClick={() => setActiveTab("users")}>
-                <CardContent className="p-4">
+                <CardContent className="p-5">
                   <div className="text-center">
-                    <div className="p-3 bg-orange-500/30 rounded-full mx-auto mb-3 w-fit">
-                      <Users className="h-6 w-6 text-orange-400" />
+                    <div className="p-3 bg-orange-300/30 rounded-full mx-auto mb-3 w-fit border border-orange-200/20">
+                      <Users className="h-6 w-6 text-orange-100" />
                     </div>
-                    <h4 className="font-bold text-white mb-1">User Management</h4>
-                    <p className="text-xs text-gray-400">View and manage players</p>
+                    <h4 className="font-bold text-orange-50 mb-2 text-sm">User Management</h4>
+                    <p className="text-xs text-orange-200/80">View and manage players</p>
                   </div>
                 </CardContent>
               </Card>
 
-              <Card className="bg-gradient-to-br from-pink-600/20 to-purple-600/20 backdrop-blur-sm border border-pink-500/30 hover:border-pink-400/50 transition-all duration-300 cursor-pointer"
+              <Card className="bg-gradient-to-br from-pink-500/40 to-purple-500/40 backdrop-blur-sm border border-pink-400/50 hover:border-pink-300/70 transition-all duration-300 cursor-pointer hover:shadow-xl hover:shadow-pink-500/25"
                     onClick={() => setActiveTab("system")}>
-                <CardContent className="p-4">
+                <CardContent className="p-5">
                   <div className="text-center">
-                    <div className="p-3 bg-pink-500/30 rounded-full mx-auto mb-3 w-fit">
-                      <Monitor className="h-6 w-6 text-pink-400" />
+                    <div className="p-3 bg-pink-300/30 rounded-full mx-auto mb-3 w-fit border border-pink-200/20">
+                      <Monitor className="h-6 w-6 text-pink-100" />
                     </div>
-                    <h4 className="font-bold text-white mb-1">System Monitor</h4>
-                    <p className="text-xs text-gray-400">Server & database status</p>
+                    <h4 className="font-bold text-pink-50 mb-2 text-sm">System Monitor</h4>
+                    <p className="text-xs text-pink-200/80">Server & database status</p>
                   </div>
                 </CardContent>
               </Card>
 
-              <Card className="bg-gradient-to-br from-cyan-600/20 to-blue-600/20 backdrop-blur-sm border border-cyan-500/30 hover:border-cyan-400/50 transition-all duration-300 cursor-pointer"
+              <Card className="bg-gradient-to-br from-cyan-500/40 to-blue-500/40 backdrop-blur-sm border border-cyan-400/50 hover:border-cyan-300/70 transition-all duration-300 cursor-pointer hover:shadow-xl hover:shadow-cyan-500/25"
                     onClick={() => setActiveTab("settings")}>
-                <CardContent className="p-4">
+                <CardContent className="p-5">
                   <div className="text-center">
-                    <div className="p-3 bg-cyan-500/30 rounded-full mx-auto mb-3 w-fit">
-                      <Settings className="h-6 w-6 text-cyan-400" />
+                    <div className="p-3 bg-cyan-300/30 rounded-full mx-auto mb-3 w-fit border border-cyan-200/20">
+                      <Settings className="h-6 w-6 text-cyan-100" />
                     </div>
-                    <h4 className="font-bold text-white mb-1">Game Settings</h4>
-                    <p className="text-xs text-gray-400">Configure game rules</p>
+                    <h4 className="font-bold text-cyan-50 mb-2 text-sm">Game Settings</h4>
+                    <p className="text-xs text-cyan-200/80">Configure game rules</p>
                   </div>
                 </CardContent>
               </Card>
 
-              <Card className="bg-gradient-to-br from-emerald-600/20 to-green-600/20 backdrop-blur-sm border border-emerald-500/30 hover:border-emerald-400/50 transition-all duration-300 cursor-pointer">
-                <CardContent className="p-4">
+              <Card className="bg-gradient-to-br from-emerald-500/40 to-green-500/40 backdrop-blur-sm border border-emerald-400/50 hover:border-emerald-300/70 transition-all duration-300 cursor-pointer hover:shadow-xl hover:shadow-emerald-500/25">
+                <CardContent className="p-5">
                   <div className="text-center">
-                    <div className="p-3 bg-emerald-500/30 rounded-full mx-auto mb-3 w-fit">
-                      <Database className="h-6 w-6 text-emerald-400" />
+                    <div className="p-3 bg-emerald-300/30 rounded-full mx-auto mb-3 w-fit border border-emerald-200/20">
+                      <Database className="h-6 w-6 text-emerald-100" />
                     </div>
-                    <h4 className="font-bold text-white mb-1">Database Tools</h4>
-                    <p className="text-xs text-gray-400">Backup & maintenance</p>
+                    <h4 className="font-bold text-emerald-50 mb-2 text-sm">Database Tools</h4>
+                    <p className="text-xs text-emerald-200/80">Backup & maintenance</p>
                   </div>
                 </CardContent>
               </Card>
