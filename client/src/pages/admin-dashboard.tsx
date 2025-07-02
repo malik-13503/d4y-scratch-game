@@ -293,39 +293,39 @@ export default function AdminDashboard() {
           {/* Overview Tab */}
           <TabsContent value="overview" className="space-y-8">
             {/* Hero Stats Section */}
-            <div className="relative overflow-hidden bg-gradient-to-r from-purple-600/20 via-blue-600/20 to-cyan-600/20 backdrop-blur-sm border border-purple-500/30 rounded-2xl p-8">
-              <div className="absolute inset-0 bg-gradient-to-r from-purple-600/10 to-blue-600/10 animate-pulse"></div>
+            <div className="relative overflow-hidden bg-gradient-to-r from-slate-800/95 via-slate-700/95 to-slate-800/95 backdrop-blur-sm border border-slate-600/50 rounded-2xl p-8 shadow-2xl">
+              <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-purple-500/10"></div>
               <div className="relative z-10">
                 <div className="text-center mb-8">
-                  <h2 className="text-4xl font-bold bg-gradient-to-r from-purple-400 via-blue-400 to-cyan-400 bg-clip-text text-transparent mb-2">
+                  <h2 className="text-4xl font-bold text-white mb-2 drop-shadow-lg">
                     🎯 GAME CONTROL CENTER
                   </h2>
-                  <p className="text-gray-300 text-lg">Real-time analytics and instant management</p>
+                  <p className="text-slate-200 text-lg font-medium">Real-time analytics and instant management</p>
                 </div>
                 
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                  <div className="text-center p-4 bg-white/5 rounded-xl border border-white/10">
-                    <div className="text-3xl font-bold text-purple-400 mb-1">{dashboardStats?.totalGames || 0}</div>
-                    <div className="text-sm text-gray-300">Total Games</div>
-                    <div className="text-xs text-green-400 mt-1">↗ +12% growth</div>
+                  <div className="text-center p-5 bg-slate-700/70 rounded-xl border border-slate-500/30 shadow-lg hover:bg-slate-600/70 transition-colors">
+                    <div className="text-3xl font-bold text-blue-300 mb-1">{dashboardStats?.totalGames || 0}</div>
+                    <div className="text-sm text-slate-100 font-medium">Total Games</div>
+                    <div className="text-xs text-green-300 mt-1 font-semibold">↗ +12% growth</div>
                   </div>
                   
-                  <div className="text-center p-4 bg-white/5 rounded-xl border border-white/10">
-                    <div className="text-3xl font-bold text-green-400 mb-1">{dashboardStats?.activeGames || 0}</div>
-                    <div className="text-sm text-gray-300">Live Games</div>
-                    <div className="text-xs text-blue-400 mt-1">🔥 Currently running</div>
+                  <div className="text-center p-5 bg-slate-700/70 rounded-xl border border-slate-500/30 shadow-lg hover:bg-slate-600/70 transition-colors">
+                    <div className="text-3xl font-bold text-green-300 mb-1">{dashboardStats?.activeGames || 0}</div>
+                    <div className="text-sm text-slate-100 font-medium">Live Games</div>
+                    <div className="text-xs text-blue-300 mt-1 font-semibold">🔥 Currently running</div>
                   </div>
                   
-                  <div className="text-center p-4 bg-white/5 rounded-xl border border-white/10">
-                    <div className="text-3xl font-bold text-blue-400 mb-1">{dashboardStats?.totalSpins || 0}</div>
-                    <div className="text-sm text-gray-300">Player Spins</div>
-                    <div className="text-xs text-cyan-400 mt-1">⚡ Real-time</div>
+                  <div className="text-center p-5 bg-slate-700/70 rounded-xl border border-slate-500/30 shadow-lg hover:bg-slate-600/70 transition-colors">
+                    <div className="text-3xl font-bold text-cyan-300 mb-1">{dashboardStats?.totalSpins || 0}</div>
+                    <div className="text-sm text-slate-100 font-medium">Player Spins</div>
+                    <div className="text-xs text-cyan-300 mt-1 font-semibold">⚡ Real-time</div>
                   </div>
                   
-                  <div className="text-center p-4 bg-white/5 rounded-xl border border-white/10">
-                    <div className="text-3xl font-bold text-yellow-400 mb-1">${dashboardStats?.totalPrizeValue || 0}</div>
-                    <div className="text-sm text-gray-300">Prize Value</div>
-                    <div className="text-xs text-orange-400 mt-1">💰 Total awarded</div>
+                  <div className="text-center p-5 bg-slate-700/70 rounded-xl border border-slate-500/30 shadow-lg hover:bg-slate-600/70 transition-colors">
+                    <div className="text-3xl font-bold text-yellow-300 mb-1">${dashboardStats?.totalPrizeValue || 0}</div>
+                    <div className="text-sm text-slate-100 font-medium">Prize Value</div>
+                    <div className="text-xs text-orange-300 mt-1 font-semibold">💰 Total awarded</div>
                   </div>
                 </div>
               </div>
@@ -333,58 +333,58 @@ export default function AdminDashboard() {
 
             {/* Quick Action Cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <Card className="bg-gradient-to-br from-green-500/30 to-emerald-500/30 backdrop-blur-sm border border-green-400/40 hover:border-green-300/60 transition-all duration-300 cursor-pointer hover:shadow-2xl hover:shadow-green-500/20"
+              <Card className="bg-gradient-to-br from-emerald-600/90 to-green-600/90 backdrop-blur-sm border border-emerald-400/80 hover:border-emerald-300 transition-all duration-300 cursor-pointer hover:shadow-2xl hover:shadow-emerald-500/40 hover:scale-105"
                     onClick={() => setIsCreateGameOpen(true)}>
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <h3 className="text-xl font-bold text-green-100 mb-2">🎮 Create New Game</h3>
-                      <p className="text-green-200 text-sm mb-4">Launch a new spinning wheel game instantly</p>
-                      <Button className="bg-green-600 hover:bg-green-700 text-white border-0 shadow-lg">
+                      <h3 className="text-xl font-bold text-white mb-2 drop-shadow-lg">🎮 Create New Game</h3>
+                      <p className="text-emerald-50 text-sm mb-4 font-medium">Launch a new spinning wheel game instantly</p>
+                      <Button className="bg-white text-emerald-700 hover:bg-emerald-50 border-0 shadow-lg font-semibold">
                         <Plus className="h-4 w-4 mr-2" />
                         Create Game
                       </Button>
                     </div>
-                    <div className="p-4 bg-green-400/40 rounded-full border border-green-300/20">
-                      <Gamepad2 className="h-8 w-8 text-green-200" />
+                    <div className="p-4 bg-white/20 rounded-full border border-white/30 shadow-lg">
+                      <Gamepad2 className="h-8 w-8 text-white" />
                     </div>
                   </div>
                 </CardContent>
               </Card>
 
-              <Card className="bg-gradient-to-br from-blue-500/30 to-cyan-500/30 backdrop-blur-sm border border-blue-400/40 hover:border-blue-300/60 transition-all duration-300 cursor-pointer hover:shadow-2xl hover:shadow-blue-500/20"
+              <Card className="bg-gradient-to-br from-blue-600/90 to-cyan-600/90 backdrop-blur-sm border border-blue-400/80 hover:border-blue-300 transition-all duration-300 cursor-pointer hover:shadow-2xl hover:shadow-blue-500/40 hover:scale-105"
                     onClick={() => setActiveTab("games")}>
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <h3 className="text-xl font-bold text-blue-100 mb-2">⚙️ Manage Games</h3>
-                      <p className="text-blue-200 text-sm mb-4">Edit, pause, or delete existing games</p>
-                      <Button className="bg-blue-600 hover:bg-blue-700 text-white border-0 shadow-lg">
+                      <h3 className="text-xl font-bold text-white mb-2 drop-shadow-lg">⚙️ Manage Games</h3>
+                      <p className="text-blue-50 text-sm mb-4 font-medium">Edit, pause, or delete existing games</p>
+                      <Button className="bg-white text-blue-700 hover:bg-blue-50 border-0 shadow-lg font-semibold">
                         <Settings className="h-4 w-4 mr-2" />
                         Manage
                       </Button>
                     </div>
-                    <div className="p-4 bg-blue-400/40 rounded-full border border-blue-300/20">
-                      <Settings className="h-8 w-8 text-blue-200" />
+                    <div className="p-4 bg-white/20 rounded-full border border-white/30 shadow-lg">
+                      <Settings className="h-8 w-8 text-white" />
                     </div>
                   </div>
                 </CardContent>
               </Card>
 
-              <Card className="bg-gradient-to-br from-purple-500/30 to-pink-500/30 backdrop-blur-sm border border-purple-400/40 hover:border-purple-300/60 transition-all duration-300 cursor-pointer hover:shadow-2xl hover:shadow-purple-500/20"
+              <Card className="bg-gradient-to-br from-purple-600/90 to-pink-600/90 backdrop-blur-sm border border-purple-400/80 hover:border-purple-300 transition-all duration-300 cursor-pointer hover:shadow-2xl hover:shadow-purple-500/40 hover:scale-105"
                     onClick={() => setActiveTab("analytics")}>
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <h3 className="text-xl font-bold text-purple-100 mb-2">📊 View Analytics</h3>
-                      <p className="text-purple-200 text-sm mb-4">Detailed insights and performance metrics</p>
-                      <Button className="bg-purple-600 hover:bg-purple-700 text-white border-0 shadow-lg">
+                      <h3 className="text-xl font-bold text-white mb-2 drop-shadow-lg">📊 View Analytics</h3>
+                      <p className="text-purple-50 text-sm mb-4 font-medium">Detailed insights and performance metrics</p>
+                      <Button className="bg-white text-purple-700 hover:bg-purple-50 border-0 shadow-lg font-semibold">
                         <BarChart3 className="h-4 w-4 mr-2" />
                         Analytics
                       </Button>
                     </div>
-                    <div className="p-4 bg-purple-400/40 rounded-full border border-purple-300/20">
-                      <TrendingUp className="h-8 w-8 text-purple-200" />
+                    <div className="p-4 bg-white/20 rounded-full border border-white/30 shadow-lg">
+                      <TrendingUp className="h-8 w-8 text-white" />
                     </div>
                   </div>
                 </CardContent>
@@ -392,90 +392,90 @@ export default function AdminDashboard() {
             </div>
 
             {/* Advanced Management Features */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              <Card className="bg-gradient-to-br from-orange-500/40 to-red-500/40 backdrop-blur-sm border border-orange-400/50 hover:border-orange-300/70 transition-all duration-300 cursor-pointer hover:shadow-xl hover:shadow-orange-500/25"
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <Card className="bg-gradient-to-br from-orange-600/85 to-red-600/85 backdrop-blur-sm border border-orange-300/60 hover:border-orange-200 transition-all duration-300 cursor-pointer hover:shadow-xl hover:shadow-orange-500/30 hover:scale-105"
                     onClick={() => setActiveTab("users")}>
                 <CardContent className="p-5">
                   <div className="text-center">
-                    <div className="p-3 bg-orange-300/30 rounded-full mx-auto mb-3 w-fit border border-orange-200/20">
-                      <Users className="h-6 w-6 text-orange-100" />
+                    <div className="p-3 bg-white/25 rounded-full mx-auto mb-3 w-fit border border-white/20 shadow-lg">
+                      <Users className="h-6 w-6 text-white" />
                     </div>
-                    <h4 className="font-bold text-orange-50 mb-2 text-sm">User Management</h4>
-                    <p className="text-xs text-orange-200/80">View and manage players</p>
+                    <h4 className="font-bold text-white mb-2 text-sm drop-shadow-lg">User Management</h4>
+                    <p className="text-xs text-orange-50 font-medium">View and manage players</p>
                   </div>
                 </CardContent>
               </Card>
 
-              <Card className="bg-gradient-to-br from-pink-500/40 to-purple-500/40 backdrop-blur-sm border border-pink-400/50 hover:border-pink-300/70 transition-all duration-300 cursor-pointer hover:shadow-xl hover:shadow-pink-500/25"
+              <Card className="bg-gradient-to-br from-pink-600/85 to-purple-600/85 backdrop-blur-sm border border-pink-300/60 hover:border-pink-200 transition-all duration-300 cursor-pointer hover:shadow-xl hover:shadow-pink-500/30 hover:scale-105"
                     onClick={() => setActiveTab("system")}>
                 <CardContent className="p-5">
                   <div className="text-center">
-                    <div className="p-3 bg-pink-300/30 rounded-full mx-auto mb-3 w-fit border border-pink-200/20">
-                      <Monitor className="h-6 w-6 text-pink-100" />
+                    <div className="p-3 bg-white/25 rounded-full mx-auto mb-3 w-fit border border-white/20 shadow-lg">
+                      <Monitor className="h-6 w-6 text-white" />
                     </div>
-                    <h4 className="font-bold text-pink-50 mb-2 text-sm">System Monitor</h4>
-                    <p className="text-xs text-pink-200/80">Server & database status</p>
+                    <h4 className="font-bold text-white mb-2 text-sm drop-shadow-lg">System Monitor</h4>
+                    <p className="text-xs text-pink-50 font-medium">Server & database status</p>
                   </div>
                 </CardContent>
               </Card>
 
-              <Card className="bg-gradient-to-br from-cyan-500/40 to-blue-500/40 backdrop-blur-sm border border-cyan-400/50 hover:border-cyan-300/70 transition-all duration-300 cursor-pointer hover:shadow-xl hover:shadow-cyan-500/25"
+              <Card className="bg-gradient-to-br from-cyan-600/85 to-blue-600/85 backdrop-blur-sm border border-cyan-300/60 hover:border-cyan-200 transition-all duration-300 cursor-pointer hover:shadow-xl hover:shadow-cyan-500/30 hover:scale-105"
                     onClick={() => setActiveTab("settings")}>
                 <CardContent className="p-5">
                   <div className="text-center">
-                    <div className="p-3 bg-cyan-300/30 rounded-full mx-auto mb-3 w-fit border border-cyan-200/20">
-                      <Settings className="h-6 w-6 text-cyan-100" />
+                    <div className="p-3 bg-white/25 rounded-full mx-auto mb-3 w-fit border border-white/20 shadow-lg">
+                      <Settings className="h-6 w-6 text-white" />
                     </div>
-                    <h4 className="font-bold text-cyan-50 mb-2 text-sm">Game Settings</h4>
-                    <p className="text-xs text-cyan-200/80">Configure game rules</p>
+                    <h4 className="font-bold text-white mb-2 text-sm drop-shadow-lg">Game Settings</h4>
+                    <p className="text-xs text-cyan-50 font-medium">Configure game rules</p>
                   </div>
                 </CardContent>
               </Card>
 
-              <Card className="bg-gradient-to-br from-emerald-500/40 to-green-500/40 backdrop-blur-sm border border-emerald-400/50 hover:border-emerald-300/70 transition-all duration-300 cursor-pointer hover:shadow-xl hover:shadow-emerald-500/25">
+              <Card className="bg-gradient-to-br from-emerald-600/85 to-green-600/85 backdrop-blur-sm border border-emerald-300/60 hover:border-emerald-200 transition-all duration-300 cursor-pointer hover:shadow-xl hover:shadow-emerald-500/30 hover:scale-105">
                 <CardContent className="p-5">
                   <div className="text-center">
-                    <div className="p-3 bg-emerald-300/30 rounded-full mx-auto mb-3 w-fit border border-emerald-200/20">
-                      <Database className="h-6 w-6 text-emerald-100" />
+                    <div className="p-3 bg-white/25 rounded-full mx-auto mb-3 w-fit border border-white/20 shadow-lg">
+                      <Database className="h-6 w-6 text-white" />
                     </div>
-                    <h4 className="font-bold text-emerald-50 mb-2 text-sm">Database Tools</h4>
-                    <p className="text-xs text-emerald-200/80">Backup & maintenance</p>
+                    <h4 className="font-bold text-white mb-2 text-sm drop-shadow-lg">Database Tools</h4>
+                    <p className="text-xs text-emerald-50 font-medium">Backup & maintenance</p>
                   </div>
                 </CardContent>
               </Card>
             </div>
 
             {/* System Status Panel */}
-            <Card className="bg-black/20 backdrop-blur-sm border border-purple-500/30">
-              <CardHeader>
-                <CardTitle className="text-white flex items-center">
-                  <Monitor className="h-5 w-5 mr-2 text-green-400" />
+            <Card className="bg-slate-800/90 backdrop-blur-sm border border-slate-600/50 shadow-2xl">
+              <CardHeader className="bg-slate-700/50 border-b border-slate-600/30">
+                <CardTitle className="text-white flex items-center font-bold">
+                  <Monitor className="h-5 w-5 mr-2 text-emerald-400" />
                   System Status & Quick Actions
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-6">
+              <CardContent className="space-y-6 p-6">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   {/* Server Status */}
-                  <div className="space-y-3">
-                    <h4 className="text-sm font-medium text-gray-300">Server Health</h4>
-                    <div className="space-y-2">
+                  <div className="space-y-3 bg-slate-700/30 p-4 rounded-lg border border-slate-600/20">
+                    <h4 className="text-sm font-bold text-slate-100">Server Health</h4>
+                    <div className="space-y-3">
                       <div className="flex items-center justify-between text-sm">
-                        <span className="text-gray-400">API Server</span>
-                        <Badge className="bg-green-500/20 text-green-400 border-green-500/30">
-                          <div className="w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse"></div>
+                        <span className="text-slate-200 font-medium">API Server</span>
+                        <Badge className="bg-green-600/80 text-green-100 border-green-500/50 font-semibold">
+                          <div className="w-2 h-2 bg-green-200 rounded-full mr-2 animate-pulse"></div>
                           Online
                         </Badge>
                       </div>
                       <div className="flex items-center justify-between text-sm">
-                        <span className="text-gray-400">Database</span>
-                        <Badge className="bg-green-500/20 text-green-400 border-green-500/30">
+                        <span className="text-slate-200 font-medium">Database</span>
+                        <Badge className="bg-green-600/80 text-green-100 border-green-500/50 font-semibold">
                           <Database className="w-3 h-3 mr-1" />
                           Connected
                         </Badge>
                       </div>
                       <div className="flex items-center justify-between text-sm">
-                        <span className="text-gray-400">Cache</span>
-                        <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30">
+                        <span className="text-slate-200 font-medium">Cache</span>
+                        <Badge className="bg-yellow-600/80 text-yellow-100 border-yellow-500/50 font-semibold">
                           <Zap className="w-3 h-3 mr-1" />
                           Active
                         </Badge>
@@ -484,19 +484,19 @@ export default function AdminDashboard() {
                   </div>
 
                   {/* Quick Actions */}
-                  <div className="space-y-3">
-                    <h4 className="text-sm font-medium text-gray-300">Quick Actions</h4>
+                  <div className="space-y-3 bg-slate-700/30 p-4 rounded-lg border border-slate-600/20">
+                    <h4 className="text-sm font-bold text-slate-100">Quick Actions</h4>
                     <div className="space-y-2">
-                      <Button size="sm" variant="outline" className="w-full justify-start text-left border-purple-500/30 hover:bg-purple-500/20"
+                      <Button size="sm" variant="outline" className="w-full justify-start text-left border-slate-500/50 hover:bg-slate-600/50 text-slate-100 hover:text-white font-medium"
                               onClick={() => { refetchStats(); refetchGames(); }}>
                         <RefreshCw className="h-4 w-4 mr-2" />
                         Refresh Stats
                       </Button>
-                      <Button size="sm" variant="outline" className="w-full justify-start text-left border-blue-500/30 hover:bg-blue-500/20">
+                      <Button size="sm" variant="outline" className="w-full justify-start text-left border-slate-500/50 hover:bg-slate-600/50 text-slate-100 hover:text-white font-medium">
                         <Download className="h-4 w-4 mr-2" />
                         Export Data
                       </Button>
-                      <Button size="sm" variant="outline" className="w-full justify-start text-left border-green-500/30 hover:bg-green-500/20">
+                      <Button size="sm" variant="outline" className="w-full justify-start text-left border-slate-500/50 hover:bg-slate-600/50 text-slate-100 hover:text-white font-medium">
                         <Wifi className="h-4 w-4 mr-2" />
                         Test Connection
                       </Button>
@@ -504,23 +504,23 @@ export default function AdminDashboard() {
                   </div>
 
                   {/* Security Panel */}
-                  <div className="space-y-3">
-                    <h4 className="text-sm font-medium text-gray-300">Security</h4>
-                    <div className="space-y-2">
+                  <div className="space-y-3 bg-slate-700/30 p-4 rounded-lg border border-slate-600/20">
+                    <h4 className="text-sm font-bold text-slate-100">Security</h4>
+                    <div className="space-y-3">
                       <div className="flex items-center justify-between text-sm">
-                        <span className="text-gray-400">Session Timeout</span>
-                        <span className="text-green-400">24h</span>
+                        <span className="text-slate-200 font-medium">Session Timeout</span>
+                        <span className="text-emerald-300 font-semibold">24h</span>
                       </div>
                       <div className="flex items-center justify-between text-sm">
-                        <span className="text-gray-400">SSL Status</span>
-                        <Badge className="bg-green-500/20 text-green-400 border-green-500/30">
+                        <span className="text-slate-200 font-medium">SSL Status</span>
+                        <Badge className="bg-green-600/80 text-green-100 border-green-500/50 font-semibold">
                           <Lock className="w-3 h-3 mr-1" />
                           Secured
                         </Badge>
                       </div>
                       <div className="flex items-center justify-between text-sm">
-                        <span className="text-gray-400">Last Backup</span>
-                        <span className="text-blue-400">2 hours ago</span>
+                        <span className="text-slate-200 font-medium">Last Backup</span>
+                        <span className="text-blue-300 font-semibold">2 hours ago</span>
                       </div>
                     </div>
                   </div>
