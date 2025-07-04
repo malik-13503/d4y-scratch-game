@@ -94,61 +94,58 @@ export function ProfessionalWheel({
           <div className="w-0 h-0 border-l-[12px] border-r-[12px] border-b-[20px] sm:border-l-[15px] sm:border-r-[15px] sm:border-b-[25px] border-l-transparent border-r-transparent border-b-yellow-400 drop-shadow-lg"></div>
         </div>
 
-        {/* Wheel with complete circular border */}
-        <div className="relative w-72 h-72 sm:w-88 sm:h-88 md:w-104 md:h-104">
-          {/* Outer border ring */}
-          <div className="absolute inset-0 rounded-full bg-gradient-to-r from-yellow-400 via-yellow-500 to-yellow-600 shadow-2xl flex items-center justify-center">
-            <div 
-              ref={wheelRef}
-              className="w-64 h-64 sm:w-80 sm:h-80 md:w-96 md:h-96 rounded-full relative overflow-hidden"
-              style={{
-                transform: `rotate(${rotation}deg)`,
-                transition: isSpinning ? `transform 8s cubic-bezier(0.25, 0.1, 0.25, 1)` : 'none',
-                boxShadow: 'inset 0 0 20px rgba(0, 0, 0, 0.2)'
-              }}
-            >
-              {/* Wheel Segments */}
-              {segmentColors.map((color, index) => {
-                const angle = (360 / segmentColors.length) * index;
-                const nextAngle = (360 / segmentColors.length) * (index + 1);
-                const midAngle = angle + (360 / segmentColors.length) / 2;
-                
-                return (
-                  <div
-                    key={index}
-                    className="absolute inset-0"
+        {/* Wheel */}
+        {/* Outer golden ring */}
+        <div className="relative p-2 rounded-full bg-gradient-to-r from-yellow-400 via-yellow-500 to-yellow-600 shadow-2xl">
+          <div 
+            ref={wheelRef}
+            className="w-64 h-64 sm:w-80 sm:h-80 md:w-96 md:h-96 rounded-full relative overflow-hidden shadow-inner"
+            style={{
+              transform: `rotate(${rotation}deg)`,
+              transition: isSpinning ? `transform 8s cubic-bezier(0.25, 0.1, 0.25, 1)` : 'none',
+              boxShadow: 'inset 0 0 20px rgba(0, 0, 0, 0.3)'
+            }}
+          >
+            {/* Wheel Segments */}
+            {segmentColors.map((color, index) => {
+              const angle = (360 / segmentColors.length) * index;
+              const nextAngle = (360 / segmentColors.length) * (index + 1);
+              
+              return (
+                <div
+                  key={index}
+                  className="absolute inset-0"
+                  style={{
+                    clipPath: `polygon(50% 50%, ${50 + 50 * Math.cos((angle - 90) * Math.PI / 180)}% ${50 + 50 * Math.sin((angle - 90) * Math.PI / 180)}%, ${50 + 50 * Math.cos((nextAngle - 90) * Math.PI / 180)}% ${50 + 50 * Math.sin((nextAngle - 90) * Math.PI / 180)}%)`,
+                    backgroundColor: color
+                  }}
+                >
+                  {/* Segment number - centered in segment */}
+                  <div 
+                    className="absolute text-white font-bold text-base sm:text-lg md:text-xl z-10 flex items-center justify-center"
                     style={{
-                      clipPath: `polygon(50% 50%, ${50 + 50 * Math.cos((angle - 90) * Math.PI / 180)}% ${50 + 50 * Math.sin((angle - 90) * Math.PI / 180)}%, ${50 + 50 * Math.cos((nextAngle - 90) * Math.PI / 180)}% ${50 + 50 * Math.sin((nextAngle - 90) * Math.PI / 180)}%)`,
-                      backgroundColor: color
+                      top: '50%',
+                      left: '50%',
+                      width: '36px',
+                      height: '36px',
+                      transform: `translate(-50%, -50%) translate(${Math.cos((angle + (360 / segmentColors.length) / 2 - 90) * Math.PI / 180) * 75}px, ${Math.sin((angle + (360 / segmentColors.length) / 2 - 90) * Math.PI / 180) * 75}px)`,
+                      textShadow: '2px 2px 8px rgba(0,0,0,0.9), 1px 1px 4px rgba(0,0,0,0.8), 0 0 12px rgba(0,0,0,0.6)',
+                      filter: 'drop-shadow(2px 2px 4px rgba(0,0,0,0.9))',
+                      backgroundColor: 'rgba(0,0,0,0.4)',
+                      borderRadius: '50%',
+                      border: '2px solid rgba(255,255,255,0.9)',
+                      boxShadow: '0 0 8px rgba(0,0,0,0.5)'
                     }}
                   >
-                    {/* Segment number - perfectly centered in segment */}
-                    <div 
-                      className="absolute text-white font-bold text-base sm:text-lg md:text-xl z-10 flex items-center justify-center"
-                      style={{
-                        top: '50%',
-                        left: '50%',
-                        width: '32px',
-                        height: '32px',
-                        transform: `translate(-50%, -50%) translate(${Math.cos((midAngle - 90) * Math.PI / 180) * 65}px, ${Math.sin((midAngle - 90) * Math.PI / 180) * 65}px)`,
-                        textShadow: '2px 2px 8px rgba(0,0,0,0.9), 1px 1px 4px rgba(0,0,0,0.8), 0 0 12px rgba(0,0,0,0.6)',
-                        filter: 'drop-shadow(2px 2px 4px rgba(0,0,0,0.9))',
-                        backgroundColor: 'rgba(0,0,0,0.5)',
-                        borderRadius: '50%',
-                        border: '2px solid rgba(255,255,255,0.9)',
-                        boxShadow: '0 0 8px rgba(0,0,0,0.5)'
-                      }}
-                    >
-                      {wheelNumbers[index]}
-                    </div>
+                    {wheelNumbers[index]}
                   </div>
-                );
-              })}
-              
-              {/* Center hub */}
-              <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-br from-yellow-300 to-yellow-500 rounded-full border-2 sm:border-4 border-white shadow-lg flex items-center justify-center">
-                <div className="w-6 h-6 sm:w-8 sm:h-8 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-full"></div>
-              </div>
+                </div>
+              );
+            })}
+            
+            {/* Center hub */}
+            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-br from-yellow-300 to-yellow-500 rounded-full border-2 sm:border-4 border-white shadow-lg flex items-center justify-center">
+              <div className="w-6 h-6 sm:w-8 sm:h-8 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-full"></div>
             </div>
           </div>
         </div>
