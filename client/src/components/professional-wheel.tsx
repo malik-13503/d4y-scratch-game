@@ -25,11 +25,20 @@ export function ProfessionalWheel({
   
   const freePlayStart = Math.floor(totalNumbers * 0.75) + 1;
   
-  // Professional wheel colors and numbers
+  // Professional wheel colors - vibrant and visually appealing
   const segmentColors = [
-    "#FF6B6B", "#4ECDC4", "#45B7D1", "#96CEB4", 
-    "#FECA57", "#FF9FF3", "#54A0FF", "#5F27CD", 
-    "#00D2D3", "#FF9F43", "#10AC84", "#EE5A24"
+    "#FF4757", // Bright Red
+    "#2ED573", // Vibrant Green  
+    "#3742FA", // Electric Blue
+    "#FF6348", // Orange Red
+    "#FFD32A", // Golden Yellow
+    "#A55EEA", // Purple
+    "#26D0CE", // Turquoise
+    "#FF3838", // Crimson
+    "#20BF6B", // Emerald Green
+    "#0984e3", // Royal Blue
+    "#FD79A8", // Pink
+    "#00B894"  // Teal
   ];
   
   // Sample numbers for wheel display - more varied range
@@ -111,15 +120,21 @@ export function ProfessionalWheel({
                     backgroundColor: color
                   }}
                 >
-                  {/* Segment number - positioned at radial center */}
+                  {/* Segment number - centered in segment */}
                   <div 
-                    className="absolute text-white font-bold text-lg sm:text-xl md:text-2xl z-10"
+                    className="absolute text-white font-bold text-base sm:text-lg md:text-xl z-10 flex items-center justify-center"
                     style={{
                       top: '50%',
                       left: '50%',
-                      transform: `translate(-50%, -50%) translate(${Math.cos((angle + (360 / segmentColors.length) / 2 - 90) * Math.PI / 180) * 70}px, ${Math.sin((angle + (360 / segmentColors.length) / 2 - 90) * Math.PI / 180) * 70}px)`,
-                      textShadow: '2px 2px 6px rgba(0,0,0,0.9), 0 0 10px rgba(0,0,0,0.5)',
-                      filter: 'drop-shadow(1px 1px 2px rgba(0,0,0,0.8))'
+                      width: '36px',
+                      height: '36px',
+                      transform: `translate(-50%, -50%) translate(${Math.cos((angle + (360 / segmentColors.length) / 2 - 90) * Math.PI / 180) * 75}px, ${Math.sin((angle + (360 / segmentColors.length) / 2 - 90) * Math.PI / 180) * 75}px)`,
+                      textShadow: '2px 2px 8px rgba(0,0,0,0.9), 1px 1px 4px rgba(0,0,0,0.8), 0 0 12px rgba(0,0,0,0.6)',
+                      filter: 'drop-shadow(2px 2px 4px rgba(0,0,0,0.9))',
+                      backgroundColor: 'rgba(0,0,0,0.4)',
+                      borderRadius: '50%',
+                      border: '2px solid rgba(255,255,255,0.9)',
+                      boxShadow: '0 0 8px rgba(0,0,0,0.5)'
                     }}
                   >
                     {wheelNumbers[index]}
