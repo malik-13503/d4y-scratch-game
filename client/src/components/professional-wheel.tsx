@@ -32,7 +32,7 @@ export function ProfessionalWheel({
     "#00D2D3", "#FF9F43", "#10AC84", "#EE5A24"
   ];
   
-  // Sample numbers for wheel display
+  // Sample numbers for wheel display - more varied range
   const wheelNumbers = [15, 47, 182, 9, 156, 78, 195, 23, 167, 91, 189, 34];
 
   const handleSpin = async () => {
@@ -42,8 +42,8 @@ export function ProfessionalWheel({
     setResult(null);
     setShowResultModal(false);
 
-    // Professional spinning animation - 4 seconds duration
-    const spinDuration = 4000;
+    // Professional spinning animation - 8 seconds duration
+    const spinDuration = 8000;
     const spins = 8 + Math.random() * 4; // 8-12 full rotations
     const finalRotation = rotation + (spins * 360);
     
@@ -86,13 +86,15 @@ export function ProfessionalWheel({
         </div>
 
         {/* Wheel */}
-        <div className="relative">
+        {/* Outer golden ring */}
+        <div className="relative p-2 rounded-full bg-gradient-to-r from-yellow-400 via-yellow-500 to-yellow-600 shadow-2xl">
           <div 
             ref={wheelRef}
-            className="w-64 h-64 sm:w-80 sm:h-80 md:w-96 md:h-96 rounded-full relative overflow-hidden shadow-2xl border-4 sm:border-8 border-yellow-400"
+            className="w-64 h-64 sm:w-80 sm:h-80 md:w-96 md:h-96 rounded-full relative overflow-hidden shadow-inner"
             style={{
               transform: `rotate(${rotation}deg)`,
-              transition: isSpinning ? `transform 4s cubic-bezier(0.25, 0.1, 0.25, 1)` : 'none'
+              transition: isSpinning ? `transform 8s cubic-bezier(0.25, 0.1, 0.25, 1)` : 'none',
+              boxShadow: 'inset 0 0 20px rgba(0, 0, 0, 0.3)'
             }}
           >
             {/* Wheel Segments */}
@@ -109,14 +111,15 @@ export function ProfessionalWheel({
                     backgroundColor: color
                   }}
                 >
-                  {/* Segment number - positioned better */}
+                  {/* Segment number - positioned at radial center */}
                   <div 
-                    className="absolute text-white font-bold text-sm sm:text-lg md:text-xl"
+                    className="absolute text-white font-bold text-lg sm:text-xl md:text-2xl z-10"
                     style={{
-                      top: '35%',
+                      top: '50%',
                       left: '50%',
-                      transform: `translate(-50%, -50%) rotate(${angle + (360 / segmentColors.length) / 2}deg)`,
-                      textShadow: '2px 2px 4px rgba(0,0,0,0.8)'
+                      transform: `translate(-50%, -50%) translate(${Math.cos((angle + (360 / segmentColors.length) / 2 - 90) * Math.PI / 180) * 70}px, ${Math.sin((angle + (360 / segmentColors.length) / 2 - 90) * Math.PI / 180) * 70}px)`,
+                      textShadow: '2px 2px 6px rgba(0,0,0,0.9), 0 0 10px rgba(0,0,0,0.5)',
+                      filter: 'drop-shadow(1px 1px 2px rgba(0,0,0,0.8))'
                     }}
                   >
                     {wheelNumbers[index]}
