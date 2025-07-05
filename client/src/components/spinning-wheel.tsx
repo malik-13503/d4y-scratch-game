@@ -27,13 +27,26 @@ interface WheelSegment {
 }
 
 // Generate wheel segments dynamically
-const generateWheelSegments = (totalNumbers: number, freePlayStart: number): WheelSegment[] => {
+const generateWheelSegments = (
+  totalNumbers: number,
+  freePlayStart: number,
+): WheelSegment[] => {
   const segments: WheelSegment[] = [];
   const colors = [
-    "#ef4444", "#3b82f6", "#10b981", "#f59e0b", "#8b5cf6", "#06b6d4",
-    "#84cc16", "#ec4899", "#f97316", "#6366f1", "#14b8a6", "#a855f7"
+    "#ef4444",
+    "#3b82f6",
+    "#10b981",
+    "#f59e0b",
+    "#8b5cf6",
+    "#06b6d4",
+    "#84cc16",
+    "#ec4899",
+    "#f97316",
+    "#6366f1",
+    "#14b8a6",
+    "#a855f7",
   ];
-  
+
   // Sample 12 numbers from the total range
   const selectedNumbers: number[] = [];
   for (let i = 0; i < 12; i++) {
@@ -43,7 +56,7 @@ const generateWheelSegments = (totalNumbers: number, freePlayStart: number): Whe
     } while (selectedNumbers.includes(number));
     selectedNumbers.push(number);
   }
-  
+
   selectedNumbers.forEach((number, index) => {
     const isFreePlay = number >= freePlayStart;
     segments.push({
@@ -51,10 +64,10 @@ const generateWheelSegments = (totalNumbers: number, freePlayStart: number): Whe
       color: colors[index % colors.length],
       textColor: "#ffffff",
       isFreePlay,
-      label: isFreePlay ? "FREE" : number.toString()
+      label: isFreePlay ? "FREE" : number.toString(),
     });
   });
-  
+
   return segments;
 };
 
@@ -71,7 +84,7 @@ export function SpinningWheel({
   const [amountCharged, setAmountCharged] = useState<number>(0);
   const wheelRef = useRef<HTMLDivElement>(null);
   const [glowIntensity, setGlowIntensity] = useState(0);
-  
+
   // Generate wheel segments with free play range (151-200 for 200 total numbers)
   const freePlayStart = Math.floor(totalNumbers * 0.75) + 1; // Last 25% are free plays
   const wheelSegments = generateWheelSegments(totalNumbers, freePlayStart);
@@ -108,12 +121,12 @@ export function SpinningWheel({
     const spinResult = await resultPromise;
 
     setResult(spinResult);
-    
+
     // Determine if it's a free play and calculate charges
     const isFree = spinResult >= freePlayStart;
     setIsFreePlay(isFree);
     setAmountCharged(isFree ? 0 : spinResult);
-    
+
     setIsSpinning(false);
 
     // Show result modal after spinning completes
@@ -138,7 +151,7 @@ export function SpinningWheel({
         ></div>
 
         {/* Outer Ring - Removed border */}
-        <div className="relative w-80 h-80 rounded-full shadow-2xl">
+        <div className="relative w-120 h-120 rounded-full shadow-2xl">
           {/* Enhanced Pointer - Pointing downward */}
           <div className="absolute bottom-85 left-1/2 transform -translate-x-1/2 translate-y-2 z-30">
             <div className="flex flex-col items-center">
@@ -206,7 +219,7 @@ export function SpinningWheel({
                 <div className="animate-spin">
                   <Target className="h-5 w-5" />
                 </div>
-                <span className="font-semibold">Spinning...</span>
+                {/* <span className="font-semibold">Spinning...</span> */}
               </div>
             </div>
           </div>
@@ -255,7 +268,9 @@ export function SpinningWheel({
                   {isFreePlay ? "🎁 FREE PLAY! 🎁" : "✨ NUMBER CLAIMED! ✨"}
                 </h2>
                 <p className="text-white/80 text-lg">
-                  {isFreePlay ? "Lucky you - this one's free!" : "You've claimed this number!"}
+                  {isFreePlay
+                    ? "Lucky you - this one's free!"
+                    : "You've claimed this number!"}
                 </p>
               </div>
 
@@ -277,7 +292,8 @@ export function SpinningWheel({
                       💰 $0.00 CHARGED
                     </div>
                     <p className="text-green-200 text-sm">
-                      This number is in the free play range - no payment required!
+                      This number is in the free play range - no payment
+                      required!
                     </p>
                     <p className="text-white/70 text-xs">
                       Number {result} has been added to your entry list
@@ -370,14 +386,7 @@ export function SpinningWheel({
         )}
 
         <div className="relative flex items-center space-x-3">
-          {isSpinning ? (
-            <>
-              <div className="animate-spin">
-                <Target className="h-6 w-6" />
-              </div>
-              <span>Spinning...</span>
-            </>
-          ) : (
+          
             <>
               <Zap className="h-6 w-6" />
               <span>SPIN TO WIN</span>
