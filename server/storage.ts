@@ -84,9 +84,87 @@ export class DatabaseStorage implements IStorage {
   }
 
   private async initializeSampleData() {
-    // Skip database initialization on startup to avoid blocking the server
-    // Database operations will be handled when actually needed
-    console.log("Database initialization skipped - will initialize on first use");
+    try {
+      // Create sample games if none exist
+      const existingGames = await this.getGames();
+      if (existingGames.length === 0) {
+        const sampleGames = [
+          {
+            name: "Premium Travel Mug",
+            code: "MUG001",
+            description: "High-quality travel mug with thermal insulation",
+            gameType: "wheel",
+            prize: "Premium Travel Mug",
+            prizeValue: "89.99",
+            prizeDescription: "Stainless steel travel mug with 12-hour heat retention",
+            totalNumbers: 150,
+            numbersLeft: 142,
+            minNumber: 1,
+            maxNumber: 150,
+            pricePerNumber: 0.60,
+            freePlayNumbers: Array.from({ length: 25 }, (_, i) => 126 + i),
+            startTime: new Date(),
+            endTime: new Date(Date.now() + 24 * 60 * 60 * 1000),
+            createdBy: 1,
+            isActive: true,
+            allowGuestPlay: true,
+            maxPlayersPerGame: 500,
+            gameStatus: "active" as const,
+          },
+          {
+            name: "Premium Camera",
+            code: "CAM001", 
+            description: "Professional DSLR camera with premium lens",
+            gameType: "wheel",
+            prize: "Premium Camera",
+            prizeValue: "299.99",
+            prizeDescription: "High-resolution camera with multiple shooting modes",
+            totalNumbers: 200,
+            numbersLeft: 186,
+            minNumber: 1,
+            maxNumber: 200,
+            pricePerNumber: 1.50,
+            freePlayNumbers: Array.from({ length: 50 }, (_, i) => 151 + i),
+            startTime: new Date(),
+            endTime: new Date(Date.now() + 72 * 60 * 60 * 1000),
+            createdBy: 1,
+            isActive: true,
+            allowGuestPlay: true,
+            maxPlayersPerGame: 1000,
+            gameStatus: "active" as const,
+          },
+          {
+            name: "Gift Card Bundle",
+            code: "GFT001",
+            description: "Multi-store gift card bundle worth $250",
+            gameType: "wheel",
+            prize: "Gift Card Bundle",
+            prizeValue: "250.00",
+            prizeDescription: "Gift cards for popular retailers and restaurants",
+            totalNumbers: 200,
+            numbersLeft: 194,
+            minNumber: 1,
+            maxNumber: 200,
+            pricePerNumber: 1.25,
+            freePlayNumbers: Array.from({ length: 25 }, (_, i) => 176 + i),
+            startTime: new Date(),
+            endTime: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+            createdBy: 1,
+            isActive: true,
+            allowGuestPlay: true,
+            maxPlayersPerGame: 800,
+            gameStatus: "active" as const,
+          }
+        ];
+
+        for (const gameData of sampleGames) {
+          await this.createGame(gameData);
+        }
+        console.log("Sample games created successfully");
+      }
+    } catch (error) {
+      console.error("Failed to initialize sample data:", error);
+    }
   }
 
   // Game methods
