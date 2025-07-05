@@ -60,12 +60,15 @@ export const players = pgTable("players", {
   email: text("email"),
   phone: text("phone"),
   ownedNumbers: text("owned_numbers").array().notNull().default([]), // Numbers player owns
+  selectedNumber: integer("selected_number"), // Last number selected in wheel spin
   totalSpent: decimal("total_spent", { precision: 10, scale: 2 }).notNull().default("0"),
   freeSpins: integer("free_spins").notNull().default(0),
+  referralCount: integer("referral_count").notNull().default(0),
   isWinner: boolean("is_winner").notNull().default(false),
   ipAddress: text("ip_address"),
   userAgent: text("user_agent"),
   joinedAt: timestamp("joined_at").notNull().defaultNow(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
 // Game results with enhanced tracking

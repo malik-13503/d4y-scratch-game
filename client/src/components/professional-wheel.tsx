@@ -10,21 +10,22 @@ interface ProfessionalWheelProps {
   totalNumbers?: number;
 }
 
-export function ProfessionalWheel({ 
-  onSpin, 
-  disabled = false, 
-  totalNumbers = 200 
+export function ProfessionalWheel({
+  onSpin,
+  disabled = false,
+  totalNumbers = 200,
 }: ProfessionalWheelProps) {
   const [isSpinning, setIsSpinning] = useState(false);
   const [rotation, setRotation] = useState(0);
+  const [pointerRotation, setPointerRotation] = useState(0);
   const [result, setResult] = useState<number | null>(null);
   const [showResultModal, setShowResultModal] = useState(false);
   const [isFreePlay, setIsFreePlay] = useState(false);
   const [amountCharged, setAmountCharged] = useState<number>(0);
   const wheelRef = useRef<HTMLDivElement>(null);
-  
+
   const freePlayStart = Math.floor(totalNumbers * 0.75) + 1;
-  
+
   // Premium dark and rich segment colors
   const segmentColors = [
     "#8B0000", // Dark Red
@@ -38,9 +39,9 @@ export function ProfessionalWheel({
     "#556B2F", // Dark Olive Green
     "#483D8B", // Dark Slate Blue
     "#CD853F", // Peru
-    "#2E8B57"  // Sea Green
+    "#2E8B57", // Sea Green
   ];
-  
+
   // Sample numbers for wheel display - more varied range
   const wheelNumbers = [15, 47, 182, 9, 156, 78, 195, 23, 167, 91, 189, 34];
 
@@ -54,26 +55,31 @@ export function ProfessionalWheel({
     // Professional spinning animation - 8 seconds duration
     const spinDuration = 8000;
     const spins = 8 + Math.random() * 4; // 8-12 full rotations
-    const finalRotation = rotation + (spins * 360);
+    const finalRotation = rotation + spins * 360;
+    
+    // Calculate pointer rotation based on result
+    const segmentAngle = 360 / segmentColors.length;
+    const pointerTargetAngle = Math.random() * 360;
     
     setRotation(finalRotation);
+    setPointerRotation(pointerTargetAngle);
 
     // Get result from API
     const resultPromise = onSpin();
-    
+
     // Wait for spin animation to complete
     setTimeout(async () => {
       try {
         const spinResult = await resultPromise;
         setResult(spinResult);
-        
+
         // Determine if it's a free play
         const isFree = spinResult >= freePlayStart;
         setIsFreePlay(isFree);
         setAmountCharged(isFree ? 0 : spinResult);
-        
+
         setIsSpinning(false);
-        
+
         // Show result modal after wheel stops
         setTimeout(() => {
           setShowResultModal(true);
@@ -89,8 +95,15 @@ export function ProfessionalWheel({
     <div className="flex flex-col items-center space-y-4 sm:space-y-6 w-full max-w-lg mx-auto px-2 sm:px-4">
       {/* Wheel Container */}
       <div className="relative">
-        {/* Pointer */}
-        <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1 z-20">
+        {/* Rotating Pointer */}
+        <div 
+          className="absolute top-0 left-1/2 z-20"
+          style={{
+            transform: `translate(-50%, -12px) rotate(${pointerRotation}deg)`,
+            transition: isSpinning ? `transform 8s cubic-bezier(0.25, 0.1, 0.25, 1)` : 'none',
+            transformOrigin: 'center bottom'
+          }}
+        >
           <div className="w-0 h-0 border-l-[12px] border-r-[12px] border-b-[20px] sm:border-l-[15px] sm:border-r-[15px] sm:border-b-[25px] border-l-transparent border-r-transparent border-b-yellow-400 drop-shadow-lg"></div>
         </div>
 
@@ -100,44 +113,50 @@ export function ProfessionalWheel({
           <div className="relative p-3 rounded-full bg-gradient-to-r from-yellow-600 via-yellow-400 via-yellow-300 to-yellow-600 shadow-2xl">
             <div className="p-1 rounded-full bg-gradient-to-r from-amber-700 via-yellow-500 to-amber-700">
               <div className="p-1 rounded-full bg-gradient-to-r from-yellow-500 via-yellow-300 to-yellow-500">
-                <div 
+                <div
                   ref={wheelRef}
                   className="w-64 h-64 sm:w-80 sm:h-80 md:w-96 md:h-96 rounded-full relative overflow-hidden"
                   style={{
                     transform: `rotate(${rotation}deg)`,
-                    transition: isSpinning ? `transform 8s cubic-bezier(0.25, 0.1, 0.25, 1)` : 'none',
-                    boxShadow: 'inset 0 0 30px rgba(0, 0, 0, 0.4), 0 0 40px rgba(255, 215, 0, 0.3)'
+                    transition: isSpinning
+                      ? `transform 8s cubic-bezier(0.25, 0.1, 0.25, 1)`
+                      : "none",
+                    boxShadow:
+                      "inset 0 0 30px rgba(0, 0, 0, 0.4), 0 0 40px rgba(255, 215, 0, 0.3)",
                   }}
                 >
                   {/* Wheel Segments */}
                   {segmentColors.map((color, index) => {
                     const angle = (360 / segmentColors.length) * index;
-                    const nextAngle = (360 / segmentColors.length) * (index + 1);
-                    
+                    const nextAngle =
+                      (360 / segmentColors.length) * (index + 1);
+
                     return (
                       <div
                         key={index}
                         className="absolute inset-0"
                         style={{
-                          clipPath: `polygon(50% 50%, ${50 + 50 * Math.cos((angle - 90) * Math.PI / 180)}% ${50 + 50 * Math.sin((angle - 90) * Math.PI / 180)}%, ${50 + 50 * Math.cos((nextAngle - 90) * Math.PI / 180)}% ${50 + 50 * Math.sin((nextAngle - 90) * Math.PI / 180)}%)`,
-                          background: `linear-gradient(135deg, ${color}, ${color}dd)`
+                          clipPath: `polygon(50% 50%, ${50 + 50 * Math.cos(((angle - 90) * Math.PI) / 180)}% ${50 + 50 * Math.sin(((angle - 90) * Math.PI) / 180)}%, ${50 + 50 * Math.cos(((nextAngle - 90) * Math.PI) / 180)}% ${50 + 50 * Math.sin(((nextAngle - 90) * Math.PI) / 180)}%)`,
+                          background: `linear-gradient(135deg, ${color}, ${color}dd)`,
                         }}
                       >
                         {/* Segment number - perfectly centered */}
-                        <div 
+                        <div
                           className="absolute text-white font-bold text-sm sm:text-base md:text-lg z-10 flex items-center justify-center"
                           style={{
-                            top: '50%',
-                            left: '50%',
-                            width: '32px',
-                            height: '32px',
-                            transform: `translate(-50%, -50%) translate(${Math.cos((angle + (360 / segmentColors.length) / 2 - 90) * Math.PI / 180) * 70}px, ${Math.sin((angle + (360 / segmentColors.length) / 2 - 90) * Math.PI / 180) * 70}px)`,
-                            textShadow: '2px 2px 6px rgba(0,0,0,0.9), 1px 1px 3px rgba(0,0,0,0.8), 0 0 8px rgba(0,0,0,0.6)',
-                            filter: 'drop-shadow(1px 1px 3px rgba(0,0,0,0.8))',
-                            backgroundColor: 'rgba(0,0,0,0.5)',
-                            borderRadius: '50%',
-                            border: '1.5px solid rgba(255,255,255,0.9)',
-                            boxShadow: '0 0 6px rgba(0,0,0,0.6), inset 0 0 4px rgba(255,255,255,0.1)'
+                            top: "50%",
+                            left: "50%",
+                            width: "32px",
+                            height: "32px",
+                            transform: `translate(-50%, -50%) translate(${Math.cos(((angle + 360 / segmentColors.length / 2 - 90) * Math.PI) / 180) * 70}px, ${Math.sin(((angle + 360 / segmentColors.length / 2 - 90) * Math.PI) / 180) * 70}px)`,
+                            textShadow:
+                              "2px 2px 6px rgba(0,0,0,0.9), 1px 1px 3px rgba(0,0,0,0.8), 0 0 8px rgba(0,0,0,0.6)",
+                            filter: "drop-shadow(1px 1px 3px rgba(0,0,0,0.8))",
+                            backgroundColor: "rgba(0,0,0,0.5)",
+                            borderRadius: "50%",
+                            border: "1.5px solid rgba(255,255,255,0.9)",
+                            boxShadow:
+                              "0 0 6px rgba(0,0,0,0.6), inset 0 0 4px rgba(255,255,255,0.1)",
                           }}
                         >
                           {wheelNumbers[index]}
@@ -145,10 +164,10 @@ export function ProfessionalWheel({
                       </div>
                     );
                   })}
-                  
-                  {/* Center hub */}
+
+                  {/* Center hub with brand logo */}
                   <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-br from-yellow-300 to-yellow-500 rounded-full border-2 sm:border-4 border-white shadow-lg flex items-center justify-center">
-                    <div className="w-6 h-6 sm:w-8 sm:h-8 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-full"></div>
+                    <Sparkles className="w-6 h-6 sm:w-8 sm:h-8 text-yellow-800" />
                   </div>
                 </div>
               </div>
@@ -156,19 +175,7 @@ export function ProfessionalWheel({
           </div>
         </div>
 
-        {/* Spinning indicator */}
-        {isSpinning && (
-          <div className="absolute inset-0 flex items-center justify-center bg-black/20 rounded-full">
-            <div className="bg-white/90 backdrop-blur-sm rounded-full px-3 py-2 sm:px-4 sm:py-2">
-              <div className="flex items-center space-x-2 text-gray-800">
-                <div className="animate-spin">
-                  <Play className="h-4 w-4 sm:h-5 sm:w-5" />
-                </div>
-                <span className="font-semibold text-sm sm:text-base">Spinning...</span>
-              </div>
-            </div>
-          </div>
-        )}
+
       </div>
 
       {/* Spin Button */}
@@ -198,10 +205,10 @@ export function ProfessionalWheel({
           <div className="relative p-6 text-center">
             {/* Confetti */}
             <Confetti active={showResultModal} duration={3000} />
-            
+
             {/* Background effects */}
             <div className="absolute inset-0 bg-gradient-to-r from-yellow-400/10 via-orange-500/10 to-red-500/10 animate-pulse"></div>
-            
+
             <div className="relative z-10 space-y-4">
               {/* Icon */}
               <div className="flex justify-center">

@@ -141,43 +141,44 @@ export default function GamePage() {
 
       {/* Header */}
       <header className="relative z-10 bg-black/20 backdrop-blur-xl border-b border-purple-500/30 shadow-2xl">
-        <div className="max-w-7xl mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between space-y-3 sm:space-y-0">
+            {/* Left side - Back button and game info */}
+            <div className="flex items-center space-x-3 sm:space-x-4 w-full sm:w-auto">
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => setLocation("/")}
-                className="text-gray-300 hover:text-white hover:bg-white/10"
+                className="text-gray-300 hover:text-white hover:bg-white/10 flex-shrink-0"
               >
-                <ArrowLeft className="h-5 w-5 mr-2" />
-                Back
+                <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5 mr-1 sm:mr-2" />
+                <span className="hidden sm:inline">Back</span>
               </Button>
-              <div className="flex items-center space-x-3">
-                <div className="p-3 bg-gradient-to-r from-red-500 to-red-600 rounded-xl shadow-lg">
-                  <span className="text-3xl">{game.emoji}</span>
+              <div className="flex items-center space-x-2 sm:space-x-3 min-w-0">
+                <div className="p-2 sm:p-3 bg-gradient-to-r from-red-500 to-red-600 rounded-xl shadow-lg flex-shrink-0">
+                  <span className="text-xl sm:text-3xl">{game.emoji}</span>
                 </div>
-                <div>
-                  <h1 className="text-3xl font-bold bg-gradient-to-r from-red-400 to-pink-400 bg-clip-text text-transparent">
+                <div className="min-w-0">
+                  <h1 className="text-xl sm:text-3xl font-bold bg-gradient-to-r from-red-400 to-pink-400 bg-clip-text text-transparent truncate">
                     {game.name}
                   </h1>
-                  <p className="text-gray-400 font-mono text-sm">{game.code}</p>
+                  <p className="text-gray-400 font-mono text-xs sm:text-sm">{game.code}</p>
                 </div>
               </div>
             </div>
             
-            <div className="flex items-center space-x-6">
-              {/* Live Stats */}
-              <div className="flex items-center space-x-4 bg-white/5 backdrop-blur-sm rounded-xl px-4 py-2 border border-white/10">
-                <div className="flex items-center space-x-2">
-                  <Users className="h-4 w-4 text-green-400" />
-                  <span className="text-white font-bold">{playerCount}</span>
-                  <span className="text-gray-400 text-sm">playing</span>
+            {/* Right side - Live Stats */}
+            <div className="flex items-center space-x-3 sm:space-x-6 w-full sm:w-auto">
+              <div className="flex items-center space-x-2 sm:space-x-4 bg-white/5 backdrop-blur-sm rounded-xl px-3 sm:px-4 py-2 border border-white/10 flex-1 sm:flex-none">
+                <div className="flex items-center space-x-1 sm:space-x-2">
+                  <Users className="h-3 w-3 sm:h-4 sm:w-4 text-green-400" />
+                  <span className="text-white font-bold text-sm sm:text-base">{playerCount}</span>
+                  <span className="text-gray-400 text-xs sm:text-sm">playing</span>
                 </div>
-                <div className="w-px h-6 bg-white/20"></div>
-                <div className="flex items-center space-x-2">
-                  <Clock className="h-4 w-4 text-blue-400" />
-                  <span className="text-white font-mono">{formatTimeRemaining(new Date(game.endTime))}</span>
+                <div className="w-px h-4 sm:h-6 bg-white/20"></div>
+                <div className="flex items-center space-x-1 sm:space-x-2">
+                  <Clock className="h-3 w-3 sm:h-4 sm:w-4 text-blue-400" />
+                  <span className="text-white font-mono text-xs sm:text-sm">{formatTimeRemaining(new Date(game.endTime))}</span>
                 </div>
               </div>
               

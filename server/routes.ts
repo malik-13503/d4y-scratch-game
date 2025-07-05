@@ -400,11 +400,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const games = await storage.getGames();
       const totalSpins = games.reduce((sum, game) => sum + (game.totalNumbers - game.numbersLeft), 0);
       
+      // Get all players across all games for user metrics
+      const allPlayers = [];
+      for (const game of games) {
+        const players = await storage.getPlayersByGameId(game.id);
+        allPlayers.push(...players);
+      }
+      
+      // Calculate real metrics
+      const totalUsers = allPlayers.length;
+      const activeUsers = allPlayers.filter(p => {
+        // Consider active if created within last hour
+        const hourAgo = new Date();
+        hourAgo.setHours(hourAgo.getHours() - 1);
+        return new Date(p.createdAt) > hourAgo;
+      }).length;
+      
+      // Calculate revenue (users who got paid numbers)
+      const todayRevenue = allPlayers.reduce((sum, player) => {
+        if (player.selectedNumber && player.selectedNumber <= 150) { // paid range
+          return sum + player.selectedNumber;
+        }
+        return sum;
+      }, 0);
+      
+      const conversionRate = totalUsers > 0 ? (totalSpins / totalUsers) * 100 : 0;
+      
       const stats = {
         totalGames: games.length,
         activeGames: games.filter(g => g.isActive).length,
         totalSpins,
         totalPrizeValue: games.reduce((sum, game) => sum + parseFloat(game.prizeValue.toString()), 0),
+        todayRevenue,
+        activeUsers,
+        totalUsers,
+        conversionRate: Math.round(conversionRate * 100) / 100
       };
 
       res.json(stats);

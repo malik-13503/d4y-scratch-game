@@ -153,7 +153,7 @@ export function SpinningWheel({
         {/* Outer Ring - Removed border */}
         <div className="relative w-120 h-120 rounded-full shadow-2xl">
           {/* Enhanced Pointer - Pointing downward */}
-          <div className="absolute bottom-85 left-1/2 transform -translate-x-1/2 translate-y-2 z-30">
+          <div className="absolute bottom-85 left-1/2 transform -translate-x-1/2 translate-y-5 z-30">
             <div className="flex flex-col items-center">
               {/* Arrow base */}
               {/* <div className="w-8 h-8 bg-gradient-to-br from-yellow-400 via-orange-500 to-red-500 rounded-full border-4 border-white shadow-2xl flex items-center justify-center">
@@ -386,7 +386,14 @@ export function SpinningWheel({
         )}
 
         <div className="relative flex items-center space-x-3">
-          
+          {isSpinning ? (
+            <>
+              <div className="animate-spin">
+                <Target className="h-6 w-6" />
+              </div>
+              <span>Spinning...</span>
+            </>
+          ) : (
             <>
               <Zap className="h-6 w-6" />
               <span>SPIN TO WIN</span>
