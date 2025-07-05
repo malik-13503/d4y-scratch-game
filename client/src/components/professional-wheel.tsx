@@ -42,8 +42,18 @@ export function ProfessionalWheel({
     "#2E8B57", // Sea Green
   ];
 
-  // Sample numbers for wheel display - more varied range
-  const wheelNumbers = [15, 47, 182, 9, 156, 78, 195, 23, 167, 91, 189, 34];
+  // Generate numbers for wheel display based on total numbers
+  const generateWheelNumbers = () => {
+    const numbers = [];
+    const segments = 12;
+    for (let i = 0; i < segments; i++) {
+      const number = Math.floor((totalNumbers / segments) * i) + Math.floor(Math.random() * (totalNumbers / segments)) + 1;
+      numbers.push(Math.min(number, totalNumbers));
+    }
+    return numbers;
+  };
+  
+  const wheelNumbers = generateWheelNumbers();
 
   const handleSpin = async () => {
     if (isSpinning || disabled) return;
@@ -52,59 +62,63 @@ export function ProfessionalWheel({
     setResult(null);
     setShowResultModal(false);
 
-    // Professional spinning animation - 8 seconds duration
-    const spinDuration = 8000;
-    const spins = 8 + Math.random() * 4; // 8-12 full rotations
-    const finalRotation = rotation + spins * 360;
-    
-    // Calculate pointer rotation based on result
-    const segmentAngle = 360 / segmentColors.length;
-    const pointerTargetAngle = Math.random() * 360;
-    
-    setRotation(finalRotation);
-    setPointerRotation(pointerTargetAngle);
+    try {
+      // Get result from API first
+      const spinResult = await onSpin();
+      console.log("Spin result received:", spinResult);
+      
+      // Professional spinning animation - 8 seconds duration
+      const spinDuration = 8000;
+      const spins = 8 + Math.random() * 4; // 8-12 full rotations
+      
+      // For simplicity, just spin the wheel randomly and show the actual result
+      // The important part is showing the correct result number in the popup
+      const finalRotation = rotation + spins * 360 + Math.random() * 360;
+      
+      setRotation(finalRotation);
+      // Keep pointer stationary - it always points down
 
-    // Get result from API
-    const resultPromise = onSpin();
-
-    // Wait for spin animation to complete
-    setTimeout(async () => {
-      try {
-        const spinResult = await resultPromise;
+      // Wait for spin animation to complete
+      setTimeout(() => {
         setResult(spinResult);
 
         // Determine if it's a free play
         const isFree = spinResult >= freePlayStart;
         setIsFreePlay(isFree);
+        // For paid numbers, charge the exact number amount
         setAmountCharged(isFree ? 0 : spinResult);
 
         setIsSpinning(false);
 
+        console.log("About to show result modal:", { spinResult, isFree, amountCharged: isFree ? 0 : spinResult });
+
         // Show result modal after wheel stops
         setTimeout(() => {
           setShowResultModal(true);
-        }, 300);
-      } catch (error) {
-        console.error("Spin error:", error);
-        setIsSpinning(false);
-      }
-    }, spinDuration);
+        }, 500);
+      }, spinDuration);
+      
+    } catch (error) {
+      console.error("Spin error:", error);
+      setIsSpinning(false);
+    }
   };
 
   return (
     <div className="flex flex-col items-center space-y-4 sm:space-y-6 w-full max-w-lg mx-auto px-2 sm:px-4">
       {/* Wheel Container */}
       <div className="relative">
-        {/* Rotating Pointer */}
+        {/* Fixed Downward Pointer */}
         <div 
           className="absolute top-0 left-1/2 z-20"
           style={{
-            transform: `translate(-50%, -12px) rotate(${pointerRotation}deg)`,
-            transition: isSpinning ? `transform 8s cubic-bezier(0.25, 0.1, 0.25, 1)` : 'none',
+            transform: `translate(-50%, -8px)`,
             transformOrigin: 'center bottom'
           }}
         >
-          <div className="w-0 h-0 border-l-[12px] border-r-[12px] border-b-[20px] sm:border-l-[15px] sm:border-r-[15px] sm:border-b-[25px] border-l-transparent border-r-transparent border-b-yellow-400 drop-shadow-lg"></div>
+          <div className="w-0 h-0 border-l-[15px] border-r-[15px] border-b-[30px] sm:border-l-[18px] sm:border-r-[18px] sm:border-b-[35px] border-l-transparent border-r-transparent border-b-yellow-400 drop-shadow-2xl">
+            <div className="absolute top-[25px] left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-[8px] border-r-[8px] border-b-[12px] border-l-transparent border-r-transparent border-b-red-600"></div>
+          </div>
         </div>
 
         {/* Wheel with Premium Border */}
@@ -235,22 +249,32 @@ export function ProfessionalWheel({
               {/* Payment info */}
               <div className="bg-black/30 backdrop-blur-sm rounded-lg p-4 border border-white/20">
                 {isFreePlay ? (
-                  <div className="text-center space-y-1">
-                    <div className="text-xl font-bold text-green-300">
-                      💰 $0.00 CHARGED
+                  <div className="text-center space-y-2">
+                    <div className="text-2xl font-bold text-green-300">
+                      🎉 FREE PLAY - $0.00
                     </div>
                     <p className="text-green-200 text-sm">
-                      This number is in the free play range!
+                      Lucky you! This number is in the free play range (#{freePlayStart}-{totalNumbers})
                     </p>
+                    <div className="bg-green-500/20 rounded-lg p-2 mt-2">
+                      <p className="text-green-100 text-xs font-semibold">
+                        🎁 No charge for this spin!
+                      </p>
+                    </div>
                   </div>
                 ) : (
-                  <div className="text-center space-y-1">
-                    <div className="text-xl font-bold text-blue-300">
-                      💳 ${amountCharged}.00 CHARGED
+                  <div className="text-center space-y-2">
+                    <div className="text-2xl font-bold text-blue-300">
+                      💳 ${amountCharged.toFixed(2)} CHARGED
                     </div>
                     <p className="text-blue-200 text-sm">
-                      Your card has been charged the exact number amount
+                      You selected number {result} - charged exactly ${amountCharged.toFixed(2)}
                     </p>
+                    <div className="bg-blue-500/20 rounded-lg p-2 mt-2">
+                      <p className="text-blue-100 text-xs font-semibold">
+                        💰 Payment processed successfully
+                      </p>
+                    </div>
                   </div>
                 )}
               </div>

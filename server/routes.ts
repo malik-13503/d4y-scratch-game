@@ -195,7 +195,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Update player with selected number
       await storage.updatePlayer(playerId, { selectedNumber });
 
-      res.json({ selectedNumber });
+      res.json({ spunNumber: selectedNumber, selectedNumber });
     } catch (error) {
       res.status(500).json({ message: "Failed to spin wheel" });
     }
