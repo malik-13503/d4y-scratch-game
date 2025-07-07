@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Coffee, Camera, Gift, Trophy, Star, Zap, Crown, Sparkles } from "lucide-react";
 import type { Game } from "@shared/schema";
+import logoPath from "@assets/logo_1751918412862.png";
 
 export default function Home() {
   const [, setLocation] = useLocation();
@@ -85,7 +86,7 @@ export default function Home() {
             <div className="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-4 w-full sm:w-auto">
               <div className="flex items-center">
                 <img 
-                  src="/attached_assets/logo_1751918412862.png" 
+                  src={logoPath} 
                   alt="Hit The Road Jackpot" 
                   className="h-12 sm:h-16 w-auto object-contain"
                 />

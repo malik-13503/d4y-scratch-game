@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { ProfessionalWheel } from "@/components/professional-wheel";
 import { Confetti } from "@/components/confetti";
+import logoPath from "@assets/logo_1751918412862.png";
 import { 
   Clock, 
   Users, 
@@ -170,7 +171,7 @@ export default function GamePage() {
             {/* Right side - Logo and Live Stats */}
             <div className="flex items-center space-x-3 sm:space-x-6 w-full sm:w-auto">
               <img 
-                src="/attached_assets/logo_1751918412862.png" 
+                src={logoPath} 
                 alt="Hit The Road Jackpot" 
                 className="h-8 w-auto object-contain hidden sm:block"
               />

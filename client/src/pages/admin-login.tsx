@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import logoPath from "@assets/logo_1751918412862.png";
 
 export default function AdminLoginPage() {
   const [, setLocation] = useLocation();
@@ -54,8 +55,12 @@ export default function AdminLoginPage() {
       <div className="w-full max-w-md">
         <Card className="shadow-2xl border-0">
           <CardHeader className="text-center pb-6">
-            <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full mx-auto mb-4 flex items-center justify-center">
-              <span className="text-white text-2xl font-bold">🎮</span>
+            <div className="mx-auto mb-4 flex items-center justify-center">
+              <img 
+                src={logoPath} 
+                alt="Hit The Road Jackpot" 
+                className="h-16 w-auto object-contain"
+              />
             </div>
             <CardTitle className="text-2xl font-bold text-gray-900">Admin Dashboard</CardTitle>
             <p className="text-gray-600">Sign in to manage prize games</p>

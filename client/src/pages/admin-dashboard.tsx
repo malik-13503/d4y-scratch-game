@@ -47,6 +47,7 @@ import {
 } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import logoPath from "@assets/logo_1751918412862.png";
 
 export default function AdminDashboard() {
   const [, setLocation] = useLocation();
@@ -217,7 +218,7 @@ export default function AdminDashboard() {
             <div className="flex items-center space-x-6">
               <div className="flex items-center space-x-3">
                 <img 
-                  src="/attached_assets/logo_1751918412862.png" 
+                  src={logoPath} 
                   alt="Hit The Road Jackpot" 
                   className="h-12 w-auto object-contain"
                 />
