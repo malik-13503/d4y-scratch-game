@@ -223,92 +223,92 @@ export default function Home() {
                   <div className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r ${colors.color} group-hover:h-2 transition-all duration-300`}></div>
                   
                   <CardContent className="relative p-6">
-                    {/* Enhanced Prize Highlight */}
-                    <div className="absolute top-6 right-6 z-10">
-                      <div className={`bg-gradient-to-r ${colors.color} text-white px-4 py-2 rounded-xl text-base font-black shadow-2xl flex items-center space-x-2 border border-white/20 backdrop-blur-sm`}>
-                        <Trophy className="h-4 w-4 animate-pulse" />
-                        <span>${game.prizeValue}</span>
-                        <Sparkles className="h-3 w-3 animate-spin" />
+                    {/* Enhanced Responsive Prize Highlight */}
+                    <div className="absolute top-4 right-4 sm:top-6 sm:right-6 z-10">
+                      <div className={`bg-gradient-to-r ${colors.color} text-white px-2 py-1 sm:px-4 sm:py-2 rounded-lg sm:rounded-xl text-xs sm:text-base font-black shadow-2xl flex items-center space-x-1 sm:space-x-2 border border-white/20 backdrop-blur-sm max-w-[120px] sm:max-w-none`}>
+                        <Trophy className="h-3 w-3 sm:h-4 sm:w-4 animate-pulse flex-shrink-0" />
+                        <span className="truncate text-xs sm:text-base">${game.prizeValue}</span>
+                        <Sparkles className="h-2 w-2 sm:h-3 sm:w-3 animate-spin flex-shrink-0" />
                       </div>
                     </div>
 
-                    {/* Enhanced Game Icon and Info */}
-                    <div className="flex items-start space-x-6">
-                      <div className={`relative p-5 rounded-3xl bg-gradient-to-br ${colors.color} shadow-2xl group-hover:scale-110 transition-transform duration-500`}>
-                        <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent rounded-3xl"></div>
-                        <Icon className="relative h-10 w-10 text-white drop-shadow-lg" />
+                    {/* Enhanced Responsive Game Icon and Info */}
+                    <div className="flex items-start space-x-3 sm:space-x-6 pr-[130px] sm:pr-[140px]">
+                      <div className={`relative p-3 sm:p-5 rounded-2xl sm:rounded-3xl bg-gradient-to-br ${colors.color} shadow-2xl group-hover:scale-110 transition-transform duration-500 flex-shrink-0`}>
+                        <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent rounded-2xl sm:rounded-3xl"></div>
+                        <Icon className="relative h-6 w-6 sm:h-10 sm:w-10 text-white drop-shadow-lg" />
                       </div>
                       
-                      <div className="flex-1 min-w-0 pt-2">
-                        <div className="flex items-center space-x-3 mb-2">
-                          <h2 className="text-2xl font-black text-white truncate tracking-wide">{game.name}</h2>
-                          <Badge className={`${colors.bg} text-white text-xs font-bold px-3 py-1 rounded-full border border-white/20`}>
+                      <div className="flex-1 min-w-0 pt-1 sm:pt-2">
+                        <div className="flex flex-col sm:flex-row sm:items-center space-y-1 sm:space-y-0 sm:space-x-3 mb-2">
+                          <h2 className="text-lg sm:text-2xl font-black text-white truncate tracking-wide">{game.name}</h2>
+                          <Badge className={`${colors.bg} text-white text-xs font-bold px-2 sm:px-3 py-1 rounded-full border border-white/20 w-fit`}>
                             {game.code}
                           </Badge>
                         </div>
-                        <p className="text-gray-300 text-base mb-4 leading-relaxed">{game.description}</p>
+                        <p className="text-gray-300 text-sm sm:text-base mb-3 sm:mb-4 leading-relaxed line-clamp-2">{game.description}</p>
                         
                         {/* Status indicators */}
-                        <div className="flex items-center space-x-4">
+                        <div className="flex flex-col sm:flex-row sm:items-center space-y-1 sm:space-y-0 sm:space-x-4">
                           <div className="flex items-center space-x-2">
-                            <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse shadow-lg shadow-green-400/50"></div>
-                            <span className="text-green-400 font-bold text-sm">LIVE</span>
+                            <div className="w-2 h-2 sm:w-3 sm:h-3 bg-green-400 rounded-full animate-pulse shadow-lg shadow-green-400/50"></div>
+                            <span className="text-green-400 font-bold text-xs sm:text-sm">LIVE</span>
                           </div>
                           <div className="flex items-center space-x-2">
-                            <Users className="h-4 w-4 text-blue-400" />
-                            <span className="text-blue-400 font-bold text-sm">{Math.floor(Math.random() * 50) + 10} playing</span>
+                            <Users className="h-3 w-3 sm:h-4 sm:w-4 text-blue-400" />
+                            <span className="text-blue-400 font-bold text-xs sm:text-sm">{Math.floor(Math.random() * 50) + 10} playing</span>
                           </div>
                         </div>
                       </div>
                     </div>
 
-                    {/* Enhanced Game Progress */}
-                    <div className="mt-8 space-y-4">
+                    {/* Enhanced Responsive Game Progress */}
+                    <div className="mt-6 sm:mt-8 space-y-3 sm:space-y-4">
                       <div className="flex justify-between items-center">
-                        <span className="text-base font-bold text-white">Game Progress</span>
-                        <span className="text-sm text-gray-300 font-mono bg-slate-800/50 px-3 py-1 rounded-full border border-white/10">{game.numbersLeft} / {game.totalNumbers} left</span>
+                        <span className="text-sm sm:text-base font-bold text-white">Game Progress</span>
+                        <span className="text-xs sm:text-sm text-gray-300 font-mono bg-slate-800/50 px-2 sm:px-3 py-1 rounded-full border border-white/10">{game.numbersLeft} / {game.totalNumbers} left</span>
                       </div>
                       <div className="relative">
-                        <Progress value={progress} className="h-3 bg-slate-800/50 border border-white/10" />
+                        <Progress value={progress} className="h-2 sm:h-3 bg-slate-800/50 border border-white/10" />
                         <div className="absolute inset-0 bg-gradient-to-r from-purple-500/20 via-blue-500/20 to-red-500/20 rounded-full blur-sm"></div>
                       </div>
                       <div className="text-center">
-                        <span className="text-2xl font-black text-white">{Math.round(progress)}%</span>
-                        <span className="text-gray-400 ml-2">Complete</span>
+                        <span className="text-xl sm:text-2xl font-black text-white">{Math.round(progress)}%</span>
+                        <span className="text-gray-400 ml-2 text-sm sm:text-base">Complete</span>
                       </div>
                     </div>
 
-                    {/* Enhanced Game Details Grid */}
-                    <div className="mt-8 grid grid-cols-2 gap-4">
-                      <div className="bg-gradient-to-br from-green-500/20 to-emerald-500/20 p-4 rounded-xl border border-green-400/30 backdrop-blur-sm">
+                    {/* Enhanced Responsive Game Details Grid */}
+                    <div className="mt-6 sm:mt-8 grid grid-cols-2 gap-3 sm:gap-4">
+                      <div className="bg-gradient-to-br from-green-500/20 to-emerald-500/20 p-3 sm:p-4 rounded-lg sm:rounded-xl border border-green-400/30 backdrop-blur-sm">
                         <div className="text-xs text-green-300 font-bold uppercase tracking-wider">Free Play Range</div>
-                        <div className="text-lg font-black text-green-200 mt-1">{freePlayRange}</div>
-                        <div className="text-xs text-green-400 mt-2">🎁 No cost to play</div>
+                        <div className="text-base sm:text-lg font-black text-green-200 mt-1">{freePlayRange}</div>
+                        <div className="text-xs text-green-400 mt-1 sm:mt-2">🎁 No cost to play</div>
                       </div>
-                      <div className="bg-gradient-to-br from-blue-500/20 to-cyan-500/20 p-4 rounded-xl border border-blue-400/30 backdrop-blur-sm">
+                      <div className="bg-gradient-to-br from-blue-500/20 to-cyan-500/20 p-3 sm:p-4 rounded-lg sm:rounded-xl border border-blue-400/30 backdrop-blur-sm">
                         <div className="text-xs text-blue-300 font-bold uppercase tracking-wider">Paid Range</div>
-                        <div className="text-lg font-black text-blue-200 mt-1">{paidRange}</div>
-                        <div className="text-xs text-blue-400 mt-2">💰 Pay exact number</div>
+                        <div className="text-base sm:text-lg font-black text-blue-200 mt-1">{paidRange}</div>
+                        <div className="text-xs text-blue-400 mt-1 sm:mt-2">💰 Pay exact number</div>
                       </div>
                     </div>
 
-                    {/* Enhanced Action Section */}
-                    <div className="mt-8 pt-6 border-t border-white/10">
-                      <div className="flex flex-col space-y-4">
-                        <div className="flex justify-between items-center">
-                          <div className="text-sm text-gray-400">
+                    {/* Enhanced Responsive Action Section */}
+                    <div className="mt-6 sm:mt-8 pt-4 sm:pt-6 border-t border-white/10">
+                      <div className="flex flex-col space-y-3 sm:space-y-4">
+                        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center space-y-2 sm:space-y-0">
+                          <div className="text-xs sm:text-sm text-gray-400">
                             <span className="font-medium">Game ends:</span>
-                            <div className="text-white font-bold">{timeRemaining}</div>
+                            <div className="text-white font-bold text-sm sm:text-base">{timeRemaining}</div>
                           </div>
                           <div className="flex items-center space-x-2">
                             <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
-                            <span className="text-red-400 font-bold text-sm">ENDING SOON</span>
+                            <span className="text-red-400 font-bold text-xs sm:text-sm">ENDING SOON</span>
                           </div>
                         </div>
-                        <Button size="lg" className={`w-full bg-gradient-to-r ${colors.color} hover:opacity-90 text-white font-black text-lg px-8 py-4 shadow-2xl border border-white/20 backdrop-blur-sm group-hover:shadow-purple-500/30 transition-all duration-300`}>
-                          <Zap className="h-5 w-5 mr-2 animate-pulse" />
+                        <Button size="lg" className={`w-full bg-gradient-to-r ${colors.color} hover:opacity-90 text-white font-black text-base sm:text-lg px-6 sm:px-8 py-3 sm:py-4 shadow-2xl border border-white/20 backdrop-blur-sm group-hover:shadow-purple-500/30 transition-all duration-300`}>
+                          <Zap className="h-4 w-4 sm:h-5 sm:w-5 mr-2 animate-pulse" />
                           SPIN TO WIN
-                          <Crown className="h-5 w-5 ml-2 animate-bounce" />
+                          <Crown className="h-4 w-4 sm:h-5 sm:w-5 ml-2 animate-bounce" />
                         </Button>
                       </div>
                     </div>
