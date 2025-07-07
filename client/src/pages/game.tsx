@@ -167,8 +167,13 @@ export default function GamePage() {
               </div>
             </div>
             
-            {/* Right side - Live Stats */}
+            {/* Right side - Logo and Live Stats */}
             <div className="flex items-center space-x-3 sm:space-x-6 w-full sm:w-auto">
+              <img 
+                src="/attached_assets/logo_1751918412862.png" 
+                alt="Hit The Road Jackpot" 
+                className="h-8 w-auto object-contain hidden sm:block"
+              />
               <div className="flex items-center space-x-2 sm:space-x-4 bg-white/5 backdrop-blur-sm rounded-xl px-3 sm:px-4 py-2 border border-white/10 flex-1 sm:flex-none">
                 <div className="flex items-center space-x-1 sm:space-x-2">
                   <Users className="h-3 w-3 sm:h-4 sm:w-4 text-green-400" />

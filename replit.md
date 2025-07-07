@@ -100,6 +100,12 @@ This is a real-time prize game web application that allows users to participate 
 
 ## Changelog
 
+- January 7, 2025: Replaced text logo with custom brand logo
+  - Updated homepage header to display brand logo image
+  - Added logo to admin dashboard header maintaining professional appearance
+  - Integrated logo into game page header (hidden on mobile for space)
+  - Enhanced brand consistency across all application pages
+  - Logo displays at optimal sizes for different screen contexts
 - January 2, 2025: Enhanced admin dashboard with eye-catching overview section
   - Removed live users and total spins from header
   - Added hero stats section with gradient animations

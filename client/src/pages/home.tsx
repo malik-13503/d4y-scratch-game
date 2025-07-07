@@ -83,12 +83,12 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
           <div className="flex flex-col sm:flex-row items-center sm:items-center justify-between space-y-3 sm:space-y-0">
             <div className="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-4 w-full sm:w-auto">
-              <div className="bg-gradient-to-r from-white to-yellow-100 text-red-600 px-3 sm:px-6 py-2 sm:py-3 rounded-xl font-bold text-lg sm:text-2xl shadow-2xl border border-yellow-200">
-                <div className="flex items-center space-x-1 sm:space-x-2">
-                  <Crown className="h-4 w-4 sm:h-6 sm:w-6 text-yellow-600" />
-                  <span className="text-center">HIT THE ROAD JACKPOT</span>
-                  <Crown className="h-4 w-4 sm:h-6 sm:w-6 text-yellow-600" />
-                </div>
+              <div className="flex items-center">
+                <img 
+                  src="/attached_assets/logo_1751918412862.png" 
+                  alt="Hit The Road Jackpot" 
+                  className="h-12 sm:h-16 w-auto object-contain"
+                />
               </div>
               <div className="text-white/90 text-xs sm:text-sm bg-gradient-to-r from-white/20 to-white/10 px-3 sm:px-4 py-1 sm:py-2 rounded-full border border-white/20 backdrop-blur-sm">
                 <div className="flex items-center space-x-1">

@@ -216,9 +216,11 @@ export default function AdminDashboard() {
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-6">
               <div className="flex items-center space-x-3">
-                <div className="p-3 bg-gradient-to-r from-purple-600 to-blue-600 rounded-xl shadow-lg">
-                  <Shield className="h-8 w-8 text-white" />
-                </div>
+                <img 
+                  src="/attached_assets/logo_1751918412862.png" 
+                  alt="Hit The Road Jackpot" 
+                  className="h-12 w-auto object-contain"
+                />
                 <div>
                   <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
                     ADMIN COMMAND CENTER
