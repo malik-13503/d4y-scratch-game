@@ -88,7 +88,7 @@ export default function Home() {
                 <img 
                   src={logoPath} 
                   alt="Hit The Road Jackpot" 
-                  className="h-12 sm:h-16 w-auto object-contain"
+                  className="h-16 w-auto object-contain sm:h-20 md:h-24 lg:h-28 max-w-none"
                 />
               </div>
               <div className="text-white/90 text-xs sm:text-sm bg-gradient-to-r from-white/20 to-white/10 px-3 sm:px-4 py-1 sm:py-2 rounded-full border border-white/20 backdrop-blur-sm">

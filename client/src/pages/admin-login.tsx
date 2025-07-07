@@ -59,7 +59,7 @@ export default function AdminLoginPage() {
               <img 
                 src={logoPath} 
                 alt="Hit The Road Jackpot" 
-                className="h-16 w-auto object-contain"
+                className="h-20 w-auto object-contain sm:h-24 md:h-28"
               />
             </div>
             <CardTitle className="text-2xl font-bold text-gray-900">Admin Dashboard</CardTitle>

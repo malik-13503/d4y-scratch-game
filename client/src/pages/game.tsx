@@ -173,7 +173,7 @@ export default function GamePage() {
               <img 
                 src={logoPath} 
                 alt="Hit The Road Jackpot" 
-                className="h-8 w-auto object-contain hidden sm:block"
+                className="h-10 w-auto object-contain sm:h-12 md:h-14 lg:h-16"
               />
               <div className="flex items-center space-x-2 sm:space-x-4 bg-white/5 backdrop-blur-sm rounded-xl px-3 sm:px-4 py-2 border border-white/10 flex-1 sm:flex-none">
                 <div className="flex items-center space-x-1 sm:space-x-2">
