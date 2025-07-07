@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Coffee, Camera, Gift, Trophy, Star, Zap, Crown, Sparkles } from "lucide-react";
+import { Coffee, Camera, Gift, Trophy, Star, Zap, Crown, Sparkles, Users, Gamepad2, Target, Gem } from "lucide-react";
 import type { Game } from "@shared/schema";
 import logoPath from "@assets/logo_1751918412862.png";
 
@@ -53,17 +53,42 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden">
-      {/* Animated Background Elements */}
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950 to-slate-950 relative overflow-hidden">
+      {/* Enhanced Professional Background */}
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-500/20 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-blue-500/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
-        <div className="absolute top-1/2 left-1/2 w-60 h-60 bg-pink-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
+        {/* Primary gradient orbs */}
+        <div className="absolute top-10 left-5 w-96 h-96 bg-gradient-to-br from-red-500/25 to-purple-600/25 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-10 right-5 w-[500px] h-[500px] bg-gradient-to-br from-blue-500/20 to-cyan-500/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
+        <div className="absolute top-1/3 right-1/4 w-72 h-72 bg-gradient-to-br from-yellow-500/15 to-orange-500/15 rounded-full blur-3xl animate-pulse delay-2000"></div>
+        
+        {/* Rotating elements */}
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[1000px] h-[1000px] bg-gradient-conic from-purple-500/8 via-blue-500/8 to-red-500/8 rounded-full blur-3xl animate-spin" style={{animationDuration: '30s'}}></div>
+        
+        {/* Grid pattern overlay */}
+        <div className="absolute inset-0 opacity-30"
+             style={{
+               backgroundImage: `
+                 linear-gradient(rgba(147, 51, 234, 0.15) 1px, transparent 1px),
+                 linear-gradient(90deg, rgba(147, 51, 234, 0.15) 1px, transparent 1px)
+               `,
+               backgroundSize: '60px 60px'
+             }}>
+        </div>
+        
+        {/* Radial gradient overlay for depth */}
+        <div className="absolute inset-0 bg-gradient-radial from-transparent via-slate-950/30 to-slate-950/60"></div>
       </div>
 
-      {/* Floating Elements */}
+      {/* Enhanced Floating Elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {[...Array(8)].map((_, i) => (
+        {/* Floating particles */}
+        <div className="absolute top-1/4 left-1/3 w-3 h-3 bg-yellow-400/90 rounded-full animate-ping shadow-lg shadow-yellow-400/50"></div>
+        <div className="absolute top-3/4 right-1/3 w-2 h-2 bg-cyan-400/90 rounded-full animate-ping delay-500 shadow-lg shadow-cyan-400/50"></div>
+        <div className="absolute bottom-1/3 left-1/4 w-4 h-4 bg-purple-400/90 rounded-full animate-ping delay-1000 shadow-lg shadow-purple-400/50"></div>
+        <div className="absolute top-1/6 right-1/6 w-2 h-2 bg-red-400/90 rounded-full animate-ping delay-1500 shadow-lg shadow-red-400/50"></div>
+        
+        {/* Enhanced floating elements */}
+        {[...Array(12)].map((_, i) => (
           <div
             key={i}
             className="absolute animate-float"
@@ -71,39 +96,49 @@ export default function Home() {
               left: `${Math.random() * 100}%`,
               top: `${Math.random() * 100}%`,
               animationDelay: `${Math.random() * 5}s`,
-              animationDuration: `${5 + Math.random() * 10}s`
+              animationDuration: `${8 + Math.random() * 12}s`
             }}
           >
-            <div className="w-2 h-2 bg-white/20 rounded-full blur-sm"></div>
+            <div className={`w-${Math.random() > 0.5 ? '3' : '2'} h-${Math.random() > 0.5 ? '3' : '2'} bg-gradient-to-br from-white/30 to-white/10 rounded-full blur-sm shadow-lg`}></div>
           </div>
         ))}
       </div>
 
-      {/* Header */}
-      <header className="relative bg-gradient-to-r from-red-600 via-red-700 to-purple-700 shadow-2xl backdrop-blur-sm border-b border-white/10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
-          <div className="flex flex-col sm:flex-row items-center sm:items-center justify-between space-y-3 sm:space-y-0">
-            <div className="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-4 w-full sm:w-auto">
-              <div className="flex items-center">
+      {/* Enhanced Professional Header */}
+      <header className="relative bg-gradient-to-r from-red-600/95 via-red-700/95 to-purple-700/95 shadow-2xl backdrop-blur-xl border-b border-white/20">
+        <div className="absolute inset-0 bg-gradient-to-r from-red-500/20 via-purple-500/20 to-blue-500/20 blur-xl"></div>
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+          <div className="flex flex-col sm:flex-row items-center sm:items-center justify-between space-y-4 sm:space-y-0">
+            <div className="flex flex-col sm:flex-row items-center space-y-3 sm:space-y-0 sm:space-x-6 w-full sm:w-auto">
+              <div className="flex items-center relative">
+                <div className="absolute inset-0 bg-gradient-to-r from-yellow-400/30 to-orange-400/30 blur-lg rounded-full"></div>
                 <img 
                   src={logoPath} 
                   alt="Hit The Road Jackpot" 
-                  className="h-16 w-auto object-contain sm:h-20 md:h-24 lg:h-28 max-w-none"
+                  className="relative h-16 w-auto object-contain sm:h-20 md:h-24 lg:h-28 max-w-none drop-shadow-2xl"
                 />
               </div>
-              <div className="text-white/90 text-xs sm:text-sm bg-gradient-to-r from-white/20 to-white/10 px-3 sm:px-4 py-1 sm:py-2 rounded-full border border-white/20 backdrop-blur-sm">
-                <div className="flex items-center space-x-1">
-                  <Star className="h-3 w-3 text-yellow-300" />
-                  <span>A7T6</span>
+              <div className="flex items-center space-x-3">
+                <div className="text-white/95 text-sm sm:text-base bg-gradient-to-r from-yellow-500/30 to-orange-500/30 px-4 sm:px-6 py-2 sm:py-3 rounded-full border border-yellow-400/40 backdrop-blur-sm shadow-lg">
+                  <div className="flex items-center space-x-2">
+                    <Star className="h-4 w-4 sm:h-5 sm:w-5 text-yellow-300 animate-pulse" />
+                    <span className="font-bold tracking-wide">LIVE GAMES</span>
+                    <Star className="h-4 w-4 sm:h-5 sm:w-5 text-yellow-300 animate-pulse" />
+                  </div>
                 </div>
               </div>
             </div>
             
-            <div className="flex items-center space-x-2 sm:space-x-4 w-full sm:w-auto justify-center sm:justify-end">
-              <div className="text-white/90 text-xs sm:text-sm bg-gradient-to-r from-white/20 to-white/10 px-3 sm:px-4 py-1 sm:py-2 rounded-lg border border-white/20 backdrop-blur-sm">
-                <div className="flex items-center space-x-1 sm:space-x-2">
-                  <Sparkles className="h-3 w-3 sm:h-4 sm:w-4 text-yellow-300" />
-                  <span className="text-center">Free coins | <span className="text-yellow-300 font-semibold">personality</span></span>
+            <div className="flex items-center space-x-3 sm:space-x-4 w-full sm:w-auto justify-center sm:justify-end">
+              <div className="text-white/95 text-sm sm:text-base bg-gradient-to-r from-emerald-500/30 to-cyan-500/30 px-4 sm:px-6 py-2 sm:py-3 rounded-xl border border-emerald-400/40 backdrop-blur-sm shadow-lg">
+                <div className="flex items-center space-x-2 sm:space-x-3">
+                  <Sparkles className="h-4 w-4 sm:h-5 sm:w-5 text-emerald-300 animate-spin" />
+                  <span className="font-bold">WIN BIG</span>
+                  <div className="flex space-x-1">
+                    <div className="w-2 h-2 bg-emerald-400 rounded-full animate-ping"></div>
+                    <div className="w-2 h-2 bg-cyan-400 rounded-full animate-ping delay-100"></div>
+                    <div className="w-2 h-2 bg-blue-400 rounded-full animate-ping delay-200"></div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -111,15 +146,48 @@ export default function Home() {
         </div>
       </header>
 
-      {/* Main Content */}
-      <main className="relative max-w-md mx-auto px-4 py-8">
+      {/* Enhanced Main Content */}
+      <main className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        {/* Hero Section */}
+        <div className="text-center mb-16">
+          <div className="relative inline-block">
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black bg-gradient-to-r from-yellow-400 via-red-500 to-purple-600 bg-clip-text text-transparent mb-6 tracking-tight">
+              LIVE JACKPOT GAMES
+            </h1>
+            <div className="absolute -inset-4 bg-gradient-to-r from-yellow-400/20 via-red-500/20 to-purple-600/20 blur-2xl rounded-full"></div>
+          </div>
+          <p className="text-xl sm:text-2xl text-gray-300 font-medium mb-8 max-w-3xl mx-auto leading-relaxed">
+            Spin the wheel of fortune and win amazing prizes! 
+            <span className="text-yellow-400 font-bold"> Real games, real winners, real excitement!</span>
+          </p>
+          <div className="flex flex-wrap justify-center gap-6 mb-12">
+            <div className="bg-gradient-to-r from-green-500/20 to-emerald-500/20 backdrop-blur-sm border border-green-400/40 rounded-xl px-6 py-3">
+              <div className="flex items-center space-x-2">
+                <Zap className="h-5 w-5 text-green-400" />
+                <span className="text-green-300 font-bold">INSTANT PLAY</span>
+              </div>
+            </div>
+            <div className="bg-gradient-to-r from-blue-500/20 to-cyan-500/20 backdrop-blur-sm border border-blue-400/40 rounded-xl px-6 py-3">
+              <div className="flex items-center space-x-2">
+                <Trophy className="h-5 w-5 text-blue-400" />
+                <span className="text-blue-300 font-bold">BIG PRIZES</span>
+              </div>
+            </div>
+            <div className="bg-gradient-to-r from-purple-500/20 to-pink-500/20 backdrop-blur-sm border border-purple-400/40 rounded-xl px-6 py-3">
+              <div className="flex items-center space-x-2">
+                <Crown className="h-5 w-5 text-purple-400" />
+                <span className="text-purple-300 font-bold">FREE SPINS</span>
+              </div>
+            </div>
+          </div>
+        </div>
         {isLoading ? (
           <div className="text-center py-12">
             <div className="animate-spin rounded-full h-16 w-16 border-4 border-purple-500 border-t-transparent mx-auto mb-4"></div>
             <p className="text-white text-xl font-semibold">Loading Games...</p>
           </div>
         ) : (
-          <div className="space-y-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8">
             {games && games.length > 0 ? games.filter(game => game.isActive).map((game, index) => {
               const Icon = getGameIcon(game.name);
               const progress = ((game.totalNumbers - game.numbersLeft) / game.totalNumbers) * 100;
@@ -138,72 +206,109 @@ export default function Home() {
               return (
                 <Card
                   key={game.id}
-                  className="relative bg-gradient-to-br from-white via-white to-gray-50 shadow-2xl hover:shadow-3xl transition-all duration-500 cursor-pointer border-0 overflow-hidden transform hover:scale-105 hover:-translate-y-2 group"
+                  className="relative bg-gradient-to-br from-slate-900/95 via-slate-800/95 to-slate-900/95 backdrop-blur-xl shadow-2xl hover:shadow-purple-500/25 transition-all duration-500 cursor-pointer border border-white/10 overflow-hidden transform hover:scale-105 hover:-translate-y-2 group"
                   onClick={() => setLocation(`/game/${game.id}`)}
                   style={{ animationDelay: `${index * 200}ms` }}
                 >
-                  {/* Glow Effect */}
-                  <div className={`absolute inset-0 bg-gradient-to-r ${colors.color} opacity-0 group-hover:opacity-10 transition-opacity duration-300 rounded-xl`}></div>
+                  {/* Enhanced Glow Effect */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-purple-500/20 via-blue-500/10 to-red-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                  <div className="absolute -inset-1 bg-gradient-to-r from-purple-600/30 via-blue-600/30 to-red-600/30 blur-xl opacity-0 group-hover:opacity-70 transition-opacity duration-500"></div>
                   
-                  {/* Top Border Accent */}
-                  <div className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r ${colors.color}`}></div>
+                  {/* Enhanced Sparkle Effects */}
+                  <div className="absolute top-6 right-6 w-3 h-3 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full animate-ping shadow-lg shadow-yellow-500/50"></div>
+                  <div className="absolute bottom-6 left-6 w-2 h-2 bg-gradient-to-br from-pink-400 to-purple-500 rounded-full animate-ping shadow-lg shadow-pink-500/50" style={{ animationDelay: '1s' }}></div>
+                  <div className="absolute top-1/2 right-8 w-1 h-1 bg-cyan-400 rounded-full animate-ping" style={{ animationDelay: '2s' }}></div>
+                  
+                  {/* Dynamic Border Accent */}
+                  <div className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r ${colors.color} group-hover:h-2 transition-all duration-300`}></div>
                   
                   <CardContent className="relative p-6">
-                    {/* Prize Highlight */}
-                    <div className="absolute top-4 right-4">
-                      <div className={`bg-gradient-to-r ${colors.color} text-white px-3 py-1 rounded-full text-sm font-bold shadow-lg flex items-center space-x-1`}>
-                        <Trophy className="h-3 w-3" />
+                    {/* Enhanced Prize Highlight */}
+                    <div className="absolute top-6 right-6 z-10">
+                      <div className={`bg-gradient-to-r ${colors.color} text-white px-4 py-2 rounded-xl text-base font-black shadow-2xl flex items-center space-x-2 border border-white/20 backdrop-blur-sm`}>
+                        <Trophy className="h-4 w-4 animate-pulse" />
                         <span>${game.prizeValue}</span>
+                        <Sparkles className="h-3 w-3 animate-spin" />
                       </div>
                     </div>
 
-                    {/* Game Icon and Info */}
-                    <div className="flex items-start space-x-4">
-                      <div className={`p-4 rounded-2xl bg-gradient-to-br ${colors.color} shadow-xl group-hover:scale-110 transition-transform duration-300`}>
-                        <Icon className="h-8 w-8 text-white" />
+                    {/* Enhanced Game Icon and Info */}
+                    <div className="flex items-start space-x-6">
+                      <div className={`relative p-5 rounded-3xl bg-gradient-to-br ${colors.color} shadow-2xl group-hover:scale-110 transition-transform duration-500`}>
+                        <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent rounded-3xl"></div>
+                        <Icon className="relative h-10 w-10 text-white drop-shadow-lg" />
                       </div>
                       
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center space-x-2">
-                          <h2 className="text-xl font-bold text-gray-800 truncate">{game.name}</h2>
-                          <Badge variant="secondary" className="text-xs font-mono">
+                      <div className="flex-1 min-w-0 pt-2">
+                        <div className="flex items-center space-x-3 mb-2">
+                          <h2 className="text-2xl font-black text-white truncate tracking-wide">{game.name}</h2>
+                          <Badge className={`${colors.bg} text-white text-xs font-bold px-3 py-1 rounded-full border border-white/20`}>
                             {game.code}
                           </Badge>
                         </div>
-                        <p className="text-gray-600 text-sm mt-1">{game.description}</p>
-                      </div>
-                    </div>
-
-                    {/* Game Progress */}
-                    <div className="mt-6 space-y-3">
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm font-medium text-gray-700">Progress</span>
-                        <span className="text-sm text-gray-600">{game.numbersLeft} / {game.totalNumbers} left</span>
-                      </div>
-                      <Progress value={progress} className="h-2" />
-                    </div>
-
-                    {/* Game Details Grid */}
-                    <div className="mt-6 grid grid-cols-2 gap-4">
-                      <div className="bg-gradient-to-br from-green-50 to-green-100 p-3 rounded-xl border border-green-200">
-                        <div className="text-xs text-green-700 font-medium">Free Play Range</div>
-                        <div className="text-sm font-bold text-green-800">{freePlayRange}</div>
-                      </div>
-                      <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-3 rounded-xl border border-blue-200">
-                        <div className="text-xs text-blue-700 font-medium">Paid Range</div>
-                        <div className="text-sm font-bold text-blue-800">{paidRange}</div>
-                      </div>
-                    </div>
-
-                    {/* Action Section */}
-                    <div className="mt-6 pt-4 border-t border-gray-200">
-                      <div className="flex justify-between items-center">
-                        <div className="text-xs text-gray-500">
-                          <span>Ends: {timeRemaining}</span>
+                        <p className="text-gray-300 text-base mb-4 leading-relaxed">{game.description}</p>
+                        
+                        {/* Status indicators */}
+                        <div className="flex items-center space-x-4">
+                          <div className="flex items-center space-x-2">
+                            <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse shadow-lg shadow-green-400/50"></div>
+                            <span className="text-green-400 font-bold text-sm">LIVE</span>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Users className="h-4 w-4 text-blue-400" />
+                            <span className="text-blue-400 font-bold text-sm">{Math.floor(Math.random() * 50) + 10} playing</span>
+                          </div>
                         </div>
-                        <Button size="sm" className={`bg-gradient-to-r ${colors.color} hover:opacity-90 text-white font-semibold px-6 shadow-lg`}>
-                          <Zap className="h-4 w-4 mr-1" />
-                          Play Now
+                      </div>
+                    </div>
+
+                    {/* Enhanced Game Progress */}
+                    <div className="mt-8 space-y-4">
+                      <div className="flex justify-between items-center">
+                        <span className="text-base font-bold text-white">Game Progress</span>
+                        <span className="text-sm text-gray-300 font-mono bg-slate-800/50 px-3 py-1 rounded-full border border-white/10">{game.numbersLeft} / {game.totalNumbers} left</span>
+                      </div>
+                      <div className="relative">
+                        <Progress value={progress} className="h-3 bg-slate-800/50 border border-white/10" />
+                        <div className="absolute inset-0 bg-gradient-to-r from-purple-500/20 via-blue-500/20 to-red-500/20 rounded-full blur-sm"></div>
+                      </div>
+                      <div className="text-center">
+                        <span className="text-2xl font-black text-white">{Math.round(progress)}%</span>
+                        <span className="text-gray-400 ml-2">Complete</span>
+                      </div>
+                    </div>
+
+                    {/* Enhanced Game Details Grid */}
+                    <div className="mt-8 grid grid-cols-2 gap-4">
+                      <div className="bg-gradient-to-br from-green-500/20 to-emerald-500/20 p-4 rounded-xl border border-green-400/30 backdrop-blur-sm">
+                        <div className="text-xs text-green-300 font-bold uppercase tracking-wider">Free Play Range</div>
+                        <div className="text-lg font-black text-green-200 mt-1">{freePlayRange}</div>
+                        <div className="text-xs text-green-400 mt-2">🎁 No cost to play</div>
+                      </div>
+                      <div className="bg-gradient-to-br from-blue-500/20 to-cyan-500/20 p-4 rounded-xl border border-blue-400/30 backdrop-blur-sm">
+                        <div className="text-xs text-blue-300 font-bold uppercase tracking-wider">Paid Range</div>
+                        <div className="text-lg font-black text-blue-200 mt-1">{paidRange}</div>
+                        <div className="text-xs text-blue-400 mt-2">💰 Pay exact number</div>
+                      </div>
+                    </div>
+
+                    {/* Enhanced Action Section */}
+                    <div className="mt-8 pt-6 border-t border-white/10">
+                      <div className="flex flex-col space-y-4">
+                        <div className="flex justify-between items-center">
+                          <div className="text-sm text-gray-400">
+                            <span className="font-medium">Game ends:</span>
+                            <div className="text-white font-bold">{timeRemaining}</div>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
+                            <span className="text-red-400 font-bold text-sm">ENDING SOON</span>
+                          </div>
+                        </div>
+                        <Button size="lg" className={`w-full bg-gradient-to-r ${colors.color} hover:opacity-90 text-white font-black text-lg px-8 py-4 shadow-2xl border border-white/20 backdrop-blur-sm group-hover:shadow-purple-500/30 transition-all duration-300`}>
+                          <Zap className="h-5 w-5 mr-2 animate-pulse" />
+                          SPIN TO WIN
+                          <Crown className="h-5 w-5 ml-2 animate-bounce" />
                         </Button>
                       </div>
                     </div>
@@ -211,14 +316,81 @@ export default function Home() {
                 </Card>
               );
             }) : (
-              <div className="text-center py-12">
-                <Gift className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-xl font-semibold text-white mb-2">No Active Games</h3>
-                <p className="text-gray-400">Check back soon for new exciting games!</p>
+              <div className="text-center py-20 col-span-full">
+                <div className="relative inline-block">
+                  <div className="absolute inset-0 bg-gradient-to-r from-purple-500/30 to-red-500/30 blur-xl rounded-full"></div>
+                  <div className="relative bg-gradient-to-br from-slate-900/95 to-slate-800/95 backdrop-blur-xl border border-white/20 rounded-3xl px-12 py-16 shadow-2xl">
+                    <Gem className="h-16 w-16 text-purple-400 mx-auto mb-6 animate-pulse" />
+                    <h3 className="text-3xl font-black text-white mb-4">No Active Games</h3>
+                    <p className="text-gray-300 text-lg">New exciting games are being prepared! Check back soon for amazing prizes.</p>
+                    <div className="mt-8">
+                      <Button size="lg" className="bg-gradient-to-r from-purple-600 to-red-600 hover:from-purple-700 hover:to-red-700 text-white font-bold px-8 py-4 rounded-xl shadow-lg">
+                        <Star className="h-5 w-5 mr-2" />
+                        Get Notified
+                      </Button>
+                    </div>
+                  </div>
+                </div>
               </div>
             )}
           </div>
         )}
+        
+        {/* Enhanced Footer */}
+        <footer className="relative mt-20 border-t border-white/10 bg-gradient-to-r from-slate-900/50 to-slate-800/50 backdrop-blur-xl">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+              <div className="col-span-1 md:col-span-2">
+                <div className="flex items-center space-x-4 mb-6">
+                  <img src={logoPath} alt="Hit The Road Jackpot" className="h-12 w-auto" />
+                  <div>
+                    <h4 className="text-xl font-black text-white">Hit The Road Jackpot</h4>
+                    <p className="text-gray-400 text-sm">Win Big, Play Smart</p>
+                  </div>
+                </div>
+                <p className="text-gray-300 text-base leading-relaxed max-w-md">
+                  Experience the thrill of real-time gaming with authentic prizes and instant rewards. 
+                  Join thousands of players spinning their way to victory.
+                </p>
+              </div>
+              
+              <div>
+                <h5 className="text-white font-bold mb-4">Game Info</h5>
+                <ul className="space-y-2 text-gray-400">
+                  <li className="flex items-center space-x-2">
+                    <Zap className="h-4 w-4 text-yellow-400" />
+                    <span>Instant Play</span>
+                  </li>
+                  <li className="flex items-center space-x-2">
+                    <Trophy className="h-4 w-4 text-blue-400" />
+                    <span>Real Prizes</span>
+                  </li>
+                  <li className="flex items-center space-x-2">
+                    <Crown className="h-4 w-4 text-purple-400" />
+                    <span>Free Spins</span>
+                  </li>
+                </ul>
+              </div>
+              
+              <div>
+                <h5 className="text-white font-bold mb-4">Support</h5>
+                <ul className="space-y-2 text-gray-400">
+                  <li>How to Play</li>
+                  <li>Prize Rules</li>
+                  <li>Contact Us</li>
+                  <li>Terms & Conditions</li>
+                </ul>
+              </div>
+            </div>
+            
+            <div className="mt-12 pt-8 border-t border-white/10 text-center">
+              <p className="text-gray-400 text-sm">
+                © 2025 Hit The Road Jackpot. All rights reserved. 
+                <span className="text-yellow-400 ml-2">Play responsibly.</span>
+              </p>
+            </div>
+          </div>
+        </footer>
       </main>
     </div>
   );
