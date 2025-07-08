@@ -17,9 +17,9 @@ export function WheelPointer({ className = "" }: WheelPointerProps) {
         {/* Gradient definitions */}
         <defs>
           <linearGradient id="pointerGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#ffd700" />
-            <stop offset="50%" stopColor="#ff6b35" />
-            <stop offset="100%" stopColor="#ff1744" />
+            <stop offset="0%" stopColor="#00E676" />
+            <stop offset="50%" stopColor="#2196F3" />
+            <stop offset="100%" stopColor="#9C27B0" />
           </linearGradient>
           <filter id="glow">
             <feGaussianBlur stdDeviation="2" result="coloredBlur"/>

@@ -27,20 +27,20 @@ export function ProfessionalWheel({
 
   const freePlayStart = Math.floor(totalNumbers * 0.75) + 1;
 
-  // Premium dark and rich segment colors
+  // Vibrant logo-inspired segment colors
   const segmentColors = [
-    "#8B0000", // Dark Red
-    "#006400", // Dark Green
-    "#191970", // Midnight Blue
-    "#B8860B", // Dark Goldenrod
-    "#4B0082", // Indigo
-    "#8B4513", // Saddle Brown
-    "#2F4F4F", // Dark Slate Gray
-    "#800080", // Purple
-    "#556B2F", // Dark Olive Green
-    "#483D8B", // Dark Slate Blue
-    "#CD853F", // Peru
-    "#2E8B57", // Sea Green
+    "#FF1744", // Bright Red
+    "#00E676", // Bright Green  
+    "#2196F3", // Bright Blue
+    "#FF9800", // Orange
+    "#9C27B0", // Purple
+    "#00BCD4", // Cyan
+    "#8BC34A", // Light Green
+    "#E91E63", // Pink
+    "#FF5722", // Deep Orange
+    "#673AB7", // Deep Purple
+    "#03A9F4", // Light Blue
+    "#4CAF50", // Green
   ];
 
   // Generate static numbers for wheel display based on total numbers
@@ -174,8 +174,12 @@ export function ProfessionalWheel({
                   })}
 
                   {/* Center hub with brand logo */}
-                  <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-br from-yellow-300 to-yellow-500 rounded-full border-2 sm:border-4 border-white shadow-lg flex items-center justify-center">
-                    <Sparkles className="w-6 h-6 sm:w-8 sm:h-8 text-yellow-800" />
+                  <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-slate-800 to-slate-900 rounded-full border-2 sm:border-4 border-white shadow-lg flex items-center justify-center overflow-hidden">
+                    <img 
+                      src="/attached_assets/logo_1751956932645.png" 
+                      alt="Hit The Road Jackpot"
+                      className="w-12 h-12 sm:w-16 sm:h-16 object-contain"
+                    />
                   </div>
                 </div>
               </div>
