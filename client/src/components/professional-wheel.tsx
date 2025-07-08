@@ -113,12 +113,33 @@ export function ProfessionalWheel({
     }
   };
 
+  const [numberRadius, setNumberRadius] = useState(110);
+
+  useEffect(() => {
+    const updateRadius = () => {
+      const width = window.innerWidth;
+      if (width >= 1200) {
+        setNumberRadius(180); // For lg and xl screens
+      } else if (width >= 1024) {
+        setNumberRadius(160); // For md screens
+      } else if (width >= 768) {
+        setNumberRadius(130); // For sm screens
+      } else {
+        setNumberRadius(110); // For mobile
+      }
+    };
+
+    updateRadius();
+    window.addEventListener("resize", updateRadius);
+    return () => window.removeEventListener("resize", updateRadius);
+  }, []);
+
   return (
     <div className="flex flex-col items-center space-y-4 sm:space-y-6 w-full max-w-2xl mx-auto px-4 sm:px-4">
       {/* Wheel Container */}
       <div className="relative w-full flex justify-center">
         {/* Enhanced Professional Pointer */}
-        <WheelPointer className="top-0 left-1/2 transform -translate-x-1/2 -translate-y-2" />
+        <WheelPointer className="top-0 left-1/2 transform -translate-x-1/2 -translate-y-2 max-sm:top-[-3%] sm:mb-20" />
 
         {/* Wheel with Premium Border */}
         <div className="relative">
@@ -158,7 +179,7 @@ export function ProfessionalWheel({
                           id={`wheel-number-${index}`}
                           className="wheel-prize-number text-white font-bold text-xs sm:text-sm md:text-base flex items-center justify-center"
                           style={{
-                            transform: `translate(-50%, -50%) translate(${Math.cos(((angle + 360 / segmentColors.length / 2 - 90) * Math.PI) / 180) * 140}px, ${Math.sin(((angle + 360 / segmentColors.length / 2 - 90) * Math.PI) / 180) * 140}px)`,
+                            transform: `translate(-50%, -50%) translate(${Math.cos(((angle + 360 / segmentColors.length / 2 - 90) * Math.PI) / 180) * numberRadius}px, ${Math.sin(((angle + 360 / segmentColors.length / 2 - 90) * Math.PI) / 180) * numberRadius}px)`,
                           }}
                         >
                           {wheelNumbers[index]}

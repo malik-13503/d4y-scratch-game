@@ -206,6 +206,10 @@
     font-size: 14px !important;
   }
 
+  .pointermobile {
+    margin-top: -10% important;
+  }
+
   /* Smaller middle circles for mobile */
   .mobile-middle-ring {
     width: 24rem !important;
