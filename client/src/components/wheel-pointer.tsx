@@ -12,7 +12,7 @@ export function WheelPointer({ className = "" }: WheelPointerProps) {
         height="50"
         viewBox="0 0 50 50"
         className="drop-shadow-2xl"
-        style={{ transform: 'rotate(90deg)' }}
+        style={{ transform: 'rotate(180deg)' }}
       >
         {/* Gradient definitions */}
         <defs>
