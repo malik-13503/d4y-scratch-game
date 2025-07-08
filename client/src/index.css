@@ -201,9 +201,9 @@
 /* Mobile positioning - adjusted for larger wheel with smaller middle circle */
 @media (max-width: 300px) {
   .wheel-prize-number {
-    width: 38px !important;
-    height: 38px !important;
-    font-size: 14px !important;
+    width: 34px !important;
+    height: 34px !important;
+    font-size: 12px !important;
   }
 
   /* Smaller middle circles for mobile */
@@ -222,51 +222,102 @@
     height: 16rem !important;
   }
 
-  /* Each number repositioned closer to smaller middle circle - visible positioning */
+  /* Each number repositioned for max-width 300px devices */
   #wheel-number-0 {
-    transform: translate(-50%, -50%) translate(110px, 0) !important;
+    transform: translate(-50%, -50%) translate(85px, 0) !important;
     z-index: 200 !important;
     display: block !important;
   }
 
   #wheel-number-1 {
-    transform: translate(-50%, -50%) translate(77.8px, 77.8px) !important;
+    transform: translate(-50%, -50%) translate(60.1px, 60.1px) !important;
     z-index: 200 !important;
     display: block !important;
   }
 
   #wheel-number-2 {
-    transform: translate(-50%, -50%) translate(0, 110px) !important;
+    transform: translate(-50%, -50%) translate(0, 85px) !important;
     z-index: 200 !important;
     display: block !important;
   }
 
   #wheel-number-3 {
-    transform: translate(-50%, -50%) translate(-77.8px, 77.8px) !important;
+    transform: translate(-50%, -50%) translate(-60.1px, 60.1px) !important;
     z-index: 200 !important;
     display: block !important;
   }
 
   #wheel-number-4 {
-    transform: translate(-50%, -50%) translate(-110px, 0) !important;
+    transform: translate(-50%, -50%) translate(-85px, 0) !important;
     z-index: 200 !important;
     display: block !important;
   }
 
   #wheel-number-5 {
-    transform: translate(-50%, -50%) translate(-77.8px, -77.8px) !important;
+    transform: translate(-50%, -50%) translate(-60.1px, -60.1px) !important;
     z-index: 200 !important;
     display: block !important;
   }
 
   #wheel-number-6 {
-    transform: translate(-50%, -50%) translate(0, -110px) !important;
+    transform: translate(-50%, -50%) translate(0, -85px) !important;
     z-index: 200 !important;
     display: block !important;
   }
 
   #wheel-number-7 {
-    transform: translate(-50%, -50%) translate(77.8px, -77.8px) !important;
+    transform: translate(-50%, -50%) translate(60.1px, -60.1px) !important;
+    z-index: 200 !important;
+    display: block !important;
+  }
+}
+
+/* Tablet and larger mobile positioning - above 300px */
+@media (min-width: 301px) and (max-width: 640px) {
+  .wheel-prize-number {
+    width: 38px !important;
+    height: 38px !important;
+    font-size: 14px !important;
+  }
+  
+  /* Each number repositioned for larger mobile devices */
+  #wheel-number-0 { 
+    transform: translate(-50%, -50%) translate(95px, 0) !important; 
+    z-index: 200 !important;
+    display: block !important;
+  }
+  #wheel-number-1 { 
+    transform: translate(-50%, -50%) translate(67.2px, 67.2px) !important; 
+    z-index: 200 !important;
+    display: block !important;
+  }
+  #wheel-number-2 { 
+    transform: translate(-50%, -50%) translate(0, 95px) !important; 
+    z-index: 200 !important;
+    display: block !important;
+  }
+  #wheel-number-3 { 
+    transform: translate(-50%, -50%) translate(-67.2px, 67.2px) !important; 
+    z-index: 200 !important;
+    display: block !important;
+  }
+  #wheel-number-4 { 
+    transform: translate(-50%, -50%) translate(-95px, 0) !important; 
+    z-index: 200 !important;
+    display: block !important;
+  }
+  #wheel-number-5 { 
+    transform: translate(-50%, -50%) translate(-67.2px, -67.2px) !important; 
+    z-index: 200 !important;
+    display: block !important;
+  }
+  #wheel-number-6 { 
+    transform: translate(-50%, -50%) translate(0, -95px) !important; 
+    z-index: 200 !important;
+    display: block !important;
+  }
+  #wheel-number-7 { 
+    transform: translate(-50%, -50%) translate(67.2px, -67.2px) !important; 
     z-index: 200 !important;
     display: block !important;
   }
