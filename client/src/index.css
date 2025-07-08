@@ -121,6 +121,19 @@
   animation: glow 2s ease-in-out infinite;
 }
 
+@keyframes spin-slow {
+  0% {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+  100% {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+
+.animate-spin-slow {
+  animation: spin-slow 8s linear infinite;
+}
+
 /* Enhanced utility classes */
 .bg-gradient-radial {
   background: radial-gradient(circle at center, var(--tw-gradient-stops));
