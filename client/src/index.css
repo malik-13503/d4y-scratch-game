@@ -224,49 +224,49 @@
 
   /* Each number repositioned closer to smaller middle circle - visible positioning */
   #wheel-number-0 {
-    transform: translate(-50%, -50%) translate(110px, 0) !important;
+    transform: translate(-50%, -50%) translate(80px, 0) !important;
     z-index: 200 !important;
     display: block !important;
   }
 
   #wheel-number-1 {
-    transform: translate(-50%, -50%) translate(77.8px, 77.8px) !important;
+    transform: translate(-50%, -50%) translate(56.6px, 56.6px) !important;
     z-index: 200 !important;
     display: block !important;
   }
 
   #wheel-number-2 {
-    transform: translate(-50%, -50%) translate(0, 110px) !important;
+    transform: translate(-50%, -50%) translate(0, 80px) !important;
     z-index: 200 !important;
     display: block !important;
   }
 
   #wheel-number-3 {
-    transform: translate(-50%, -50%) translate(-77.8px, 77.8px) !important;
+    transform: translate(-50%, -50%) translate(-56.6px, 56.6px) !important;
     z-index: 200 !important;
     display: block !important;
   }
 
   #wheel-number-4 {
-    transform: translate(-50%, -50%) translate(-110px, 0) !important;
+    transform: translate(-50%, -50%) translate(-80px, 0) !important;
     z-index: 200 !important;
     display: block !important;
   }
 
   #wheel-number-5 {
-    transform: translate(-50%, -50%) translate(-77.8px, -77.8px) !important;
+    transform: translate(-50%, -50%) translate(-56.6px, -56.6px) !important;
     z-index: 200 !important;
     display: block !important;
   }
 
   #wheel-number-6 {
-    transform: translate(-50%, -50%) translate(0, -110px) !important;
+    transform: translate(-50%, -50%) translate(0, -80px) !important;
     z-index: 200 !important;
     display: block !important;
   }
 
   #wheel-number-7 {
-    transform: translate(-50%, -50%) translate(77.8px, -77.8px) !important;
+    transform: translate(-50%, -50%) translate(56.6px, -56.6px) !important;
     z-index: 200 !important;
     display: block !important;
   }
