@@ -198,12 +198,12 @@
   font-weight: bold !important;
 }
 
-/* Mobile positioning - adjusted for larger wheel with smaller middle circle */
-@media (max-width: 300px) {
+/* Mobile positioning - adjusted for 10% smaller wheel design */
+@media (max-width: 640px) {
   .wheel-prize-number {
-    width: 38px !important;
-    height: 38px !important;
-    font-size: 14px !important;
+    width: 34px !important;
+    height: 34px !important;
+    font-size: 12px !important;
   }
 
   .pointermobile {
@@ -228,49 +228,49 @@
 
   /* Each number repositioned closer to smaller middle circle - visible positioning */
   #wheel-number-0 {
-    transform: translate(-50%, -50%) translate(125px, 0) !important;
+    transform: translate(-50%, -50%) translate(108px, 0) !important;
     z-index: 200 !important;
     display: block !important;
   }
 
   #wheel-number-1 {
-    transform: translate(-50%, -50%) translate(88.4px, 88.4px) !important;
+    transform: translate(-50%, -50%) translate(76.4px, 76.4px) !important;
     z-index: 200 !important;
     display: block !important;
   }
 
   #wheel-number-2 {
-    transform: translate(-50%, -50%) translate(0, 125px) !important;
+    transform: translate(-50%, -50%) translate(0, 108px) !important;
     z-index: 200 !important;
     display: block !important;
   }
 
   #wheel-number-3 {
-    transform: translate(-50%, -50%) translate(-88.4px, 88.4px) !important;
+    transform: translate(-50%, -50%) translate(-76.4px, 76.4px) !important;
     z-index: 200 !important;
     display: block !important;
   }
 
   #wheel-number-4 {
-    transform: translate(-50%, -50%) translate(-125px, 0) !important;
+    transform: translate(-50%, -50%) translate(-108px, 0) !important;
     z-index: 200 !important;
     display: block !important;
   }
 
   #wheel-number-5 {
-    transform: translate(-50%, -50%) translate(-88.4px, -88.4px) !important;
+    transform: translate(-50%, -50%) translate(-76.4px, -76.4px) !important;
     z-index: 200 !important;
     display: block !important;
   }
 
   #wheel-number-6 {
-    transform: translate(-50%, -50%) translate(0, -125px) !important;
+    transform: translate(-50%, -50%) translate(0, -108px) !important;
     z-index: 200 !important;
     display: block !important;
   }
 
   #wheel-number-7 {
-    transform: translate(-50%, -50%) translate(88.4px, -88.4px) !important;
+    transform: translate(-50%, -50%) translate(76.4px, -76.4px) !important;
     z-index: 200 !important;
     display: block !important;
   }
