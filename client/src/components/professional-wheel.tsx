@@ -4,6 +4,7 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Gift, DollarSign, Sparkles, Play } from "lucide-react";
 import { Confetti } from "./confetti";
 import { WheelPointer } from "./wheel-pointer";
+import logoPath from "@assets/logo_1751956932645.png";
 
 interface ProfessionalWheelProps {
   onSpin: () => Promise<number>;
@@ -154,21 +155,22 @@ export function ProfessionalWheel({
                       >
                         {/* Static segment number - positioned further out */}
                         <div
-                          className="absolute text-white font-bold text-xs sm:text-sm md:text-base z-50 flex items-center justify-center bg-black bg-opacity-70 rounded-full border border-white"
+                          className="absolute text-white font-bold text-xs sm:text-sm md:text-base flex items-center justify-center bg-black bg-opacity-80 rounded-full border border-white"
                           style={{
                             top: "50%",
                             left: "50%",
                             width: "40px",
                             height: "40px",
-                            transform: `translate(-50%, -50%) translate(${Math.cos(((angle + 360 / segmentColors.length / 2 - 90) * Math.PI) / 180) * 120}px, ${Math.sin(((angle + 360 / segmentColors.length / 2 - 90) * Math.PI) / 180) * 120}px)`,
+                            transform: `translate(-50%, -50%) translate(${Math.cos(((angle + 360 / segmentColors.length / 2 - 90) * Math.PI) / 180) * 150}px, ${Math.sin(((angle + 360 / segmentColors.length / 2 - 90) * Math.PI) / 180) * 150}px)`,
                             textShadow:
                               "2px 2px 6px rgba(0,0,0,0.9), 1px 1px 3px rgba(0,0,0,0.8), 0 0 8px rgba(0,0,0,0.6)",
                             filter: "drop-shadow(1px 1px 3px rgba(0,0,0,0.8))",
-                            backgroundColor: "rgba(0,0,0,0.5)",
+                            backgroundColor: "rgba(0,0,0,0.8)",
                             borderRadius: "50%",
-                            border: "1.5px solid rgba(255,255,255,0.9)",
+                            border: "2px solid rgba(255,255,255,0.95)",
                             boxShadow:
-                              "0 0 6px rgba(0,0,0,0.6), inset 0 0 4px rgba(255,255,255,0.1)",
+                              "0 0 10px rgba(0,0,0,0.8), inset 0 0 4px rgba(255,255,255,0.2)",
+                            zIndex: 100,
                           }}
                         >
                           {wheelNumbers[index]}
@@ -193,7 +195,7 @@ export function ProfessionalWheel({
                   <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 lg:w-36 lg:h-36 bg-gradient-to-br from-slate-900 to-slate-700 rounded-full border-3 sm:border-4 border-yellow-300 shadow-2xl flex items-center justify-center overflow-hidden z-40">
                     <div className="w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 lg:w-32 lg:h-32 bg-black rounded-full border-2 border-orange-400 flex items-center justify-center p-2">
                       <img
-                        src="/attached_assets/logo_1751956932645.png"
+                        src={logoPath}
                         alt="Hit The Road Jackpot"
                         className="w-full h-full object-contain filter brightness-125 contrast-110"
                       />
