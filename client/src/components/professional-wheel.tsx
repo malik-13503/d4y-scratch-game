@@ -174,12 +174,14 @@ export function ProfessionalWheel({
                   })}
 
                   {/* Center hub with brand logo */}
-                  <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-slate-800 to-slate-900 rounded-full border-2 sm:border-4 border-white shadow-lg flex items-center justify-center overflow-hidden">
-                    <img 
-                      src="/attached_assets/logo_1751956932645.png" 
-                      alt="Hit The Road Jackpot"
-                      className="w-12 h-12 sm:w-16 sm:h-16 object-contain"
-                    />
+                  <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-20 h-20 sm:w-24 sm:h-24 bg-gradient-to-br from-yellow-400 via-orange-500 to-red-600 rounded-full border-4 sm:border-6 border-white shadow-2xl flex items-center justify-center overflow-hidden animate-pulse">
+                    <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-slate-800 to-slate-900 rounded-full border-2 border-yellow-300 flex items-center justify-center">
+                      <img 
+                        src="/attached_assets/logo_1751956932645.png" 
+                        alt="Hit The Road Jackpot"
+                        className="w-12 h-12 sm:w-16 sm:h-16 object-contain filter brightness-110"
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
