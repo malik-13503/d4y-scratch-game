@@ -8,10 +8,11 @@ export function WheelPointer({ className = "" }: WheelPointerProps) {
   return (
     <div className={`absolute z-30 pointer-events-none ${className}`}>
       <svg
-        width="60"
-        height="40"
-        viewBox="0 0 60 40"
+        width="50"
+        height="50"
+        viewBox="0 0 50 50"
         className="drop-shadow-2xl"
+        style={{ transform: 'rotate(90deg)' }}
       >
         {/* Gradient definitions */}
         <defs>
@@ -29,20 +30,20 @@ export function WheelPointer({ className = "" }: WheelPointerProps) {
           </filter>
         </defs>
         
-        {/* Main pointer triangle pointing down */}
+        {/* Sharp triangular pointer */}
         <path
-          d="M30 5 L50 25 L30 35 L10 25 Z"
+          d="M25 8 L38 32 L25 28 L12 32 Z"
           fill="url(#pointerGradient)"
           stroke="#ffffff"
           strokeWidth="2"
           filter="url(#glow)"
         />
         
-        {/* Center circle */}
+        {/* Center attachment circle */}
         <circle
-          cx="30"
-          cy="20"
-          r="6"
+          cx="25"
+          cy="25"
+          r="5"
           fill="url(#pointerGradient)"
           stroke="#ffffff"
           strokeWidth="2"
@@ -50,17 +51,17 @@ export function WheelPointer({ className = "" }: WheelPointerProps) {
         
         {/* Inner highlight for 3D effect */}
         <path
-          d="M30 8 L45 23 L30 30 L15 23 Z"
-          fill="rgba(255, 255, 255, 0.3)"
+          d="M25 12 L33 28 L25 25 L17 28 Z"
+          fill="rgba(255, 255, 255, 0.4)"
         />
         
-        {/* Small white dot in center */}
+        {/* Center dot */}
         <circle
-          cx="30"
-          cy="20"
+          cx="25"
+          cy="25"
           r="2"
           fill="#ffffff"
-          opacity="0.8"
+          opacity="0.9"
         />
       </svg>
     </div>
