@@ -180,22 +180,38 @@
   filter: drop-shadow(1px 1px 3px rgba(0,0,0,0.8));
 }
 
-/* Mobile positioning - adjusted for larger wheel */
+/* Mobile positioning - adjusted for larger wheel with smaller middle circle */
 @media (max-width: 640px) {
   .wheel-prize-number {
     width: 38px;
     height: 38px;
   }
   
-  /* Each number gets repositioned for mobile with larger wheel */
-  #wheel-number-0 { transform: translate(-50%, -50%) translate(115px, 0) !important; }
-  #wheel-number-1 { transform: translate(-50%, -50%) translate(81.3px, 81.3px) !important; }
-  #wheel-number-2 { transform: translate(-50%, -50%) translate(0, 115px) !important; }
-  #wheel-number-3 { transform: translate(-50%, -50%) translate(-81.3px, 81.3px) !important; }
-  #wheel-number-4 { transform: translate(-50%, -50%) translate(-115px, 0) !important; }
-  #wheel-number-5 { transform: translate(-50%, -50%) translate(-81.3px, -81.3px) !important; }
-  #wheel-number-6 { transform: translate(-50%, -50%) translate(0, -115px) !important; }
-  #wheel-number-7 { transform: translate(-50%, -50%) translate(81.3px, -81.3px) !important; }
+  /* Smaller middle circles for mobile */
+  .mobile-middle-ring {
+    width: 24rem !important;
+    height: 24rem !important;
+  }
+  
+  .mobile-center-hub {
+    width: 20rem !important;
+    height: 20rem !important;
+  }
+  
+  .mobile-logo-container {
+    width: 16rem !important;
+    height: 16rem !important;
+  }
+  
+  /* Each number repositioned closer to smaller middle circle */
+  #wheel-number-0 { transform: translate(-50%, -50%) translate(95px, 0) !important; }
+  #wheel-number-1 { transform: translate(-50%, -50%) translate(67.2px, 67.2px) !important; }
+  #wheel-number-2 { transform: translate(-50%, -50%) translate(0, 95px) !important; }
+  #wheel-number-3 { transform: translate(-50%, -50%) translate(-67.2px, 67.2px) !important; }
+  #wheel-number-4 { transform: translate(-50%, -50%) translate(-95px, 0) !important; }
+  #wheel-number-5 { transform: translate(-50%, -50%) translate(-67.2px, -67.2px) !important; }
+  #wheel-number-6 { transform: translate(-50%, -50%) translate(0, -95px) !important; }
+  #wheel-number-7 { transform: translate(-50%, -50%) translate(67.2px, -67.2px) !important; }
 }
 
 .dark {
