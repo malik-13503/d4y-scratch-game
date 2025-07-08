@@ -100,6 +100,13 @@ This is a real-time prize game web application that allows users to participate 
 
 ## Changelog
 
+- January 8, 2025: Enhanced wheel with professional pointer and fixed rotating numbers
+  - Created custom SVG wheel pointer with gradient colors and glow effects
+  - Replaced basic CSS triangle pointer with professional PNG-style design
+  - Fixed rotating numbers animation by using static number generation
+  - Numbers now remain stationary on wheel segments during gameplay
+  - Added proper pointer positioning and visual effects
+  - Maintained wheel spinning animation while keeping numbers readable
 - January 7, 2025: Enhanced homepage with professional casino-style design and responsive improvements
   - Transformed background with animated gradients, grid patterns, and floating particles
   - Enhanced header with glowing logo effects and animated status badges

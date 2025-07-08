@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Gift, DollarSign, Sparkles, Play } from "lucide-react";
 import { Confetti } from "./confetti";
+import { WheelPointer } from "./wheel-pointer";
 
 interface ProfessionalWheelProps {
   onSpin: () => Promise<number>;
@@ -42,12 +43,13 @@ export function ProfessionalWheel({
     "#2E8B57", // Sea Green
   ];
 
-  // Generate numbers for wheel display based on total numbers
+  // Generate static numbers for wheel display based on total numbers
   const generateWheelNumbers = () => {
     const numbers = [];
     const segments = 12;
     for (let i = 0; i < segments; i++) {
-      const number = Math.floor((totalNumbers / segments) * i) + Math.floor(Math.random() * (totalNumbers / segments)) + 1;
+      // Use fixed numbers instead of random for consistent display
+      const number = Math.floor((totalNumbers / segments) * i) + Math.floor((totalNumbers / segments) / 2) + 1;
       numbers.push(Math.min(number, totalNumbers));
     }
     return numbers;
@@ -108,18 +110,10 @@ export function ProfessionalWheel({
     <div className="flex flex-col items-center space-y-4 sm:space-y-6 w-full max-w-lg mx-auto px-2 sm:px-4">
       {/* Wheel Container */}
       <div className="relative">
-        {/* Fixed Downward Pointer */}
-        <div 
-          className="absolute top-0 left-1/2 z-20"
-          style={{
-            transform: `translate(-50%, -8px)`,
-            transformOrigin: 'center bottom'
-          }}
-        >
-          <div className="w-0 h-0 border-l-[15px] border-r-[15px] border-b-[30px] sm:border-l-[18px] sm:border-r-[18px] sm:border-b-[35px] border-l-transparent border-r-transparent border-b-yellow-400 drop-shadow-2xl">
-            <div className="absolute top-[25px] left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-[8px] border-r-[8px] border-b-[12px] border-l-transparent border-r-transparent border-b-red-600"></div>
-          </div>
-        </div>
+        {/* Enhanced Professional Pointer */}
+        <WheelPointer 
+          className="top-0 left-1/2 transform -translate-x-1/2 -translate-y-2"
+        />
 
         {/* Wheel with Premium Border */}
         <div className="relative">
@@ -154,7 +148,7 @@ export function ProfessionalWheel({
                           background: `linear-gradient(135deg, ${color}, ${color}dd)`,
                         }}
                       >
-                        {/* Segment number - perfectly centered */}
+                        {/* Static segment number - perfectly centered */}
                         <div
                           className="absolute text-white font-bold text-sm sm:text-base md:text-lg z-10 flex items-center justify-center"
                           style={{
