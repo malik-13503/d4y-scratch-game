@@ -117,8 +117,8 @@ export function ProfessionalWheel({
 
         {/* Wheel with Premium Border */}
         <div className="relative">
-          {/* Enhanced multi-layer decorative border */}
-          <div className="relative p-4 rounded-full bg-gradient-to-r from-yellow-600 via-orange-500 to-red-600 shadow-2xl animate-pulse">
+          {/* Enhanced multi-layer decorative border - static but eye-catching */}
+          <div className="relative p-4 rounded-full bg-gradient-to-r from-yellow-600 via-orange-500 to-red-600 shadow-2xl">
             <div className="p-2 rounded-full bg-gradient-to-r from-purple-600 via-blue-600 to-cyan-500 shadow-xl">
               <div className="p-2 rounded-full bg-gradient-to-r from-yellow-500 via-yellow-300 to-yellow-500 border-4 border-white shadow-inner">
                 <div
@@ -142,21 +142,21 @@ export function ProfessionalWheel({
                     return (
                       <div
                         key={index}
-                        className="absolute inset-0"
+                        className="absolute inset-0 z-10"
                         style={{
                           clipPath: `polygon(50% 50%, ${50 + 50 * Math.cos(((angle - 90) * Math.PI) / 180)}% ${50 + 50 * Math.sin(((angle - 90) * Math.PI) / 180)}%, ${50 + 50 * Math.cos(((nextAngle - 90) * Math.PI) / 180)}% ${50 + 50 * Math.sin(((nextAngle - 90) * Math.PI) / 180)}%)`,
                           background: `linear-gradient(135deg, ${color}, ${color}dd)`,
                         }}
                       >
-                        {/* Static segment number - perfectly centered */}
+                        {/* Static segment number - positioned further out */}
                         <div
-                          className="absolute text-white font-bold text-xs sm:text-sm md:text-base z-10 flex items-center justify-center bg-black bg-opacity-50 rounded-full border border-white"
+                          className="absolute text-white font-bold text-xs sm:text-sm md:text-base z-50 flex items-center justify-center bg-black bg-opacity-70 rounded-full border border-white"
                           style={{
                             top: "50%",
                             left: "50%",
-                            width: "28px",
-                            height: "28px",
-                            transform: `translate(-50%, -50%) translate(${Math.cos(((angle + 360 / segmentColors.length / 2 - 90) * Math.PI) / 180) * 65}px, ${Math.sin(((angle + 360 / segmentColors.length / 2 - 90) * Math.PI) / 180) * 65}px)`,
+                            width: "30px",
+                            height: "30px",
+                            transform: `translate(-50%, -50%) translate(${Math.cos(((angle + 360 / segmentColors.length / 2 - 90) * Math.PI) / 180) * 95}px, ${Math.sin(((angle + 360 / segmentColors.length / 2 - 90) * Math.PI) / 180) * 95}px)`,
                             textShadow:
                               "2px 2px 6px rgba(0,0,0,0.9), 1px 1px 3px rgba(0,0,0,0.8), 0 0 8px rgba(0,0,0,0.6)",
                             filter: "drop-shadow(1px 1px 3px rgba(0,0,0,0.8))",
@@ -173,14 +173,14 @@ export function ProfessionalWheel({
                     );
                   })}
 
-                  {/* Outer ring decoration */}
-                  <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-32 h-32 sm:w-36 sm:h-36 bg-gradient-to-br from-yellow-400 via-orange-500 to-red-600 rounded-full border-4 border-white shadow-2xl animate-pulse opacity-80"></div>
+                  {/* Outer ring decoration - static but eye-catching */}
+                  <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-32 h-32 sm:w-36 sm:h-36 bg-gradient-to-br from-yellow-400 via-orange-500 to-red-600 rounded-full border-4 border-white shadow-2xl z-20"></div>
                   
-                  {/* Middle ring */}
-                  <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-28 h-28 sm:w-32 sm:h-32 bg-gradient-to-br from-purple-600 via-blue-600 to-cyan-500 rounded-full border-3 border-white shadow-xl animate-spin-slow"></div>
+                  {/* Middle ring - static with enhanced glow */}
+                  <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-28 h-28 sm:w-32 sm:h-32 bg-gradient-to-br from-purple-600 via-blue-600 to-cyan-500 rounded-full border-3 border-white shadow-xl z-30" style={{ boxShadow: '0 0 30px rgba(147, 51, 234, 0.6), inset 0 0 15px rgba(255, 255, 255, 0.3)' }}></div>
                   
                   {/* Center hub with brand logo */}
-                  <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-24 h-24 sm:w-28 sm:h-28 bg-gradient-to-br from-slate-900 to-slate-700 rounded-full border-4 border-yellow-300 shadow-2xl flex items-center justify-center overflow-hidden">
+                  <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-24 h-24 sm:w-28 sm:h-28 bg-gradient-to-br from-slate-900 to-slate-700 rounded-full border-4 border-yellow-300 shadow-2xl flex items-center justify-center overflow-hidden z-40">
                     <div className="w-20 h-20 sm:w-24 sm:h-24 bg-black rounded-full border-2 border-orange-400 flex items-center justify-center p-2">
                       <img 
                         src="/attached_assets/logo_1751956932645.png" 
