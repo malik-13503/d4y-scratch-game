@@ -128,7 +128,7 @@ export function ProfessionalWheel({
               <div className="p-2 sm:p-2 rounded-full bg-gradient-to-r from-yellow-500 via-yellow-300 to-yellow-500 border-3 sm:border-4 border-white shadow-inner">
                 <div
                   ref={wheelRef}
-                  className="w-72 h-72 sm:w-96 sm:h-96 md:w-[480px] md:h-[480px] lg:w-[520px] lg:h-[520px] rounded-full relative overflow-hidden"
+                  className="w-[300px] h-[300px] sm:w-96 sm:h-96 md:w-[480px] md:h-[480px] lg:w-[520px] lg:h-[520px] rounded-full relative overflow-hidden"
                   style={{
                     transform: `rotate(${rotation}deg)`,
                     transition: isSpinning

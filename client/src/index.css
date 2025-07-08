@@ -23,7 +23,7 @@
   --destructive-foreground: hsl(60, 9.1%, 97.8%);
   --ring: hsl(20, 14.3%, 4.1%);
   --radius: 0.5rem;
-  
+
   /* Custom brand colors */
   --brand-red: hsl(355, 84%, 53%);
   --brand-yellow: hsl(42, 94%, 70%);
@@ -33,12 +33,16 @@
 
 /* Enhanced Custom Animations */
 @keyframes float {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translateY(0px) rotate(0deg);
   }
+
   33% {
     transform: translateY(-20px) rotate(120deg);
   }
+
   66% {
     transform: translateY(10px) rotate(240deg);
   }
@@ -48,9 +52,11 @@
   0% {
     background-position: 0% 50%;
   }
+
   50% {
     background-position: 100% 50%;
   }
+
   100% {
     background-position: 0% 50%;
   }
@@ -60,15 +66,19 @@
   0% {
     transform: translateX(-100%);
   }
+
   100% {
     transform: translateX(100%);
   }
 }
 
 @keyframes glow {
-  0%, 100% {
+
+  0%,
+  100% {
     text-shadow: 0 0 5px rgba(255, 255, 255, 0.3), 0 0 10px rgba(255, 255, 255, 0.2);
   }
+
   50% {
     text-shadow: 0 0 10px rgba(255, 255, 255, 0.5), 0 0 20px rgba(255, 255, 255, 0.3), 0 0 30px rgba(255, 255, 255, 0.2);
   }
@@ -79,6 +89,7 @@
     opacity: 0;
     transform: translateY(20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -90,6 +101,7 @@
     transform: translateY(0) rotateZ(0deg);
     opacity: 1;
   }
+
   100% {
     transform: translateY(-100vh) rotateZ(720deg);
     opacity: 0;
@@ -125,6 +137,7 @@
   0% {
     transform: translate(-50%, -50%) rotate(0deg);
   }
+
   100% {
     transform: translate(-50%, -50%) rotate(360deg);
   }
@@ -171,13 +184,13 @@
   left: 50% !important;
   width: 40px !important;
   height: 40px !important;
-  background-color: rgba(0,0,0,0.8) !important;
+  background-color: rgba(0, 0, 0, 0.8) !important;
   border-radius: 50% !important;
-  border: 2px solid rgba(255,255,255,0.95) !important;
-  box-shadow: 0 0 10px rgba(0,0,0,0.8), inset 0 0 4px rgba(255,255,255,0.2) !important;
+  border: 2px solid rgba(255, 255, 255, 0.95) !important;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.8), inset 0 0 4px rgba(255, 255, 255, 0.2) !important;
   z-index: 100 !important;
-  text-shadow: 2px 2px 6px rgba(0,0,0,0.9), 1px 1px 3px rgba(0,0,0,0.8), 0 0 8px rgba(0,0,0,0.6) !important;
-  filter: drop-shadow(1px 1px 3px rgba(0,0,0,0.8)) !important;
+  text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.9), 1px 1px 3px rgba(0, 0, 0, 0.8), 0 0 8px rgba(0, 0, 0, 0.6) !important;
+  filter: drop-shadow(1px 1px 3px rgba(0, 0, 0, 0.8)) !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
@@ -186,67 +199,74 @@
 }
 
 /* Mobile positioning - adjusted for larger wheel with smaller middle circle */
-@media (max-width: 640px) {
+@media (max-width: 300px) {
   .wheel-prize-number {
     width: 38px !important;
     height: 38px !important;
     font-size: 14px !important;
   }
-  
+
   /* Smaller middle circles for mobile */
   .mobile-middle-ring {
     width: 24rem !important;
     height: 24rem !important;
   }
-  
+
   .mobile-center-hub {
     width: 20rem !important;
     height: 20rem !important;
   }
-  
+
   .mobile-logo-container {
     width: 16rem !important;
     height: 16rem !important;
   }
-  
+
   /* Each number repositioned closer to smaller middle circle - visible positioning */
-  #wheel-number-0 { 
-    transform: translate(-50%, -50%) translate(110px, 0) !important; 
+  #wheel-number-0 {
+    transform: translate(-50%, -50%) translate(110px, 0) !important;
     z-index: 200 !important;
     display: block !important;
   }
-  #wheel-number-1 { 
-    transform: translate(-50%, -50%) translate(77.8px, 77.8px) !important; 
+
+  #wheel-number-1 {
+    transform: translate(-50%, -50%) translate(77.8px, 77.8px) !important;
     z-index: 200 !important;
     display: block !important;
   }
-  #wheel-number-2 { 
-    transform: translate(-50%, -50%) translate(0, 110px) !important; 
+
+  #wheel-number-2 {
+    transform: translate(-50%, -50%) translate(0, 110px) !important;
     z-index: 200 !important;
     display: block !important;
   }
-  #wheel-number-3 { 
-    transform: translate(-50%, -50%) translate(-77.8px, 77.8px) !important; 
+
+  #wheel-number-3 {
+    transform: translate(-50%, -50%) translate(-77.8px, 77.8px) !important;
     z-index: 200 !important;
     display: block !important;
   }
-  #wheel-number-4 { 
-    transform: translate(-50%, -50%) translate(-110px, 0) !important; 
+
+  #wheel-number-4 {
+    transform: translate(-50%, -50%) translate(-110px, 0) !important;
     z-index: 200 !important;
     display: block !important;
   }
-  #wheel-number-5 { 
-    transform: translate(-50%, -50%) translate(-77.8px, -77.8px) !important; 
+
+  #wheel-number-5 {
+    transform: translate(-50%, -50%) translate(-77.8px, -77.8px) !important;
     z-index: 200 !important;
     display: block !important;
   }
-  #wheel-number-6 { 
-    transform: translate(-50%, -50%) translate(0, -110px) !important; 
+
+  #wheel-number-6 {
+    transform: translate(-50%, -50%) translate(0, -110px) !important;
     z-index: 200 !important;
     display: block !important;
   }
-  #wheel-number-7 { 
-    transform: translate(-50%, -50%) translate(77.8px, -77.8px) !important; 
+
+  #wheel-number-7 {
+    transform: translate(-50%, -50%) translate(77.8px, -77.8px) !important;
     z-index: 200 !important;
     display: block !important;
   }
@@ -289,31 +309,31 @@
   .brand-red {
     color: hsl(355, 84%, 53%);
   }
-  
+
   .bg-brand-red {
     background-color: hsl(355, 84%, 53%);
   }
-  
+
   .brand-yellow {
     color: hsl(42, 94%, 70%);
   }
-  
+
   .bg-brand-yellow {
     background-color: hsl(42, 94%, 70%);
   }
-  
+
   .brand-blue {
     color: hsl(207, 90%, 54%);
   }
-  
+
   .bg-brand-blue {
     background-color: hsl(207, 90%, 54%);
   }
-  
+
   .brand-green {
     color: hsl(166, 73%, 73%);
   }
-  
+
   .bg-brand-green {
     background-color: hsl(166, 73%, 73%);
   }
@@ -344,26 +364,64 @@
 
 /* Fullscreen animations */
 @keyframes confetti {
-  0% { transform: translateY(0) rotateZ(0deg); opacity: 1; }
-  100% { transform: translateY(-1000px) rotateZ(720deg); opacity: 0; }
+  0% {
+    transform: translateY(0) rotateZ(0deg);
+    opacity: 1;
+  }
+
+  100% {
+    transform: translateY(-1000px) rotateZ(720deg);
+    opacity: 0;
+  }
 }
 
 @keyframes scale-in {
-  0% { transform: scale(0.5) rotate(-10deg); opacity: 0; }
-  50% { transform: scale(1.1) rotate(5deg); opacity: 0.8; }
-  100% { transform: scale(1) rotate(0deg); opacity: 1; }
+  0% {
+    transform: scale(0.5) rotate(-10deg);
+    opacity: 0;
+  }
+
+  50% {
+    transform: scale(1.1) rotate(5deg);
+    opacity: 0.8;
+  }
+
+  100% {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
 }
 
 @keyframes glow-pulse {
-  0%, 100% { box-shadow: 0 0 20px rgba(251, 191, 36, 0.5); }
-  50% { box-shadow: 0 0 40px rgba(251, 191, 36, 0.8), 0 0 60px rgba(251, 191, 36, 0.4); }
+
+  0%,
+  100% {
+    box-shadow: 0 0 20px rgba(251, 191, 36, 0.5);
+  }
+
+  50% {
+    box-shadow: 0 0 40px rgba(251, 191, 36, 0.8), 0 0 60px rgba(251, 191, 36, 0.4);
+  }
 }
 
 @keyframes bounce-in {
-  0% { transform: scale(0.3); opacity: 0; }
-  50% { transform: scale(1.05); }
-  70% { transform: scale(0.9); }
-  100% { transform: scale(1); opacity: 1; }
+  0% {
+    transform: scale(0.3);
+    opacity: 0;
+  }
+
+  50% {
+    transform: scale(1.05);
+  }
+
+  70% {
+    transform: scale(0.9);
+  }
+
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
 .animate-confetti {
@@ -429,7 +487,7 @@
     grid-template-columns: 1fr;
     gap: 1rem;
   }
-  
+
   .wheel-container {
     width: 280px;
     height: 280px;
@@ -474,18 +532,23 @@
 
 /* Enhanced Game Animations */
 @keyframes float {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translateY(0px) rotate(0deg);
     opacity: 0.1;
   }
+
   25% {
     transform: translateY(-20px) rotate(90deg);
     opacity: 0.3;
   }
+
   50% {
     transform: translateY(-10px) rotate(180deg);
     opacity: 0.2;
   }
+
   75% {
     transform: translateY(-25px) rotate(270deg);
     opacity: 0.4;
@@ -497,6 +560,7 @@
     opacity: 0;
     transform: scale(0.8) translateY(20px);
   }
+
   100% {
     opacity: 1;
     transform: scale(1) translateY(0);
@@ -504,10 +568,13 @@
 }
 
 @keyframes sparkle {
-  0%, 100% {
+
+  0%,
+  100% {
     opacity: 0;
     transform: scale(0);
   }
+
   50% {
     opacity: 1;
     transform: scale(1);
@@ -515,19 +582,25 @@
 }
 
 @keyframes wheelGlow {
-  0%, 100% {
+
+  0%,
+  100% {
     box-shadow: 0 0 20px rgba(139, 92, 246, 0.3);
   }
+
   50% {
     box-shadow: 0 0 40px rgba(139, 92, 246, 0.6), 0 0 60px rgba(59, 130, 246, 0.3);
   }
 }
 
 @keyframes numberPulse {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: scale(1);
     filter: brightness(1);
   }
+
   50% {
     transform: scale(1.05);
     filter: brightness(1.2);
@@ -535,33 +608,44 @@
 }
 
 @keyframes glitchEffect {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translate(0);
   }
+
   10% {
     transform: translate(-2px, 2px);
   }
+
   20% {
     transform: translate(2px, -2px);
   }
+
   30% {
     transform: translate(-2px, -2px);
   }
+
   40% {
     transform: translate(2px, 2px);
   }
+
   50% {
     transform: translate(-2px, 2px);
   }
+
   60% {
     transform: translate(2px, -2px);
   }
+
   70% {
     transform: translate(-2px, -2px);
   }
+
   80% {
     transform: translate(2px, 2px);
   }
+
   90% {
     transform: translate(-2px, 2px);
   }
@@ -647,6 +731,7 @@
     transform: translateY(0) rotate(0deg);
     opacity: 1;
   }
+
   100% {
     transform: translateY(-100vh) rotate(360deg);
     opacity: 0;
@@ -674,10 +759,12 @@
     transform: scale(0) rotate(0deg);
     opacity: 0;
   }
+
   50% {
     transform: scale(1.2) rotate(180deg);
     opacity: 1;
   }
+
   100% {
     transform: scale(1) rotate(360deg);
     opacity: 0;
@@ -696,9 +783,12 @@
 }
 
 @keyframes hologramScan {
-  0%, 100% {
+
+  0%,
+  100% {
     background-position: 0% 0%;
   }
+
   50% {
     background-position: 100% 100%;
   }
@@ -709,7 +799,7 @@
   .animate-float {
     animation-duration: 6s;
   }
-  
+
   .glass-card,
   .glass-dark {
     backdrop-filter: blur(8px);
