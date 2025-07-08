@@ -30,7 +30,7 @@ export function ProfessionalWheel({
   // Vibrant logo-inspired segment colors
   const segmentColors = [
     "#FF1744", // Bright Red
-    "#00E676", // Bright Green  
+    "#00E676", // Bright Green
     "#2196F3", // Bright Blue
     "#FF9800", // Orange
     "#9C27B0", // Purple
@@ -49,12 +49,15 @@ export function ProfessionalWheel({
     const segments = 12;
     for (let i = 0; i < segments; i++) {
       // Use fixed numbers instead of random for consistent display
-      const number = Math.floor((totalNumbers / segments) * i) + Math.floor((totalNumbers / segments) / 2) + 1;
+      const number =
+        Math.floor((totalNumbers / segments) * i) +
+        Math.floor(totalNumbers / segments / 2) +
+        1;
       numbers.push(Math.min(number, totalNumbers));
     }
     return numbers;
   };
-  
+
   const wheelNumbers = generateWheelNumbers();
 
   const handleSpin = async () => {
@@ -68,15 +71,15 @@ export function ProfessionalWheel({
       // Get result from API first
       const spinResult = await onSpin();
       console.log("Spin result received:", spinResult);
-      
+
       // Professional spinning animation - 8 seconds duration
       const spinDuration = 8000;
       const spins = 8 + Math.random() * 4; // 8-12 full rotations
-      
+
       // For simplicity, just spin the wheel randomly and show the actual result
       // The important part is showing the correct result number in the popup
       const finalRotation = rotation + spins * 360 + Math.random() * 360;
-      
+
       setRotation(finalRotation);
       // Keep pointer stationary - it always points down
 
@@ -92,14 +95,17 @@ export function ProfessionalWheel({
 
         setIsSpinning(false);
 
-        console.log("About to show result modal:", { spinResult, isFree, amountCharged: isFree ? 0 : spinResult });
+        console.log("About to show result modal:", {
+          spinResult,
+          isFree,
+          amountCharged: isFree ? 0 : spinResult,
+        });
 
         // Show result modal after wheel stops
         setTimeout(() => {
           setShowResultModal(true);
         }, 500);
       }, spinDuration);
-      
     } catch (error) {
       console.error("Spin error:", error);
       setIsSpinning(false);
@@ -107,13 +113,11 @@ export function ProfessionalWheel({
   };
 
   return (
-    <div className="flex flex-col items-center space-y-4 sm:space-y-6 w-full max-w-lg mx-auto px-2 sm:px-4">
+    <div className="flex flex-col items-center space-y-4 sm:space-y-6 w-full max-w-2xl mx-auto px-2 sm:px-4">
       {/* Wheel Container */}
       <div className="relative">
         {/* Enhanced Professional Pointer */}
-        <WheelPointer 
-          className="top-0 left-1/2 transform -translate-x-1/2 -translate-y-2"
-        />
+        <WheelPointer className="top-0 left-1/2 transform -translate-x-1/2 -translate-y-2" />
 
         {/* Wheel with Premium Border */}
         <div className="relative">
@@ -123,7 +127,7 @@ export function ProfessionalWheel({
               <div className="p-2 rounded-full bg-gradient-to-r from-yellow-500 via-yellow-300 to-yellow-500 border-4 border-white shadow-inner">
                 <div
                   ref={wheelRef}
-                  className="w-64 h-64 sm:w-80 sm:h-80 md:w-96 md:h-96 rounded-full relative overflow-hidden"
+                  className="w-72 h-72 sm:w-80 sm:h-80 md:w-96 md:h-96 lg:w-[420px] lg:h-[420px] rounded-full relative overflow-hidden"
                   style={{
                     transform: `rotate(${rotation}deg)`,
                     transition: isSpinning
@@ -144,7 +148,7 @@ export function ProfessionalWheel({
                         key={index}
                         className="absolute inset-0 z-10"
                         style={{
-                          clipPath: `polygon(50% 50%, ${50 + 50 * Math.cos(((angle - 90) * Math.PI) / 180)}% ${50 + 50 * Math.sin(((angle - 90) * Math.PI) / 180)}%, ${50 + 50 * Math.cos(((nextAngle - 90) * Math.PI) / 180)}% ${50 + 50 * Math.sin(((nextAngle - 90) * Math.PI) / 180)}%)`,
+                          clipPath: `polygon(50% 50%, ${50 + 65 * Math.cos(((angle - 90) * Math.PI) / 180)}% ${50 + 65 * Math.sin(((angle - 90) * Math.PI) / 180)}%, ${50 + 65 * Math.cos(((nextAngle - 90) * Math.PI) / 180)}% ${50 + 65 * Math.sin(((nextAngle - 90) * Math.PI) / 180)}%)`,
                           background: `linear-gradient(135deg, ${color}, ${color}dd)`,
                         }}
                       >
@@ -154,9 +158,9 @@ export function ProfessionalWheel({
                           style={{
                             top: "50%",
                             left: "50%",
-                            width: "30px",
-                            height: "30px",
-                            transform: `translate(-50%, -50%) translate(${Math.cos(((angle + 360 / segmentColors.length / 2 - 90) * Math.PI) / 180) * 95}px, ${Math.sin(((angle + 360 / segmentColors.length / 2 - 90) * Math.PI) / 180) * 95}px)`,
+                            width: "40px",
+                            height: "40px",
+                            transform: `translate(-50%, -50%) translate(${Math.cos(((angle + 360 / segmentColors.length / 2 - 90) * Math.PI) / 180) * 120}px, ${Math.sin(((angle + 360 / segmentColors.length / 2 - 90) * Math.PI) / 180) * 120}px)`,
                             textShadow:
                               "2px 2px 6px rgba(0,0,0,0.9), 1px 1px 3px rgba(0,0,0,0.8), 0 0 8px rgba(0,0,0,0.6)",
                             filter: "drop-shadow(1px 1px 3px rgba(0,0,0,0.8))",
@@ -174,16 +178,22 @@ export function ProfessionalWheel({
                   })}
 
                   {/* Outer ring decoration - static but eye-catching */}
-                  <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-32 h-32 sm:w-36 sm:h-36 bg-gradient-to-br from-yellow-400 via-orange-500 to-red-600 rounded-full border-4 border-white shadow-2xl z-20"></div>
-                  
+                  <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-32 h-32 sm:w-36 sm:h-36 md:w-40 md:h-40 lg:w-44 lg:h-44 bg-gradient-to-br from-yellow-400 via-orange-500 to-red-600 rounded-full border-4 border-white shadow-2xl z-20"></div>
+
                   {/* Middle ring - static with enhanced glow */}
-                  <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-28 h-28 sm:w-32 sm:h-32 bg-gradient-to-br from-purple-600 via-blue-600 to-cyan-500 rounded-full border-3 border-white shadow-xl z-30" style={{ boxShadow: '0 0 30px rgba(147, 51, 234, 0.6), inset 0 0 15px rgba(255, 255, 255, 0.3)' }}></div>
-                  
+                  <div
+                    className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-28 h-28 sm:w-32 sm:h-32 md:w-36 md:h-36 lg:w-40 lg:h-40 bg-gradient-to-br from-purple-600 via-blue-600 to-cyan-500 rounded-full border-3 border-white shadow-xl z-30"
+                    style={{
+                      boxShadow:
+                        "0 0 30px rgba(147, 51, 234, 0.6), inset 0 0 15px rgba(255, 255, 255, 0.3)",
+                    }}
+                  ></div>
+
                   {/* Center hub with brand logo */}
-                  <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-24 h-24 sm:w-28 sm:h-28 bg-gradient-to-br from-slate-900 to-slate-700 rounded-full border-4 border-yellow-300 shadow-2xl flex items-center justify-center overflow-hidden z-40">
-                    <div className="w-20 h-20 sm:w-24 sm:h-24 bg-black rounded-full border-2 border-orange-400 flex items-center justify-center p-2">
-                      <img 
-                        src="/attached_assets/logo_1751956932645.png" 
+                  <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 lg:w-36 lg:h-36 bg-gradient-to-br from-slate-900 to-slate-700 rounded-full border-4 border-yellow-300 shadow-2xl flex items-center justify-center overflow-hidden z-40">
+                    <div className="w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 lg:w-32 lg:h-32 bg-black rounded-full border-2 border-orange-400 flex items-center justify-center p-2">
+                      <img
+                        src="/attached_assets/logo_1751956932645.png"
                         alt="Hit The Road Jackpot"
                         className="w-full h-full object-contain filter brightness-125 contrast-110"
                       />
@@ -194,8 +204,6 @@ export function ProfessionalWheel({
             </div>
           </div>
         </div>
-
-
       </div>
 
       {/* Spin Button */}
@@ -260,7 +268,8 @@ export function ProfessionalWheel({
                       🎉 FREE PLAY - $0.00
                     </div>
                     <p className="text-green-200 text-sm">
-                      Lucky you! This number is in the free play range (#{freePlayStart}-{totalNumbers})
+                      Lucky you! This number is in the free play range (#
+                      {freePlayStart}-{totalNumbers})
                     </p>
                     <div className="bg-green-500/20 rounded-lg p-2 mt-2">
                       <p className="text-green-100 text-xs font-semibold">
@@ -274,7 +283,8 @@ export function ProfessionalWheel({
                       💳 ${amountCharged.toFixed(2)} CHARGED
                     </div>
                     <p className="text-blue-200 text-sm">
-                      You selected number {result} - charged exactly ${amountCharged.toFixed(2)}
+                      You selected number {result} - charged exactly $
+                      {amountCharged.toFixed(2)}
                     </p>
                     <div className="bg-blue-500/20 rounded-lg p-2 mt-2">
                       <p className="text-blue-100 text-xs font-semibold">
