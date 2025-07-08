@@ -113,21 +113,21 @@ export function ProfessionalWheel({
   };
 
   return (
-    <div className="flex flex-col items-center space-y-4 sm:space-y-6 w-full max-w-2xl mx-auto px-1 xs:px-2 sm:px-4">
+    <div className="flex flex-col items-center space-y-4 sm:space-y-6 w-full max-w-2xl mx-auto px-4 sm:px-4">
       {/* Wheel Container */}
-      <div className="relative">
+      <div className="relative w-full flex justify-center">
         {/* Enhanced Professional Pointer */}
         <WheelPointer className="top-0 left-1/2 transform -translate-x-1/2 -translate-y-2" />
 
         {/* Wheel with Premium Border */}
         <div className="relative">
           {/* Enhanced multi-layer decorative border - static but eye-catching */}
-          <div className="relative p-2 xs:p-3 sm:p-4 rounded-full bg-gradient-to-r from-yellow-600 via-orange-500 to-red-600 shadow-2xl">
-            <div className="p-1 xs:p-1.5 sm:p-2 rounded-full bg-gradient-to-r from-purple-600 via-blue-600 to-cyan-500 shadow-xl">
-              <div className="p-1 xs:p-1.5 sm:p-2 rounded-full bg-gradient-to-r from-yellow-500 via-yellow-300 to-yellow-500 border-2 xs:border-3 sm:border-4 border-white shadow-inner">
+          <div className="relative p-3 sm:p-4 rounded-full bg-gradient-to-r from-yellow-600 via-orange-500 to-red-600 shadow-2xl">
+            <div className="p-2 sm:p-2 rounded-full bg-gradient-to-r from-purple-600 via-blue-600 to-cyan-500 shadow-xl">
+              <div className="p-2 sm:p-2 rounded-full bg-gradient-to-r from-yellow-500 via-yellow-300 to-yellow-500 border-3 sm:border-4 border-white shadow-inner">
                 <div
                   ref={wheelRef}
-                  className="w-56 h-56 xs:w-64 xs:h-64 sm:w-80 sm:h-80 md:w-96 md:h-96 lg:w-[420px] lg:h-[420px] rounded-full relative overflow-hidden"
+                  className="w-64 h-64 sm:w-80 sm:h-80 md:w-96 md:h-96 lg:w-[420px] lg:h-[420px] rounded-full relative overflow-hidden"
                   style={{
                     transform: `rotate(${rotation}deg)`,
                     transition: isSpinning
@@ -178,11 +178,11 @@ export function ProfessionalWheel({
                   })}
 
                   {/* Outer ring decoration - static but eye-catching */}
-                  <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-24 h-24 xs:w-28 xs:h-28 sm:w-36 sm:h-36 md:w-40 md:h-40 lg:w-44 lg:h-44 bg-gradient-to-br from-yellow-400 via-orange-500 to-red-600 rounded-full border-2 xs:border-3 sm:border-4 border-white shadow-2xl z-20"></div>
+                  <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-32 h-32 sm:w-36 sm:h-36 md:w-40 md:h-40 lg:w-44 lg:h-44 bg-gradient-to-br from-yellow-400 via-orange-500 to-red-600 rounded-full border-3 sm:border-4 border-white shadow-2xl z-20"></div>
 
                   {/* Middle ring - static with enhanced glow */}
                   <div
-                    className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-20 h-20 xs:w-24 xs:h-24 sm:w-32 sm:h-32 md:w-36 md:h-36 lg:w-40 lg:h-40 bg-gradient-to-br from-purple-600 via-blue-600 to-cyan-500 rounded-full border-2 xs:border-3 border-white shadow-xl z-30"
+                    className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-28 h-28 sm:w-32 sm:h-32 md:w-36 md:h-36 lg:w-40 lg:h-40 bg-gradient-to-br from-purple-600 via-blue-600 to-cyan-500 rounded-full border-3 border-white shadow-xl z-30"
                     style={{
                       boxShadow:
                         "0 0 30px rgba(147, 51, 234, 0.6), inset 0 0 15px rgba(255, 255, 255, 0.3)",
@@ -190,8 +190,8 @@ export function ProfessionalWheel({
                   ></div>
 
                   {/* Center hub with brand logo */}
-                  <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-16 h-16 xs:w-20 xs:h-20 sm:w-28 sm:h-28 md:w-32 md:h-32 lg:w-36 lg:h-36 bg-gradient-to-br from-slate-900 to-slate-700 rounded-full border-2 xs:border-3 sm:border-4 border-yellow-300 shadow-2xl flex items-center justify-center overflow-hidden z-40">
-                    <div className="w-12 h-12 xs:w-16 xs:h-16 sm:w-24 sm:h-24 md:w-28 md:h-28 lg:w-32 lg:h-32 bg-black rounded-full border xs:border-2 border-orange-400 flex items-center justify-center p-0.5 xs:p-1 sm:p-2">
+                  <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 lg:w-36 lg:h-36 bg-gradient-to-br from-slate-900 to-slate-700 rounded-full border-3 sm:border-4 border-yellow-300 shadow-2xl flex items-center justify-center overflow-hidden z-40">
+                    <div className="w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 lg:w-32 lg:h-32 bg-black rounded-full border-2 border-orange-400 flex items-center justify-center p-2">
                       <img
                         src="/attached_assets/logo_1751956932645.png"
                         alt="Hit The Road Jackpot"
@@ -210,7 +210,7 @@ export function ProfessionalWheel({
       <Button
         onClick={handleSpin}
         disabled={isSpinning || disabled}
-        className="w-full max-w-xs bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-white font-bold py-2 xs:py-3 sm:py-4 px-4 xs:px-6 sm:px-8 rounded-xl text-sm xs:text-base sm:text-lg shadow-lg transition-all duration-300 disabled:opacity-50 touch-manipulation"
+        className="w-full max-w-xs bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-white font-bold py-3 sm:py-4 px-6 sm:px-8 rounded-xl text-base sm:text-lg shadow-lg transition-all duration-300 disabled:opacity-50 touch-manipulation"
       >
         {isSpinning ? (
           <div className="flex items-center justify-center space-x-2">
