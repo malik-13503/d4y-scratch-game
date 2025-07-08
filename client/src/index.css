@@ -222,51 +222,51 @@
     height: 16rem !important;
   }
 
-  /* Each number positioned at 30% of segment start for mobile */
+  /* Each number repositioned closer to smaller middle circle - visible positioning */
   #wheel-number-0 {
-    transform: translate(-50%, -50%) translate(121.35px, -27.88px) !important;
+    transform: translate(-50%, -50%) translate(125px, 0) !important;
     z-index: 200 !important;
     display: block !important;
   }
 
   #wheel-number-1 {
-    transform: translate(-50%, -50%) translate(27.88px, 121.35px) !important;
+    transform: translate(-50%, -50%) translate(88.4px, 88.4px) !important;
     z-index: 200 !important;
     display: block !important;
   }
 
   #wheel-number-2 {
-    transform: translate(-50%, -50%) translate(-27.88px, 121.35px) !important;
+    transform: translate(-50%, -50%) translate(0, 125px) !important;
     z-index: 200 !important;
     display: block !important;
   }
 
   #wheel-number-3 {
-    transform: translate(-50%, -50%) translate(-121.35px, 27.88px) !important;
+    transform: translate(-50%, -50%) translate(-88.4px, 88.4px) !important;
     z-index: 200 !important;
     display: block !important;
   }
 
   #wheel-number-4 {
-    transform: translate(-50%, -50%) translate(-121.35px, -27.88px) !important;
+    transform: translate(-50%, -50%) translate(-125px, 0) !important;
     z-index: 200 !important;
     display: block !important;
   }
 
   #wheel-number-5 {
-    transform: translate(-50%, -50%) translate(-27.88px, -121.35px) !important;
+    transform: translate(-50%, -50%) translate(-88.4px, -88.4px) !important;
     z-index: 200 !important;
     display: block !important;
   }
 
   #wheel-number-6 {
-    transform: translate(-50%, -50%) translate(27.88px, -121.35px) !important;
+    transform: translate(-50%, -50%) translate(0, -125px) !important;
     z-index: 200 !important;
     display: block !important;
   }
 
   #wheel-number-7 {
-    transform: translate(-50%, -50%) translate(121.35px, -27.88px) !important;
+    transform: translate(-50%, -50%) translate(88.4px, -88.4px) !important;
     z-index: 200 !important;
     display: block !important;
   }
