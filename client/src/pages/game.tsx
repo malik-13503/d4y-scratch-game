@@ -142,60 +142,57 @@ export default function GamePage() {
 
       {/* Header */}
       <header className="relative z-10 bg-black/20 backdrop-blur-xl border-b border-purple-500/30 shadow-2xl">
-        <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-6 py-2 sm:py-4">
-          <div className="flex flex-col gap-2 sm:gap-0 sm:flex-row items-start sm:items-center justify-between">
-            {/* Top row on mobile - Back button and game info */}
-            <div className="flex items-center space-x-2 sm:space-x-4 w-full sm:w-auto min-w-0">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between space-y-3 sm:space-y-0">
+            {/* Left side - Back button and game info */}
+            <div className="flex items-center space-x-3 sm:space-x-4 w-full sm:w-auto">
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => setLocation("/")}
-                className="text-gray-300 hover:text-white hover:bg-white/10 flex-shrink-0 h-8 px-2 sm:h-10 sm:px-4"
+                className="text-gray-300 hover:text-white hover:bg-white/10 flex-shrink-0"
               >
-                <ArrowLeft className="h-3 w-3 sm:h-4 sm:w-4 lg:h-5 lg:w-5 mr-1" />
-                <span className="text-xs sm:text-sm">Back</span>
+                <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5 mr-1 sm:mr-2" />
+                <span className="hidden sm:inline">Back</span>
               </Button>
-              <div className="flex items-center space-x-2 min-w-0 flex-1">
-                <div className="p-1 sm:p-2 bg-gradient-to-r from-red-500 to-red-600 rounded-lg shadow-lg flex-shrink-0">
-                  <span className="text-sm sm:text-xl lg:text-2xl">{game.emoji}</span>
+              <div className="flex items-center space-x-2 sm:space-x-3 min-w-0">
+                <div className="p-2 sm:p-3 bg-gradient-to-r from-red-500 to-red-600 rounded-xl shadow-lg flex-shrink-0">
+                  <span className="text-xl sm:text-3xl">{game.emoji}</span>
                 </div>
-                <div className="min-w-0 flex-1">
-                  <h1 className="text-sm sm:text-xl lg:text-2xl xl:text-3xl font-bold bg-gradient-to-r from-red-400 to-pink-400 bg-clip-text text-transparent truncate leading-tight">
+                <div className="min-w-0">
+                  <h1 className="text-xl sm:text-3xl font-bold bg-gradient-to-r from-red-400 to-pink-400 bg-clip-text text-transparent truncate">
                     {game.name}
                   </h1>
-                  <p className="text-gray-400 font-mono text-xs sm:text-sm truncate">{game.code}</p>
+                  <p className="text-gray-400 font-mono text-xs sm:text-sm">{game.code}</p>
                 </div>
               </div>
             </div>
             
-            {/* Bottom row on mobile - Logo, stats, and prize */}
-            <div className="flex items-center justify-between sm:justify-end space-x-2 sm:space-x-4 lg:space-x-6 w-full sm:w-auto">
-              {/* Logo - hide on very small screens, show on xs+ */}
+            {/* Right side - Logo and Live Stats */}
+            <div className="flex items-center space-x-3 sm:space-x-6 w-full sm:w-auto">
               <img 
                 src={logoPath} 
                 alt="Hit The Road Jackpot" 
-                className="hidden xs:block h-6 sm:h-10 lg:h-12 xl:h-14 w-auto object-contain flex-shrink-0"
+                className="h-10 w-auto object-contain sm:h-12 md:h-14 lg:h-16"
               />
-              
-              {/* Live Stats - compact on mobile */}
-              <div className="flex items-center space-x-1 sm:space-x-2 lg:space-x-3 bg-white/5 backdrop-blur-sm rounded-lg sm:rounded-xl px-2 sm:px-3 lg:px-4 py-1 sm:py-2 border border-white/10 text-xs sm:text-sm">
-                <div className="flex items-center space-x-1">
+              <div className="flex items-center space-x-2 sm:space-x-4 bg-white/5 backdrop-blur-sm rounded-xl px-3 sm:px-4 py-2 border border-white/10 flex-1 sm:flex-none">
+                <div className="flex items-center space-x-1 sm:space-x-2">
                   <Users className="h-3 w-3 sm:h-4 sm:w-4 text-green-400" />
-                  <span className="text-white font-bold">{playerCount}</span>
-                  <span className="text-gray-400 hidden sm:inline">playing</span>
+                  <span className="text-white font-bold text-sm sm:text-base">{playerCount}</span>
+                  <span className="text-gray-400 text-xs sm:text-sm">playing</span>
                 </div>
-                <div className="w-px h-3 sm:h-4 lg:h-6 bg-white/20"></div>
-                <div className="flex items-center space-x-1">
+                <div className="w-px h-4 sm:h-6 bg-white/20"></div>
+                <div className="flex items-center space-x-1 sm:space-x-2">
                   <Clock className="h-3 w-3 sm:h-4 sm:w-4 text-blue-400" />
-                  <span className="text-white font-mono">{formatTimeRemaining(new Date(game.endTime))}</span>
+                  <span className="text-white font-mono text-xs sm:text-sm">{formatTimeRemaining(new Date(game.endTime))}</span>
                 </div>
               </div>
               
-              {/* Prize Display - responsive sizing */}
-              <div className="bg-gradient-to-r from-yellow-500/20 to-orange-500/20 backdrop-blur-sm rounded-lg sm:rounded-xl px-2 sm:px-4 lg:px-6 py-1 sm:py-2 lg:py-3 border border-yellow-500/30 flex-shrink-0">
-                <div className="flex items-center space-x-1 sm:space-x-2">
-                  <Trophy className="h-3 w-3 sm:h-4 sm:w-4 lg:h-5 lg:w-5 text-yellow-400" />
-                  <span className="text-yellow-400 font-bold text-xs sm:text-sm lg:text-lg xl:text-xl truncate max-w-20 sm:max-w-none">{game.prize}</span>
+              {/* Prize Display */}
+              <div className="bg-gradient-to-r from-yellow-500/20 to-orange-500/20 backdrop-blur-sm rounded-xl px-6 py-3 border border-yellow-500/30">
+                <div className="flex items-center space-x-2">
+                  <Trophy className="h-5 w-5 text-yellow-400" />
+                  <span className="text-yellow-400 font-bold text-xl">{game.prize}</span>
                 </div>
               </div>
             </div>
