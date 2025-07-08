@@ -199,7 +199,7 @@
 }
 
 /* Mobile positioning - adjusted for larger wheel with smaller middle circle */
-@media (max-width: 300px) {
+@media (max-width: 640px) {
   .wheel-prize-number {
     width: 38px !important;
     height: 38px !important;
@@ -272,56 +272,23 @@
   }
 }
 
-/* Desktop positioning - different logic for better desktop visibility */
-@media (min-width: 641px) {
-  /* Desktop wheel numbers positioned closer to outer edge */
-  #wheel-number-0 {
-    transform: translate(-50%, -50%) translate(160px, 0) !important;
-    z-index: 200 !important;
-    display: block !important;
+/* Additional responsive breakpoint for smaller screens */
+@media (max-width: 400px) {
+  .wheel-prize-number {
+    width: 34px !important;
+    height: 34px !important;
+    font-size: 12px !important;
   }
-
-  #wheel-number-1 {
-    transform: translate(-50%, -50%) translate(113.1px, 113.1px) !important;
-    z-index: 200 !important;
-    display: block !important;
-  }
-
-  #wheel-number-2 {
-    transform: translate(-50%, -50%) translate(0, 160px) !important;
-    z-index: 200 !important;
-    display: block !important;
-  }
-
-  #wheel-number-3 {
-    transform: translate(-50%, -50%) translate(-113.1px, 113.1px) !important;
-    z-index: 200 !important;
-    display: block !important;
-  }
-
-  #wheel-number-4 {
-    transform: translate(-50%, -50%) translate(-160px, 0) !important;
-    z-index: 200 !important;
-    display: block !important;
-  }
-
-  #wheel-number-5 {
-    transform: translate(-50%, -50%) translate(-113.1px, -113.1px) !important;
-    z-index: 200 !important;
-    display: block !important;
-  }
-
-  #wheel-number-6 {
-    transform: translate(-50%, -50%) translate(0, -160px) !important;
-    z-index: 200 !important;
-    display: block !important;
-  }
-
-  #wheel-number-7 {
-    transform: translate(-50%, -50%) translate(113.1px, -113.1px) !important;
-    z-index: 200 !important;
-    display: block !important;
-  }
+  
+  /* Adjust numbers for smaller 280px wheel */
+  #wheel-number-0 { transform: translate(-50%, -50%) translate(105px, 0) !important; }
+  #wheel-number-1 { transform: translate(-50%, -50%) translate(74.2px, 74.2px) !important; }
+  #wheel-number-2 { transform: translate(-50%, -50%) translate(0, 105px) !important; }
+  #wheel-number-3 { transform: translate(-50%, -50%) translate(-74.2px, 74.2px) !important; }
+  #wheel-number-4 { transform: translate(-50%, -50%) translate(-105px, 0) !important; }
+  #wheel-number-5 { transform: translate(-50%, -50%) translate(-74.2px, -74.2px) !important; }
+  #wheel-number-6 { transform: translate(-50%, -50%) translate(0, -105px) !important; }
+  #wheel-number-7 { transform: translate(-50%, -50%) translate(74.2px, -74.2px) !important; }
 }
 
 .dark {
