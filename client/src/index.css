@@ -164,6 +164,40 @@
   overflow: hidden;
 }
 
+/* Wheel prize number positioning */
+.wheel-prize-number {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 40px;
+  height: 40px;
+  background-color: rgba(0,0,0,0.8);
+  border-radius: 50%;
+  border: 2px solid rgba(255,255,255,0.95);
+  box-shadow: 0 0 10px rgba(0,0,0,0.8), inset 0 0 4px rgba(255,255,255,0.2);
+  z-index: 100;
+  text-shadow: 2px 2px 6px rgba(0,0,0,0.9), 1px 1px 3px rgba(0,0,0,0.8), 0 0 8px rgba(0,0,0,0.6);
+  filter: drop-shadow(1px 1px 3px rgba(0,0,0,0.8));
+}
+
+/* Mobile positioning - closer to center and smaller */
+@media (max-width: 640px) {
+  .wheel-prize-number {
+    width: 36px;
+    height: 36px;
+  }
+  
+  /* Each number gets repositioned closer to center on mobile */
+  #wheel-number-0 { transform: translate(-50%, -50%) translate(100px, 0) !important; }
+  #wheel-number-1 { transform: translate(-50%, -50%) translate(70.7px, 70.7px) !important; }
+  #wheel-number-2 { transform: translate(-50%, -50%) translate(0, 100px) !important; }
+  #wheel-number-3 { transform: translate(-50%, -50%) translate(-70.7px, 70.7px) !important; }
+  #wheel-number-4 { transform: translate(-50%, -50%) translate(-100px, 0) !important; }
+  #wheel-number-5 { transform: translate(-50%, -50%) translate(-70.7px, -70.7px) !important; }
+  #wheel-number-6 { transform: translate(-50%, -50%) translate(0, -100px) !important; }
+  #wheel-number-7 { transform: translate(-50%, -50%) translate(70.7px, -70.7px) !important; }
+}
+
 .dark {
   --background: hsl(240, 10%, 3.9%);
   --foreground: hsl(0, 0%, 98%);

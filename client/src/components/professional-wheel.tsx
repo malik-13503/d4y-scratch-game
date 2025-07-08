@@ -153,24 +153,12 @@ export function ProfessionalWheel({
                           background: `linear-gradient(135deg, ${color}, ${color}dd)`,
                         }}
                       >
-                        {/* Static segment number - positioned further out */}
+                        {/* Static segment number - positioned with responsive class */}
                         <div
-                          className="absolute text-white font-bold text-xs sm:text-sm md:text-base flex items-center justify-center bg-black bg-opacity-80 rounded-full border border-white"
+                          id={`wheel-number-${index}`}
+                          className="wheel-prize-number text-white font-bold text-xs sm:text-sm md:text-base flex items-center justify-center"
                           style={{
-                            top: "50%",
-                            left: "50%",
-                            width: "40px",
-                            height: "40px",
-                            transform: `translate(-50%, -50%) translate(${Math.cos(((angle + 360 / segmentColors.length / 2 - 90) * Math.PI) / 180) * 150}px, ${Math.sin(((angle + 360 / segmentColors.length / 2 - 90) * Math.PI) / 180) * 150}px)`,
-                            textShadow:
-                              "2px 2px 6px rgba(0,0,0,0.9), 1px 1px 3px rgba(0,0,0,0.8), 0 0 8px rgba(0,0,0,0.6)",
-                            filter: "drop-shadow(1px 1px 3px rgba(0,0,0,0.8))",
-                            backgroundColor: "rgba(0,0,0,0.8)",
-                            borderRadius: "50%",
-                            border: "2px solid rgba(255,255,255,0.95)",
-                            boxShadow:
-                              "0 0 10px rgba(0,0,0,0.8), inset 0 0 4px rgba(255,255,255,0.2)",
-                            zIndex: 100,
+                            transform: `translate(-50%, -50%) translate(${Math.cos(((angle + 360 / segmentColors.length / 2 - 90) * Math.PI) / 180) * 120}px, ${Math.sin(((angle + 360 / segmentColors.length / 2 - 90) * Math.PI) / 180) * 120}px)`,
                           }}
                         >
                           {wheelNumbers[index]}
