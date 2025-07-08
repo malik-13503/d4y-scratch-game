@@ -158,7 +158,7 @@ export function ProfessionalWheel({
                           id={`wheel-number-${index}`}
                           className="wheel-prize-number text-white font-bold text-xs sm:text-sm md:text-base flex items-center justify-center"
                           style={{
-                            transform: `translate(-50%, -50%) translate(${Math.cos(((angle + 360 / segmentColors.length / 2 - 90) * Math.PI) / 180) * 140}px, ${Math.sin(((angle + 360 / segmentColors.length / 2 - 90) * Math.PI) / 180) * 140}px)`,
+                            transform: `translate(-50%, -50%) translate(${Math.cos(((angle + 360 / segmentColors.length / 2 - 90) * Math.PI) / 180) * 110}px, ${Math.sin(((angle + 360 / segmentColors.length / 2 - 90) * Math.PI) / 180) * 110}px)`,
                           }}
                         >
                           {wheelNumbers[index]}

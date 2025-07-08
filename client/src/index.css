@@ -272,6 +272,58 @@
   }
 }
 
+/* Desktop positioning - different logic for better desktop visibility */
+@media (min-width: 641px) {
+  /* Desktop wheel numbers positioned closer to outer edge */
+  #wheel-number-0 {
+    transform: translate(-50%, -50%) translate(160px, 0) !important;
+    z-index: 200 !important;
+    display: block !important;
+  }
+
+  #wheel-number-1 {
+    transform: translate(-50%, -50%) translate(113.1px, 113.1px) !important;
+    z-index: 200 !important;
+    display: block !important;
+  }
+
+  #wheel-number-2 {
+    transform: translate(-50%, -50%) translate(0, 160px) !important;
+    z-index: 200 !important;
+    display: block !important;
+  }
+
+  #wheel-number-3 {
+    transform: translate(-50%, -50%) translate(-113.1px, 113.1px) !important;
+    z-index: 200 !important;
+    display: block !important;
+  }
+
+  #wheel-number-4 {
+    transform: translate(-50%, -50%) translate(-160px, 0) !important;
+    z-index: 200 !important;
+    display: block !important;
+  }
+
+  #wheel-number-5 {
+    transform: translate(-50%, -50%) translate(-113.1px, -113.1px) !important;
+    z-index: 200 !important;
+    display: block !important;
+  }
+
+  #wheel-number-6 {
+    transform: translate(-50%, -50%) translate(0, -160px) !important;
+    z-index: 200 !important;
+    display: block !important;
+  }
+
+  #wheel-number-7 {
+    transform: translate(-50%, -50%) translate(113.1px, -113.1px) !important;
+    z-index: 200 !important;
+    display: block !important;
+  }
+}
+
 .dark {
   --background: hsl(240, 10%, 3.9%);
   --foreground: hsl(0, 0%, 98%);
