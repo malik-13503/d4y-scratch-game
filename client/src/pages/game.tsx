@@ -201,20 +201,20 @@ export default function GamePage() {
       </header>
 
       {/* Main Game Area */}
-      <main className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-8">
+      <main className="relative z-10 max-w-7xl mx-auto px-2 xs:px-4 sm:px-6 py-3 xs:py-4 sm:py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 xs:gap-4 sm:gap-8">
           {/* Game Interface */}
-          <div className="lg:col-span-2 space-y-4 sm:space-y-8">
+          <div className="lg:col-span-2 space-y-3 xs:space-y-4 sm:space-y-8">
             {/* Professional Spinning Wheel */}
             <Card className="bg-black/20 backdrop-blur-xl border border-purple-500/30 shadow-2xl overflow-hidden">
-              <CardHeader className="text-center pb-2 sm:pb-4 p-4 sm:p-6">
+              <CardHeader className="text-center pb-2 sm:pb-4 p-2 xs:p-3 sm:p-6">
                 <CardTitle className="text-xl sm:text-2xl lg:text-3xl font-bold text-white flex items-center justify-center space-x-2">
                   <Target className="h-5 w-5 sm:h-6 sm:w-6 lg:h-8 lg:w-8 text-purple-400" />
                   <span>Spin to Win</span>
                 </CardTitle>
                 <p className="text-slate-400 text-sm sm:text-base lg:text-lg">Click the wheel to spin and claim your number!</p>
               </CardHeader>
-              <CardContent className="p-2 sm:p-4 lg:p-8">
+              <CardContent className="p-1 xs:p-2 sm:p-4 lg:p-8">
                 <div className="text-center">
                   <ProfessionalWheel 
                     onSpin={handleSpin} 
@@ -227,7 +227,7 @@ export default function GamePage() {
           </div>
 
           {/* Game Info Sidebar */}
-          <div className="space-y-6">
+          <div className="space-y-3 xs:space-y-4 sm:space-y-6">
             {/* Game Status */}
             <Card className="bg-black/20 backdrop-blur-xl border border-purple-500/30 shadow-2xl">
               <CardHeader>
