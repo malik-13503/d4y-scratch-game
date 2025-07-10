@@ -24,6 +24,7 @@ export function ProfessionalWheel({
   const [showResultModal, setShowResultModal] = useState(false);
   const [isFreePlay, setIsFreePlay] = useState(false);
   const [amountCharged, setAmountCharged] = useState<number>(0);
+  const [currentWheelNumbers, setCurrentWheelNumbers] = useState<number[]>([]);
   const wheelRef = useRef<HTMLDivElement>(null);
 
   const freePlayStart = Math.floor(totalNumbers * 0.75) + 1;
@@ -61,6 +62,11 @@ export function ProfessionalWheel({
 
   const wheelNumbers = generateWheelNumbers();
 
+  // Initialize wheel numbers on component mount
+  useEffect(() => {
+    setCurrentWheelNumbers(wheelNumbers);
+  }, []);
+
   const handleSpin = async () => {
     if (isSpinning || disabled) return;
 
@@ -81,13 +87,11 @@ export function ProfessionalWheel({
       const segmentCount = 12;
       const degreesPerSegment = 360 / segmentCount;
       
-      // Find which segment should contain our result number
-      const resultSegmentIndex = wheelNumbers.findIndex(num => 
-        Math.abs(num - spinResult) <= Math.floor(totalNumbers / segmentCount / 2)
-      );
-      
-      // If not found in displayed numbers, use a random segment
-      const targetSegmentIndex = resultSegmentIndex >= 0 ? resultSegmentIndex : Math.floor(Math.random() * segmentCount);
+      // Update the wheel numbers to include our result number in one of the segments
+      const updatedWheelNumbers = [...wheelNumbers];
+      const targetSegmentIndex = Math.floor(Math.random() * segmentCount);
+      updatedWheelNumbers[targetSegmentIndex] = spinResult;
+      setCurrentWheelNumbers(updatedWheelNumbers);
       
       // Calculate the target angle to stop at the correct segment
       // Pointer points down, so we need to adjust accordingly
@@ -106,20 +110,21 @@ export function ProfessionalWheel({
       // For paid numbers, charge the exact number amount
       setAmountCharged(isFree ? 0 : spinResult);
 
-      // Wait for spin animation to complete before showing modal
+      // Wait for spin animation to complete, then wait 1 more second before showing modal
       setTimeout(() => {
         setIsSpinning(false);
         
-        console.log("Wheel stopped, showing result modal:", {
+        console.log("Wheel stopped, waiting 1 second before showing result modal:", {
           spinResult,
           isFree,
           amountCharged: isFree ? 0 : spinResult,
           targetSegmentIndex,
-          displayedNumber: wheelNumbers[targetSegmentIndex]
         });
 
-        // Show result modal only after wheel completely stops
-        setShowResultModal(true);
+        // Wait 1 additional second after wheel stops, then show result modal
+        setTimeout(() => {
+          setShowResultModal(true);
+        }, 1000);
       }, spinDuration);
     } catch (error) {
       console.error("Spin error:", error);
@@ -205,7 +210,7 @@ export function ProfessionalWheel({
                               : "transform 0.3s ease-out",
                           }}
                         >
-                          {wheelNumbers[index]}
+                          {currentWheelNumbers[index] || wheelNumbers[index]}
                         </div>
                       </div>
                     );
@@ -283,7 +288,7 @@ export function ProfessionalWheel({
           </DialogDescription>
           
           <div className="relative p-6 text-center">
-            {/* Confetti */}
+            {/* Confetti - only when modal is visible */}
             <Confetti active={showResultModal} duration={3000} />
 
             {/* Background effects */}
