@@ -69,20 +69,19 @@ export function ProfessionalWheel({
     setShowResultModal(false);
 
     try {
-      // Get result from API first
-      const spinResult = await onSpin();
-      console.log("Spin result received:", spinResult);
-
       // Professional spinning animation - 8 seconds duration
       const spinDuration = 8000;
       const spins = 8 + Math.random() * 4; // 8-12 full rotations
 
-      // For simplicity, just spin the wheel randomly and show the actual result
-      // The important part is showing the correct result number in the popup
+      // Calculate final rotation for realistic spinning
       const finalRotation = rotation + spins * 360 + Math.random() * 360;
-
+      
+      // Start the wheel spinning animation immediately
       setRotation(finalRotation);
-      // Keep pointer stationary - it always points down
+
+      // Get result from API while wheel is spinning
+      const spinResult = await onSpin();
+      console.log("Spin result received:", spinResult);
 
       // Wait for spin animation to complete
       setTimeout(() => {
@@ -154,7 +153,7 @@ export function ProfessionalWheel({
                     transform: `rotate(${rotation}deg)`,
                     transition: isSpinning
                       ? `transform 8s cubic-bezier(0.25, 0.1, 0.25, 1)`
-                      : "none",
+                      : "transform 0.3s ease-out",
                     boxShadow:
                       "inset 0 0 30px rgba(0, 0, 0, 0.4), 0 0 40px rgba(255, 215, 0, 0.3)",
                   }}
@@ -240,7 +239,7 @@ export function ProfessionalWheel({
 
       {/* Result Modal */}
       <Dialog open={showResultModal} onOpenChange={setShowResultModal}>
-        <DialogContent className="max-w-sm mx-auto p-0 bg-gradient-to-br from-purple-900 via-blue-900 to-purple-900 border-0 overflow-hidden">
+        <DialogContent className="max-w-md mx-auto p-0 bg-gradient-to-br from-purple-900 via-blue-900 to-purple-900 border-2 border-yellow-400/30 overflow-hidden shadow-2xl">
           <div className="relative p-6 text-center">
             {/* Confetti */}
             <Confetti active={showResultModal} duration={3000} />
@@ -248,33 +247,33 @@ export function ProfessionalWheel({
             {/* Background effects */}
             <div className="absolute inset-0 bg-gradient-to-r from-yellow-400/10 via-orange-500/10 to-red-500/10 animate-pulse"></div>
 
-            <div className="relative z-10 space-y-4">
+            <div className="relative z-10 space-y-6">
               {/* Icon */}
               <div className="flex justify-center">
                 <div className="relative">
                   {isFreePlay ? (
-                    <Gift className="h-12 w-12 text-green-400 animate-bounce" />
+                    <Gift className="h-16 w-16 text-green-400 animate-bounce" />
                   ) : (
-                    <DollarSign className="h-12 w-12 text-blue-400 animate-bounce" />
+                    <DollarSign className="h-16 w-16 text-blue-400 animate-bounce" />
                   )}
                   <div className="absolute inset-0 bg-current blur-xl opacity-30 animate-pulse"></div>
                 </div>
               </div>
 
               {/* Result */}
-              <div className="space-y-2">
-                <h2 className="text-2xl font-bold bg-gradient-to-r from-yellow-300 via-orange-400 to-red-400 bg-clip-text text-transparent">
+              <div className="space-y-3">
+                <h2 className="text-3xl font-bold bg-gradient-to-r from-yellow-300 via-orange-400 to-red-400 bg-clip-text text-transparent">
                   {isFreePlay ? "🎁 FREE PLAY!" : "✨ NUMBER CLAIMED!"}
                 </h2>
-                <div className="text-6xl font-black bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 bg-clip-text text-transparent">
+                <div className="text-7xl font-black bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 bg-clip-text text-transparent animate-pulse">
                   {result}
                 </div>
               </div>
 
               {/* Payment info */}
-              <div className="bg-black/30 backdrop-blur-sm rounded-lg p-4 border border-white/20">
+              <div className="bg-black/30 backdrop-blur-sm rounded-lg p-6 border border-white/20">
                 {isFreePlay ? (
-                  <div className="text-center space-y-2">
+                  <div className="text-center space-y-3">
                     <div className="text-2xl font-bold text-green-300">
                       🎉 FREE PLAY - $0.00
                     </div>
@@ -282,14 +281,14 @@ export function ProfessionalWheel({
                       Lucky you! This number is in the free play range (#
                       {freePlayStart}-{totalNumbers})
                     </p>
-                    <div className="bg-green-500/20 rounded-lg p-2 mt-2">
-                      <p className="text-green-100 text-xs font-semibold">
+                    <div className="bg-green-500/20 rounded-lg p-3 mt-3">
+                      <p className="text-green-100 text-sm font-semibold">
                         🎁 No charge for this spin!
                       </p>
                     </div>
                   </div>
                 ) : (
-                  <div className="text-center space-y-2">
+                  <div className="text-center space-y-3">
                     <div className="text-2xl font-bold text-blue-300">
                       💳 ${amountCharged.toFixed(2)} CHARGED
                     </div>
@@ -297,8 +296,8 @@ export function ProfessionalWheel({
                       You selected number {result} - charged exactly $
                       {amountCharged.toFixed(2)}
                     </p>
-                    <div className="bg-blue-500/20 rounded-lg p-2 mt-2">
-                      <p className="text-blue-100 text-xs font-semibold">
+                    <div className="bg-blue-500/20 rounded-lg p-3 mt-3">
+                      <p className="text-blue-100 text-sm font-semibold">
                         💰 Payment processed successfully
                       </p>
                     </div>
@@ -309,7 +308,7 @@ export function ProfessionalWheel({
               {/* Close button */}
               <Button
                 onClick={() => setShowResultModal(false)}
-                className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-semibold py-2 rounded-lg"
+                className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-semibold py-3 rounded-lg shadow-lg"
               >
                 Continue Playing
               </Button>
