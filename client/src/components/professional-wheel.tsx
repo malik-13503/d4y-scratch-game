@@ -24,7 +24,7 @@ export function ProfessionalWheel({
   const [showResultModal, setShowResultModal] = useState(false);
   const [isFreePlay, setIsFreePlay] = useState(false);
   const [amountCharged, setAmountCharged] = useState<number>(0);
-  const [currentWheelNumbers, setCurrentWheelNumbers] = useState<number[]>([]);
+
   const wheelRef = useRef<HTMLDivElement>(null);
 
   const freePlayStart = Math.floor(totalNumbers * 0.75) + 1;
@@ -98,6 +98,7 @@ export function ProfessionalWheel({
       const targetAngle = segmentAngle * segmentIndex + segmentAngle / 2;
 
       // Step F: Use the target angle to calculate the final rotation
+      // Reset rotation to 0 for clean calculation on each spin
       const fullRotations = 4 * 360;
       const finalRotation = fullRotations + (360 - targetAngle);
       
@@ -107,14 +108,14 @@ export function ProfessionalWheel({
         segmentAngle,
         targetAngle,
         finalRotation,
-        currentRotation: rotation,
         willShowNumber: currentWheelNumbers[segmentIndex],
         calculatedAngle: 360 - targetAngle
       });
 
-      setRotation(rotation + finalRotation);
+      // Set absolute rotation, not additive
+      setRotation(finalRotation);
 
-      // Step E: Use a timeout to show the modal after animation
+      // Step G: Use a timeout to show the modal after animation
       const spinDuration = 8000; // 8 seconds
       setTimeout(() => {
         setResult(spinResult);
@@ -179,7 +180,7 @@ export function ProfessionalWheel({
                     transform: `rotate(${rotation}deg)`,
                     transition: isSpinning
                       ? `transform 8s cubic-bezier(0.17, 0.67, 0.12, 0.99)`
-                      : "transform 0.3s ease-out",
+                      : "none",
                     boxShadow:
                       "inset 0 0 30px rgba(0, 0, 0, 0.4), 0 0 40px rgba(255, 215, 0, 0.3)",
                   }}
@@ -207,7 +208,7 @@ export function ProfessionalWheel({
                             transform: `translate(-50%, -50%) translate(${Math.cos(((angle + 360 / segmentColors.length / 2 - 90) * Math.PI) / 180) * numberRadius}px, ${Math.sin(((angle + 360 / segmentColors.length / 2 - 90) * Math.PI) / 180) * numberRadius}px) rotate(${-rotation}deg)`,
                             transition: isSpinning
                               ? `transform 8s cubic-bezier(0.17, 0.67, 0.12, 0.99)`
-                              : "transform 0.3s ease-out",
+                              : "none",
                           }}
                         >
                           {wheelNumbers[index]}
@@ -235,7 +236,7 @@ export function ProfessionalWheel({
                       transform: `translate(-50%, -50%) rotate(${-rotation}deg)`,
                       transition: isSpinning
                         ? `transform 8s cubic-bezier(0.17, 0.67, 0.12, 0.99)`
-                        : "transform 0.3s ease-out",
+                        : "none",
                     }}
                   >
                     <div className="w-12 h-12 sm:w-28 sm:h-28 md:w-32 md:h-32 lg:w-36 lg:h-36 bg-black rounded-full border-2 border-orange-400 flex items-center justify-center p-2">
