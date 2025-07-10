@@ -1,0 +1,63 @@
+game.tsx:81  POST https://f45475b4-a7c6-4031-bbbd-cffdcb6fa4d5-00-1aqxf2ubqm5iz.janeway.replit.dev/api/players 400 (Bad Request)
+handleSpin @ game.tsx:81
+handleSpin @ professional-wheel.tsx:83
+callCallback2 @ chunk-WERSD76P.js?v=cbec9fad:3674
+invokeGuardedCallbackDev @ chunk-WERSD76P.js?v=cbec9fad:3699
+invokeGuardedCallback @ chunk-WERSD76P.js?v=cbec9fad:3733
+invokeGuardedCallbackAndCatchFirstError @ chunk-WERSD76P.js?v=cbec9fad:3736
+executeDispatch @ chunk-WERSD76P.js?v=cbec9fad:7014
+processDispatchQueueItemsInOrder @ chunk-WERSD76P.js?v=cbec9fad:7034
+processDispatchQueue @ chunk-WERSD76P.js?v=cbec9fad:7043
+dispatchEventsForPlugins @ chunk-WERSD76P.js?v=cbec9fad:7051
+(anonymous) @ chunk-WERSD76P.js?v=cbec9fad:7174
+batchedUpdates$1 @ chunk-WERSD76P.js?v=cbec9fad:18913
+batchedUpdates @ chunk-WERSD76P.js?v=cbec9fad:3579
+dispatchEventForPluginEventSystem @ chunk-WERSD76P.js?v=cbec9fad:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-WERSD76P.js?v=cbec9fad:5478
+dispatchEvent @ chunk-WERSD76P.js?v=cbec9fad:5472
+dispatchDiscreteEvent @ chunk-WERSD76P.js?v=cbec9fad:5449Understand this error
+game.tsx:93 Player creation failed: {"message":"Invalid player data","errors":[{"code":"invalid_type","expected":"string","received":"undefined","path":["playerName"],"message":"Required"}]}
+overrideMethod @ hook.js:608
+handleSpin @ game.tsx:93
+await in handleSpin
+handleSpin @ professional-wheel.tsx:83
+callCallback2 @ chunk-WERSD76P.js?v=cbec9fad:3674
+invokeGuardedCallbackDev @ chunk-WERSD76P.js?v=cbec9fad:3699
+invokeGuardedCallback @ chunk-WERSD76P.js?v=cbec9fad:3733
+invokeGuardedCallbackAndCatchFirstError @ chunk-WERSD76P.js?v=cbec9fad:3736
+executeDispatch @ chunk-WERSD76P.js?v=cbec9fad:7014
+processDispatchQueueItemsInOrder @ chunk-WERSD76P.js?v=cbec9fad:7034
+processDispatchQueue @ chunk-WERSD76P.js?v=cbec9fad:7043
+dispatchEventsForPlugins @ chunk-WERSD76P.js?v=cbec9fad:7051
+(anonymous) @ chunk-WERSD76P.js?v=cbec9fad:7174
+batchedUpdates$1 @ chunk-WERSD76P.js?v=cbec9fad:18913
+batchedUpdates @ chunk-WERSD76P.js?v=cbec9fad:3579
+dispatchEventForPluginEventSystem @ chunk-WERSD76P.js?v=cbec9fad:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-WERSD76P.js?v=cbec9fad:5478
+dispatchEvent @ chunk-WERSD76P.js?v=cbec9fad:5472
+dispatchDiscreteEvent @ chunk-WERSD76P.js?v=cbec9fad:5449Understand this error
+game.tsx:130 Spin error: Error: Failed to create player
+    at handleSpin (game.tsx:94:15)
+    at async handleSpin (professional-wheel.tsx:83:26)
+overrideMethod @ hook.js:608
+handleSpin @ game.tsx:130
+await in handleSpin
+handleSpin @ professional-wheel.tsx:83
+callCallback2 @ chunk-WERSD76P.js?v=cbec9fad:3674
+invokeGuardedCallbackDev @ chunk-WERSD76P.js?v=cbec9fad:3699
+invokeGuardedCallback @ chunk-WERSD76P.js?v=cbec9fad:3733
+invokeGuardedCallbackAndCatchFirstError @ chunk-WERSD76P.js?v=cbec9fad:3736
+executeDispatch @ chunk-WERSD76P.js?v=cbec9fad:7014
+processDispatchQueueItemsInOrder @ chunk-WERSD76P.js?v=cbec9fad:7034
+processDispatchQueue @ chunk-WERSD76P.js?v=cbec9fad:7043
+dispatchEventsForPlugins @ chunk-WERSD76P.js?v=cbec9fad:7051
+(anonymous) @ chunk-WERSD76P.js?v=cbec9fad:7174
+batchedUpdates$1 @ chunk-WERSD76P.js?v=cbec9fad:18913
+batchedUpdates @ chunk-WERSD76P.js?v=cbec9fad:3579
+dispatchEventForPluginEventSystem @ chunk-WERSD76P.js?v=cbec9fad:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-WERSD76P.js?v=cbec9fad:5478
+dispatchEvent @ chunk-WERSD76P.js?v=cbec9fad:5472
+dispatchDiscreteEvent @ chunk-WERSD76P.js?v=cbec9fad:5449Understand this error
+professional-wheel.tsx:108 Spin error: Error: Failed to create player
+    at handleSpin (game.tsx:94:15)
+    at async handleSpin (professional-wheel.tsx:83:26)

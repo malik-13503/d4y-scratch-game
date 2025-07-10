@@ -83,7 +83,7 @@ export default function GamePage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           gameId: parseInt(id!),
-          name: `Player-${Date.now()}`,
+          playerName: `Player-${Date.now()}`,
           email: `player-${Date.now()}@example.com`
         })
       });

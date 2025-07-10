@@ -69,7 +69,7 @@ export function ProfessionalWheel({
     setShowResultModal(false);
 
     try {
-      // Professional spinning animation - 3 seconds duration for testing
+      // Professional spinning animation - 3 seconds duration
       const spinDuration = 3000;
       const spins = 3 + Math.random() * 2; // 3-5 full rotations
 
@@ -83,25 +83,26 @@ export function ProfessionalWheel({
       const spinResult = await onSpin();
       console.log("Spin result received:", spinResult);
 
-      // Wait for spin animation to complete
+      // Store the result but don't show modal yet
+      setResult(spinResult);
+      
+      // Determine if it's a free play
+      const isFree = spinResult >= freePlayStart;
+      setIsFreePlay(isFree);
+      // For paid numbers, charge the exact number amount
+      setAmountCharged(isFree ? 0 : spinResult);
+
+      // Wait for spin animation to complete before showing modal
       setTimeout(() => {
-        setResult(spinResult);
-
-        // Determine if it's a free play
-        const isFree = spinResult >= freePlayStart;
-        setIsFreePlay(isFree);
-        // For paid numbers, charge the exact number amount
-        setAmountCharged(isFree ? 0 : spinResult);
-
         setIsSpinning(false);
-
-        console.log("Showing result modal:", {
+        
+        console.log("Wheel stopped, showing result modal:", {
           spinResult,
           isFree,
           amountCharged: isFree ? 0 : spinResult,
         });
 
-        // Show result modal immediately after wheel stops
+        // Show result modal only after wheel completely stops
         setShowResultModal(true);
       }, spinDuration);
     } catch (error) {
@@ -177,12 +178,15 @@ export function ProfessionalWheel({
                           background: `linear-gradient(135deg, ${color}, ${color}dd)`,
                         }}
                       >
-                        {/* Static segment number - positioned with responsive class */}
+                        {/* Static segment number - positioned with responsive class and counter-rotation */}
                         <div
                           id={`wheel-number-${index}`}
                           className="wheel-prize-number text-white font-bold text-xs sm:text-sm md:text-base flex items-center justify-center"
                           style={{
-                            transform: `translate(-50%, -50%) translate(${Math.cos(((angle + 360 / segmentColors.length / 2 - 90) * Math.PI) / 180) * numberRadius}px, ${Math.sin(((angle + 360 / segmentColors.length / 2 - 90) * Math.PI) / 180) * numberRadius}px)`,
+                            transform: `translate(-50%, -50%) translate(${Math.cos(((angle + 360 / segmentColors.length / 2 - 90) * Math.PI) / 180) * numberRadius}px, ${Math.sin(((angle + 360 / segmentColors.length / 2 - 90) * Math.PI) / 180) * numberRadius}px) rotate(${-rotation}deg)`,
+                            transition: isSpinning
+                              ? `transform 3s cubic-bezier(0.25, 0.1, 0.25, 1)`
+                              : "transform 0.3s ease-out",
                           }}
                         >
                           {wheelNumbers[index]}
