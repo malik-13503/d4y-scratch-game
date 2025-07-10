@@ -60,12 +60,12 @@ export function ProfessionalWheel({
     return numbers;
   };
 
-  const wheelNumbers = generateWheelNumbers();
+  const [wheelNumbers, setWheelNumbers] = useState<number[]>([]);
 
   // Initialize wheel numbers on component mount
   useEffect(() => {
-    setCurrentWheelNumbers(wheelNumbers);
-  }, []);
+    setWheelNumbers(generateWheelNumbers());
+  }, [totalNumbers]);
 
   const handleSpin = async () => {
     if (isSpinning || disabled) return;
@@ -79,43 +79,37 @@ export function ProfessionalWheel({
       const spinResult = await onSpin();
       console.log("Spin result received:", spinResult);
 
-      // Step B: Get index of the segment where this number appears
-      let segmentIndex = wheelNumbers.findIndex(num => num === spinResult);
-      const totalSegments = segmentColors.length;
+      // Step B: Store wheelNumbers in a temporary variable
+      let currentWheelNumbers = [...wheelNumbers];
 
-      // Step C: Handle fallback if number isn't found (avoid crash)
+      // Step C: Get index of the segment where this number appears
+      let segmentIndex = currentWheelNumbers.findIndex(num => num === spinResult);
+
+      // Step D: Handle fallback if number isn't found (avoid crash)
       if (segmentIndex === -1) {
-        // Place the result number in a random segment and update the wheel
-        segmentIndex = Math.floor(Math.random() * totalSegments);
-        console.log("Spin result", spinResult, "not found in wheel numbers, placing in segment", segmentIndex);
+        segmentIndex = Math.floor(Math.random() * currentWheelNumbers.length);
+        currentWheelNumbers[segmentIndex] = spinResult;
+        setWheelNumbers(currentWheelNumbers);
+        console.warn(`Spin result ${spinResult} not found. Placing in segment ${segmentIndex}`);
       }
-      
-      // Always update the wheel to show the exact result number in the target segment
-      const updatedWheelNumbers = [...currentWheelNumbers.length ? currentWheelNumbers : wheelNumbers];
-      updatedWheelNumbers[segmentIndex] = spinResult;
-      setCurrentWheelNumbers(updatedWheelNumbers);
-      console.log("Updated wheel numbers - segment", segmentIndex, "now shows:", spinResult);
 
-      // Step D: Calculate rotation so it lands on the correct segment
-      const segmentAngle = 360 / totalSegments;
-      // Pointer is positioned at top (0°) and rotated 180° in CSS, so it points downward
-      // Segments start from top (0°) going clockwise
-      const targetAngle = segmentIndex * segmentAngle + (segmentAngle / 2);
-      const fullRotations = 4 * 360; // 4 full rotations for dramatic effect
-      // We need to rotate the wheel so the target segment aligns with the pointer (top position)
-      // Since pointer points down due to CSS rotation, we need to add 180° to the target angle
-      const finalRotation = fullRotations - targetAngle;
+      // Step E: Use the updated segmentIndex to calculate the target angle
+      const segmentAngle = 360 / currentWheelNumbers.length;
+      const targetAngle = segmentAngle * segmentIndex + segmentAngle / 2;
+
+      // Step F: Use the target angle to calculate the final rotation
+      const fullRotations = 4 * 360;
+      const finalRotation = fullRotations + (360 - targetAngle);
       
       console.log("Wheel alignment:", {
         spinResult,
         segmentIndex,
         segmentAngle,
         targetAngle,
-        pointerPosition: "top, rotated 180° to point down",
         finalRotation,
         currentRotation: rotation,
-        willShowNumber: updatedWheelNumbers[segmentIndex],
-        calculatedAngle: -targetAngle
+        willShowNumber: currentWheelNumbers[segmentIndex],
+        calculatedAngle: 360 - targetAngle
       });
 
       setRotation(rotation + finalRotation);
@@ -216,7 +210,7 @@ export function ProfessionalWheel({
                               : "transform 0.3s ease-out",
                           }}
                         >
-                          {currentWheelNumbers[index] || wheelNumbers[index]}
+                          {wheelNumbers[index]}
                         </div>
                       </div>
                     );
