@@ -98,20 +98,24 @@ export function ProfessionalWheel({
 
       // Step D: Calculate rotation so it lands on the correct segment
       const segmentAngle = 360 / totalSegments;
-      // Calculate target angle - pointer is at top (0°), segments start from top and go clockwise
+      // Pointer is positioned at top (0°) and rotated 180° in CSS, so it points downward
+      // Segments start from top (0°) going clockwise
       const targetAngle = segmentIndex * segmentAngle + (segmentAngle / 2);
       const fullRotations = 4 * 360; // 4 full rotations for dramatic effect
-      // Calculate final rotation to align the target segment with the pointer
-      const finalRotation = fullRotations + targetAngle;
+      // We need to rotate the wheel so the target segment aligns with the pointer (top position)
+      // Since pointer points down due to CSS rotation, we need to add 180° to the target angle
+      const finalRotation = fullRotations - targetAngle;
       
       console.log("Wheel alignment:", {
         spinResult,
         segmentIndex,
         segmentAngle,
         targetAngle,
+        pointerPosition: "top, rotated 180° to point down",
         finalRotation,
         currentRotation: rotation,
-        willShowNumber: updatedWheelNumbers[segmentIndex]
+        willShowNumber: updatedWheelNumbers[segmentIndex],
+        calculatedAngle: -targetAngle
       });
 
       setRotation(rotation + finalRotation);
