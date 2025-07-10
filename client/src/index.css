@@ -199,10 +199,10 @@
 }
 
 /* Mobile positioning - adjusted for 10% smaller wheel design */
-@media (max-width: 640px) {
+@media (max-width: 300px) {
   .wheel-prize-number {
-    width: 34px !important;
-    height: 34px !important;
+    width: 30px !important;
+    height: 30px !important;
     font-size: 12px !important;
   }
 

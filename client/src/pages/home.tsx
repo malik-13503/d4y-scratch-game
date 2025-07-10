@@ -241,7 +241,7 @@ export default function Home() {
                       
                       <div className="flex-1 min-w-0 pt-1">
                         <div className="flex flex-col space-y-1 mb-2">
-                          <h2 className="text-base sm:text-lg md:text-xl font-black text-white truncate tracking-wide pr-2">{game.name}</h2>
+                          <h2 className="text-base sm:text-lg md:text-xl font-black text-white tracking-wide pr-2 break-words">{game.name}</h2>
                           <Badge className={`${colors.bg} text-white text-xs font-bold px-2 py-1 rounded-full border border-white/20 w-fit`}>
                             {game.code}
                           </Badge>
