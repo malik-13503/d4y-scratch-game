@@ -75,6 +75,8 @@ export default function GamePage() {
     if (!game) throw new Error("Game not found");
     
     try {
+      console.log("Starting spin for game:", id);
+      
       // Create a temporary player for this spin
       const playerResponse = await fetch("/api/players", {
         method: "POST",
@@ -87,10 +89,13 @@ export default function GamePage() {
       });
       
       if (!playerResponse.ok) {
+        const errorText = await playerResponse.text();
+        console.error("Player creation failed:", errorText);
         throw new Error("Failed to create player");
       }
       
       const player = await playerResponse.json();
+      console.log("Player created:", player);
       
       // Perform the spin
       const spinResponse = await fetch(`/api/games/${id}/spin`, {
@@ -100,11 +105,21 @@ export default function GamePage() {
       });
       
       if (!spinResponse.ok) {
-        const error = await spinResponse.json();
-        throw new Error(error.message || "Failed to spin wheel");
+        const errorText = await spinResponse.text();
+        console.error("Spin failed:", errorText);
+        
+        // Try to parse as JSON, fallback to text
+        try {
+          const error = JSON.parse(errorText);
+          throw new Error(error.message || "Failed to spin wheel");
+        } catch {
+          throw new Error("Failed to spin wheel: " + errorText);
+        }
       }
       
       const spinResult = await spinResponse.json();
+      console.log("Spin result:", spinResult);
+      
       setLastResult(spinResult.spunNumber);
       setShowConfetti(true);
       

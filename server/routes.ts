@@ -179,6 +179,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const gameId = parseInt(req.params.id);
       const { playerId } = req.body;
 
+      console.log("Spin request:", { gameId, playerId });
+
       const game = await storage.getGame(gameId);
       if (!game || !game.isActive) {
         return res.status(404).json({ message: "Game not found or inactive" });
@@ -192,11 +194,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Generate random number between 1 and total numbers
       const selectedNumber = Math.floor(Math.random() * game.totalNumbers) + 1;
       
+      console.log("Generated number:", selectedNumber);
+      
       // Update player with selected number
       await storage.updatePlayer(playerId, { selectedNumber });
 
       res.json({ spunNumber: selectedNumber, selectedNumber });
     } catch (error) {
+      console.error("Spin error:", error);
       res.status(500).json({ message: "Failed to spin wheel" });
     }
   });

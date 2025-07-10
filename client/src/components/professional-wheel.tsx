@@ -69,9 +69,9 @@ export function ProfessionalWheel({
     setShowResultModal(false);
 
     try {
-      // Professional spinning animation - 8 seconds duration
-      const spinDuration = 8000;
-      const spins = 8 + Math.random() * 4; // 8-12 full rotations
+      // Professional spinning animation - 3 seconds duration for testing
+      const spinDuration = 3000;
+      const spins = 3 + Math.random() * 2; // 3-5 full rotations
 
       // Calculate final rotation for realistic spinning
       const finalRotation = rotation + spins * 360 + Math.random() * 360;
@@ -95,11 +95,10 @@ export function ProfessionalWheel({
 
         setIsSpinning(false);
 
-        console.log("About to show result modal:", {
+        console.log("Showing result modal:", {
           spinResult,
           isFree,
           amountCharged: isFree ? 0 : spinResult,
-          showResultModal,
         });
 
         // Show result modal immediately after wheel stops
@@ -108,6 +107,12 @@ export function ProfessionalWheel({
     } catch (error) {
       console.error("Spin error:", error);
       setIsSpinning(false);
+      
+      // Show error modal or fallback
+      setResult(Math.floor(Math.random() * totalNumbers) + 1);
+      setIsFreePlay(false);
+      setAmountCharged(50);
+      setShowResultModal(true);
     }
   };
 
@@ -151,7 +156,7 @@ export function ProfessionalWheel({
                   style={{
                     transform: `rotate(${rotation}deg)`,
                     transition: isSpinning
-                      ? `transform 8s cubic-bezier(0.25, 0.1, 0.25, 1)`
+                      ? `transform 3s cubic-bezier(0.25, 0.1, 0.25, 1)`
                       : "transform 0.3s ease-out",
                     boxShadow:
                       "inset 0 0 30px rgba(0, 0, 0, 0.4), 0 0 40px rgba(255, 215, 0, 0.3)",
@@ -204,7 +209,7 @@ export function ProfessionalWheel({
                     style={{
                       transform: `translate(-50%, -50%) rotate(${-rotation}deg)`,
                       transition: isSpinning
-                        ? `transform 8s cubic-bezier(0.25, 0.1, 0.25, 1)`
+                        ? `transform 3s cubic-bezier(0.25, 0.1, 0.25, 1)`
                         : "transform 0.3s ease-out",
                     }}
                   >
@@ -244,8 +249,7 @@ export function ProfessionalWheel({
         )}
       </Button>
 
-      {/* Result Modal - Debug */}
-      {console.log("Modal state:", { showResultModal, result, isFreePlay, amountCharged })}
+      {/* Result Modal */}
       <Dialog open={showResultModal} onOpenChange={setShowResultModal}>
         <DialogContent className="max-w-md mx-auto p-0 bg-gradient-to-br from-purple-900 via-blue-900 to-purple-900 border-2 border-yellow-400/30 overflow-hidden shadow-2xl">
           <div className="relative p-6 text-center">
