@@ -69,19 +69,33 @@ export function ProfessionalWheel({
     setShowResultModal(false);
 
     try {
-      // Professional spinning animation - 3 seconds duration
-      const spinDuration = 3000;
-      const spins = 3 + Math.random() * 2; // 3-5 full rotations
-
-      // Calculate final rotation for realistic spinning
-      const finalRotation = rotation + spins * 360 + Math.random() * 360;
-      
-      // Start the wheel spinning animation immediately
-      setRotation(finalRotation);
-
-      // Get result from API while wheel is spinning
+      // Get result from API first
       const spinResult = await onSpin();
       console.log("Spin result received:", spinResult);
+
+      // Professional spinning animation - 8 seconds with realistic physics
+      const spinDuration = 8000;
+      const baseSpins = 8 + Math.random() * 4; // 8-12 full rotations
+      
+      // Calculate where we want to stop based on the result
+      const segmentCount = 12;
+      const degreesPerSegment = 360 / segmentCount;
+      
+      // Find which segment should contain our result number
+      const resultSegmentIndex = wheelNumbers.findIndex(num => 
+        Math.abs(num - spinResult) <= Math.floor(totalNumbers / segmentCount / 2)
+      );
+      
+      // If not found in displayed numbers, use a random segment
+      const targetSegmentIndex = resultSegmentIndex >= 0 ? resultSegmentIndex : Math.floor(Math.random() * segmentCount);
+      
+      // Calculate the target angle to stop at the correct segment
+      // Pointer points down, so we need to adjust accordingly
+      const targetAngle = targetSegmentIndex * degreesPerSegment + (degreesPerSegment / 2);
+      const finalRotation = rotation + baseSpins * 360 + (360 - targetAngle);
+      
+      // Start the wheel spinning animation with realistic easing
+      setRotation(finalRotation);
 
       // Store the result but don't show modal yet
       setResult(spinResult);
@@ -100,6 +114,8 @@ export function ProfessionalWheel({
           spinResult,
           isFree,
           amountCharged: isFree ? 0 : spinResult,
+          targetSegmentIndex,
+          displayedNumber: wheelNumbers[targetSegmentIndex]
         });
 
         // Show result modal only after wheel completely stops
@@ -157,7 +173,7 @@ export function ProfessionalWheel({
                   style={{
                     transform: `rotate(${rotation}deg)`,
                     transition: isSpinning
-                      ? `transform 3s cubic-bezier(0.25, 0.1, 0.25, 1)`
+                      ? `transform 8s cubic-bezier(0.17, 0.67, 0.12, 0.99)`
                       : "transform 0.3s ease-out",
                     boxShadow:
                       "inset 0 0 30px rgba(0, 0, 0, 0.4), 0 0 40px rgba(255, 215, 0, 0.3)",
@@ -185,7 +201,7 @@ export function ProfessionalWheel({
                           style={{
                             transform: `translate(-50%, -50%) translate(${Math.cos(((angle + 360 / segmentColors.length / 2 - 90) * Math.PI) / 180) * numberRadius}px, ${Math.sin(((angle + 360 / segmentColors.length / 2 - 90) * Math.PI) / 180) * numberRadius}px) rotate(${-rotation}deg)`,
                             transition: isSpinning
-                              ? `transform 3s cubic-bezier(0.25, 0.1, 0.25, 1)`
+                              ? `transform 8s cubic-bezier(0.17, 0.67, 0.12, 0.99)`
                               : "transform 0.3s ease-out",
                           }}
                         >
@@ -213,7 +229,7 @@ export function ProfessionalWheel({
                     style={{
                       transform: `translate(-50%, -50%) rotate(${-rotation}deg)`,
                       transition: isSpinning
-                        ? `transform 3s cubic-bezier(0.25, 0.1, 0.25, 1)`
+                        ? `transform 8s cubic-bezier(0.17, 0.67, 0.12, 0.99)`
                         : "transform 0.3s ease-out",
                     }}
                   >
@@ -294,6 +310,9 @@ export function ProfessionalWheel({
                 <div className="text-7xl font-black bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 bg-clip-text text-transparent animate-pulse">
                   {result}
                 </div>
+                <p className="text-white/80 text-sm">
+                  Wheel stopped on segment with number {result}
+                </p>
               </div>
 
               {/* Payment info */}
