@@ -126,6 +126,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Create a new player (for backwards compatibility)
+  app.post("/api/players", async (req, res) => {
+    try {
+      console.log("Creating player with data:", req.body);
+      const playerData = insertPlayerSchema.parse(req.body);
+      const player = await storage.createPlayer(playerData);
+      console.log("Player created:", player);
+      res.status(201).json(player);
+    } catch (error) {
+      console.error("Player creation error:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid player data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create player" });
+    }
+  });
+
   // Get players for a game
   app.get("/api/games/:id/players", async (req, res) => {
     try {

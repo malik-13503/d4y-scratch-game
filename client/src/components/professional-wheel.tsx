@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Gift, DollarSign, Sparkles, Play } from "lucide-react";
 import { Confetti } from "./confetti";
 import { WheelPointer } from "./wheel-pointer";
@@ -252,6 +252,16 @@ export function ProfessionalWheel({
       {/* Result Modal */}
       <Dialog open={showResultModal} onOpenChange={setShowResultModal}>
         <DialogContent className="max-w-md mx-auto p-0 bg-gradient-to-br from-purple-900 via-blue-900 to-purple-900 border-2 border-yellow-400/30 overflow-hidden shadow-2xl">
+          <DialogTitle className="sr-only">
+            {isFreePlay ? "Free Play Result" : "Spin Result"}
+          </DialogTitle>
+          <DialogDescription className="sr-only">
+            {isFreePlay 
+              ? `You got number ${result} as a free play - no charge!`
+              : `You got number ${result} and were charged $${amountCharged.toFixed(2)}`
+            }
+          </DialogDescription>
+          
           <div className="relative p-6 text-center">
             {/* Confetti */}
             <Confetti active={showResultModal} duration={3000} />
