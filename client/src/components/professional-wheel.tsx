@@ -85,19 +85,24 @@ export function ProfessionalWheel({
 
       // Step C: Handle fallback if number isn't found (avoid crash)
       if (segmentIndex === -1) {
-        // Place the result number in a random segment
+        // Place the result number in a random segment and update the wheel
         segmentIndex = Math.floor(Math.random() * totalSegments);
-        const updatedWheelNumbers = [...currentWheelNumbers.length ? currentWheelNumbers : wheelNumbers];
-        updatedWheelNumbers[segmentIndex] = spinResult;
-        setCurrentWheelNumbers(updatedWheelNumbers);
-        console.log("Placed spin result", spinResult, "in segment", segmentIndex);
+        console.log("Spin result", spinResult, "not found in wheel numbers, placing in segment", segmentIndex);
       }
+      
+      // Always update the wheel to show the exact result number in the target segment
+      const updatedWheelNumbers = [...currentWheelNumbers.length ? currentWheelNumbers : wheelNumbers];
+      updatedWheelNumbers[segmentIndex] = spinResult;
+      setCurrentWheelNumbers(updatedWheelNumbers);
+      console.log("Updated wheel numbers - segment", segmentIndex, "now shows:", spinResult);
 
       // Step D: Calculate rotation so it lands on the correct segment
       const segmentAngle = 360 / totalSegments;
-      const targetAngle = segmentIndex * segmentAngle + segmentAngle / 2;
+      // Calculate target angle - pointer is at top (0°), segments start from top and go clockwise
+      const targetAngle = segmentIndex * segmentAngle + (segmentAngle / 2);
       const fullRotations = 4 * 360; // 4 full rotations for dramatic effect
-      const finalRotation = fullRotations + (360 - targetAngle); // reverse to align pointer
+      // Calculate final rotation to align the target segment with the pointer
+      const finalRotation = fullRotations + targetAngle;
       
       console.log("Wheel alignment:", {
         spinResult,
@@ -105,7 +110,8 @@ export function ProfessionalWheel({
         segmentAngle,
         targetAngle,
         finalRotation,
-        currentRotation: rotation
+        currentRotation: rotation,
+        willShowNumber: updatedWheelNumbers[segmentIndex]
       });
 
       setRotation(rotation + finalRotation);
