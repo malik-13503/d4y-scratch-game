@@ -70,27 +70,24 @@ export function ProfessionalWheel({
   const handleSpin = async () => {
     if (isSpinning || disabled) return;
 
-    setIsSpinning(true);
+    // Step 1: Reset to initial state immediately
+    setRotation(0);
+    setIsSpinning(false);
     setResult(null);
     setShowResultModal(false);
-    
-    // Force a reflow to ensure CSS transitions work properly
-    if (wheelRef.current) {
-      wheelRef.current.offsetHeight; // Trigger reflow
-    }
 
     try {
-      // Step A: Await the result first
+      // Step 2: Await the result first
       const spinResult = await onSpin();
       console.log("Spin result received:", spinResult);
 
-      // Step B: Store wheelNumbers in a temporary variable
+      // Step 3: Store wheelNumbers in a temporary variable
       let currentWheelNumbers = [...wheelNumbers];
 
-      // Step C: Get index of the segment where this number appears
+      // Step 4: Get index of the segment where this number appears
       let segmentIndex = currentWheelNumbers.findIndex(num => num === spinResult);
 
-      // Step D: Handle fallback if number isn't found (avoid crash)
+      // Step 5: Handle fallback if number isn't found (avoid crash)
       if (segmentIndex === -1) {
         segmentIndex = Math.floor(Math.random() * currentWheelNumbers.length);
         currentWheelNumbers[segmentIndex] = spinResult;
@@ -98,12 +95,9 @@ export function ProfessionalWheel({
         console.warn(`Spin result ${spinResult} not found. Placing in segment ${segmentIndex}`);
       }
 
-      // Step E: Use the updated segmentIndex to calculate the target angle
+      // Step 6: Calculate the target angle
       const segmentAngle = 360 / currentWheelNumbers.length;
       const targetAngle = segmentAngle * segmentIndex + segmentAngle / 2;
-
-      // Step F: Use the target angle to calculate the final rotation
-      // Reset rotation to 0 for clean calculation on each spin
       const fullRotations = 4 * 360;
       const finalRotation = fullRotations + (360 - targetAngle);
       
@@ -114,18 +108,19 @@ export function ProfessionalWheel({
         targetAngle,
         finalRotation,
         willShowNumber: currentWheelNumbers[segmentIndex],
-        calculatedAngle: 360 - targetAngle,
-        isSpinning: true,
-        spinDuration: "8 seconds"
+        calculatedAngle: 360 - targetAngle
       });
 
-      // Set absolute rotation, not additive
-      // Use requestAnimationFrame to ensure proper timing
+      // Step 7: Start spinning with proper timing
+      // Use double requestAnimationFrame to ensure proper state transition
       requestAnimationFrame(() => {
-        setRotation(finalRotation);
+        setIsSpinning(true);
+        requestAnimationFrame(() => {
+          setRotation(finalRotation);
+        });
       });
 
-      // Step G: Use a timeout to show the modal after animation
+      // Step 8: Use a timeout to show the modal after animation
       const spinDuration = 8000; // 8 seconds
       setTimeout(() => {
         setResult(spinResult);
