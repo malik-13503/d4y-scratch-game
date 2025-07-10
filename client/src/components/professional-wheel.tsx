@@ -81,22 +81,30 @@ export function ProfessionalWheel({
 
       // Professional spinning animation - 8 seconds with realistic physics
       const spinDuration = 8000;
-      const baseSpins = 8 + Math.random() * 4; // 8-12 full rotations
+      const fullSpins = 8 + Math.random() * 4; // 8-12 full rotations
       
       // Calculate where we want to stop based on the result
       const segmentCount = 12;
-      const degreesPerSegment = 360 / segmentCount;
+      const segmentAngle = 360 / segmentCount;
       
-      // Update the wheel numbers to include our result number in one of the segments
-      const updatedWheelNumbers = [...wheelNumbers];
-      const targetSegmentIndex = Math.floor(Math.random() * segmentCount);
-      updatedWheelNumbers[targetSegmentIndex] = spinResult;
-      setCurrentWheelNumbers(updatedWheelNumbers);
+      // Find which segment should contain our result number
+      let targetIndex = wheelNumbers.findIndex(num => 
+        Math.abs(num - spinResult) <= Math.floor(totalNumbers / segmentCount / 2)
+      );
+      
+      // If not found in current wheel numbers, place it in a random segment
+      if (targetIndex === -1) {
+        targetIndex = Math.floor(Math.random() * segmentCount);
+        const updatedWheelNumbers = [...currentWheelNumbers.length ? currentWheelNumbers : wheelNumbers];
+        updatedWheelNumbers[targetIndex] = spinResult;
+        setCurrentWheelNumbers(updatedWheelNumbers);
+      }
       
       // Calculate the target angle to stop at the correct segment
-      // Pointer points down, so we need to adjust accordingly
-      const targetAngle = targetSegmentIndex * degreesPerSegment + (degreesPerSegment / 2);
-      const finalRotation = rotation + baseSpins * 360 + (360 - targetAngle);
+      // Pointer points down (0 degrees), so we calculate from top
+      const targetAngle = targetIndex * segmentAngle;
+      const smallRandomOffset = (Math.random() - 0.5) * 10; // ±5 degrees for natural variation
+      const finalRotation = (fullSpins * 360) + targetAngle + smallRandomOffset;
       
       // Start the wheel spinning animation with realistic easing
       setRotation(finalRotation);
@@ -110,16 +118,19 @@ export function ProfessionalWheel({
       // For paid numbers, charge the exact number amount
       setAmountCharged(isFree ? 0 : spinResult);
 
+      console.log("Wheel spinning to land on:", {
+        spinResult,
+        targetIndex,
+        targetAngle,
+        finalRotation,
+        wheelNumber: (currentWheelNumbers.length ? currentWheelNumbers : wheelNumbers)[targetIndex]
+      });
+
       // Wait for spin animation to complete, then wait 1 more second before showing modal
       setTimeout(() => {
         setIsSpinning(false);
         
-        console.log("Wheel stopped, waiting 1 second before showing result modal:", {
-          spinResult,
-          isFree,
-          amountCharged: isFree ? 0 : spinResult,
-          targetSegmentIndex,
-        });
+        console.log("Wheel stopped, waiting 1 second before showing result modal");
 
         // Wait 1 additional second after wheel stops, then show result modal
         setTimeout(() => {
