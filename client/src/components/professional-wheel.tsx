@@ -99,12 +99,11 @@ export function ProfessionalWheel({
           spinResult,
           isFree,
           amountCharged: isFree ? 0 : spinResult,
+          showResultModal,
         });
 
-        // Show result modal after wheel stops
-        setTimeout(() => {
-          setShowResultModal(true);
-        }, 500);
+        // Show result modal immediately after wheel stops
+        setShowResultModal(true);
       }, spinDuration);
     } catch (error) {
       console.error("Spin error:", error);
@@ -199,8 +198,16 @@ export function ProfessionalWheel({
                     }}
                   ></div>
 
-                  {/* Center hub with brand logo */}
-                  <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-16 h-16 sm:w-32 sm:h-32 md:w-36 md:h-36 lg:w-40 lg:h-40 bg-gradient-to-br from-slate-900 to-slate-700 rounded-full border-3 sm:border-4 border-yellow-300 shadow-2xl flex items-center justify-center overflow-hidden z-40">
+                  {/* Center hub with brand logo - Static (doesn't rotate) */}
+                  <div 
+                    className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-16 h-16 sm:w-32 sm:h-32 md:w-36 md:h-36 lg:w-40 lg:h-40 bg-gradient-to-br from-slate-900 to-slate-700 rounded-full border-3 sm:border-4 border-yellow-300 shadow-2xl flex items-center justify-center overflow-hidden z-40"
+                    style={{
+                      transform: `translate(-50%, -50%) rotate(${-rotation}deg)`,
+                      transition: isSpinning
+                        ? `transform 8s cubic-bezier(0.25, 0.1, 0.25, 1)`
+                        : "transform 0.3s ease-out",
+                    }}
+                  >
                     <div className="w-12 h-12 sm:w-28 sm:h-28 md:w-32 md:h-32 lg:w-36 lg:h-36 bg-black rounded-full border-2 border-orange-400 flex items-center justify-center p-2">
                       <img
                         src={logoPath}
@@ -237,7 +244,8 @@ export function ProfessionalWheel({
         )}
       </Button>
 
-      {/* Result Modal */}
+      {/* Result Modal - Debug */}
+      {console.log("Modal state:", { showResultModal, result, isFreePlay, amountCharged })}
       <Dialog open={showResultModal} onOpenChange={setShowResultModal}>
         <DialogContent className="max-w-md mx-auto p-0 bg-gradient-to-br from-purple-900 via-blue-900 to-purple-900 border-2 border-yellow-400/30 overflow-hidden shadow-2xl">
           <div className="relative p-6 text-center">
