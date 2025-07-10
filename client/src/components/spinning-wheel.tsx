@@ -104,35 +104,51 @@ export function SpinningWheel({
     setResult(null);
     setShowResultModal(false);
 
-    // Enhanced spinning animation - 8 seconds duration
-    const spinDuration = 8000;
-    const finalRotation = rotation + 2880 + Math.random() * 1440; // At least 8 full rotations
+    try {
+      // STEP 1: Get the result from API first
+      const spinResult = await onSpin();
 
-    // Apply rotation immediately for visual feedback
-    setRotation(finalRotation);
+      // STEP 2: Find the index of the segment matching the result
+      const targetIndex = wheelSegments.findIndex(
+        (segment) => segment.number === spinResult,
+      );
 
-    // Start the API call but don't wait for it initially
-    const resultPromise = onSpin();
+      if (targetIndex === -1) {
+        console.warn(
+          "Result not found in current wheel segments. Showing fallback.",
+        );
+        setResult(spinResult);
+        setIsFreePlay(spinResult >= freePlayStart);
+        setAmountCharged(spinResult >= freePlayStart ? 0 : spinResult);
+        setIsSpinning(false);
+        setShowResultModal(true);
+        return;
+      }
 
-    // Wait for the full spinning animation to complete
-    await new Promise((resolve) => setTimeout(resolve, spinDuration));
+      // STEP 3: Calculate angle to land on target index
+      const segmentAngle = 360 / wheelSegments.length;
+      const angleToTarget = targetIndex * segmentAngle + segmentAngle / 2;
+      const fullRotations = 8 * 360; // 8 full spins
+      const finalRotation = fullRotations + angleToTarget;
 
-    // Then get the result
-    const spinResult = await resultPromise;
+      // STEP 4: Set the wheel rotation
+      setRotation(finalRotation);
 
-    setResult(spinResult);
+      // STEP 5: Wait for animation to finish
+      const spinDuration = 8000;
+      await new Promise((resolve) => setTimeout(resolve, spinDuration));
 
-    // Determine if it's a free play and calculate charges
-    const isFree = spinResult >= freePlayStart;
-    setIsFreePlay(isFree);
-    setAmountCharged(isFree ? 0 : spinResult);
-
-    setIsSpinning(false);
-
-    // Show result modal after spinning completes
-    setTimeout(() => {
+      // STEP 6: Update state after animation
+      setResult(spinResult);
+      const isFree = spinResult >= freePlayStart;
+      setIsFreePlay(isFree);
+      setAmountCharged(isFree ? 0 : spinResult);
+      setIsSpinning(false);
       setShowResultModal(true);
-    }, 500);
+    } catch (err) {
+      console.error("Spin failed:", err);
+      setIsSpinning(false);
+    }
   };
 
   const segmentAngle = 360 / wheelSegments.length;

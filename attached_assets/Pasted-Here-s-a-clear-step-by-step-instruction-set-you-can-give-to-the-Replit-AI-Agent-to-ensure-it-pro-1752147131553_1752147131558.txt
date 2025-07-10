@@ -1,0 +1,167 @@
+Here's a clear step-by-step instruction set you can give to the **Replit AI Agent** to ensure it properly fixes the spinning wheel logic and ensures visual accuracy with the spin result:
+
+---
+
+## ✅ TASK: Fix the Spinning Wheel Logic to Match API Result
+
+### 🎯 Objective:
+
+Ensure that the spinning wheel visually **lands on the correct number** returned from the `onSpin()` API, and that all animations and UI behaviors remain polished and responsive.
+
+---
+
+### 🛠️ Step-by-Step Instructions for Replit Agent:
+
+---
+
+### **1. Understand the Problem**
+
+* Currently, the wheel rotates using a **random angle**.
+* Separately, the `onSpin()` function returns a **number result**.
+* The **visual segment it lands on doesn't match the result** — which is a UX bug.
+
+---
+
+### **2. Locate This Function**
+
+Find and replace the logic inside this function:
+
+```ts
+const handleSpin = async () => { ... }
+```
+
+---
+
+### **3. Modify `handleSpin()` with Proper Sequence**
+
+#### ✳️ Instead of:
+
+* Rotating first
+* Then calling `onSpin()`
+* And showing the modal
+
+#### ✅ DO THIS:
+
+##### ➤ Step A: Await the result first
+
+```ts
+const spinResult = await onSpin();
+```
+
+##### ➤ Step B: Get index of the segment where this number appears
+
+```ts
+const segmentIndex = wheelNumbers.findIndex(num => num === spinResult);
+```
+
+##### ➤ Step C: Handle fallback if number isn't found (avoid crash)
+
+```ts
+if (segmentIndex === -1) {
+  // fallback modal logic here
+}
+```
+
+##### ➤ Step D: Calculate rotation so it lands on the correct segment
+
+```ts
+const segmentAngle = 360 / segmentColors.length;
+const targetAngle = segmentIndex * segmentAngle + segmentAngle / 2;
+const fullRotations = 4 * 360;
+const finalRotation = fullRotations + (360 - targetAngle); // reverse to align pointer
+setRotation(rotation + finalRotation);
+```
+
+##### ➤ Step E: Use a timeout to show the modal **after animation**
+
+```ts
+setTimeout(() => {
+  setResult(spinResult);
+  const isFree = spinResult >= freePlayStart;
+  setIsFreePlay(isFree);
+  setAmountCharged(isFree ? 0 : spinResult);
+  setIsSpinning(false);
+  setShowResultModal(true);
+}, spinDuration);
+```
+
+---
+
+### **4. Optional Enhancements**
+
+* ✅ Keep `transform: rotate(-rotation)` on the **center hub logo** so it stays upright.
+* ✅ Keep the `Confetti` and modal UI — no change needed.
+* ✅ Maintain responsive radius logic for mobile scaling.
+* ✅ Maintain `WheelPointer` styling as-is.
+
+---
+
+### ✅ Example Code Snippet to Insert
+
+This is the updated `handleSpin()` function:
+
+```ts
+const handleSpin = async () => {
+  if (isSpinning || disabled) return;
+
+  setIsSpinning(true);
+  setResult(null);
+  setShowResultModal(false);
+
+  try {
+    const spinResult = await onSpin();
+    const segmentIndex = wheelNumbers.findIndex(num => num === spinResult);
+    const totalSegments = segmentColors.length;
+
+    if (segmentIndex === -1) {
+      console.warn("Spin result not in wheel numbers");
+      setResult(spinResult);
+      setIsFreePlay(spinResult >= freePlayStart);
+      setAmountCharged(spinResult >= freePlayStart ? 0 : spinResult);
+      setIsSpinning(false);
+      setShowResultModal(true);
+      return;
+    }
+
+    const segmentAngle = 360 / totalSegments;
+    const targetAngle = segmentIndex * segmentAngle + segmentAngle / 2;
+    const fullRotations = 4 * 360;
+    const finalRotation = fullRotations + (360 - targetAngle);
+
+    setRotation(rotation + finalRotation);
+
+    setTimeout(() => {
+      setResult(spinResult);
+      const isFree = spinResult >= freePlayStart;
+      setIsFreePlay(isFree);
+      setAmountCharged(isFree ? 0 : spinResult);
+      setIsSpinning(false);
+      setShowResultModal(true);
+    }, 3000);
+  } catch (err) {
+    console.error("Spin error:", err);
+    setIsSpinning(false);
+    setResult(Math.floor(Math.random() * totalNumbers) + 1);
+    setIsFreePlay(false);
+    setAmountCharged(50);
+    setShowResultModal(true);
+  }
+};
+```
+
+---
+
+### ✅ Final Checklist
+
+| Task                                                      | Done? |
+| --------------------------------------------------------- | ----- |
+| Replace old spin logic with rotation based on spin result | ✅     |
+| Match visual position to result index                     | ✅     |
+| Keep animation duration & ease                            | ✅     |
+| Ensure fallback if result not found                       | ✅     |
+| Maintain logo upright during spin                         | ✅     |
+| Preserve all UI styling and modals                        | ✅     |
+
+---
+
+Let me know if you want me to generate the **fully updated `ProfessionalWheel.tsx`** file for Replit to use directly.

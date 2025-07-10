@@ -75,73 +75,58 @@ export function ProfessionalWheel({
     setShowResultModal(false);
 
     try {
-      // Get result from API first
+      // Step A: Await the result first
       const spinResult = await onSpin();
       console.log("Spin result received:", spinResult);
 
-      // Professional spinning animation - 8 seconds with realistic physics
-      const spinDuration = 8000;
-      const fullSpins = 8 + Math.random() * 4; // 8-12 full rotations
-      
-      // Calculate where we want to stop based on the result
-      const segmentCount = 12;
-      const segmentAngle = 360 / segmentCount;
-      
-      // Find which segment should contain our result number
-      let targetIndex = wheelNumbers.findIndex(num => 
-        Math.abs(num - spinResult) <= Math.floor(totalNumbers / segmentCount / 2)
-      );
-      
-      // If not found in current wheel numbers, place it in a random segment
-      if (targetIndex === -1) {
-        targetIndex = Math.floor(Math.random() * segmentCount);
+      // Step B: Get index of the segment where this number appears
+      let segmentIndex = wheelNumbers.findIndex(num => num === spinResult);
+      const totalSegments = segmentColors.length;
+
+      // Step C: Handle fallback if number isn't found (avoid crash)
+      if (segmentIndex === -1) {
+        // Place the result number in a random segment
+        segmentIndex = Math.floor(Math.random() * totalSegments);
         const updatedWheelNumbers = [...currentWheelNumbers.length ? currentWheelNumbers : wheelNumbers];
-        updatedWheelNumbers[targetIndex] = spinResult;
+        updatedWheelNumbers[segmentIndex] = spinResult;
         setCurrentWheelNumbers(updatedWheelNumbers);
+        console.log("Placed spin result", spinResult, "in segment", segmentIndex);
       }
-      
-      // Calculate the target angle to stop at the correct segment
-      // Pointer points down (0 degrees), so we calculate from top
-      const targetAngle = targetIndex * segmentAngle;
-      const smallRandomOffset = (Math.random() - 0.5) * 10; // ±5 degrees for natural variation
-      const finalRotation = (fullSpins * 360) + targetAngle + smallRandomOffset;
-      
-      // Start the wheel spinning animation with realistic easing
-      setRotation(finalRotation);
 
-      // Store the result but don't show modal yet
-      setResult(spinResult);
+      // Step D: Calculate rotation so it lands on the correct segment
+      const segmentAngle = 360 / totalSegments;
+      const targetAngle = segmentIndex * segmentAngle + segmentAngle / 2;
+      const fullRotations = 4 * 360; // 4 full rotations for dramatic effect
+      const finalRotation = fullRotations + (360 - targetAngle); // reverse to align pointer
       
-      // Determine if it's a free play
-      const isFree = spinResult >= freePlayStart;
-      setIsFreePlay(isFree);
-      // For paid numbers, charge the exact number amount
-      setAmountCharged(isFree ? 0 : spinResult);
-
-      console.log("Wheel spinning to land on:", {
+      console.log("Wheel alignment:", {
         spinResult,
-        targetIndex,
+        segmentIndex,
+        segmentAngle,
         targetAngle,
         finalRotation,
-        wheelNumber: (currentWheelNumbers.length ? currentWheelNumbers : wheelNumbers)[targetIndex]
+        currentRotation: rotation
       });
 
-      // Wait for spin animation to complete, then wait 1 more second before showing modal
+      setRotation(rotation + finalRotation);
+
+      // Step E: Use a timeout to show the modal after animation
+      const spinDuration = 8000; // 8 seconds
       setTimeout(() => {
+        setResult(spinResult);
+        const isFree = spinResult >= freePlayStart;
+        setIsFreePlay(isFree);
+        setAmountCharged(isFree ? 0 : spinResult);
         setIsSpinning(false);
         
-        console.log("Wheel stopped, waiting 1 second before showing result modal");
-
         // Wait 1 additional second after wheel stops, then show result modal
         setTimeout(() => {
           setShowResultModal(true);
         }, 1000);
       }, spinDuration);
-    } catch (error) {
-      console.error("Spin error:", error);
+    } catch (err) {
+      console.error("Spin error:", err);
       setIsSpinning(false);
-      
-      // Show error modal or fallback
       setResult(Math.floor(Math.random() * totalNumbers) + 1);
       setIsFreePlay(false);
       setAmountCharged(50);
