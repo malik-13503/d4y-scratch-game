@@ -121,9 +121,7 @@ export default function GamePage() {
       console.log("Spin result:", spinResult);
       
       setLastResult(spinResult.spunNumber);
-      setShowConfetti(true);
-      
-      setTimeout(() => setShowConfetti(false), 3000);
+      // Don't trigger confetti here - let the wheel component handle it
       
       return spinResult.spunNumber;
     } catch (error) {
@@ -153,7 +151,7 @@ export default function GamePage() {
         <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-gradient-to-r from-purple-500/5 to-blue-500/5 rounded-full blur-3xl animate-spin" style={{animationDuration: '20s'}}></div>
       </div>
 
-      <Confetti active={showConfetti} duration={3000} />
+      {/* Confetti is handled by the wheel component */}
 
       {/* Header */}
       <header className="relative z-10 bg-black/20 backdrop-blur-xl border-b border-purple-500/30 shadow-2xl">
