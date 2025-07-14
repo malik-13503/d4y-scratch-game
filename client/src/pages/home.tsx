@@ -1,4 +1,4 @@
-import { useLocation } from "wouter";
+import { useLocation, Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -375,10 +375,34 @@ export default function Home() {
               <div>
                 <h5 className="text-white font-bold mb-4">Support</h5>
                 <ul className="space-y-2 text-gray-400">
-                  <li>How to Play</li>
-                  <li>Prize Rules</li>
-                  <li>Contact Us</li>
-                  <li>Terms & Conditions</li>
+                  <li>
+                    <Link href="/how-to-play">
+                      <a className="hover:text-white transition-colors">
+                        How to Play
+                      </a>
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/prize-rules">
+                      <a className="hover:text-white transition-colors">
+                        Prize Rules
+                      </a>
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/contact">
+                      <a className="hover:text-white transition-colors">
+                        Contact Us
+                      </a>
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/terms">
+                      <a className="hover:text-white transition-colors">
+                        Terms & Conditions
+                      </a>
+                    </Link>
+                  </li>
                 </ul>
               </div>
             </div>

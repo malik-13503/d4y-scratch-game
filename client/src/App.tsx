@@ -8,6 +8,10 @@ import GamePage from "@/pages/game";
 import AdminPage from "@/pages/admin";
 import AdminLoginPage from "@/pages/admin-login";
 import AdminDashboard from "@/pages/admin-dashboard";
+import HowToPlay from "@/pages/how-to-play";
+import PrizeRules from "@/pages/prize-rules";
+import Contact from "@/pages/contact";
+import Terms from "@/pages/terms";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -18,6 +22,10 @@ function Router() {
       <Route path="/admin" component={AdminPage} />
       <Route path="/admin-login" component={AdminLoginPage} />
       <Route path="/admin-dashboard" component={AdminDashboard} />
+      <Route path="/how-to-play" component={HowToPlay} />
+      <Route path="/prize-rules" component={PrizeRules} />
+      <Route path="/contact" component={Contact} />
+      <Route path="/terms" component={Terms} />
       <Route component={NotFound} />
     </Switch>
   );
