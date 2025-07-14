@@ -79,7 +79,7 @@ export default function PrizeRules() {
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-xl p-6 border border-blue-500/30">
+              <div className="bg-slate-700/80 rounded-xl p-6 border border-slate-500/30">
                 <div className="flex items-center mb-4">
                   <DollarSign className="h-8 w-8 text-blue-400 mr-3" />
                   <h3 className="text-xl font-bold text-white">Regular Numbers</h3>
@@ -104,7 +104,7 @@ export default function PrizeRules() {
                 </div>
               </div>
 
-              <div className="bg-gradient-to-br from-green-500/20 to-emerald-500/20 rounded-xl p-6 border border-green-500/30">
+              <div className="bg-slate-700/80 rounded-xl p-6 border border-slate-500/30">
                 <div className="flex items-center mb-4">
                   <Gift className="h-8 w-8 text-green-400 mr-3" />
                   <h3 className="text-xl font-bold text-white">Free Play Zone</h3>
@@ -286,16 +286,16 @@ export default function PrizeRules() {
                     </div>
                     <div>
                       <h3 className="font-semibold text-white mb-1">{note.title}</h3>
-                      <p className="text-sm text-white/80">{note.description}</p>
+                      <p className="text-sm text-gray-200">{note.description}</p>
                     </div>
                   </div>
                 </div>
               ))}
             </div>
 
-            <div className="bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-lg p-6 border border-blue-500/30 mt-6">
+            <div className="bg-slate-700/80 rounded-lg p-6 border border-slate-500/30 mt-6">
               <h3 className="text-lg font-semibold text-white mb-3">Questions?</h3>
-              <p className="text-white/80 mb-4">
+              <p className="text-gray-200 mb-4">
                 If you have any questions about our prize rules or need clarification on any policy, 
                 please don't hesitate to contact our support team.
               </p>

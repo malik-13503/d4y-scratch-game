@@ -78,25 +78,25 @@ export default function HowToPlay() {
               Game Overview
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4 text-white/90">
+          <CardContent className="space-y-4 text-gray-200">
             <p className="text-lg">
               Hit The Road Jackpot is a thrilling spinning wheel game where you spin to win numbers from 1 to 200. 
               Each number has a cost equal to its value, except for our special free play zone!
             </p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
-              <div className="bg-black/20 rounded-lg p-4">
+              <div className="bg-slate-700/80 rounded-lg p-4 border border-slate-500/30">
                 <div className="flex items-center mb-2">
                   <DollarSign className="h-5 w-5 mr-2 text-blue-400" />
                   <h3 className="font-semibold text-blue-300">Regular Numbers</h3>
                 </div>
-                <p className="text-sm text-white/80">Numbers 1-150: Pay the exact amount of the number you land on</p>
+                <p className="text-sm text-gray-200">Numbers 1-150: Pay the exact amount of the number you land on</p>
               </div>
-              <div className="bg-black/20 rounded-lg p-4">
+              <div className="bg-slate-700/80 rounded-lg p-4 border border-slate-500/30">
                 <div className="flex items-center mb-2">
                   <Gift className="h-5 w-5 mr-2 text-green-400" />
                   <h3 className="font-semibold text-green-300">Free Play Zone</h3>
                 </div>
-                <p className="text-sm text-white/80">Numbers 151-200: Completely free - no charge!</p>
+                <p className="text-sm text-gray-200">Numbers 151-200: Completely free - no charge!</p>
               </div>
             </div>
           </CardContent>
@@ -204,7 +204,7 @@ export default function HowToPlay() {
                     {tip.icon}
                     <h3 className="font-semibold text-white ml-2">{tip.title}</h3>
                   </div>
-                  <p className="text-sm text-white/80">{tip.description}</p>
+                  <p className="text-sm text-gray-200">{tip.description}</p>
                 </div>
               ))}
             </div>
@@ -216,12 +216,12 @@ export default function HowToPlay() {
           <CardContent className="text-center py-12">
             <Trophy className="h-16 w-16 text-yellow-400 mx-auto mb-4" />
             <h3 className="text-3xl font-bold text-white mb-4">Ready to Spin?</h3>
-            <p className="text-white/80 mb-8 max-w-2xl mx-auto">
+            <p className="text-gray-200 mb-8 max-w-2xl mx-auto">
               Now that you know how to play, it's time to try your luck! 
               Join a game and experience the thrill of our spinning wheel.
             </p>
             <Link href="/">
-              <Button className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold py-3 px-8 rounded-xl text-lg shadow-lg animate-rainbow-glow hover:animate-card-hover">
+              <Button className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold py-3 px-8 rounded-xl text-lg shadow-lg hover:scale-105 transition-all duration-200">
                 <Play className="h-5 w-5 mr-2 animate-sparkle" />
                 Start Playing Now
               </Button>

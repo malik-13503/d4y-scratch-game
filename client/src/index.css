@@ -60,6 +60,24 @@
   @apply bg-slate-700/90;
 }
 
+/* Better inner card backgrounds */
+.informational-page [class*="bg-black/20"] {
+  @apply bg-slate-700/80 border border-slate-500/30;
+}
+
+/* Gradient card backgrounds */
+.informational-page [class*="bg-gradient-to-r from-blue-500/20 to-purple-500/20"] {
+  @apply bg-slate-700/80 border border-slate-500/30;
+}
+
+.informational-page [class*="bg-gradient-to-br from-blue-500/20 to-purple-500/20"] {
+  @apply bg-slate-700/80 border border-slate-500/30;
+}
+
+.informational-page [class*="bg-gradient-to-br from-green-500/20 to-emerald-500/20"] {
+  @apply bg-slate-700/80 border border-slate-500/30;
+}
+
 :root {
   --background: hsl(0, 0%, 100%);
   --foreground: hsl(20, 14.3%, 4.1%);

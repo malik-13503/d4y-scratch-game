@@ -166,7 +166,7 @@ export default function Terms() {
         </Card>
 
         {/* Game Rules */}
-        <Card className="bg-gradient-to-r from-purple-900/40 to-pink-900/40 backdrop-blur-xl border-purple-500/30 shadow-2xl mb-8">
+        <Card className="bg-slate-800/90 backdrop-blur-xl border-slate-600/50 shadow-2xl mb-8">
           <CardHeader>
             <CardTitle className="text-2xl text-white flex items-center">
               <Shield className="h-6 w-6 mr-2 text-purple-400" />
@@ -207,7 +207,7 @@ export default function Terms() {
         </Card>
 
         {/* Payment Terms */}
-        <Card className="bg-gradient-to-r from-orange-900/40 to-red-900/40 backdrop-blur-xl border-orange-500/30 shadow-2xl mb-8">
+        <Card className="bg-slate-800/90 backdrop-blur-xl border-slate-600/50 shadow-2xl mb-8">
           <CardHeader>
             <CardTitle className="text-2xl text-white flex items-center">
               <Lock className="h-6 w-6 mr-2 text-orange-400" />
@@ -272,7 +272,7 @@ export default function Terms() {
         </Card>
 
         {/* Limitation of Liability */}
-        <Card className="bg-gradient-to-r from-gray-900/40 to-slate-900/40 backdrop-blur-xl border-gray-500/30 shadow-2xl mb-8">
+        <Card className="bg-slate-800/90 backdrop-blur-xl border-slate-600/50 shadow-2xl mb-8">
           <CardHeader>
             <CardTitle className="text-2xl text-white flex items-center">
               <Scale className="h-6 w-6 mr-2 text-gray-400" />
@@ -299,10 +299,10 @@ export default function Terms() {
         </Card>
 
         {/* Contact Information */}
-        <Card className="bg-gradient-to-r from-indigo-900/40 to-purple-900/40 backdrop-blur-xl border-indigo-500/30 shadow-2xl">
+        <Card className="bg-slate-800/90 backdrop-blur-xl border-slate-600/50 shadow-2xl">
           <CardContent className="text-center py-8">
             <h3 className="text-2xl font-bold text-white mb-4">Questions About These Terms?</h3>
-            <p className="text-white/80 mb-6 max-w-2xl mx-auto">
+            <p className="text-gray-200 mb-6 max-w-2xl mx-auto">
               If you have any questions about these Terms & Conditions, please contact our legal team. 
               We're here to help clarify any concerns you may have.
             </p>

@@ -100,6 +100,14 @@ This is a real-time prize game web application that allows users to participate 
 
 ## Changelog
 
+- January 15, 2025: Fixed color schemes and readability across all informational pages
+  - Applied consistent dark slate card backgrounds (bg-slate-800/90) for excellent contrast
+  - Enhanced text visibility with improved gray color schemes (text-gray-200)
+  - Fixed all inner card backgrounds from transparent black to solid slate
+  - Updated all button styles for consistent hover effects and proper colors
+  - Added comprehensive CSS overrides for better text contrast
+  - Resolved all color scheme inconsistencies across 8 informational pages
+  - All pages now have excellent readability while maintaining engaging design
 - January 15, 2025: Enhanced all pages with better readability and created new informational pages
   - Fixed readability issues by using consistent dark theme across all pages
   - Added vibrant, eye-catching colors and interesting design elements
