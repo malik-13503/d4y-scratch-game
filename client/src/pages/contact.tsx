@@ -56,7 +56,7 @@ export default function Contact() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden informational-page">
       {/* Enhanced Animated Background */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-20 left-10 w-72 h-72 bg-gradient-to-r from-emerald-500/20 to-teal-500/20 rounded-full blur-3xl animate-pulse"></div>
@@ -112,7 +112,7 @@ export default function Contact() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Contact Form */}
-          <Card className="bg-gradient-to-r from-emerald-900/50 to-teal-900/50 backdrop-blur-xl border-emerald-400/40 shadow-2xl shadow-emerald-500/25 hover:shadow-emerald-500/40 transition-all duration-300">
+          <Card className="bg-slate-800/90 backdrop-blur-xl border-slate-600/50 shadow-2xl">
             <CardHeader>
               <CardTitle className="text-2xl text-white flex items-center">
                 <Send className="h-6 w-6 mr-2 text-purple-400" />
@@ -202,7 +202,7 @@ export default function Contact() {
           {/* Contact Information */}
           <div className="space-y-6">
             {/* Contact Details */}
-            <Card className="bg-gradient-to-r from-cyan-900/50 to-blue-900/50 backdrop-blur-xl border-cyan-400/40 shadow-2xl shadow-cyan-500/25 hover:shadow-cyan-500/40 transition-all duration-300">
+            <Card className="bg-slate-800/90 backdrop-blur-xl border-slate-600/50 shadow-2xl">
               <CardHeader>
                 <CardTitle className="text-2xl text-white flex items-center">
                   <HeadphonesIcon className="h-6 w-6 mr-2 text-blue-400" />
@@ -256,7 +256,7 @@ export default function Contact() {
             </Card>
 
             {/* Social Media */}
-            <Card className="bg-gradient-to-r from-pink-900/50 to-rose-900/50 backdrop-blur-xl border-pink-400/40 shadow-2xl shadow-pink-500/25 hover:shadow-pink-500/40 transition-all duration-300">
+            <Card className="bg-slate-800/90 backdrop-blur-xl border-slate-600/50 shadow-2xl">
               <CardHeader>
                 <CardTitle className="text-2xl text-white flex items-center">
                   <Globe className="h-6 w-6 mr-2 text-pink-400" />

@@ -18,7 +18,7 @@ import logoPath from "@assets/logo_1751956932645.png";
 
 export default function PrizeRules() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden informational-page">
       {/* Enhanced Animated Background */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-20 left-10 w-72 h-72 bg-gradient-to-r from-orange-500/20 to-yellow-500/20 rounded-full blur-3xl animate-pulse"></div>
@@ -70,7 +70,7 @@ export default function PrizeRules() {
         </div>
 
         {/* Pricing Structure */}
-        <Card className="bg-gradient-to-r from-orange-900/50 to-red-900/50 backdrop-blur-xl border-orange-400/40 shadow-2xl shadow-orange-500/25 mb-8 hover:shadow-orange-500/40 transition-all duration-300">
+        <Card className="bg-slate-800/90 backdrop-blur-xl border-slate-600/50 shadow-2xl mb-8">
           <CardHeader>
             <CardTitle className="text-2xl text-white flex items-center">
               <DollarSign className="h-6 w-6 mr-2 text-blue-400" />
@@ -133,7 +133,7 @@ export default function PrizeRules() {
         </Card>
 
         {/* Game Rules */}
-        <Card className="bg-gradient-to-r from-yellow-900/50 to-amber-900/50 backdrop-blur-xl border-yellow-400/40 shadow-2xl shadow-yellow-500/25 mb-8 hover:shadow-yellow-500/40 transition-all duration-300">
+        <Card className="bg-slate-800/90 backdrop-blur-xl border-slate-600/50 shadow-2xl mb-8">
           <CardHeader>
             <CardTitle className="text-2xl text-white flex items-center">
               <Shield className="h-6 w-6 mr-2 text-purple-400" />

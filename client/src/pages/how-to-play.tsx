@@ -18,7 +18,7 @@ import logoPath from "@assets/logo_1751956932645.png";
 
 export default function HowToPlay() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden informational-page">
       {/* Enhanced Animated Background */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-20 left-10 w-72 h-72 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 rounded-full blur-3xl animate-pulse"></div>
@@ -71,7 +71,7 @@ export default function HowToPlay() {
         </div>
 
         {/* Game Overview */}
-        <Card className="bg-gradient-to-r from-cyan-900/50 to-blue-900/50 backdrop-blur-xl border-cyan-400/40 shadow-2xl shadow-cyan-500/25 mb-8 hover:shadow-cyan-500/40 transition-all duration-300">
+        <Card className="bg-slate-800/90 backdrop-blur-xl border-slate-600/50 shadow-2xl mb-8">
           <CardHeader>
             <CardTitle className="text-2xl text-white flex items-center">
               <Target className="h-6 w-6 mr-2 text-purple-400" />
@@ -103,7 +103,7 @@ export default function HowToPlay() {
         </Card>
 
         {/* Step by Step Guide */}
-        <Card className="bg-gradient-to-r from-purple-900/50 to-pink-900/50 backdrop-blur-xl border-purple-400/40 shadow-2xl shadow-purple-500/25 mb-8 hover:shadow-purple-500/40 transition-all duration-300">
+        <Card className="bg-slate-800/90 backdrop-blur-xl border-slate-600/50 shadow-2xl mb-8">
           <CardHeader>
             <CardTitle className="text-2xl text-white flex items-center">
               <Star className="h-6 w-6 mr-2 text-blue-400" />
@@ -168,7 +168,7 @@ export default function HowToPlay() {
         </Card>
 
         {/* Pro Tips */}
-        <Card className="bg-gradient-to-r from-emerald-900/50 to-teal-900/50 backdrop-blur-xl border-emerald-400/40 shadow-2xl shadow-emerald-500/25 mb-8 hover:shadow-emerald-500/40 transition-all duration-300">
+        <Card className="bg-slate-800/90 backdrop-blur-xl border-slate-600/50 shadow-2xl mb-8">
           <CardHeader>
             <CardTitle className="text-2xl text-white flex items-center">
               <Zap className="h-6 w-6 mr-2 text-green-400" />
@@ -212,7 +212,7 @@ export default function HowToPlay() {
         </Card>
 
         {/* Ready to Play */}
-        <Card className="bg-gradient-to-r from-pink-900/60 to-rose-900/60 backdrop-blur-xl border-pink-400/40 shadow-2xl shadow-pink-500/25 hover:shadow-pink-500/40 transition-all duration-300">
+        <Card className="bg-slate-800/90 backdrop-blur-xl border-slate-600/50 shadow-2xl">
           <CardContent className="text-center py-12">
             <Trophy className="h-16 w-16 text-yellow-400 mx-auto mb-4" />
             <h3 className="text-3xl font-bold text-white mb-4">Ready to Spin?</h3>

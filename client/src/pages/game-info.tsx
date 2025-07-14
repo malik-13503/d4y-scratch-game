@@ -20,7 +20,7 @@ import logoPath from "@assets/logo_1751956932645.png";
 
 export default function GameInfo() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden informational-page">
       {/* Enhanced Animated Background */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-20 left-10 w-72 h-72 bg-purple-500/10 rounded-full blur-3xl animate-pulse"></div>
@@ -73,7 +73,7 @@ export default function GameInfo() {
         </div>
 
         {/* Game Overview */}
-        <Card className="bg-gradient-to-r from-purple-900/40 to-blue-900/40 backdrop-blur-xl border-purple-500/30 shadow-2xl mb-8">
+        <Card className="bg-slate-800/90 backdrop-blur-xl border-slate-600/50 shadow-2xl mb-8">
           <CardHeader>
             <CardTitle className="text-2xl text-white flex items-center">
               <Gamepad2 className="h-6 w-6 mr-2 text-purple-400" />
@@ -101,7 +101,7 @@ export default function GameInfo() {
         </Card>
 
         {/* Key Features */}
-        <Card className="bg-gradient-to-r from-blue-900/40 to-purple-900/40 backdrop-blur-xl border-blue-500/30 shadow-2xl mb-8">
+        <Card className="bg-slate-800/90 backdrop-blur-xl border-slate-600/50 shadow-2xl mb-8">
           <CardHeader>
             <CardTitle className="text-2xl text-white flex items-center">
               <Star className="h-6 w-6 mr-2 text-blue-400" />
@@ -136,7 +136,7 @@ export default function GameInfo() {
         </Card>
 
         {/* Game Statistics */}
-        <Card className="bg-gradient-to-r from-purple-900/40 to-pink-900/40 backdrop-blur-xl border-purple-500/30 shadow-2xl mb-8">
+        <Card className="bg-slate-800/90 backdrop-blur-xl border-slate-600/50 shadow-2xl mb-8">
           <CardHeader>
             <CardTitle className="text-2xl text-white flex items-center">
               <Crown className="h-6 w-6 mr-2 text-purple-400" />
@@ -166,7 +166,7 @@ export default function GameInfo() {
         </Card>
 
         {/* Ready to Play */}
-        <Card className="bg-gradient-to-r from-purple-900/60 to-pink-900/60 backdrop-blur-xl border-purple-500/30 shadow-2xl">
+        <Card className="bg-slate-800/90 backdrop-blur-xl border-slate-600/50 shadow-2xl">
           <CardContent className="text-center py-12">
             <Gift className="h-16 w-16 text-yellow-400 mx-auto mb-4" />
             <h3 className="text-3xl font-bold text-white mb-4">Ready to Experience the Thrill?</h3>
