@@ -18,11 +18,17 @@ import logoPath from "@assets/logo_1751956932645.png";
 
 export default function PrizeRules() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden">
-      {/* Animated Background */}
+    <div className="min-h-screen bg-gradient-to-br from-orange-900 via-red-800 to-yellow-900 relative overflow-hidden">
+      {/* Enhanced Animated Background */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-20 left-10 w-72 h-72 bg-purple-500/10 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-20 right-10 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
+        <div className="absolute top-20 left-10 w-72 h-72 bg-gradient-to-r from-orange-500/20 to-yellow-500/20 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-20 right-10 w-96 h-96 bg-gradient-to-r from-red-500/20 to-pink-500/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
+        <div className="absolute top-1/3 right-1/3 w-[400px] h-[400px] bg-gradient-to-r from-amber-500/10 to-orange-500/10 rounded-full blur-3xl animate-spin-slow"></div>
+        
+        {/* Floating coins animation */}
+        <div className="absolute top-32 left-24 w-6 h-6 bg-gradient-to-r from-yellow-400 to-amber-500 rounded-full animate-bounce shadow-lg shadow-yellow-500/50"></div>
+        <div className="absolute top-48 right-32 w-4 h-4 bg-gradient-to-r from-orange-400 to-red-500 rounded-full animate-bounce delay-700 shadow-lg shadow-orange-500/50"></div>
+        <div className="absolute bottom-32 left-1/4 w-5 h-5 bg-gradient-to-r from-red-400 to-pink-500 rounded-full animate-bounce delay-1200 shadow-lg shadow-red-500/50"></div>
       </div>
 
       {/* Header */}
@@ -51,11 +57,11 @@ export default function PrizeRules() {
       <main className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 py-8">
         {/* Hero Section */}
         <div className="text-center mb-12">
-          <div className="inline-flex items-center space-x-2 bg-gradient-to-r from-yellow-600/20 to-orange-600/20 backdrop-blur-sm rounded-full px-6 py-3 border border-yellow-500/30 mb-6">
-            <Trophy className="h-5 w-5 text-yellow-300" />
-            <span className="text-yellow-200 font-medium">Prize Information</span>
+          <div className="inline-flex items-center space-x-2 bg-gradient-to-r from-amber-600/30 to-orange-600/30 backdrop-blur-sm rounded-full px-6 py-3 border border-amber-400/40 mb-6 shadow-lg shadow-amber-500/25">
+            <Trophy className="h-5 w-5 text-amber-300 animate-pulse" />
+            <span className="text-amber-200 font-medium">Prize Information</span>
           </div>
-          <h2 className="text-4xl sm:text-5xl font-bold bg-gradient-to-r from-yellow-400 via-orange-400 to-red-400 bg-clip-text text-transparent mb-4">
+          <h2 className="text-4xl sm:text-6xl font-bold bg-gradient-to-r from-amber-400 via-orange-400 to-red-400 bg-clip-text text-transparent mb-4 animate-pulse">
             Prize Rules & Policies
           </h2>
           <p className="text-xl text-white/80 max-w-2xl mx-auto">
@@ -64,7 +70,7 @@ export default function PrizeRules() {
         </div>
 
         {/* Pricing Structure */}
-        <Card className="bg-gradient-to-r from-blue-900/40 to-purple-900/40 backdrop-blur-xl border-blue-500/30 shadow-2xl mb-8">
+        <Card className="bg-gradient-to-r from-orange-900/50 to-red-900/50 backdrop-blur-xl border-orange-400/40 shadow-2xl shadow-orange-500/25 mb-8 hover:shadow-orange-500/40 transition-all duration-300">
           <CardHeader>
             <CardTitle className="text-2xl text-white flex items-center">
               <DollarSign className="h-6 w-6 mr-2 text-blue-400" />
@@ -127,7 +133,7 @@ export default function PrizeRules() {
         </Card>
 
         {/* Game Rules */}
-        <Card className="bg-gradient-to-r from-purple-900/40 to-pink-900/40 backdrop-blur-xl border-purple-500/30 shadow-2xl mb-8">
+        <Card className="bg-gradient-to-r from-yellow-900/50 to-amber-900/50 backdrop-blur-xl border-yellow-400/40 shadow-2xl shadow-yellow-500/25 mb-8 hover:shadow-yellow-500/40 transition-all duration-300">
           <CardHeader>
             <CardTitle className="text-2xl text-white flex items-center">
               <Shield className="h-6 w-6 mr-2 text-purple-400" />

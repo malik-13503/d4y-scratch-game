@@ -18,11 +18,18 @@ import logoPath from "@assets/logo_1751956932645.png";
 
 export default function HowToPlay() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden">
-      {/* Animated Background */}
+    <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-800 to-pink-900 relative overflow-hidden">
+      {/* Enhanced Animated Background */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-20 left-10 w-72 h-72 bg-purple-500/10 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-20 right-10 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
+        <div className="absolute top-20 left-10 w-72 h-72 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-20 right-10 w-96 h-96 bg-gradient-to-r from-pink-500/20 to-purple-500/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-r from-yellow-500/5 to-orange-500/5 rounded-full blur-3xl animate-spin-slow"></div>
+        
+        {/* Floating particles */}
+        <div className="absolute top-40 left-20 w-2 h-2 bg-cyan-400 rounded-full animate-bounce"></div>
+        <div className="absolute top-60 right-40 w-3 h-3 bg-pink-400 rounded-full animate-bounce delay-500"></div>
+        <div className="absolute bottom-40 left-1/3 w-2 h-2 bg-yellow-400 rounded-full animate-bounce delay-1000"></div>
+        <div className="absolute bottom-60 right-1/4 w-4 h-4 bg-green-400 rounded-full animate-bounce delay-1500"></div>
       </div>
 
       {/* Header */}
@@ -51,11 +58,11 @@ export default function HowToPlay() {
       <main className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 py-8">
         {/* Hero Section */}
         <div className="text-center mb-12">
-          <div className="inline-flex items-center space-x-2 bg-gradient-to-r from-purple-600/20 to-blue-600/20 backdrop-blur-sm rounded-full px-6 py-3 border border-purple-500/30 mb-6">
-            <Play className="h-5 w-5 text-purple-300" />
-            <span className="text-purple-200 font-medium">Game Instructions</span>
+          <div className="inline-flex items-center space-x-2 bg-gradient-to-r from-cyan-600/30 to-blue-600/30 backdrop-blur-sm rounded-full px-6 py-3 border border-cyan-400/40 mb-6 shadow-lg shadow-cyan-500/25">
+            <Play className="h-5 w-5 text-cyan-300 animate-pulse" />
+            <span className="text-cyan-200 font-medium">Game Instructions</span>
           </div>
-          <h2 className="text-4xl sm:text-5xl font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text text-transparent mb-4">
+          <h2 className="text-4xl sm:text-6xl font-bold bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-400 bg-clip-text text-transparent mb-4 animate-pulse">
             Master the Wheel
           </h2>
           <p className="text-xl text-white/80 max-w-2xl mx-auto">
@@ -64,7 +71,7 @@ export default function HowToPlay() {
         </div>
 
         {/* Game Overview */}
-        <Card className="bg-gradient-to-r from-purple-900/40 to-blue-900/40 backdrop-blur-xl border-purple-500/30 shadow-2xl mb-8">
+        <Card className="bg-gradient-to-r from-cyan-900/50 to-blue-900/50 backdrop-blur-xl border-cyan-400/40 shadow-2xl shadow-cyan-500/25 mb-8 hover:shadow-cyan-500/40 transition-all duration-300">
           <CardHeader>
             <CardTitle className="text-2xl text-white flex items-center">
               <Target className="h-6 w-6 mr-2 text-purple-400" />
@@ -96,7 +103,7 @@ export default function HowToPlay() {
         </Card>
 
         {/* Step by Step Guide */}
-        <Card className="bg-gradient-to-r from-blue-900/40 to-purple-900/40 backdrop-blur-xl border-blue-500/30 shadow-2xl mb-8">
+        <Card className="bg-gradient-to-r from-purple-900/50 to-pink-900/50 backdrop-blur-xl border-purple-400/40 shadow-2xl shadow-purple-500/25 mb-8 hover:shadow-purple-500/40 transition-all duration-300">
           <CardHeader>
             <CardTitle className="text-2xl text-white flex items-center">
               <Star className="h-6 w-6 mr-2 text-blue-400" />
@@ -161,7 +168,7 @@ export default function HowToPlay() {
         </Card>
 
         {/* Pro Tips */}
-        <Card className="bg-gradient-to-r from-green-900/40 to-teal-900/40 backdrop-blur-xl border-green-500/30 shadow-2xl mb-8">
+        <Card className="bg-gradient-to-r from-emerald-900/50 to-teal-900/50 backdrop-blur-xl border-emerald-400/40 shadow-2xl shadow-emerald-500/25 mb-8 hover:shadow-emerald-500/40 transition-all duration-300">
           <CardHeader>
             <CardTitle className="text-2xl text-white flex items-center">
               <Zap className="h-6 w-6 mr-2 text-green-400" />
@@ -205,7 +212,7 @@ export default function HowToPlay() {
         </Card>
 
         {/* Ready to Play */}
-        <Card className="bg-gradient-to-r from-purple-900/60 to-pink-900/60 backdrop-blur-xl border-purple-500/30 shadow-2xl">
+        <Card className="bg-gradient-to-r from-pink-900/60 to-rose-900/60 backdrop-blur-xl border-pink-400/40 shadow-2xl shadow-pink-500/25 hover:shadow-pink-500/40 transition-all duration-300">
           <CardContent className="text-center py-12">
             <Trophy className="h-16 w-16 text-yellow-400 mx-auto mb-4" />
             <h3 className="text-3xl font-bold text-white mb-4">Ready to Spin?</h3>
@@ -214,8 +221,8 @@ export default function HowToPlay() {
               Join a game and experience the thrill of our spinning wheel.
             </p>
             <Link href="/">
-              <Button className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold py-3 px-8 rounded-xl text-lg shadow-lg">
-                <Play className="h-5 w-5 mr-2" />
+              <Button className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold py-3 px-8 rounded-xl text-lg shadow-lg animate-rainbow-glow hover:animate-card-hover">
+                <Play className="h-5 w-5 mr-2 animate-sparkle" />
                 Start Playing Now
               </Button>
             </Link>

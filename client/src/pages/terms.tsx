@@ -16,11 +16,18 @@ import logoPath from "@assets/logo_1751956932645.png";
 
 export default function Terms() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden">
-      {/* Animated Background */}
+    <div className="min-h-screen bg-gradient-to-br from-violet-900 via-indigo-800 to-blue-900 relative overflow-hidden">
+      {/* Enhanced Animated Background */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-20 left-10 w-72 h-72 bg-purple-500/10 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-20 right-10 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
+        <div className="absolute top-20 left-10 w-72 h-72 bg-gradient-to-r from-violet-500/20 to-purple-500/20 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-20 right-10 w-96 h-96 bg-gradient-to-r from-indigo-500/20 to-blue-500/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
+        <div className="absolute top-2/3 left-1/3 w-[450px] h-[450px] bg-gradient-to-r from-blue-500/10 to-violet-500/10 rounded-full blur-3xl animate-spin-slow"></div>
+        
+        {/* Legal document icons floating */}
+        <div className="absolute top-36 right-24 w-8 h-8 bg-gradient-to-r from-violet-400 to-purple-500 rounded-lg animate-bounce shadow-lg shadow-violet-500/50"></div>
+        <div className="absolute bottom-36 left-20 w-6 h-6 bg-gradient-to-r from-indigo-400 to-blue-500 rounded-lg animate-bounce delay-600 shadow-lg shadow-indigo-500/50"></div>
+        <div className="absolute top-1/2 right-1/4 w-4 h-4 bg-gradient-to-r from-blue-400 to-cyan-500 rounded-lg animate-bounce delay-1100 shadow-lg shadow-blue-500/50"></div>
+        <div className="absolute bottom-1/3 left-1/4 w-5 h-5 bg-gradient-to-r from-purple-400 to-violet-500 rounded-lg animate-bounce delay-1600 shadow-lg shadow-purple-500/50"></div>
       </div>
 
       {/* Header */}
@@ -49,11 +56,11 @@ export default function Terms() {
       <main className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 py-8">
         {/* Hero Section */}
         <div className="text-center mb-12">
-          <div className="inline-flex items-center space-x-2 bg-gradient-to-r from-blue-600/20 to-purple-600/20 backdrop-blur-sm rounded-full px-6 py-3 border border-blue-500/30 mb-6">
-            <Scale className="h-5 w-5 text-blue-300" />
-            <span className="text-blue-200 font-medium">Legal Information</span>
+          <div className="inline-flex items-center space-x-2 bg-gradient-to-r from-violet-600/30 to-indigo-600/30 backdrop-blur-sm rounded-full px-6 py-3 border border-violet-400/40 mb-6 shadow-lg shadow-violet-500/25">
+            <Scale className="h-5 w-5 text-violet-300 animate-pulse" />
+            <span className="text-violet-200 font-medium">Legal Information</span>
           </div>
-          <h2 className="text-4xl sm:text-5xl font-bold bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent mb-4">
+          <h2 className="text-4xl sm:text-6xl font-bold bg-gradient-to-r from-violet-400 via-indigo-400 to-blue-400 bg-clip-text text-transparent mb-4 animate-pulse">
             Terms & Conditions
           </h2>
           <p className="text-xl text-white/80 max-w-2xl mx-auto">
@@ -65,7 +72,7 @@ export default function Terms() {
         </div>
 
         {/* Agreement */}
-        <Card className="bg-gradient-to-r from-blue-900/40 to-purple-900/40 backdrop-blur-xl border-blue-500/30 shadow-2xl mb-8">
+        <Card className="bg-gradient-to-r from-violet-900/50 to-purple-900/50 backdrop-blur-xl border-violet-400/40 shadow-2xl shadow-violet-500/25 mb-8 hover:shadow-violet-500/40 transition-all duration-300">
           <CardHeader>
             <CardTitle className="text-2xl text-white flex items-center">
               <FileText className="h-6 w-6 mr-2 text-blue-400" />
@@ -92,7 +99,7 @@ export default function Terms() {
         </Card>
 
         {/* User Accounts */}
-        <Card className="bg-gradient-to-r from-green-900/40 to-emerald-900/40 backdrop-blur-xl border-green-500/30 shadow-2xl mb-8">
+        <Card className="bg-gradient-to-r from-indigo-900/50 to-blue-900/50 backdrop-blur-xl border-indigo-400/40 shadow-2xl shadow-indigo-500/25 mb-8 hover:shadow-indigo-500/40 transition-all duration-300">
           <CardHeader>
             <CardTitle className="text-2xl text-white flex items-center">
               <UserCheck className="h-6 w-6 mr-2 text-green-400" />

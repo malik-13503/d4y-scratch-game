@@ -56,11 +56,19 @@ export default function Contact() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden">
-      {/* Animated Background */}
+    <div className="min-h-screen bg-gradient-to-br from-emerald-900 via-teal-800 to-cyan-900 relative overflow-hidden">
+      {/* Enhanced Animated Background */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-20 left-10 w-72 h-72 bg-purple-500/10 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-20 right-10 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
+        <div className="absolute top-20 left-10 w-72 h-72 bg-gradient-to-r from-emerald-500/20 to-teal-500/20 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-20 right-10 w-96 h-96 bg-gradient-to-r from-teal-500/20 to-cyan-500/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
+        <div className="absolute top-1/2 left-1/4 w-[500px] h-[500px] bg-gradient-to-r from-blue-500/10 to-emerald-500/10 rounded-full blur-3xl animate-spin-slow"></div>
+        
+        {/* Communication icons floating */}
+        <div className="absolute top-40 right-20 w-8 h-8 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full animate-bounce shadow-lg shadow-green-500/50 flex items-center justify-center">
+          <div className="w-3 h-3 bg-white rounded-full"></div>
+        </div>
+        <div className="absolute bottom-40 left-16 w-6 h-6 bg-gradient-to-r from-teal-400 to-cyan-500 rounded-full animate-bounce delay-800 shadow-lg shadow-teal-500/50"></div>
+        <div className="absolute top-1/3 right-1/3 w-4 h-4 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-full animate-bounce delay-1400 shadow-lg shadow-cyan-500/50"></div>
       </div>
 
       {/* Header */}
@@ -89,11 +97,11 @@ export default function Contact() {
       <main className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 py-8">
         {/* Hero Section */}
         <div className="text-center mb-12">
-          <div className="inline-flex items-center space-x-2 bg-gradient-to-r from-blue-600/20 to-purple-600/20 backdrop-blur-sm rounded-full px-6 py-3 border border-blue-500/30 mb-6">
-            <MessageSquare className="h-5 w-5 text-blue-300" />
-            <span className="text-blue-200 font-medium">Get in Touch</span>
+          <div className="inline-flex items-center space-x-2 bg-gradient-to-r from-emerald-600/30 to-teal-600/30 backdrop-blur-sm rounded-full px-6 py-3 border border-emerald-400/40 mb-6 shadow-lg shadow-emerald-500/25">
+            <MessageSquare className="h-5 w-5 text-emerald-300 animate-pulse" />
+            <span className="text-emerald-200 font-medium">Get in Touch</span>
           </div>
-          <h2 className="text-4xl sm:text-5xl font-bold bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent mb-4">
+          <h2 className="text-4xl sm:text-6xl font-bold bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 bg-clip-text text-transparent mb-4 animate-pulse">
             We're Here to Help
           </h2>
           <p className="text-xl text-white/80 max-w-2xl mx-auto">
@@ -104,7 +112,7 @@ export default function Contact() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Contact Form */}
-          <Card className="bg-gradient-to-r from-purple-900/40 to-blue-900/40 backdrop-blur-xl border-purple-500/30 shadow-2xl">
+          <Card className="bg-gradient-to-r from-emerald-900/50 to-teal-900/50 backdrop-blur-xl border-emerald-400/40 shadow-2xl shadow-emerald-500/25 hover:shadow-emerald-500/40 transition-all duration-300">
             <CardHeader>
               <CardTitle className="text-2xl text-white flex items-center">
                 <Send className="h-6 w-6 mr-2 text-purple-400" />
@@ -173,7 +181,7 @@ export default function Contact() {
                 <Button
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg disabled:opacity-50"
+                  className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg disabled:opacity-50 animate-rainbow-glow hover:animate-card-hover"
                 >
                   {isSubmitting ? (
                     <div className="flex items-center justify-center">
@@ -194,7 +202,7 @@ export default function Contact() {
           {/* Contact Information */}
           <div className="space-y-6">
             {/* Contact Details */}
-            <Card className="bg-gradient-to-r from-blue-900/40 to-teal-900/40 backdrop-blur-xl border-blue-500/30 shadow-2xl">
+            <Card className="bg-gradient-to-r from-cyan-900/50 to-blue-900/50 backdrop-blur-xl border-cyan-400/40 shadow-2xl shadow-cyan-500/25 hover:shadow-cyan-500/40 transition-all duration-300">
               <CardHeader>
                 <CardTitle className="text-2xl text-white flex items-center">
                   <HeadphonesIcon className="h-6 w-6 mr-2 text-blue-400" />
@@ -248,7 +256,7 @@ export default function Contact() {
             </Card>
 
             {/* Social Media */}
-            <Card className="bg-gradient-to-r from-pink-900/40 to-purple-900/40 backdrop-blur-xl border-pink-500/30 shadow-2xl">
+            <Card className="bg-gradient-to-r from-pink-900/50 to-rose-900/50 backdrop-blur-xl border-pink-400/40 shadow-2xl shadow-pink-500/25 hover:shadow-pink-500/40 transition-all duration-300">
               <CardHeader>
                 <CardTitle className="text-2xl text-white flex items-center">
                   <Globe className="h-6 w-6 mr-2 text-pink-400" />
