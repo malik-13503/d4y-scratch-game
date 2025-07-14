@@ -285,20 +285,20 @@ export default function Contact() {
             </Card>
 
             {/* FAQ Link */}
-            <Card className="bg-gradient-to-r from-green-900/40 to-emerald-900/40 backdrop-blur-xl border-green-500/30 shadow-2xl">
+            <Card className="bg-slate-800/90 backdrop-blur-xl border-slate-600/50 shadow-2xl">
               <CardContent className="p-6">
                 <h3 className="text-lg font-semibold text-white mb-2">Need Quick Answers?</h3>
-                <p className="text-white/80 mb-4">
+                <p className="text-gray-200 mb-4">
                   Check out our frequently asked questions or game rules for instant help.
                 </p>
                 <div className="flex space-x-3">
                   <Link href="/how-to-play">
-                    <Button variant="outline" className="border-green-500/30 text-green-300 hover:bg-green-500/20">
+                    <Button variant="outline" className="border-slate-500/50 text-slate-300 hover:bg-slate-700/50 hover:text-white transition-all duration-200">
                       How to Play
                     </Button>
                   </Link>
                   <Link href="/prize-rules">
-                    <Button variant="outline" className="border-green-500/30 text-green-300 hover:bg-green-500/20">
+                    <Button variant="outline" className="border-slate-500/50 text-slate-300 hover:bg-slate-700/50 hover:text-white transition-all duration-200">
                       Prize Rules
                     </Button>
                   </Link>
