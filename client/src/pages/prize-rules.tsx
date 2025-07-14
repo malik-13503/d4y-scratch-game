@@ -205,13 +205,13 @@ export default function PrizeRules() {
                     <CheckCircle className="h-5 w-5 text-green-400" />
                     <span className="text-gray-200">PayPal</span>
                   </div>
-                  <div className="flex items-center space-x-3 p-3 bg-black/20 rounded-lg">
+                  <div className="flex items-center space-x-3 p-3 bg-slate-700/80 border border-slate-500/30 rounded-lg">
                     <CheckCircle className="h-5 w-5 text-green-400" />
-                    <span className="text-white/80">Apple Pay & Google Pay</span>
+                    <span className="text-gray-200">Apple Pay & Google Pay</span>
                   </div>
-                  <div className="flex items-center space-x-3 p-3 bg-black/20 rounded-lg">
+                  <div className="flex items-center space-x-3 p-3 bg-slate-700/80 border border-slate-500/30 rounded-lg">
                     <CheckCircle className="h-5 w-5 text-green-400" />
-                    <span className="text-white/80">Bank Transfer</span>
+                    <span className="text-gray-200">Bank Transfer</span>
                   </div>
                 </div>
               </div>
@@ -248,7 +248,7 @@ export default function PrizeRules() {
         </Card>
 
         {/* Important Notes */}
-        <Card className="bg-gradient-to-r from-red-900/40 to-pink-900/40 backdrop-blur-xl border-red-500/30 shadow-2xl">
+        <Card className="bg-slate-800/90 backdrop-blur-xl border-slate-600/50 shadow-2xl">
           <CardHeader>
             <CardTitle className="text-2xl text-white flex items-center">
               <AlertCircle className="h-6 w-6 mr-2 text-red-400" />
@@ -279,7 +279,7 @@ export default function PrizeRules() {
                   icon: <Trophy className="h-5 w-5 text-purple-400" />
                 }
               ].map((note, index) => (
-                <div key={index} className="bg-black/20 rounded-lg p-4">
+                <div key={index} className="bg-slate-700/80 border border-slate-500/30 rounded-lg p-4">
                   <div className="flex items-start space-x-3">
                     <div className="flex-shrink-0 mt-1">
                       {note.icon}
