@@ -12,6 +12,10 @@ import HowToPlay from "@/pages/how-to-play";
 import PrizeRules from "@/pages/prize-rules";
 import Contact from "@/pages/contact";
 import Terms from "@/pages/terms";
+import GameInfo from "@/pages/game-info";
+import InstantPlay from "@/pages/instant-play";
+import RealPrizes from "@/pages/real-prizes";
+import FreeSpins from "@/pages/free-spins";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -26,6 +30,10 @@ function Router() {
       <Route path="/prize-rules" component={PrizeRules} />
       <Route path="/contact" component={Contact} />
       <Route path="/terms" component={Terms} />
+      <Route path="/game-info" component={GameInfo} />
+      <Route path="/instant-play" component={InstantPlay} />
+      <Route path="/real-prizes" component={RealPrizes} />
+      <Route path="/free-spins" component={FreeSpins} />
       <Route component={NotFound} />
     </Switch>
   );

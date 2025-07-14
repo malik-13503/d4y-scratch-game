@@ -100,6 +100,18 @@ This is a real-time prize game web application that allows users to participate 
 
 ## Changelog
 
+- January 15, 2025: Enhanced all pages with better readability and created new informational pages
+  - Fixed readability issues by using consistent dark theme across all pages
+  - Added vibrant, eye-catching colors and interesting design elements
+  - Created four new comprehensive pages with professional content and styling:
+    * "Game Info" - Detailed information about how the game works and features
+    * "Instant Play" - Information about no-download gaming and device compatibility
+    * "Real Prizes" - Comprehensive prize information, categories, and delivery process
+    * "Free Spins" - Details about free spin program, rules, and how to earn them
+  - All pages feature unique color schemes while maintaining excellent readability
+  - Enhanced animations, floating elements, and interactive visual effects
+  - Updated footer navigation to link to all new pages
+  - Consistent brand styling across all seven informational pages
 - January 15, 2025: Created comprehensive legal and informational pages
   - Added "How to Play" page with step-by-step game instructions and pro tips
   - Created "Prize Rules" page with detailed pricing structure and policies

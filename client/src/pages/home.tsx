@@ -359,15 +359,27 @@ export default function Home() {
                 <ul className="space-y-2 text-gray-400">
                   <li className="flex items-center space-x-2">
                     <Zap className="h-4 w-4 text-yellow-400" />
-                    <span>Instant Play</span>
+                    <Link href="/instant-play">
+                      <a className="hover:text-white transition-colors">Instant Play</a>
+                    </Link>
                   </li>
                   <li className="flex items-center space-x-2">
                     <Trophy className="h-4 w-4 text-blue-400" />
-                    <span>Real Prizes</span>
+                    <Link href="/real-prizes">
+                      <a className="hover:text-white transition-colors">Real Prizes</a>
+                    </Link>
                   </li>
                   <li className="flex items-center space-x-2">
                     <Crown className="h-4 w-4 text-purple-400" />
-                    <span>Free Spins</span>
+                    <Link href="/free-spins">
+                      <a className="hover:text-white transition-colors">Free Spins</a>
+                    </Link>
+                  </li>
+                  <li className="flex items-center space-x-2">
+                    <Gamepad2 className="h-4 w-4 text-green-400" />
+                    <Link href="/game-info">
+                      <a className="hover:text-white transition-colors">Game Info</a>
+                    </Link>
                   </li>
                 </ul>
               </div>
