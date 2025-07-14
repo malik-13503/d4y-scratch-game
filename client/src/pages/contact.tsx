@@ -293,12 +293,12 @@ export default function Contact() {
                 </p>
                 <div className="flex space-x-3">
                   <Link href="/how-to-play">
-                    <Button variant="outline" className="border-slate-500/50 text-slate-300 hover:bg-slate-700/50 hover:text-white transition-all duration-200">
+                    <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200">
                       How to Play
                     </Button>
                   </Link>
                   <Link href="/prize-rules">
-                    <Button variant="outline" className="border-slate-500/50 text-slate-300 hover:bg-slate-700/50 hover:text-white transition-all duration-200">
+                    <Button className="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-semibold shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200">
                       Prize Rules
                     </Button>
                   </Link>
