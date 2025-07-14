@@ -196,9 +196,9 @@ export default function Terms() {
               </ul>
             </div>
 
-            <div className="bg-blue-500/20 border border-blue-500/30 rounded-lg p-4">
-              <h4 className="font-semibold text-blue-300 mb-2">Fair Play Guarantee</h4>
-              <p className="text-blue-200 text-sm">
+            <div className="bg-slate-700/80 border border-slate-500/30 rounded-lg p-4">
+              <h4 className="font-semibold text-white mb-2">Fair Play Guarantee</h4>
+              <p className="text-gray-200 text-sm">
                 We are committed to providing a fair and transparent gaming experience. 
                 All game mechanics are audited regularly to ensure compliance with fair play standards.
               </p>

@@ -93,9 +93,9 @@ export default function PrizeRules() {
                     <span className="text-white/80">Cost:</span>
                     <span className="text-blue-300 font-semibold">$Number Value</span>
                   </div>
-                  <div className="bg-black/20 rounded-lg p-3 mt-4">
-                    <p className="text-sm text-white/80 mb-2">Examples:</p>
-                    <ul className="text-sm text-white/70 space-y-1">
+                  <div className="bg-slate-700/80 border border-slate-500/30 rounded-lg p-3 mt-4">
+                    <p className="text-sm text-gray-200 mb-2">Examples:</p>
+                    <ul className="text-sm text-gray-200 space-y-1">
                       <li>• Number 25 = $25.00</li>
                       <li>• Number 75 = $75.00</li>
                       <li>• Number 150 = $150.00</li>
@@ -118,9 +118,9 @@ export default function PrizeRules() {
                     <span className="text-white/80">Cost:</span>
                     <span className="text-green-300 font-semibold">$0.00 - FREE!</span>
                   </div>
-                  <div className="bg-black/20 rounded-lg p-3 mt-4">
-                    <p className="text-sm text-white/80 mb-2">Benefits:</p>
-                    <ul className="text-sm text-white/70 space-y-1">
+                  <div className="bg-slate-700/80 border border-slate-500/30 rounded-lg p-3 mt-4">
+                    <p className="text-sm text-gray-200 mb-2">Benefits:</p>
+                    <ul className="text-sm text-gray-200 space-y-1">
                       <li>• No charge for any spin</li>
                       <li>• Perfect for practice</li>
                       <li>• Still win the same prizes</li>
@@ -185,7 +185,7 @@ export default function PrizeRules() {
         </Card>
 
         {/* Payment Information */}
-        <Card className="bg-gradient-to-r from-emerald-900/40 to-teal-900/40 backdrop-blur-xl border-emerald-500/30 shadow-2xl mb-8">
+        <Card className="bg-slate-800/90 backdrop-blur-xl border-slate-600/50 shadow-2xl mb-8">
           <CardHeader>
             <CardTitle className="text-2xl text-white flex items-center">
               <Crown className="h-6 w-6 mr-2 text-emerald-400" />
@@ -197,13 +197,13 @@ export default function PrizeRules() {
               <div className="space-y-4">
                 <h3 className="text-lg font-semibold text-white mb-3">Payment Methods</h3>
                 <div className="space-y-3">
-                  <div className="flex items-center space-x-3 p-3 bg-black/20 rounded-lg">
+                  <div className="flex items-center space-x-3 p-3 bg-slate-700/80 border border-slate-500/30 rounded-lg">
                     <CheckCircle className="h-5 w-5 text-green-400" />
-                    <span className="text-white/80">Credit & Debit Cards</span>
+                    <span className="text-gray-200">Credit & Debit Cards</span>
                   </div>
-                  <div className="flex items-center space-x-3 p-3 bg-black/20 rounded-lg">
+                  <div className="flex items-center space-x-3 p-3 bg-slate-700/80 border border-slate-500/30 rounded-lg">
                     <CheckCircle className="h-5 w-5 text-green-400" />
-                    <span className="text-white/80">PayPal</span>
+                    <span className="text-gray-200">PayPal</span>
                   </div>
                   <div className="flex items-center space-x-3 p-3 bg-black/20 rounded-lg">
                     <CheckCircle className="h-5 w-5 text-green-400" />

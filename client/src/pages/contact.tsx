@@ -211,7 +211,7 @@ export default function Contact() {
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="space-y-4">
-                  <div className="flex items-center space-x-4 p-4 bg-black/20 rounded-lg">
+                  <div className="flex items-center space-x-4 p-4 bg-slate-700/80 border border-slate-500/30 rounded-lg">
                     <div className="w-12 h-12 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center">
                       <Mail className="h-6 w-6 text-white" />
                     </div>
@@ -221,7 +221,7 @@ export default function Contact() {
                     </div>
                   </div>
 
-                  <div className="flex items-center space-x-4 p-4 bg-black/20 rounded-lg">
+                  <div className="flex items-center space-x-4 p-4 bg-slate-700/80 border border-slate-500/30 rounded-lg">
                     <div className="w-12 h-12 bg-gradient-to-r from-green-600 to-teal-600 rounded-full flex items-center justify-center">
                       <Phone className="h-6 w-6 text-white" />
                     </div>
@@ -231,7 +231,7 @@ export default function Contact() {
                     </div>
                   </div>
 
-                  <div className="flex items-center space-x-4 p-4 bg-black/20 rounded-lg">
+                  <div className="flex items-center space-x-4 p-4 bg-slate-700/80 border border-slate-500/30 rounded-lg">
                     <div className="w-12 h-12 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full flex items-center justify-center">
                       <MapPin className="h-6 w-6 text-white" />
                     </div>
@@ -241,7 +241,7 @@ export default function Contact() {
                     </div>
                   </div>
 
-                  <div className="flex items-center space-x-4 p-4 bg-black/20 rounded-lg">
+                  <div className="flex items-center space-x-4 p-4 bg-slate-700/80 border border-slate-500/30 rounded-lg">
                     <div className="w-12 h-12 bg-gradient-to-r from-orange-600 to-red-600 rounded-full flex items-center justify-center">
                       <Clock className="h-6 w-6 text-white" />
                     </div>
@@ -264,7 +264,7 @@ export default function Contact() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-white/80 mb-4">
+                <p className="text-gray-200 mb-4">
                   Stay updated with our latest games and announcements on social media!
                 </p>
                 <div className="flex space-x-4">

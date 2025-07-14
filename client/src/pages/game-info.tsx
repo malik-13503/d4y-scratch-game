@@ -170,12 +170,12 @@ export default function GameInfo() {
           <CardContent className="text-center py-12">
             <Gift className="h-16 w-16 text-yellow-400 mx-auto mb-4" />
             <h3 className="text-3xl font-bold text-white mb-4">Ready to Experience the Thrill?</h3>
-            <p className="text-white/80 mb-8 max-w-2xl mx-auto">
+            <p className="text-gray-200 mb-8 max-w-2xl mx-auto">
               Join the excitement and try your luck on our spinning wheel. With fair gameplay and amazing prizes, 
               your next big win could be just one spin away!
             </p>
             <Link href="/">
-              <Button className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold py-3 px-8 rounded-xl text-lg shadow-lg">
+              <Button className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold py-3 px-8 rounded-xl text-lg shadow-lg hover:scale-105 transition-all duration-200">
                 <Sparkles className="h-5 w-5 mr-2" />
                 Start Playing Now
               </Button>

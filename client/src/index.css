@@ -8,11 +8,11 @@
 }
 
 .informational-page .text-white\/80 {
-  @apply text-gray-100;
+  @apply text-gray-200;
 }
 
 .informational-page .text-white\/90 {
-  @apply text-gray-100;
+  @apply text-gray-200;
 }
 
 /* Better card backgrounds for readability */
@@ -76,6 +76,19 @@
 
 .informational-page [class*="bg-gradient-to-br from-green-500/20 to-emerald-500/20"] {
   @apply bg-slate-700/80 border border-slate-500/30;
+}
+
+/* Handle remaining color inconsistencies */
+.informational-page [class*="bg-gradient-to-r from-emerald-900/40 to-teal-900/40"] {
+  @apply bg-slate-800/90 border border-slate-600/50;
+}
+
+.informational-page [class*="bg-blue-500/20 border-blue-500/30"] {
+  @apply bg-slate-700/80 border border-slate-500/30;
+}
+
+.informational-page .text-blue-200 {
+  @apply text-gray-200;
 }
 
 :root {
