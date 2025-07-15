@@ -86,17 +86,17 @@ export default function AuthLandingPage() {
       </div>
 
       {/* Main Content */}
-      <div className="relative z-10 container mx-auto px-4 py-8">
+      <div className="relative z-10 container mx-auto px-4 py-8 sm:py-16">
         <div className="max-w-6xl mx-auto">
           {/* Header with Logo and Branding */}
-          <div className="text-center mb-12">
+          <div className="text-center mb-8 sm:mb-12">
             <div className="flex items-center justify-center mb-8">
               <div className="relative">
                 <div className="absolute inset-0 bg-gradient-to-r from-purple-500/30 to-red-500/30 blur-2xl rounded-full"></div>
                 <img 
                   src={logoPath} 
                   alt="Hit The Road Jackpot" 
-                  className="relative h-20 w-auto mx-auto drop-shadow-2xl"
+                  className="relative h-16 sm:h-20 w-auto mx-auto drop-shadow-2xl"
                 />
               </div>
             </div>
@@ -104,10 +104,10 @@ export default function AuthLandingPage() {
             <div className="relative inline-block mb-8">
               <div className="absolute -inset-12 bg-gradient-to-r from-yellow-400/30 via-red-500/30 to-purple-600/30 blur-3xl rounded-full animate-pulse"></div>
               <div className="relative">
-                <h1 className="text-6xl md:text-8xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-red-500 to-purple-600 leading-tight drop-shadow-2xl">
+                <h1 className="text-4xl sm:text-6xl md:text-8xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-red-500 to-purple-600 leading-tight drop-shadow-2xl">
                   HIT THE ROAD
                 </h1>
-                <div className="text-5xl md:text-7xl font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-500 via-blue-500 to-cyan-500 mt-2 drop-shadow-2xl">
+                <div className="text-3xl sm:text-5xl md:text-7xl font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-500 via-blue-500 to-cyan-500 mt-2 drop-shadow-2xl">
                   JACKPOT
                 </div>
                 <div className="absolute top-0 left-0 right-0 bottom-0 bg-gradient-to-r from-yellow-400/20 via-red-500/20 to-purple-600/20 blur-xl rounded-full -z-10"></div>
@@ -116,10 +116,10 @@ export default function AuthLandingPage() {
 
             <div className="relative mb-8">
               <div className="absolute -inset-4 bg-gradient-to-r from-blue-500/20 to-purple-500/20 blur-2xl rounded-full"></div>
-              <p className="relative text-2xl md:text-3xl text-white font-bold mb-4 max-w-4xl mx-auto leading-relaxed text-center drop-shadow-lg">
+              <p className="relative text-lg sm:text-2xl md:text-3xl text-white font-bold mb-4 max-w-4xl mx-auto leading-relaxed text-center drop-shadow-lg">
                 Spin the wheel of fortune and win amazing prizes! 
               </p>
-              <p className="text-xl md:text-2xl text-yellow-300 font-black max-w-3xl mx-auto leading-relaxed text-center drop-shadow-lg">
+              <p className="text-base sm:text-xl md:text-2xl text-yellow-300 font-black max-w-3xl mx-auto leading-relaxed text-center drop-shadow-lg">
                 Real games, real winners, real excitement!
               </p>
             </div>
@@ -158,7 +158,7 @@ export default function AuthLandingPage() {
           </div>
 
           {/* Two-Column Layout */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
             {/* Left Column - Enhanced Authentication Flow */}
             <div className="order-2 lg:order-1">
               {currentStep === "auth" && (
@@ -170,24 +170,24 @@ export default function AuthLandingPage() {
                     {/* Animated border effect */}
                     <div className="absolute inset-0 bg-gradient-to-r from-purple-500/20 via-blue-500/20 to-cyan-500/20 animate-pulse rounded-3xl"></div>
                     
-                    <CardContent className="relative p-10">
-                      <div className="text-center mb-10">
+                    <CardContent className="relative p-6 sm:p-10">
+                      <div className="text-center mb-6 sm:mb-10">
                         <div className="relative inline-block">
                           <div className="absolute -inset-4 bg-gradient-to-r from-purple-500/50 to-blue-500/50 blur-xl rounded-full animate-pulse"></div>
-                          <div className="relative inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-purple-500 via-blue-500 to-cyan-500 rounded-full mb-6 shadow-2xl shadow-purple-500/50">
-                            <Users className="h-10 w-10 text-white drop-shadow-lg" />
+                          <div className="relative inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-purple-500 via-blue-500 to-cyan-500 rounded-full mb-4 sm:mb-6 shadow-2xl shadow-purple-500/50">
+                            <Users className="h-8 w-8 sm:h-10 sm:w-10 text-white drop-shadow-lg" />
                           </div>
                         </div>
-                        <h2 className="text-4xl font-black text-white mb-3 drop-shadow-lg">Join the Game</h2>
-                        <p className="text-gray-300 text-lg font-medium">Create your account or sign in to start winning!</p>
+                        <h2 className="text-3xl sm:text-4xl font-black text-white mb-3 drop-shadow-lg">Join the Game</h2>
+                        <p className="text-gray-300 text-base sm:text-lg font-medium">Create your account or sign in to start winning!</p>
                       </div>
 
                       <Tabs defaultValue="signup" className="w-full">
-                        <TabsList className="grid w-full grid-cols-2 mb-8 bg-slate-800/80 border-2 border-white/20 rounded-2xl p-2 backdrop-blur-sm">
-                          <TabsTrigger value="signup" className="text-white font-bold text-lg py-3 rounded-xl data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-blue-600 data-[state=active]:shadow-lg transition-all duration-300">
+                        <TabsList className="grid w-full grid-cols-2 mb-6 sm:mb-8 bg-slate-800/80 border-2 border-white/20 rounded-2xl p-2 backdrop-blur-sm">
+                          <TabsTrigger value="signup" className="text-white font-bold text-base sm:text-lg py-3 rounded-xl data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-blue-600 data-[state=active]:shadow-lg transition-all duration-300">
                             Sign Up
                           </TabsTrigger>
-                          <TabsTrigger value="login" className="text-white font-bold text-lg py-3 rounded-xl data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-blue-600 data-[state=active]:shadow-lg transition-all duration-300">
+                          <TabsTrigger value="login" className="text-white font-bold text-base sm:text-lg py-3 rounded-xl data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-blue-600 data-[state=active]:shadow-lg transition-all duration-300">
                             Login
                           </TabsTrigger>
                         </TabsList>

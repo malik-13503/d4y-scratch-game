@@ -53,7 +53,7 @@ export function SignupForm({ onSuccess }: SignupFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label htmlFor="firstName" className="text-white font-medium text-sm">First Name</Label>
           <div className="relative">
@@ -65,7 +65,7 @@ export function SignupForm({ onSuccess }: SignupFormProps) {
               value={formData.firstName}
               onChange={handleChange}
               placeholder="John"
-              className="bg-slate-800/50 border-2 border-white/20 text-white placeholder-gray-400 focus:border-purple-500 focus:ring-purple-500 rounded-xl py-3 px-4 text-lg backdrop-blur-sm transition-all duration-300"
+              className="bg-slate-800/50 border-2 border-white/20 text-white placeholder-gray-400 focus:border-purple-500 focus:ring-purple-500 rounded-xl py-3 px-4 text-base sm:text-lg backdrop-blur-sm transition-all duration-300 w-full"
             />
             <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 to-blue-500/10 rounded-xl pointer-events-none"></div>
           </div>
@@ -81,7 +81,7 @@ export function SignupForm({ onSuccess }: SignupFormProps) {
               value={formData.lastName}
               onChange={handleChange}
               placeholder="Doe"
-              className="bg-slate-800/50 border-2 border-white/20 text-white placeholder-gray-400 focus:border-purple-500 focus:ring-purple-500 rounded-xl py-3 px-4 text-lg backdrop-blur-sm transition-all duration-300"
+              className="bg-slate-800/50 border-2 border-white/20 text-white placeholder-gray-400 focus:border-purple-500 focus:ring-purple-500 rounded-xl py-3 px-4 text-base sm:text-lg backdrop-blur-sm transition-all duration-300 w-full"
             />
             <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 to-blue-500/10 rounded-xl pointer-events-none"></div>
           </div>
@@ -99,7 +99,7 @@ export function SignupForm({ onSuccess }: SignupFormProps) {
             value={formData.email}
             onChange={handleChange}
             placeholder="john@example.com"
-            className="bg-slate-800/50 border-2 border-white/20 text-white placeholder-gray-400 focus:border-purple-500 focus:ring-purple-500 rounded-xl py-3 px-4 text-lg backdrop-blur-sm transition-all duration-300"
+            className="bg-slate-800/50 border-2 border-white/20 text-white placeholder-gray-400 focus:border-purple-500 focus:ring-purple-500 rounded-xl py-3 px-4 text-base sm:text-lg backdrop-blur-sm transition-all duration-300 w-full"
           />
           <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 to-blue-500/10 rounded-xl pointer-events-none"></div>
         </div>
@@ -115,7 +115,7 @@ export function SignupForm({ onSuccess }: SignupFormProps) {
             value={formData.phone}
             onChange={handleChange}
             placeholder="+1 (555) 123-4567"
-            className="bg-slate-800/50 border-2 border-white/20 text-white placeholder-gray-400 focus:border-purple-500 focus:ring-purple-500 rounded-xl py-3 px-4 text-lg backdrop-blur-sm transition-all duration-300"
+            className="bg-slate-800/50 border-2 border-white/20 text-white placeholder-gray-400 focus:border-purple-500 focus:ring-purple-500 rounded-xl py-3 px-4 text-base sm:text-lg backdrop-blur-sm transition-all duration-300 w-full"
           />
           <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 to-blue-500/10 rounded-xl pointer-events-none"></div>
         </div>
@@ -126,15 +126,19 @@ export function SignupForm({ onSuccess }: SignupFormProps) {
         <Button
           type="submit"
           disabled={isLoading}
-          className="relative w-full bg-gradient-to-r from-purple-600 via-blue-600 to-cyan-600 hover:from-purple-700 hover:via-blue-700 hover:to-cyan-700 text-white font-black py-4 px-6 rounded-xl shadow-2xl transform hover:scale-105 transition-all duration-300 text-lg border-2 border-white/20"
+          className="relative w-full bg-gradient-to-r from-purple-600 via-blue-600 to-cyan-600 hover:from-purple-700 hover:via-blue-700 hover:to-cyan-700 text-white font-black py-4 px-6 rounded-xl shadow-2xl transform hover:scale-105 transition-all duration-300 text-base sm:text-lg border-2 border-white/20"
         >
           {isLoading ? (
             <>
               <div className="inline-block animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-              Creating Account...
+              <span className="hidden sm:inline">Creating Account...</span>
+              <span className="sm:hidden">Creating...</span>
             </>
           ) : (
-            "Create Account & Start Playing"
+            <>
+              <span className="hidden sm:inline">Create Account & Start Playing</span>
+              <span className="sm:hidden">Create Account</span>
+            </>
           )}
         </Button>
       </div>

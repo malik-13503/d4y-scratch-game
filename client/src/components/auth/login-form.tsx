@@ -52,7 +52,7 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="john@example.com"
-            className="bg-slate-800/50 border-2 border-white/20 text-white placeholder-gray-400 focus:border-purple-500 focus:ring-purple-500 rounded-xl py-3 px-4 text-lg backdrop-blur-sm transition-all duration-300"
+            className="bg-slate-800/50 border-2 border-white/20 text-white placeholder-gray-400 focus:border-purple-500 focus:ring-purple-500 rounded-xl py-3 px-4 text-base sm:text-lg backdrop-blur-sm transition-all duration-300 w-full"
           />
           <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 to-blue-500/10 rounded-xl pointer-events-none"></div>
         </div>
@@ -63,15 +63,19 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
         <Button
           type="submit"
           disabled={isLoading}
-          className="relative w-full bg-gradient-to-r from-purple-600 via-blue-600 to-cyan-600 hover:from-purple-700 hover:via-blue-700 hover:to-cyan-700 text-white font-black py-4 px-6 rounded-xl shadow-2xl transform hover:scale-105 transition-all duration-300 text-lg border-2 border-white/20"
+          className="relative w-full bg-gradient-to-r from-purple-600 via-blue-600 to-cyan-600 hover:from-purple-700 hover:via-blue-700 hover:to-cyan-700 text-white font-black py-4 px-6 rounded-xl shadow-2xl transform hover:scale-105 transition-all duration-300 text-base sm:text-lg border-2 border-white/20"
         >
           {isLoading ? (
             <>
               <div className="inline-block animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-              Signing In...
+              <span className="hidden sm:inline">Signing In...</span>
+              <span className="sm:hidden">Signing In...</span>
             </>
           ) : (
-            "Sign In & Continue"
+            <>
+              <span className="hidden sm:inline">Sign In & Continue</span>
+              <span className="sm:hidden">Sign In</span>
+            </>
           )}
         </Button>
       </div>
