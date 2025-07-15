@@ -207,7 +207,7 @@ export default function Home() {
                 <Card
                   key={game.id}
                   className="relative bg-gradient-to-br from-slate-900/95 via-slate-800/95 to-slate-900/95 backdrop-blur-xl shadow-2xl hover:shadow-purple-500/25 transition-all duration-500 cursor-pointer border border-white/10 overflow-hidden transform hover:scale-105 hover:-translate-y-2 group w-full"
-                  onClick={() => setLocation(`/welcome?gameId=${game.id}`)}
+                  onClick={() => setLocation(`/game/${game.id}`)}
                   style={{ animationDelay: `${index * 200}ms` }}
                 >
                   {/* Enhanced Glow Effect */}

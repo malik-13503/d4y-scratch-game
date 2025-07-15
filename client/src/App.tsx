@@ -17,13 +17,15 @@ import InstantPlay from "@/pages/instant-play";
 import RealPrizes from "@/pages/real-prizes";
 import FreeSpins from "@/pages/free-spins";
 import WelcomePage from "@/pages/welcome";
+import AuthLandingPage from "@/pages/auth-landing";
 
 import NotFound from "@/pages/not-found";
 
 function Router() {
   return (
     <Switch>
-      <Route path="/" component={Home} />
+      <Route path="/" component={AuthLandingPage} />
+      <Route path="/games" component={Home} />
       <Route path="/game/:id" component={GamePage} />
       <Route path="/admin" component={AdminPage} />
       <Route path="/admin-login" component={AdminLoginPage} />

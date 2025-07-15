@@ -100,6 +100,14 @@ This is a real-time prize game web application that allows users to participate 
 
 ## Changelog
 
+- January 15, 2025: Implemented comprehensive authentication-first user experience
+  - Created new branded authentication landing page as default homepage (/)
+  - Moved games listing to /games route for authenticated users
+  - Built complete user onboarding flow with Square payment integration
+  - Added eye-catching branding with logo, gradients, and animated effects
+  - Implemented user flow: Landing → Auth → Payment Setup → Games
+  - Connected wheel spinning with payment processing and authentication checks
+  - Updated routing to ensure users must authenticate before accessing games
 - January 15, 2025: Fixed color schemes and readability across all informational pages
   - Applied consistent dark slate card backgrounds (bg-slate-800/90) for excellent contrast
   - Enhanced text visibility with improved gray color schemes (text-gray-200)
