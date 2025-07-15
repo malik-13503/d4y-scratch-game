@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useLocation, useRoute } from "wouter";
 import { SignupForm } from "@/components/auth/signup-form";
 import { LoginForm } from "@/components/auth/login-form";
 import { CardSetup } from "@/components/payment/card-setup";
@@ -12,6 +13,11 @@ type FlowStep = "auth" | "card-setup" | "complete";
 
 export default function WelcomePage() {
   const [currentStep, setCurrentStep] = useState<FlowStep>("auth");
+  const [, setLocation] = useLocation();
+  
+  // Get the game ID from URL query parameters
+  const urlParams = new URLSearchParams(window.location.search);
+  const gameId = urlParams.get('gameId');
   
   const { data: user, isLoading, refetch } = useQuery({
     queryKey: ["/api/user"],
@@ -29,7 +35,11 @@ export default function WelcomePage() {
   };
 
   const handleContinueToGames = () => {
-    window.location.href = "/";
+    if (gameId) {
+      setLocation(`/game/${gameId}`);
+    } else {
+      setLocation("/");
+    }
   };
 
   if (isLoading) {

@@ -73,59 +73,37 @@ export default function GamePage() {
 
   const handleSpin = async (): Promise<number> => {
     if (!game) throw new Error("Game not found");
-    
+
     try {
-      console.log("Starting spin for game:", id);
-      
-      // Create a temporary player for this spin
-      const playerResponse = await fetch("/api/players", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+      // Call the backend spin endpoint with payment processing
+      const response = await fetch('/api/spin', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify({
-          gameId: parseInt(id!),
-          playerName: `Player-${Date.now()}`,
-          email: `player-${Date.now()}@example.com`
-        })
+          gameId: game.id,
+          agreedToTerms: true
+        }),
       });
-      
-      if (!playerResponse.ok) {
-        const errorText = await playerResponse.text();
-        console.error("Player creation failed:", errorText);
-        throw new Error("Failed to create player");
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to spin');
       }
+
+      const data = await response.json();
+      const result = data.spinResult.number;
       
-      const player = await playerResponse.json();
-      console.log("Player created:", player);
+      setLastResult(result);
+      setShowConfetti(true);
       
-      // Perform the spin
-      const spinResponse = await fetch(`/api/games/${id}/spin`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ playerId: player.id })
-      });
+      // Hide confetti after 5 seconds
+      setTimeout(() => setShowConfetti(false), 5000);
       
-      if (!spinResponse.ok) {
-        const errorText = await spinResponse.text();
-        console.error("Spin failed:", errorText);
-        
-        // Try to parse as JSON, fallback to text
-        try {
-          const error = JSON.parse(errorText);
-          throw new Error(error.message || "Failed to spin wheel");
-        } catch {
-          throw new Error("Failed to spin wheel: " + errorText);
-        }
-      }
-      
-      const spinResult = await spinResponse.json();
-      console.log("Spin result:", spinResult);
-      
-      setLastResult(spinResult.spunNumber);
-      // Don't trigger confetti here - let the wheel component handle it
-      
-      return spinResult.spunNumber;
+      return result;
     } catch (error) {
-      console.error("Spin error:", error);
+      console.error('Spin error:', error);
       throw error;
     }
   };
