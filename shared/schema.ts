@@ -3,6 +3,35 @@ import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
 // Admin users table
+// Sellers table (replaces admin users for peer-to-peer)
+export const sellers = pgTable("sellers", {
+  id: serial("id").primaryKey(),
+  email: text("email").notNull().unique(),
+  password: text("password").notNull(),
+  firstName: text("first_name").notNull(),
+  lastName: text("last_name").notNull(),
+  businessName: text("business_name"),
+  
+  // Seller profile
+  profileDescription: text("profile_description"),
+  profileImage: text("profile_image"),
+  rating: decimal("rating", { precision: 3, scale: 2 }).default("0.00"),
+  totalGames: integer("total_games").notNull().default(0),
+  totalSales: decimal("total_sales", { precision: 10, scale: 2 }).notNull().default("0"),
+  
+  // Stripe Connect
+  stripeAccountId: text("stripe_account_id"),
+  stripeOnboarded: boolean("stripe_onboarded").notNull().default(false),
+  
+  // Status
+  isActive: boolean("is_active").notNull().default(true),
+  isVerified: boolean("is_verified").notNull().default(false),
+  
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  lastLoginAt: timestamp("last_login_at"),
+});
+
+// Keep admin users for platform administration
 export const adminUsers = pgTable("admin_users", {
   id: serial("id").primaryKey(),
   email: text("email").notNull().unique(),
@@ -14,29 +43,45 @@ export const adminUsers = pgTable("admin_users", {
   lastLoginAt: timestamp("last_login_at"),
 });
 
-// Enhanced games table
+// Enhanced games table for peer-to-peer prize platform
 export const games = pgTable("games", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
   code: text("code").notNull().unique(),
   description: text("description"),
-  gameType: text("game_type").notNull().default("wheel_spin"), // Only wheel_spin now
+  category: text("category").notNull().default("collectibles"),
+  gameType: text("game_type").notNull().default("draw"), // draw, wheel_spin
   prize: text("prize").notNull(),
   prizeValue: decimal("prize_value", { precision: 10, scale: 2 }).notNull(),
   prizeDescription: text("prize_description"),
-  totalNumbers: integer("total_numbers").notNull().default(200),
-  numbersLeft: integer("numbers_left").notNull(),
-  freePlayStart: integer("free_play_start").notNull().default(151), // Free play numbers start
-  freePlayEnd: integer("free_play_end").notNull().default(200), // Free play numbers end
-  maxParticipants: integer("max_participants"),
-  maxWinners: integer("max_winners").notNull().default(1),
-  startTime: timestamp("start_time").notNull(),
-  endTime: timestamp("end_time").notNull(),
+  prizeImages: text("prize_images").array().notNull().default([]), // Multiple images
+  prizeVideos: text("prize_videos").array().notNull().default([]), // Videos
+  
+  // Entry system
+  entryPrice: decimal("entry_price", { precision: 10, scale: 2 }).notNull(),
+  totalEntries: integer("total_entries").notNull(),
+  entriesRemaining: integer("entries_remaining").notNull(),
+  
+  // Automated draw system
+  drawTime: timestamp("draw_time").notNull(),
+  isAutoFill: boolean("is_auto_fill").notNull().default(false),
+  isDrawComplete: boolean("is_draw_complete").notNull().default(false),
+  
+  // Seller information
+  sellerId: integer("seller_id").notNull(),
+  sellerName: text("seller_name").notNull(),
+  sellerEmail: text("seller_email").notNull(),
+  sellerStripeAccount: text("seller_stripe_account"),
+  
+  // Compliance
+  termsAccepted: boolean("terms_accepted").notNull().default(false),
+  npnEntryUsed: boolean("npn_entry_used").notNull().default(false),
+  
+  // Status
+  status: text("status").notNull().default("pending"), // pending, active, completed, cancelled
   isActive: boolean("is_active").notNull().default(false),
-  isScheduled: boolean("is_scheduled").notNull().default(false),
-  emoji: text("emoji").notNull().default("🎮"),
+  emoji: text("emoji").notNull().default("🎁"),
   backgroundImage: text("background_image"),
-  createdBy: integer("created_by").notNull(),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
@@ -52,19 +97,29 @@ export const wheelSegments = pgTable("wheel_segments", {
   order: integer("order").notNull(),
 });
 
-// Enhanced players table
+// Enhanced players/entries table for peer-to-peer system
 export const players = pgTable("players", {
   id: serial("id").primaryKey(),
   gameId: integer("game_id").notNull(),
   playerName: text("player_name").notNull(),
   email: text("email"),
   phone: text("phone"),
-  ownedNumbers: text("owned_numbers").array().notNull().default([]), // Numbers player owns
-  selectedNumber: integer("selected_number"), // Last number selected in wheel spin
+  
+  // Entry tracking
+  entryCount: integer("entry_count").notNull().default(0),
   totalSpent: decimal("total_spent", { precision: 10, scale: 2 }).notNull().default("0"),
-  freeSpins: integer("free_spins").notNull().default(0),
+  isNpnEntry: boolean("is_npn_entry").notNull().default(false), // No Purchase Necessary entry
+  
+  // Game-specific data
+  ownedNumbers: text("owned_numbers").array().notNull().default([]), // For wheel games
+  selectedNumber: integer("selected_number"), // Last number selected in wheel spin
+  
+  // Player profile
+  profileId: text("profile_id"), // Links to buyer profile
   referralCount: integer("referral_count").notNull().default(0),
   isWinner: boolean("is_winner").notNull().default(false),
+  
+  // Tracking
   ipAddress: text("ip_address"),
   userAgent: text("user_agent"),
   joinedAt: timestamp("joined_at").notNull().defaultNow(),
@@ -112,18 +167,52 @@ export const adminSessions = pgTable("admin_sessions", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
+// Game entries table for tracking individual entries
+export const gameEntries = pgTable("game_entries", {
+  id: serial("id").primaryKey(),
+  gameId: integer("game_id").notNull(),
+  playerId: integer("player_id").notNull(),
+  entryNumber: integer("entry_number").notNull(),
+  isPaid: boolean("is_paid").notNull().default(false),
+  isNpnEntry: boolean("is_npn_entry").notNull().default(false),
+  paymentIntentId: text("payment_intent_id"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+// Buyer profiles for tracking across games
+export const buyerProfiles = pgTable("buyer_profiles", {
+  id: serial("id").primaryKey(),
+  email: text("email").notNull().unique(),
+  name: text("name").notNull(),
+  phone: text("phone"),
+  totalEntries: integer("total_entries").notNull().default(0),
+  totalSpent: decimal("total_spent", { precision: 10, scale: 2 }).notNull().default("0"),
+  gamesWon: integer("games_won").notNull().default(0),
+  isActive: boolean("is_active").notNull().default(true),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
 // Notification logs
 export const notifications = pgTable("notifications", {
   id: serial("id").primaryKey(),
   gameId: integer("game_id"),
-  playerId: integer("player_id"),
-  type: text("type").notNull(), // "winner", "game_start", "game_end"
+  userId: integer("user_id"),
+  userType: text("user_type").notNull().default("buyer"), // buyer, seller, admin
   message: text("message").notNull(),
-  sentAt: timestamp("sent_at").notNull().defaultNow(),
-  status: text("status").notNull().default("pending"), // "pending", "sent", "failed"
+  type: text("type").notNull().default("info"), // info, success, warning, error
+  isRead: boolean("is_read").notNull().default(false),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
 // Schema definitions
+// Sellers schema
+export const insertSellerSchema = createInsertSchema(sellers).omit({
+  id: true,
+  createdAt: true,
+  lastLoginAt: true,
+});
+
 export const insertAdminUserSchema = createInsertSchema(adminUsers).omit({
   id: true,
   createdAt: true,
@@ -158,9 +247,22 @@ export const insertSystemSettingSchema = createInsertSchema(systemSettings).omit
   updatedAt: true,
 });
 
+// Game entries schema
+export const insertGameEntrySchema = createInsertSchema(gameEntries).omit({
+  id: true,
+  createdAt: true,
+});
+
+// Buyer profiles schema
+export const insertBuyerProfileSchema = createInsertSchema(buyerProfiles).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 export const insertNotificationSchema = createInsertSchema(notifications).omit({
   id: true,
-  sentAt: true,
+  createdAt: true,
 });
 
 export const insertSpinResultSchema = createInsertSchema(spinResults).omit({
@@ -169,6 +271,9 @@ export const insertSpinResultSchema = createInsertSchema(spinResults).omit({
 });
 
 // Type exports
+export type InsertSeller = z.infer<typeof insertSellerSchema>;
+export type Seller = typeof sellers.$inferSelect;
+
 export type InsertAdminUser = z.infer<typeof insertAdminUserSchema>;
 export type AdminUser = typeof adminUsers.$inferSelect;
 export type InsertGame = z.infer<typeof insertGameSchema>;
@@ -181,6 +286,12 @@ export type InsertGameResult = z.infer<typeof insertGameResultSchema>;
 export type GameResult = typeof gameResults.$inferSelect;
 export type InsertSystemSetting = z.infer<typeof insertSystemSettingSchema>;
 export type SystemSetting = typeof systemSettings.$inferSelect;
+export type InsertGameEntry = z.infer<typeof insertGameEntrySchema>;
+export type GameEntry = typeof gameEntries.$inferSelect;
+
+export type InsertBuyerProfile = z.infer<typeof insertBuyerProfileSchema>;
+export type BuyerProfile = typeof buyerProfiles.$inferSelect;
+
 export type InsertNotification = z.infer<typeof insertNotificationSchema>;
 export type Notification = typeof notifications.$inferSelect;
 export type InsertSpinResult = z.infer<typeof insertSpinResultSchema>;
