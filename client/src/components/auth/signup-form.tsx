@@ -52,74 +52,92 @@ export function SignupForm({ onSuccess }: SignupFormProps) {
   };
 
   return (
-    <Card className="w-full max-w-md mx-auto">
-      <CardHeader>
-        <CardTitle className="text-2xl font-bold text-center">Create Account</CardTitle>
-        <p className="text-gray-600 text-center">Join Hit the Road Jackpot to start playing!</p>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="firstName">First Name</Label>
-              <Input
-                id="firstName"
-                name="firstName"
-                type="text"
-                required
-                value={formData.firstName}
-                onChange={handleChange}
-                placeholder="John"
-              />
-            </div>
-            <div>
-              <Label htmlFor="lastName">Last Name</Label>
-              <Input
-                id="lastName"
-                name="lastName"
-                type="text"
-                required
-                value={formData.lastName}
-                onChange={handleChange}
-                placeholder="Doe"
-              />
-            </div>
-          </div>
-          
-          <div>
-            <Label htmlFor="email">Email Address</Label>
+    <form onSubmit={handleSubmit} className="space-y-6">
+      <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label htmlFor="firstName" className="text-white font-medium text-sm">First Name</Label>
+          <div className="relative">
             <Input
-              id="email"
-              name="email"
-              type="email"
+              id="firstName"
+              name="firstName"
+              type="text"
               required
-              value={formData.email}
+              value={formData.firstName}
               onChange={handleChange}
-              placeholder="john@example.com"
+              placeholder="John"
+              className="bg-slate-800/50 border-2 border-white/20 text-white placeholder-gray-400 focus:border-purple-500 focus:ring-purple-500 rounded-xl py-3 px-4 text-lg backdrop-blur-sm transition-all duration-300"
             />
+            <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 to-blue-500/10 rounded-xl pointer-events-none"></div>
           </div>
-          
-          <div>
-            <Label htmlFor="phone">Phone Number (Optional)</Label>
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="lastName" className="text-white font-medium text-sm">Last Name</Label>
+          <div className="relative">
             <Input
-              id="phone"
-              name="phone"
-              type="tel"
-              value={formData.phone}
+              id="lastName"
+              name="lastName"
+              type="text"
+              required
+              value={formData.lastName}
               onChange={handleChange}
-              placeholder="+1 (555) 123-4567"
+              placeholder="Doe"
+              className="bg-slate-800/50 border-2 border-white/20 text-white placeholder-gray-400 focus:border-purple-500 focus:ring-purple-500 rounded-xl py-3 px-4 text-lg backdrop-blur-sm transition-all duration-300"
             />
+            <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 to-blue-500/10 rounded-xl pointer-events-none"></div>
           </div>
-          
-          <Button
-            type="submit"
-            className="w-full"
-            disabled={isLoading}
-          >
-            {isLoading ? "Creating Account..." : "Create Account"}
-          </Button>
-        </form>
-      </CardContent>
-    </Card>
+        </div>
+      </div>
+      
+      <div className="space-y-2">
+        <Label htmlFor="email" className="text-white font-medium text-sm">Email Address</Label>
+        <div className="relative">
+          <Input
+            id="email"
+            name="email"
+            type="email"
+            required
+            value={formData.email}
+            onChange={handleChange}
+            placeholder="john@example.com"
+            className="bg-slate-800/50 border-2 border-white/20 text-white placeholder-gray-400 focus:border-purple-500 focus:ring-purple-500 rounded-xl py-3 px-4 text-lg backdrop-blur-sm transition-all duration-300"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 to-blue-500/10 rounded-xl pointer-events-none"></div>
+        </div>
+      </div>
+      
+      <div className="space-y-2">
+        <Label htmlFor="phone" className="text-white font-medium text-sm">Phone Number (Optional)</Label>
+        <div className="relative">
+          <Input
+            id="phone"
+            name="phone"
+            type="tel"
+            value={formData.phone}
+            onChange={handleChange}
+            placeholder="+1 (555) 123-4567"
+            className="bg-slate-800/50 border-2 border-white/20 text-white placeholder-gray-400 focus:border-purple-500 focus:ring-purple-500 rounded-xl py-3 px-4 text-lg backdrop-blur-sm transition-all duration-300"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 to-blue-500/10 rounded-xl pointer-events-none"></div>
+        </div>
+      </div>
+      
+      <div className="relative">
+        <div className="absolute -inset-1 bg-gradient-to-r from-purple-500/50 to-blue-500/50 blur-lg rounded-2xl opacity-75"></div>
+        <Button
+          type="submit"
+          disabled={isLoading}
+          className="relative w-full bg-gradient-to-r from-purple-600 via-blue-600 to-cyan-600 hover:from-purple-700 hover:via-blue-700 hover:to-cyan-700 text-white font-black py-4 px-6 rounded-xl shadow-2xl transform hover:scale-105 transition-all duration-300 text-lg border-2 border-white/20"
+        >
+          {isLoading ? (
+            <>
+              <div className="inline-block animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+              Creating Account...
+            </>
+          ) : (
+            "Create Account & Start Playing"
+          )}
+        </Button>
+      </div>
+    </form>
   );
 }
