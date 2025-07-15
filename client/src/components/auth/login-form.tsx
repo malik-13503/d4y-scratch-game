@@ -63,18 +63,18 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
         <Button
           type="submit"
           disabled={isLoading}
-          className="relative w-full bg-gradient-to-r from-purple-600 via-blue-600 to-cyan-600 hover:from-purple-700 hover:via-blue-700 hover:to-cyan-700 text-white font-black py-4 px-6 rounded-xl shadow-2xl transform hover:scale-105 transition-all duration-300 text-base sm:text-lg border-2 border-white/20"
+          className="relative w-full bg-gradient-to-r from-purple-600 via-blue-600 to-cyan-600 hover:from-purple-700 hover:via-blue-700 hover:to-cyan-700 text-white font-black py-4 px-4 sm:px-6 rounded-xl shadow-2xl transform hover:scale-105 transition-all duration-300 text-base sm:text-lg border-2 border-white/20 min-h-[56px] flex items-center justify-center"
         >
           {isLoading ? (
             <>
               <div className="inline-block animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-              <span className="hidden sm:inline">Signing In...</span>
-              <span className="sm:hidden">Signing In...</span>
+              <span className="block sm:hidden">Signing In...</span>
+              <span className="hidden sm:block">Signing In...</span>
             </>
           ) : (
             <>
-              <span className="hidden sm:inline">Sign In & Continue</span>
-              <span className="sm:hidden">Sign In</span>
+              <span className="block sm:hidden">Sign In</span>
+              <span className="hidden sm:block">Sign In & Continue</span>
             </>
           )}
         </Button>
