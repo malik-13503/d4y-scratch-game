@@ -16,7 +16,7 @@ import GameInfo from "@/pages/game-info";
 import InstantPlay from "@/pages/instant-play";
 import RealPrizes from "@/pages/real-prizes";
 import FreeSpins from "@/pages/free-spins";
-import PaymentGuide from "@/pages/payment-guide";
+
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -35,7 +35,7 @@ function Router() {
       <Route path="/instant-play" component={InstantPlay} />
       <Route path="/real-prizes" component={RealPrizes} />
       <Route path="/free-spins" component={FreeSpins} />
-      <Route path="/payment-guide" component={PaymentGuide} />
+
       <Route component={NotFound} />
     </Switch>
   );
