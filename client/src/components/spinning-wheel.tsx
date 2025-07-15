@@ -11,6 +11,10 @@ import {
   PartyPopper,
 } from "lucide-react";
 import { Confetti } from "./confetti";
+import { DisclaimerModal } from "./payment/disclaimer-modal";
+import { useQuery } from "@tanstack/react-query";
+import { getQueryFn, apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 
 interface SpinningWheelProps {
   onSpin: () => Promise<number>;
@@ -84,6 +88,14 @@ export function SpinningWheel({
   const [amountCharged, setAmountCharged] = useState<number>(0);
   const wheelRef = useRef<HTMLDivElement>(null);
   const [glowIntensity, setGlowIntensity] = useState(0);
+  const [showDisclaimerModal, setShowDisclaimerModal] = useState(false);
+  const { toast } = useToast();
+  
+  // Check if user is authenticated
+  const { data: user } = useQuery({
+    queryKey: ["/api/user"],
+    queryFn: getQueryFn({ on401: "returnNull" }),
+  });
 
   // Generate wheel segments with free play range (151-200 for 200 total numbers)
   const freePlayStart = Math.floor(totalNumbers * 0.75) + 1; // Last 25% are free plays
@@ -100,6 +112,35 @@ export function SpinningWheel({
   const handleSpin = async () => {
     if (isSpinning || disabled) return;
 
+    // Check if user is authenticated
+    if (!user) {
+      toast({
+        title: "Please Sign In",
+        description: "You need to create an account to play the game.",
+        variant: "destructive",
+      });
+      window.location.href = "/welcome";
+      return;
+    }
+
+    // Check if user has a card on file
+    if (!user.cardOnFile) {
+      toast({
+        title: "Payment Method Required",
+        description: "Please add a payment method to continue.",
+        variant: "destructive",
+      });
+      window.location.href = "/welcome";
+      return;
+    }
+
+    // Show disclaimer modal for confirmation
+    setShowDisclaimerModal(true);
+  };
+
+  const handleDisclaimerAgree = async () => {
+    setShowDisclaimerModal(false);
+    
     setIsSpinning(true);
     setResult(null);
     setShowResultModal(false);
@@ -381,6 +422,18 @@ export function SpinningWheel({
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Disclaimer Modal */}
+      <DisclaimerModal
+        isOpen={showDisclaimerModal}
+        onClose={() => setShowDisclaimerModal(false)}
+        onAgree={handleDisclaimerAgree}
+        gameInfo={{
+          name: "Hit the Road Jackpot",
+          prizeValue: 200,
+          chargeAmount: result || 0
+        }}
+      />
 
       {/* Spin Button */}
       <Button

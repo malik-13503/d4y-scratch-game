@@ -4,9 +4,13 @@ import { storage } from "./storage";
 import { setupAuth, requireAuth } from "./auth";
 import { 
   insertGameSchema, insertPlayerSchema, insertGameResultSchema, 
-  insertWheelSegmentSchema, insertSystemSettingSchema, insertNotificationSchema 
+  insertWheelSegmentSchema, insertSystemSettingSchema, insertNotificationSchema,
+  insertUserSchema, insertTransactionSchema
 } from "@shared/schema";
 import { z } from "zod";
+import { squareService } from "./squareService";
+import session from "express-session";
+import connectPgSimple from "connect-pg-simple";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Setup authentication
@@ -513,6 +517,304 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error("Failed to create notification:", error);
       res.status(500).json({ message: "Failed to create notification" });
     }
+  });
+
+  // User session management and authentication
+  const pgSession = connectPgSimple(session);
+  
+  app.use(session({
+    store: new pgSession({
+      conString: process.env.DATABASE_URL,
+      tableName: 'user_sessions',
+      createTableIfMissing: true
+    }),
+    secret: process.env.SESSION_SECRET || 'your-secret-key',
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      secure: process.env.NODE_ENV === 'production',
+      httpOnly: true,
+      maxAge: 30 * 24 * 60 * 60 * 1000 // 30 days
+    }
+  }));
+
+  // User registration endpoint
+  app.post("/api/register", async (req, res) => {
+    try {
+      const userData = insertUserSchema.parse(req.body);
+      
+      // Check if user already exists
+      const existingUser = await storage.getUserByEmail(userData.email);
+      if (existingUser) {
+        return res.status(400).json({ message: "User already exists with this email" });
+      }
+
+      // Create Square customer
+      const squareCustomer = await squareService.createCustomer(
+        userData.firstName,
+        userData.lastName,
+        userData.email
+      );
+
+      // Create user in database
+      const user = await storage.createUser({
+        ...userData,
+        squareCustomerId: squareCustomer.id
+      });
+
+      // Set session
+      (req.session as any).userId = user.id;
+      (req.session as any).user = user;
+
+      res.status(201).json({ 
+        message: "User registered successfully",
+        user: {
+          id: user.id,
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          cardOnFile: user.cardOnFile
+        }
+      });
+    } catch (error) {
+      console.error("Registration error:", error);
+      res.status(400).json({ message: "Registration failed", error: error.message });
+    }
+  });
+
+  // User login endpoint
+  app.post("/api/login", async (req, res) => {
+    try {
+      const { email } = req.body;
+      
+      const user = await storage.getUserByEmail(email);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      // Set session
+      (req.session as any).userId = user.id;
+      (req.session as any).user = user;
+
+      res.json({ 
+        message: "Login successful",
+        user: {
+          id: user.id,
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          cardOnFile: user.cardOnFile
+        }
+      });
+    } catch (error) {
+      console.error("Login error:", error);
+      res.status(400).json({ message: "Login failed", error: error.message });
+    }
+  });
+
+  // Get current user endpoint
+  app.get("/api/user", async (req, res) => {
+    try {
+      const userId = (req.session as any)?.userId;
+      if (!userId) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      res.json({
+        id: user.id,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        cardOnFile: user.cardOnFile,
+        cardLast4: user.cardLast4,
+        cardBrand: user.cardBrand,
+        totalSpent: user.totalSpent,
+        totalWon: user.totalWon,
+        gamesPlayed: user.gamesPlayed,
+        gamesWon: user.gamesWon
+      });
+    } catch (error) {
+      console.error("Get user error:", error);
+      res.status(500).json({ message: "Failed to get user data" });
+    }
+  });
+
+  // Add or verify card endpoint
+  app.post("/api/card/add", async (req, res) => {
+    try {
+      const userId = (req.session as any)?.userId;
+      if (!userId) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+
+      const { cardNonce } = req.body;
+      if (!cardNonce) {
+        return res.status(400).json({ message: "Card nonce is required" });
+      }
+
+      const user = await storage.getUser(userId);
+      if (!user || !user.squareCustomerId) {
+        return res.status(404).json({ message: "User not found or no Square customer ID" });
+      }
+
+      // Verify card with Square
+      const verificationResult = await squareService.verifyCard(cardNonce);
+      
+      if (!verificationResult.verified) {
+        return res.status(400).json({ message: "Card verification failed" });
+      }
+
+      // Create card on file
+      const card = await squareService.createCard(user.squareCustomerId, cardNonce, cardNonce);
+      
+      // Update user with card info
+      await storage.updateUser(userId, {
+        cardOnFile: true,
+        cardLast4: card.last4,
+        cardBrand: card.cardBrand
+      });
+
+      res.json({ 
+        message: "Card added successfully",
+        cardLast4: card.last4,
+        cardBrand: card.cardBrand
+      });
+    } catch (error) {
+      console.error("Add card error:", error);
+      res.status(400).json({ message: "Failed to add card", error: error.message });
+    }
+  });
+
+  // Process payment and spin wheel
+  app.post("/api/spin", async (req, res) => {
+    try {
+      const userId = (req.session as any)?.userId;
+      if (!userId) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+
+      const { gameId, agreedToTerms } = req.body;
+      
+      if (!agreedToTerms) {
+        return res.status(400).json({ message: "Must agree to terms before spinning" });
+      }
+
+      const user = await storage.getUser(userId);
+      if (!user || !user.cardOnFile) {
+        return res.status(400).json({ message: "No card on file" });
+      }
+
+      const game = await storage.getGame(gameId);
+      if (!game || !game.isActive) {
+        return res.status(400).json({ message: "Game not found or inactive" });
+      }
+
+      // Create or get player
+      let player = await storage.getPlayer(userId);
+      if (!player) {
+        player = await storage.createPlayer({
+          userId: userId,
+          gameId: gameId,
+          playerName: `${user.firstName} ${user.lastName}`,
+          ownedNumbers: [],
+          totalSpent: "0",
+          freeSpins: 0,
+          referralCount: 0,
+          ipAddress: req.ip,
+          userAgent: req.headers['user-agent'] || "",
+          createdAt: new Date()
+        });
+      }
+
+      // Spin the wheel
+      const spinResult = await storage.spinWheel(gameId, player.id);
+      
+      // If it's not a free play, charge the user
+      if (!spinResult.isFreePlay) {
+        const chargeAmount = parseFloat(spinResult.amountCharged);
+        
+        // Get user's cards
+        const cards = await squareService.getCustomerCards(user.squareCustomerId!);
+        if (cards.length === 0) {
+          return res.status(400).json({ message: "No cards on file" });
+        }
+
+        // Use the first card
+        const card = cards[0];
+        
+        // Process payment
+        const payment = await squareService.chargeCard(
+          chargeAmount,
+          "USD",
+          card.id!,
+          user.squareCustomerId
+        );
+
+        // Record transaction
+        await storage.createTransaction({
+          userId: userId,
+          gameId: gameId,
+          spinResultId: spinResult.id,
+          squarePaymentId: payment.id,
+          amount: chargeAmount.toString(),
+          currency: "USD",
+          status: payment.status || "COMPLETED",
+          paymentMethod: "card",
+          cardLast4: card.last4,
+          cardBrand: card.cardBrand,
+          squareReceiptUrl: payment.receiptUrl || undefined
+        });
+
+        // Update user's total spent
+        await storage.updateUser(userId, {
+          totalSpent: (parseFloat(user.totalSpent) + chargeAmount).toString(),
+          gamesPlayed: user.gamesPlayed + 1
+        });
+      }
+
+      res.json({
+        success: true,
+        spinResult: {
+          number: spinResult.spunNumber,
+          isFreePlay: spinResult.isFreePlay,
+          amountCharged: spinResult.amountCharged
+        }
+      });
+    } catch (error) {
+      console.error("Spin error:", error);
+      res.status(400).json({ message: "Spin failed", error: error.message });
+    }
+  });
+
+  // Get user's transaction history
+  app.get("/api/transactions", async (req, res) => {
+    try {
+      const userId = (req.session as any)?.userId;
+      if (!userId) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+
+      const transactions = await storage.getTransactionsByUserId(userId);
+      res.json(transactions);
+    } catch (error) {
+      console.error("Get transactions error:", error);
+      res.status(500).json({ message: "Failed to get transactions" });
+    }
+  });
+
+  // Logout endpoint
+  app.post("/api/logout", (req, res) => {
+    req.session.destroy((err) => {
+      if (err) {
+        return res.status(500).json({ message: "Failed to logout" });
+      }
+      res.json({ message: "Logged out successfully" });
+    });
   });
 
   const httpServer = createServer(app);

@@ -1,6 +1,26 @@
-import { pgTable, text, serial, integer, boolean, timestamp, decimal, json } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, timestamp, decimal, json, varchar } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
+
+// User accounts table for game players
+export const users = pgTable("users", {
+  id: serial("id").primaryKey(),
+  email: text("email").notNull().unique(),
+  firstName: text("first_name").notNull(),
+  lastName: text("last_name").notNull(),
+  phone: text("phone"),
+  isActive: boolean("is_active").notNull().default(true),
+  squareCustomerId: text("square_customer_id").unique(),
+  cardOnFile: boolean("card_on_file").notNull().default(false),
+  cardLast4: text("card_last_4"),
+  cardBrand: text("card_brand"),
+  totalSpent: decimal("total_spent", { precision: 10, scale: 2 }).notNull().default("0"),
+  totalWon: decimal("total_won", { precision: 10, scale: 2 }).notNull().default("0"),
+  gamesPlayed: integer("games_played").notNull().default(0),
+  gamesWon: integer("games_won").notNull().default(0),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
 
 // Admin users table
 export const adminUsers = pgTable("admin_users", {
@@ -12,6 +32,31 @@ export const adminUsers = pgTable("admin_users", {
   isActive: boolean("is_active").notNull().default(true),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   lastLoginAt: timestamp("last_login_at"),
+});
+
+// User sessions table
+export const userSessions = pgTable("user_sessions", {
+  sid: varchar("sid").primaryKey(),
+  sess: json("sess").notNull(),
+  expire: timestamp("expire").notNull(),
+});
+
+// Payment transactions table
+export const transactions = pgTable("transactions", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  gameId: integer("game_id").notNull(),
+  spinResultId: integer("spin_result_id"),
+  squarePaymentId: text("square_payment_id").unique(),
+  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+  currency: text("currency").notNull().default("USD"),
+  status: text("status").notNull(), // pending, completed, failed, refunded
+  paymentMethod: text("payment_method").notNull(), // card, ach, etc.
+  cardLast4: text("card_last_4"),
+  cardBrand: text("card_brand"),
+  squareReceiptUrl: text("square_receipt_url"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
 // Enhanced games table
@@ -52,13 +97,12 @@ export const wheelSegments = pgTable("wheel_segments", {
   order: integer("order").notNull(),
 });
 
-// Enhanced players table
+// Enhanced players table (now linked to users)
 export const players = pgTable("players", {
   id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(), // Link to users table
   gameId: integer("game_id").notNull(),
   playerName: text("player_name").notNull(),
-  email: text("email"),
-  phone: text("phone"),
   ownedNumbers: text("owned_numbers").array().notNull().default([]), // Numbers player owns
   selectedNumber: integer("selected_number"), // Last number selected in wheel spin
   totalSpent: decimal("total_spent", { precision: 10, scale: 2 }).notNull().default("0"),
@@ -186,8 +230,20 @@ export type Notification = typeof notifications.$inferSelect;
 export type InsertSpinResult = z.infer<typeof insertSpinResultSchema>;
 export type SpinResult = typeof spinResults.$inferSelect;
 
-// Legacy compatibility
-export const users = adminUsers;
-export const insertUserSchema = insertAdminUserSchema;
-export type InsertUser = InsertAdminUser;
-export type User = AdminUser;
+// User schema and types
+export const insertUserSchema = createInsertSchema(users).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertTransactionSchema = createInsertSchema(transactions).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertUser = z.infer<typeof insertUserSchema>;
+export type User = typeof users.$inferSelect;
+export type InsertTransaction = z.infer<typeof insertTransactionSchema>;
+export type Transaction = typeof transactions.$inferSelect;

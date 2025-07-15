@@ -1,9 +1,10 @@
 import { 
   games, players, gameResults, adminUsers, wheelSegments, systemSettings, adminSessions, notifications, spinResults,
+  users, transactions, userSessions,
   type Game, type InsertGame, type Player, type InsertPlayer, type GameResult, type InsertGameResult, 
   type AdminUser, type InsertAdminUser, type WheelSegment, type InsertWheelSegment,
   type SystemSetting, type InsertSystemSetting, type InsertNotification, type Notification,
-  type SpinResult, type InsertSpinResult
+  type SpinResult, type InsertSpinResult, type User, type InsertUser, type Transaction, type InsertTransaction
 } from "@shared/schema";
 import { db } from "./db";
 import { eq } from "drizzle-orm";
@@ -36,6 +37,18 @@ export interface IStorage {
   getAdminUserByEmail(email: string): Promise<AdminUser | undefined>;
   createAdminUser(user: InsertAdminUser): Promise<AdminUser>;
   updateAdminUser(id: number, updates: Partial<AdminUser>): Promise<AdminUser | undefined>;
+
+  // User methods (for game players)
+  getUser(id: number): Promise<User | undefined>;
+  getUserByEmail(email: string): Promise<User | undefined>;
+  createUser(user: InsertUser): Promise<User>;
+  updateUser(id: number, updates: Partial<User>): Promise<User | undefined>;
+
+  // Transaction methods
+  createTransaction(transaction: InsertTransaction): Promise<Transaction>;
+  getTransactionsByUserId(userId: number): Promise<Transaction[]>;
+  getTransaction(id: number): Promise<Transaction | undefined>;
+  updateTransaction(id: number, updates: Partial<Transaction>): Promise<Transaction | undefined>;
 
   // Wheel segment methods
   getWheelSegmentsByGameId(gameId: number): Promise<WheelSegment[]>;
@@ -483,6 +496,87 @@ export class DatabaseStorage implements IStorage {
     } catch (error) {
       console.error("Error selecting game winner:", error);
       throw error;
+    }
+  }
+
+  // User methods (for game players)
+  async getUser(id: number): Promise<User | undefined> {
+    try {
+      const [user] = await db.select().from(users).where(eq(users.id, id));
+      return user;
+    } catch (error) {
+      console.error("Error getting user:", error);
+      return undefined;
+    }
+  }
+
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    try {
+      const [user] = await db.select().from(users).where(eq(users.email, email));
+      return user;
+    } catch (error) {
+      console.error("Error getting user by email:", error);
+      return undefined;
+    }
+  }
+
+  async createUser(insertUser: InsertUser): Promise<User> {
+    try {
+      const [user] = await db.insert(users).values(insertUser).returning();
+      return user;
+    } catch (error) {
+      console.error("Error creating user:", error);
+      throw error;
+    }
+  }
+
+  async updateUser(id: number, updates: Partial<User>): Promise<User | undefined> {
+    try {
+      const [user] = await db.update(users).set({ ...updates, updatedAt: new Date() }).where(eq(users.id, id)).returning();
+      return user;
+    } catch (error) {
+      console.error("Error updating user:", error);
+      return undefined;
+    }
+  }
+
+  // Transaction methods
+  async createTransaction(insertTransaction: InsertTransaction): Promise<Transaction> {
+    try {
+      const [transaction] = await db.insert(transactions).values(insertTransaction).returning();
+      return transaction;
+    } catch (error) {
+      console.error("Error creating transaction:", error);
+      throw error;
+    }
+  }
+
+  async getTransactionsByUserId(userId: number): Promise<Transaction[]> {
+    try {
+      return await db.select().from(transactions).where(eq(transactions.userId, userId));
+    } catch (error) {
+      console.error("Error getting transactions by user ID:", error);
+      return [];
+    }
+  }
+
+  async getTransaction(id: number): Promise<Transaction | undefined> {
+    try {
+      const [transaction] = await db.select().from(transactions).where(eq(transactions.id, id));
+      return transaction;
+    } catch (error) {
+      console.error("Error getting transaction:", error);
+      return undefined;
+    }
+  }
+
+  async updateTransaction(id: number, updates: Partial<Transaction>): Promise<Transaction | undefined> {
+    try {
+      const [transaction] = await db.update(transactions).set({ ...updates, updatedAt: new Date() }).where(eq(transactions.id, id)).returning();
+      return transaction;
+    } catch (error) {
+      console.error("Error updating transaction:", error);
+      return undefined;
     }
   }
 }
