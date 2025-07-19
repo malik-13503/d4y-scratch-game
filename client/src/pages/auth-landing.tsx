@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { SignupForm } from "@/components/auth/signup-form";
@@ -49,11 +49,12 @@ export default function AuthLandingPage() {
     setLocation("/games");
   };
 
-  // If user is already authenticated and has card on file, redirect to games
-  if (user && user.cardOnFile) {
-    setLocation("/games");
-    return null;
-  }
+  // Use useEffect to handle redirect to avoid render-time state updates
+  React.useEffect(() => {
+    if (user && user.cardOnFile) {
+      setLocation("/games");
+    }
+  }, [user, setLocation]);
 
   if (isLoading) {
     return (

@@ -359,26 +359,26 @@ export default function Home() {
                 <ul className="space-y-2 text-gray-400">
                   <li className="flex items-center space-x-2">
                     <Zap className="h-4 w-4 text-yellow-400" />
-                    <Link href="/instant-play">
-                      <a className="hover:text-white transition-colors">Instant Play</a>
+                    <Link href="/instant-play" className="hover:text-white transition-colors">
+                      Instant Play
                     </Link>
                   </li>
                   <li className="flex items-center space-x-2">
                     <Trophy className="h-4 w-4 text-blue-400" />
-                    <Link href="/real-prizes">
-                      <a className="hover:text-white transition-colors">Real Prizes</a>
+                    <Link href="/real-prizes" className="hover:text-white transition-colors">
+                      Real Prizes
                     </Link>
                   </li>
                   <li className="flex items-center space-x-2">
                     <Crown className="h-4 w-4 text-purple-400" />
-                    <Link href="/free-spins">
-                      <a className="hover:text-white transition-colors">Free Spins</a>
+                    <Link href="/free-spins" className="hover:text-white transition-colors">
+                      Free Spins
                     </Link>
                   </li>
                   <li className="flex items-center space-x-2">
                     <Gamepad2 className="h-4 w-4 text-green-400" />
-                    <Link href="/game-info">
-                      <a className="hover:text-white transition-colors">Game Info</a>
+                    <Link href="/game-info" className="hover:text-white transition-colors">
+                      Game Info
                     </Link>
                   </li>
                 </ul>
@@ -388,31 +388,23 @@ export default function Home() {
                 <h5 className="text-white font-bold mb-4">Support</h5>
                 <ul className="space-y-2 text-gray-400">
                   <li>
-                    <Link href="/how-to-play">
-                      <a className="hover:text-white transition-colors">
-                        How to Play
-                      </a>
+                    <Link href="/how-to-play" className="hover:text-white transition-colors">
+                      How to Play
                     </Link>
                   </li>
                   <li>
-                    <Link href="/prize-rules">
-                      <a className="hover:text-white transition-colors">
-                        Prize Rules
-                      </a>
+                    <Link href="/prize-rules" className="hover:text-white transition-colors">
+                      Prize Rules
                     </Link>
                   </li>
                   <li>
-                    <Link href="/contact">
-                      <a className="hover:text-white transition-colors">
-                        Contact Us
-                      </a>
+                    <Link href="/contact" className="hover:text-white transition-colors">
+                      Contact Us
                     </Link>
                   </li>
                   <li>
-                    <Link href="/terms">
-                      <a className="hover:text-white transition-colors">
-                        Terms & Conditions
-                      </a>
+                    <Link href="/terms" className="hover:text-white transition-colors">
+                      Terms & Conditions
                     </Link>
                   </li>
                 </ul>

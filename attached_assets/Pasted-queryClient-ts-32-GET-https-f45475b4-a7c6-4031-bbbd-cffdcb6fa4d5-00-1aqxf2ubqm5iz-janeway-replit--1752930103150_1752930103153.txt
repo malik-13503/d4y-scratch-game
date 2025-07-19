@@ -1,0 +1,167 @@
+queryClient.ts:32  GET https://f45475b4-a7c6-4031-bbbd-cffdcb6fa4d5-00-1aqxf2ubqm5iz.janeway.replit.dev/api/user 401 (Unauthorized)
+(anonymous) @ queryClient.ts:32
+fetchFn @ @tanstack_react-query.js?v=2e99944d:840
+run @ @tanstack_react-query.js?v=2e99944d:494
+start @ @tanstack_react-query.js?v=2e99944d:536
+fetch @ @tanstack_react-query.js?v=2e99944d:926
+executeFetch_fn @ @tanstack_react-query.js?v=2e99944d:2211
+onSubscribe @ @tanstack_react-query.js?v=2e99944d:1898
+subscribe @ @tanstack_react-query.js?v=2e99944d:24
+(anonymous) @ @tanstack_react-query.js?v=2e99944d:3022
+subscribeToStore @ chunk-WERSD76P.js?v=2e99944d:11984
+commitHookEffectListMount @ chunk-WERSD76P.js?v=2e99944d:16915
+commitPassiveMountOnFiber @ chunk-WERSD76P.js?v=2e99944d:18156
+commitPassiveMountEffects_complete @ chunk-WERSD76P.js?v=2e99944d:18129
+commitPassiveMountEffects_begin @ chunk-WERSD76P.js?v=2e99944d:18119
+commitPassiveMountEffects @ chunk-WERSD76P.js?v=2e99944d:18109
+flushPassiveEffectsImpl @ chunk-WERSD76P.js?v=2e99944d:19490
+flushPassiveEffects @ chunk-WERSD76P.js?v=2e99944d:19447
+commitRootImpl @ chunk-WERSD76P.js?v=2e99944d:19416
+commitRoot @ chunk-WERSD76P.js?v=2e99944d:19277
+performSyncWorkOnRoot @ chunk-WERSD76P.js?v=2e99944d:18895
+flushSyncCallbacks @ chunk-WERSD76P.js?v=2e99944d:9119
+(anonymous) @ chunk-WERSD76P.js?v=2e99944d:18627Understand this error
+auth-landing.tsx:54 Warning: Cannot update a component (`Route`) while rendering a different component (`AuthLandingPage`). To locate the bad setState() call inside `AuthLandingPage`, follow the stack trace as described in https://reactjs.org/link/setstate-in-render Error Component Stack
+    at AuthLandingPage (auth-landing.tsx:30:41)
+    at Route (wouter.js?v=2e99944d:323:16)
+    at Switch (wouter.js?v=2e99944d:379:17)
+    at Router (<anonymous>)
+    at div (<anonymous>)
+    at Provider (chunk-PLT6GTVM.js?v=2e99944d:38:15)
+    at TooltipProvider (@radix-ui_react-tooltip.js?v=2e99944d:61:5)
+    at QueryClientProvider (@tanstack_react-query.js?v=2e99944d:2805:3)
+    at App (<anonymous>)
+overrideMethod @ hook.js:608
+printWarning @ chunk-WERSD76P.js?v=2e99944d:521
+error @ chunk-WERSD76P.js?v=2e99944d:505
+warnAboutRenderPhaseUpdatesInDEV @ chunk-WERSD76P.js?v=2e99944d:19793
+scheduleUpdateOnFiber @ chunk-WERSD76P.js?v=2e99944d:18546
+forceStoreRerender @ chunk-WERSD76P.js?v=2e99944d:11999
+handleStoreChange @ chunk-WERSD76P.js?v=2e99944d:11981
+history.<computed> @ wouter.js?v=2e99944d:224
+navigate @ wouter.js?v=2e99944d:214
+(anonymous) @ wouter.js?v=2e99944d:265
+(anonymous) @ wouter.js?v=2e99944d:178
+AuthLandingPage @ auth-landing.tsx:54
+renderWithHooks @ chunk-WERSD76P.js?v=2e99944d:11548
+updateFunctionComponent @ chunk-WERSD76P.js?v=2e99944d:14582
+beginWork @ chunk-WERSD76P.js?v=2e99944d:15924
+beginWork$1 @ chunk-WERSD76P.js?v=2e99944d:19753
+performUnitOfWork @ chunk-WERSD76P.js?v=2e99944d:19198
+workLoopSync @ chunk-WERSD76P.js?v=2e99944d:19137
+renderRootSync @ chunk-WERSD76P.js?v=2e99944d:19116
+performSyncWorkOnRoot @ chunk-WERSD76P.js?v=2e99944d:18874
+flushSyncCallbacks @ chunk-WERSD76P.js?v=2e99944d:9119
+(anonymous) @ chunk-WERSD76P.js?v=2e99944d:18627
+setTimeout
+scheduleFn @ @tanstack_react-query.js?v=2e99944d:555
+flush @ @tanstack_react-query.js?v=2e99944d:569
+batch @ @tanstack_react-query.js?v=2e99944d:587
+dispatch_fn @ @tanstack_react-query.js?v=2e99944d:996
+setData @ @tanstack_react-query.js?v=2e99944d:696
+onSuccess @ @tanstack_react-query.js?v=2e99944d:897
+resolve @ @tanstack_react-query.js?v=2e99944d:456
+Promise.then
+run @ @tanstack_react-query.js?v=2e99944d:498
+start @ @tanstack_react-query.js?v=2e99944d:536
+fetch @ @tanstack_react-query.js?v=2e99944d:926
+executeFetch_fn @ @tanstack_react-query.js?v=2e99944d:2211
+fetch @ @tanstack_react-query.js?v=2e99944d:2011
+refetch @ @tanstack_react-query.js?v=2e99944d:2001
+handleCardSetupSuccess @ auth-landing.tsx:44
+handleCardSetup @ card-setup.tsx:43
+await in handleCardSetup
+callCallback2 @ chunk-WERSD76P.js?v=2e99944d:3674
+invokeGuardedCallbackDev @ chunk-WERSD76P.js?v=2e99944d:3699
+invokeGuardedCallback @ chunk-WERSD76P.js?v=2e99944d:3733
+invokeGuardedCallbackAndCatchFirstError @ chunk-WERSD76P.js?v=2e99944d:3736
+executeDispatch @ chunk-WERSD76P.js?v=2e99944d:7014
+processDispatchQueueItemsInOrder @ chunk-WERSD76P.js?v=2e99944d:7034
+processDispatchQueue @ chunk-WERSD76P.js?v=2e99944d:7043
+dispatchEventsForPlugins @ chunk-WERSD76P.js?v=2e99944d:7051
+(anonymous) @ chunk-WERSD76P.js?v=2e99944d:7174
+batchedUpdates$1 @ chunk-WERSD76P.js?v=2e99944d:18913
+batchedUpdates @ chunk-WERSD76P.js?v=2e99944d:3579
+dispatchEventForPluginEventSystem @ chunk-WERSD76P.js?v=2e99944d:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-WERSD76P.js?v=2e99944d:5478
+dispatchEvent @ chunk-WERSD76P.js?v=2e99944d:5472
+dispatchDiscreteEvent @ chunk-WERSD76P.js?v=2e99944d:5449Understand this error
+auth-landing.tsx:44 Warning: validateDOMNesting(...): <a> cannot appear as a descendant of <a>. Error Component Stack
+    at a (<anonymous>)
+    at a (<anonymous>)
+    at wouter.js?v=2e99944d:337:18
+    at li (<anonymous>)
+    at ul (<anonymous>)
+    at div (<anonymous>)
+    at div (<anonymous>)
+    at div (<anonymous>)
+    at footer (<anonymous>)
+    at main (<anonymous>)
+    at div (<anonymous>)
+    at Home (home.tsx:12:27)
+    at Route (wouter.js?v=2e99944d:323:16)
+    at Switch (wouter.js?v=2e99944d:379:17)
+    at Router (<anonymous>)
+    at div (<anonymous>)
+    at Provider (chunk-PLT6GTVM.js?v=2e99944d:38:15)
+    at TooltipProvider (@radix-ui_react-tooltip.js?v=2e99944d:61:5)
+    at QueryClientProvider (@tanstack_react-query.js?v=2e99944d:2805:3)
+    at App (<anonymous>)
+overrideMethod @ hook.js:608
+printWarning @ chunk-WERSD76P.js?v=2e99944d:521
+error @ chunk-WERSD76P.js?v=2e99944d:505
+validateDOMNesting @ chunk-WERSD76P.js?v=2e99944d:8256
+createInstance @ chunk-WERSD76P.js?v=2e99944d:8328
+completeWork @ chunk-WERSD76P.js?v=2e99944d:16290
+completeUnitOfWork @ chunk-WERSD76P.js?v=2e99944d:19224
+performUnitOfWork @ chunk-WERSD76P.js?v=2e99944d:19206
+workLoopSync @ chunk-WERSD76P.js?v=2e99944d:19137
+renderRootSync @ chunk-WERSD76P.js?v=2e99944d:19116
+performSyncWorkOnRoot @ chunk-WERSD76P.js?v=2e99944d:18874
+flushSyncCallbacks @ chunk-WERSD76P.js?v=2e99944d:9119
+(anonymous) @ chunk-WERSD76P.js?v=2e99944d:18627
+setTimeout
+scheduleFn @ @tanstack_react-query.js?v=2e99944d:555
+flush @ @tanstack_react-query.js?v=2e99944d:569
+batch @ @tanstack_react-query.js?v=2e99944d:587
+dispatch_fn @ @tanstack_react-query.js?v=2e99944d:996
+setData @ @tanstack_react-query.js?v=2e99944d:696
+onSuccess @ @tanstack_react-query.js?v=2e99944d:897
+resolve @ @tanstack_react-query.js?v=2e99944d:456
+Promise.then
+run @ @tanstack_react-query.js?v=2e99944d:498
+start @ @tanstack_react-query.js?v=2e99944d:536
+fetch @ @tanstack_react-query.js?v=2e99944d:926
+executeFetch_fn @ @tanstack_react-query.js?v=2e99944d:2211
+fetch @ @tanstack_react-query.js?v=2e99944d:2011
+refetch @ @tanstack_react-query.js?v=2e99944d:2001
+handleCardSetupSuccess @ auth-landing.tsx:44
+handleCardSetup @ card-setup.tsx:43
+await in handleCardSetup
+callCallback2 @ chunk-WERSD76P.js?v=2e99944d:3674
+invokeGuardedCallbackDev @ chunk-WERSD76P.js?v=2e99944d:3699
+invokeGuardedCallback @ chunk-WERSD76P.js?v=2e99944d:3733
+invokeGuardedCallbackAndCatchFirstError @ chunk-WERSD76P.js?v=2e99944d:3736
+executeDispatch @ chunk-WERSD76P.js?v=2e99944d:7014
+processDispatchQueueItemsInOrder @ chunk-WERSD76P.js?v=2e99944d:7034
+processDispatchQueue @ chunk-WERSD76P.js?v=2e99944d:7043
+dispatchEventsForPlugins @ chunk-WERSD76P.js?v=2e99944d:7051
+(anonymous) @ chunk-WERSD76P.js?v=2e99944d:7174
+batchedUpdates$1 @ chunk-WERSD76P.js?v=2e99944d:18913
+batchedUpdates @ chunk-WERSD76P.js?v=2e99944d:3579
+dispatchEventForPluginEventSystem @ chunk-WERSD76P.js?v=2e99944d:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-WERSD76P.js?v=2e99944d:5478
+dispatchEvent @ chunk-WERSD76P.js?v=2e99944d:5472
+dispatchDiscreteEvent @ chunk-WERSD76P.js?v=2e99944d:5449Understand this error
+professional-wheel.tsx:91 API spin result received: 137
+professional-wheel.tsx:115 Wheel will land on correct result: {spinResult: 137, targetSegmentIndex: 6, segmentAngle: 30, numberAtPosition: 137}
+professional-wheel.tsx:91 API spin result received: 22
+professional-wheel.tsx:115 Wheel will land on correct result: {spinResult: 22, targetSegmentIndex: 10, segmentAngle: 30, numberAtPosition: 22}
+professional-wheel.tsx:91 API spin result received: 5
+professional-wheel.tsx:115 Wheel will land on correct result: {spinResult: 5, targetSegmentIndex: 0, segmentAngle: 30, numberAtPosition: 5}
+professional-wheel.tsx:91 API spin result received: 4
+professional-wheel.tsx:115 Wheel will land on correct result: {spinResult: 4, targetSegmentIndex: 10, segmentAngle: 30, numberAtPosition: 4}
+professional-wheel.tsx:91 API spin result received: 73
+professional-wheel.tsx:115 Wheel will land on correct result: {spinResult: 73, targetSegmentIndex: 0, segmentAngle: 30, numberAtPosition: 73}
+professional-wheel.tsx:91 API spin result received: 75
+professional-wheel.tsx:115 Wheel will land on correct result: {spinResult: 75, targetSegmentIndex: 5, segmentAngle: 30, numberAtPosition: 75}
