@@ -644,6 +644,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // User dashboard routes
+  app.get("/api/user/stats", async (req, res) => {
+    try {
+      const userId = (req.session as any)?.userId;
+      if (!userId) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+
+      // Get spin results count and stats - for now return mock data until we have real spin history
+      res.json({
+        totalSpins: 0,
+        totalWins: 0,
+        freeSpins: 0,
+        totalSpent: 0
+      });
+    } catch (error) {
+      console.error("Error fetching user stats:", error);
+      res.status(500).json({ message: "Failed to fetch user statistics" });
+    }
+  });
+
+  app.get("/api/user/game-history", async (req, res) => {
+    try {
+      const userId = (req.session as any)?.userId;
+      if (!userId) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+
+      // Return empty array for now until we have real spin history
+      res.json([]);
+    } catch (error) {
+      console.error("Error fetching game history:", error);
+      res.status(500).json({ message: "Failed to fetch game history" });
+    }
+  });
+
   // Add or verify card endpoint
   app.post("/api/card/add", async (req, res) => {
     try {

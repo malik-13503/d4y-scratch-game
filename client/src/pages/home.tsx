@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Coffee, Camera, Gift, Trophy, Star, Zap, Crown, Sparkles, Users, Gamepad2, Target, Gem } from "lucide-react";
+import { Coffee, Camera, Gift, Trophy, Star, Zap, Crown, Sparkles, Users, Gamepad2, Target, Gem, User, ArrowRight, Clock } from "lucide-react";
 import type { Game } from "@shared/schema";
 import logoPath from "@assets/logo_1751918412862.png";
 
@@ -130,6 +130,15 @@ export default function Home() {
             </div>
             
             <div className="flex items-center space-x-3 sm:space-x-4 w-full sm:w-auto justify-center sm:justify-end">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setLocation("/dashboard")}
+                className="bg-gradient-to-r from-slate-800/80 to-slate-700/80 border-purple-400/40 text-purple-300 hover:bg-slate-600/80 hover:text-white backdrop-blur-sm"
+              >
+                <User className="h-4 w-4 mr-2" />
+                Dashboard
+              </Button>
               <div className="text-white/95 text-sm sm:text-base bg-gradient-to-r from-emerald-500/30 to-cyan-500/30 px-4 sm:px-6 py-2 sm:py-3 rounded-xl border border-emerald-400/40 backdrop-blur-sm shadow-lg">
                 <div className="flex items-center space-x-2 sm:space-x-3">
                   <Sparkles className="h-4 w-4 sm:h-5 sm:w-5 text-emerald-300 animate-spin" />

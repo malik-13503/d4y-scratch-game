@@ -1,0 +1,77 @@
+game.tsx:100  POST https://f45475b4-a7c6-4031-bbbd-cffdcb6fa4d5-00-1aqxf2ubqm5iz.janeway.replit.dev/api/spin 401 (Unauthorized)
+handleSpin @ game.tsx:100
+handleSpin @ professional-wheel.tsx:90
+triggerSpin @ professional-wheel.tsx:31
+handleConfirmSpin @ game.tsx:87
+handleConfirm @ disclaimer-popup.tsx:25
+callCallback2 @ chunk-WERSD76P.js?v=2e99944d:3674
+invokeGuardedCallbackDev @ chunk-WERSD76P.js?v=2e99944d:3699
+invokeGuardedCallback @ chunk-WERSD76P.js?v=2e99944d:3733
+invokeGuardedCallbackAndCatchFirstError @ chunk-WERSD76P.js?v=2e99944d:3736
+executeDispatch @ chunk-WERSD76P.js?v=2e99944d:7014
+processDispatchQueueItemsInOrder @ chunk-WERSD76P.js?v=2e99944d:7034
+processDispatchQueue @ chunk-WERSD76P.js?v=2e99944d:7043
+dispatchEventsForPlugins @ chunk-WERSD76P.js?v=2e99944d:7051
+(anonymous) @ chunk-WERSD76P.js?v=2e99944d:7174
+batchedUpdates$1 @ chunk-WERSD76P.js?v=2e99944d:18913
+batchedUpdates @ chunk-WERSD76P.js?v=2e99944d:3579
+dispatchEventForPluginEventSystem @ chunk-WERSD76P.js?v=2e99944d:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-WERSD76P.js?v=2e99944d:5478
+dispatchEvent @ chunk-WERSD76P.js?v=2e99944d:5472
+dispatchDiscreteEvent @ chunk-WERSD76P.js?v=2e99944d:5449Understand this error
+game.tsx:133 Spin error: Error: Please login to continue
+    at handleSpin (game.tsx:117:17)
+    at async handleSpin (professional-wheel.tsx:90:26)
+    at async Object.triggerSpin (professional-wheel.tsx:31:7)
+    at async handleConfirmSpin (game.tsx:87:9)
+    at async handleConfirm (disclaimer-popup.tsx:25:7)
+overrideMethod @ hook.js:608
+handleSpin @ game.tsx:133
+await in handleSpin
+handleSpin @ professional-wheel.tsx:90
+triggerSpin @ professional-wheel.tsx:31
+handleConfirmSpin @ game.tsx:87
+handleConfirm @ disclaimer-popup.tsx:25
+callCallback2 @ chunk-WERSD76P.js?v=2e99944d:3674
+invokeGuardedCallbackDev @ chunk-WERSD76P.js?v=2e99944d:3699
+invokeGuardedCallback @ chunk-WERSD76P.js?v=2e99944d:3733
+invokeGuardedCallbackAndCatchFirstError @ chunk-WERSD76P.js?v=2e99944d:3736
+executeDispatch @ chunk-WERSD76P.js?v=2e99944d:7014
+processDispatchQueueItemsInOrder @ chunk-WERSD76P.js?v=2e99944d:7034
+processDispatchQueue @ chunk-WERSD76P.js?v=2e99944d:7043
+dispatchEventsForPlugins @ chunk-WERSD76P.js?v=2e99944d:7051
+(anonymous) @ chunk-WERSD76P.js?v=2e99944d:7174
+batchedUpdates$1 @ chunk-WERSD76P.js?v=2e99944d:18913
+batchedUpdates @ chunk-WERSD76P.js?v=2e99944d:3579
+dispatchEventForPluginEventSystem @ chunk-WERSD76P.js?v=2e99944d:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-WERSD76P.js?v=2e99944d:5478
+dispatchEvent @ chunk-WERSD76P.js?v=2e99944d:5472
+dispatchDiscreteEvent @ chunk-WERSD76P.js?v=2e99944d:5449Understand this error
+professional-wheel.tsx:137 Spin error: Error: Please login to continue
+    at handleSpin (game.tsx:117:17)
+    at async handleSpin (professional-wheel.tsx:90:26)
+    at async Object.triggerSpin (professional-wheel.tsx:31:7)
+    at async handleConfirmSpin (game.tsx:87:9)
+    at async handleConfirm (disclaimer-popup.tsx:25:7)
+overrideMethod @ hook.js:608
+handleSpin @ professional-wheel.tsx:137
+await in handleSpin
+triggerSpin @ professional-wheel.tsx:31
+handleConfirmSpin @ game.tsx:87
+handleConfirm @ disclaimer-popup.tsx:25
+callCallback2 @ chunk-WERSD76P.js?v=2e99944d:3674
+invokeGuardedCallbackDev @ chunk-WERSD76P.js?v=2e99944d:3699
+invokeGuardedCallback @ chunk-WERSD76P.js?v=2e99944d:3733
+invokeGuardedCallbackAndCatchFirstError @ chunk-WERSD76P.js?v=2e99944d:3736
+executeDispatch @ chunk-WERSD76P.js?v=2e99944d:7014
+processDispatchQueueItemsInOrder @ chunk-WERSD76P.js?v=2e99944d:7034
+processDispatchQueue @ chunk-WERSD76P.js?v=2e99944d:7043
+dispatchEventsForPlugins @ chunk-WERSD76P.js?v=2e99944d:7051
+(anonymous) @ chunk-WERSD76P.js?v=2e99944d:7174
+batchedUpdates$1 @ chunk-WERSD76P.js?v=2e99944d:18913
+batchedUpdates @ chunk-WERSD76P.js?v=2e99944d:3579
+dispatchEventForPluginEventSystem @ chunk-WERSD76P.js?v=2e99944d:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-WERSD76P.js?v=2e99944d:5478
+dispatchEvent @ chunk-WERSD76P.js?v=2e99944d:5472
+dispatchDiscreteEvent @ chunk-WERSD76P.js?v=2e99944d:5449Understand this error
+queryClient.ts:32  GET https://f45475b4-a7c6-4031-bbbd-cffdcb6fa4d5-00-1aqxf2ubqm5iz.janeway.replit.dev/api/user 401 (Unauthorized)

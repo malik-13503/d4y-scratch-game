@@ -8,6 +8,7 @@ import { Progress } from "@/components/ui/progress";
 import { ProfessionalWheel } from "@/components/professional-wheel";
 import { Confetti } from "@/components/confetti";
 import { DisclaimerPopup } from "@/components/disclaimer-popup";
+import { AuthRequiredPopup } from "@/components/auth-required-popup";
 import logoPath from "@assets/logo_1751918412862.png";
 import { 
   Clock, 
@@ -30,6 +31,7 @@ export default function GamePage() {
   const [lastResult, setLastResult] = useState<number | null>(null);
   const [showConfetti, setShowConfetti] = useState(false);
   const [showDisclaimer, setShowDisclaimer] = useState(false);
+  const [showAuthPopup, setShowAuthPopup] = useState(false);
   const [isSpinning, setIsSpinning] = useState(false);
   const [playerCount, setPlayerCount] = useState(1);
   const wheelRef = useRef<{ triggerSpin: () => Promise<void> }>(null);
@@ -112,8 +114,8 @@ export default function GamePage() {
       if (!response.ok) {
         const error = await response.json();
         if (response.status === 401) {
-          // Redirect to signup/login if not authenticated
-          setLocation('/');
+          // Show auth popup instead of immediate redirect
+          setShowAuthPopup(true);
           throw new Error('Please login to continue');
         }
         throw new Error(error.message || 'Failed to spin');
@@ -332,6 +334,20 @@ export default function GamePage() {
         onClose={() => setShowDisclaimer(false)}
         onConfirm={handleConfirmSpin}
         gameTitle={game.name}
+      />
+
+      {/* Auth Required Popup */}
+      <AuthRequiredPopup
+        isOpen={showAuthPopup}
+        onClose={() => setShowAuthPopup(false)}
+        onSignup={() => {
+          setShowAuthPopup(false);
+          setLocation('/');
+        }}
+        onLogin={() => {
+          setShowAuthPopup(false);
+          setLocation('/');
+        }}
       />
     </div>
   );
