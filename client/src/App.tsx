@@ -39,27 +39,36 @@ function Router() {
   });
 
   useEffect(() => {
-    // Check localStorage first
-    const storedAuth = getAuthFromStorage();
-    
-    if (storedAuth && storedAuth.isAuthenticated) {
-      setUser(storedAuth.user);
+    // Always initialize from localStorage first
+    if (!user) {
+      const storedAuth = getAuthFromStorage();
+      if (storedAuth && storedAuth.isAuthenticated) {
+        console.log("Using stored auth from localStorage");
+        setUser(storedAuth.user);
+      }
     }
     
-    // If server responds with user, update both state and localStorage
+    // If server responds with user, update everything
     if (serverUser) {
+      console.log("Server authenticated user:", serverUser);
       setUser(serverUser);
       saveAuthToStorage(serverUser);
     }
     
-    // If server returns 401 and we have stored auth, clear it
-    if (error && storedAuth) {
-      clearAuthFromStorage();
-      setUser(null);
+    // If server returns error, check if we should clear localStorage
+    if (error && !serverUser) {
+      console.log("Server authentication error:", error);
+      // Only clear localStorage if it's been some time since login
+      const storedAuth = getAuthFromStorage();
+      if (storedAuth && (Date.now() - storedAuth.timestamp) > 60000) { // 1 minute
+        clearAuthFromStorage();
+        setUser(null);
+      }
     }
     
+    // Set initialized after first check
     setIsCheckingAuth(false);
-  }, [serverUser, error]);
+  }, [serverUser, error, user]);
 
   // Show loading spinner while checking auth state
   if (isCheckingAuth || serverLoading) {
