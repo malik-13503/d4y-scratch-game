@@ -81,38 +81,50 @@ export default function Dashboard() {
       </header>
 
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 py-8">
-        {/* User Profile Section */}
-        <Card className="mb-8 bg-gradient-to-br from-slate-900/95 to-slate-800/95 border-purple-500/30 backdrop-blur-xl">
-          <CardHeader>
-            <div className="flex items-center space-x-4">
-              <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center">
-                <User className="h-8 w-8 text-white" />
+        {/* Enhanced User Profile Section */}
+        <Card className="mb-8 relative overflow-hidden bg-gradient-to-br from-slate-800/80 to-slate-900/80 border-purple-400/40 backdrop-blur-xl shadow-2xl">
+          <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-blue-500/10 blur-2xl"></div>
+          <CardHeader className="relative">
+            <div className="flex items-center space-x-6">
+              <div className="relative">
+                <div className="w-20 h-20 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center shadow-2xl">
+                  <User className="h-10 w-10 text-white drop-shadow-lg" />
+                </div>
+                <div className="absolute -inset-2 bg-gradient-to-br from-purple-400/30 to-blue-400/30 rounded-full blur-lg"></div>
               </div>
               <div>
-                <CardTitle className="text-2xl text-white">
+                <CardTitle className="text-3xl font-black bg-gradient-to-r from-white to-gray-200 bg-clip-text text-transparent drop-shadow-lg">
                   {user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : 'Player'}
                 </CardTitle>
-                <p className="text-gray-400">{user.email}</p>
-                <div className="flex items-center space-x-2 mt-2">
-                  <Badge className={user.cardOnFile ? "bg-green-500/20 text-green-400" : "bg-red-500/20 text-red-400"}>
-                    <CreditCard className="h-3 w-3 mr-1" />
+                <p className="text-gray-200 text-lg font-medium">{user.email}</p>
+                <div className="flex items-center space-x-3 mt-3">
+                  <Badge className={`${user.cardOnFile ? "bg-gradient-to-r from-emerald-500 to-green-500 text-white" : "bg-gradient-to-r from-red-500 to-pink-500 text-white"} border-0 px-4 py-2 font-bold shadow-lg`}>
+                    <CreditCard className="h-4 w-4 mr-2" />
                     {user.cardOnFile ? "Payment Verified" : "Payment Required"}
                   </Badge>
+                  <div className="flex items-center space-x-2">
+                    <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
+                    <span className="text-green-300 font-bold">ONLINE</span>
+                  </div>
                 </div>
               </div>
             </div>
           </CardHeader>
         </Card>
 
-        {/* Stats Overview */}
+        {/* Enhanced Stats Overview with eye-catching gradients */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <Card className="bg-gradient-to-br from-green-900/50 to-green-800/50 border-green-500/30">
-            <CardContent className="p-6">
+          {/* Total Wins Card */}
+          <Card className="relative overflow-hidden bg-gradient-to-br from-emerald-500/20 to-green-600/20 border-emerald-400/40 backdrop-blur-xl shadow-2xl hover:shadow-emerald-500/20 transition-all duration-300">
+            <div className="absolute inset-0 bg-gradient-to-br from-emerald-400/10 to-green-500/10 blur-xl"></div>
+            <CardContent className="relative p-6">
               <div className="flex items-center space-x-4">
-                <Trophy className="h-8 w-8 text-green-400" />
+                <div className="p-3 bg-gradient-to-br from-emerald-500 to-green-600 rounded-xl shadow-lg">
+                  <Trophy className="h-8 w-8 text-white drop-shadow-lg" />
+                </div>
                 <div>
-                  <p className="text-green-300 text-sm font-medium">Total Wins</p>
-                  <p className="text-2xl font-bold text-white">
+                  <p className="text-emerald-200 text-lg font-bold tracking-wide">Total Wins</p>
+                  <p className="text-4xl font-black text-white drop-shadow-lg">
                     {statsLoading ? '...' : (userStats?.totalWins || 0)}
                   </p>
                 </div>
@@ -120,13 +132,17 @@ export default function Dashboard() {
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-br from-blue-900/50 to-blue-800/50 border-blue-500/30">
-            <CardContent className="p-6">
+          {/* Total Spent Card */}
+          <Card className="relative overflow-hidden bg-gradient-to-br from-blue-500/20 to-cyan-600/20 border-blue-400/40 backdrop-blur-xl shadow-2xl hover:shadow-blue-500/20 transition-all duration-300">
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-400/10 to-cyan-500/10 blur-xl"></div>
+            <CardContent className="relative p-6">
               <div className="flex items-center space-x-4">
-                <DollarSign className="h-8 w-8 text-blue-400" />
+                <div className="p-3 bg-gradient-to-br from-blue-500 to-cyan-600 rounded-xl shadow-lg">
+                  <DollarSign className="h-8 w-8 text-white drop-shadow-lg" />
+                </div>
                 <div>
-                  <p className="text-blue-300 text-sm font-medium">Total Spent</p>
-                  <p className="text-2xl font-bold text-white">
+                  <p className="text-blue-200 text-lg font-bold tracking-wide">Total Spent</p>
+                  <p className="text-4xl font-black text-white drop-shadow-lg">
                     ${statsLoading ? '...' : (userStats?.totalSpent || 0).toFixed(2)}
                   </p>
                 </div>
@@ -134,13 +150,17 @@ export default function Dashboard() {
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-br from-purple-900/50 to-purple-800/50 border-purple-500/30">
-            <CardContent className="p-6">
+          {/* Total Spins Card */}
+          <Card className="relative overflow-hidden bg-gradient-to-br from-purple-500/20 to-pink-600/20 border-purple-400/40 backdrop-blur-xl shadow-2xl hover:shadow-purple-500/20 transition-all duration-300">
+            <div className="absolute inset-0 bg-gradient-to-br from-purple-400/10 to-pink-500/10 blur-xl"></div>
+            <CardContent className="relative p-6">
               <div className="flex items-center space-x-4">
-                <Target className="h-8 w-8 text-purple-400" />
+                <div className="p-3 bg-gradient-to-br from-purple-500 to-pink-600 rounded-xl shadow-lg">
+                  <Target className="h-8 w-8 text-white drop-shadow-lg" />
+                </div>
                 <div>
-                  <p className="text-purple-300 text-sm font-medium">Total Spins</p>
-                  <p className="text-2xl font-bold text-white">
+                  <p className="text-purple-200 text-lg font-bold tracking-wide">Total Spins</p>
+                  <p className="text-4xl font-black text-white drop-shadow-lg">
                     {statsLoading ? '...' : (userStats?.totalSpins || 0)}
                   </p>
                 </div>
@@ -148,13 +168,17 @@ export default function Dashboard() {
             </CardContent>
           </Card>
 
-          <Card className="bg-gradient-to-br from-yellow-900/50 to-yellow-800/50 border-yellow-500/30">
-            <CardContent className="p-6">
+          {/* Free Spins Card */}
+          <Card className="relative overflow-hidden bg-gradient-to-br from-yellow-500/20 to-orange-600/20 border-yellow-400/40 backdrop-blur-xl shadow-2xl hover:shadow-yellow-500/20 transition-all duration-300">
+            <div className="absolute inset-0 bg-gradient-to-br from-yellow-400/10 to-orange-500/10 blur-xl"></div>
+            <CardContent className="relative p-6">
               <div className="flex items-center space-x-4">
-                <Award className="h-8 w-8 text-yellow-400" />
+                <div className="p-3 bg-gradient-to-br from-yellow-500 to-orange-600 rounded-xl shadow-lg">
+                  <Award className="h-8 w-8 text-white drop-shadow-lg" />
+                </div>
                 <div>
-                  <p className="text-yellow-300 text-sm font-medium">Free Spins</p>
-                  <p className="text-2xl font-bold text-white">
+                  <p className="text-yellow-200 text-lg font-bold tracking-wide">Free Spins</p>
+                  <p className="text-4xl font-black text-white drop-shadow-lg">
                     {statsLoading ? '...' : (userStats?.freeSpins || 0)}
                   </p>
                 </div>
@@ -163,28 +187,37 @@ export default function Dashboard() {
           </Card>
         </div>
 
-        {/* Game History */}
-        <Card className="bg-gradient-to-br from-slate-900/95 to-slate-800/95 border-purple-500/30 backdrop-blur-xl">
-          <CardHeader>
-            <CardTitle className="text-xl text-white flex items-center">
-              <Activity className="h-5 w-5 mr-2" />
+        {/* Enhanced Game History */}
+        <Card className="relative overflow-hidden bg-gradient-to-br from-slate-800/80 to-slate-900/80 border-slate-600/40 backdrop-blur-xl shadow-2xl">
+          <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-blue-500/5 blur-2xl"></div>
+          <CardHeader className="relative">
+            <CardTitle className="text-2xl font-bold bg-gradient-to-r from-white to-gray-200 bg-clip-text text-transparent flex items-center">
+              <div className="p-2 bg-gradient-to-br from-purple-500 to-blue-500 rounded-lg mr-3 shadow-lg">
+                <Activity className="h-6 w-6 text-white" />
+              </div>
               Recent Game History
             </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="relative">
             {historyLoading ? (
-              <div className="text-center py-8">
-                <div className="animate-spin w-8 h-8 border-4 border-purple-500 border-t-transparent rounded-full mx-auto mb-4" />
-                <p className="text-gray-400">Loading game history...</p>
+              <div className="flex items-center justify-center py-12">
+                <div className="relative">
+                  <div className="animate-spin w-8 h-8 border-4 border-purple-500 border-t-transparent rounded-full" />
+                  <div className="absolute inset-0 animate-ping w-8 h-8 border-4 border-purple-400/30 rounded-full" />
+                </div>
+                <p className="ml-4 text-gray-200 font-medium">Loading game history...</p>
               </div>
             ) : !gameHistory || gameHistory.length === 0 ? (
-              <div className="text-center py-12">
-                <Gamepad2 className="h-16 w-16 text-gray-600 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-gray-300 mb-2">No Games Played Yet</h3>
-                <p className="text-gray-500 mb-6">Start playing to see your game history here!</p>
+              <div className="text-center py-16">
+                <div className="relative inline-block mb-6">
+                  <div className="absolute inset-0 bg-gradient-to-br from-gray-500/20 to-gray-600/20 blur-2xl rounded-full"></div>
+                  <Gamepad2 className="relative h-20 w-20 text-gray-400 mx-auto drop-shadow-lg" />
+                </div>
+                <h3 className="text-2xl font-bold text-white mb-4">No Games Played Yet</h3>
+                <p className="text-gray-200 text-lg mb-8">Start playing to see your game history here!</p>
                 <Button 
                   onClick={() => setLocation('/games')}
-                  className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+                  className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-bold px-8 py-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 text-lg"
                 >
                   Play Now
                 </Button>
@@ -192,22 +225,25 @@ export default function Dashboard() {
             ) : (
               <div className="space-y-4">
                 {gameHistory.slice(0, 10).map((game: any, index: number) => (
-                  <div key={index} className="flex items-center justify-between p-4 bg-slate-800/50 rounded-lg border border-slate-700/50">
+                  <div 
+                    key={index}
+                    className="flex items-center justify-between p-6 bg-gradient-to-r from-slate-700/50 to-slate-800/50 rounded-xl border border-slate-600/30 hover:border-purple-500/30 transition-all duration-300 shadow-lg"
+                  >
                     <div className="flex items-center space-x-4">
-                      <div className={`w-3 h-3 rounded-full ${game.isFreePlay ? 'bg-green-400' : 'bg-blue-400'}`} />
+                      <div className={`w-4 h-4 rounded-full shadow-lg ${game.isFreePlay ? 'bg-gradient-to-r from-green-400 to-emerald-500' : 'bg-gradient-to-r from-blue-400 to-cyan-500'}`}></div>
                       <div>
-                        <p className="font-medium text-white">Number: {game.number}</p>
-                        <p className="text-sm text-gray-400 flex items-center">
-                          <Clock className="h-3 w-3 mr-1" />
+                        <p className="text-white font-bold text-lg">Number: {game.number}</p>
+                        <p className="text-gray-200 flex items-center font-medium">
+                          <Clock className="h-4 w-4 mr-2" />
                           {new Date(game.playedAt).toLocaleDateString()}
                         </p>
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className={`font-bold ${game.isFreePlay ? 'text-green-400' : 'text-blue-400'}`}>
+                      <p className={`font-black text-xl ${game.isFreePlay ? 'text-emerald-400' : 'text-cyan-400'}`}>
                         {game.isFreePlay ? 'FREE' : `$${game.amount.toFixed(2)}`}
                       </p>
-                      <Badge variant={game.isFreePlay ? "secondary" : "default"} className="text-xs">
+                      <Badge className={`${game.isFreePlay ? "bg-gradient-to-r from-emerald-500 to-green-500" : "bg-gradient-to-r from-blue-500 to-cyan-500"} text-white border-0 font-bold shadow-lg`}>
                         {game.isFreePlay ? 'Free Play' : 'Paid'}
                       </Badge>
                     </div>
@@ -215,8 +251,8 @@ export default function Dashboard() {
                 ))}
                 
                 {gameHistory.length > 10 && (
-                  <div className="text-center pt-4">
-                    <p className="text-gray-400 text-sm">
+                  <div className="text-center pt-6">
+                    <p className="text-gray-200 font-medium">
                       Showing 10 of {gameHistory.length} games
                     </p>
                   </div>
