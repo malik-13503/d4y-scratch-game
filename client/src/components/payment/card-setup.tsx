@@ -25,24 +25,27 @@ export function CardSetup({ onSuccess, user }: CardSetupProps) {
     setIsLoading(true);
 
     try {
-      // In a real implementation, this would integrate with Square Web SDK
-      // For now, we'll simulate a successful card setup
-      const mockCardNonce = "cnon_card_mock_nonce_12345";
+      // For sandbox testing - using a test card nonce
+      // In production, this would use Square Web SDK to get real card nonce
+      const testCardNonce = "cnon_test_card_nonce_sandbox";
       
       const response = await apiRequest("POST", "/api/card/add", {
-        cardNonce: mockCardNonce
+        cardNonce: testCardNonce
       });
       
+      const result = await response.json();
+      
       toast({
-        title: "Card Added Successfully",
-        description: "Your payment method has been verified and saved securely.",
+        title: "Payment Method Added",
+        description: `${result.cardBrand} card ending in ${result.cardLast4} has been verified successfully.`,
       });
       
       onSuccess();
     } catch (error) {
+      console.error("Card setup error:", error);
       toast({
-        title: "Card Setup Failed",
-        description: error.message || "Failed to add card. Please try again.",
+        title: "Payment Setup Failed",
+        description: error.message || "Unable to verify payment method. Please try again.",
         variant: "destructive",
       });
     } finally {
