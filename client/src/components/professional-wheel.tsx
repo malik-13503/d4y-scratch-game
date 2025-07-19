@@ -24,6 +24,7 @@ export const ProfessionalWheel = forwardRef<
   const [showResultModal, setShowResultModal] = useState(false);
   const [isFreePlay, setIsFreePlay] = useState(false);
   const [amountCharged, setAmountCharged] = useState<number>(0);
+  const [availableNumbers, setAvailableNumbers] = useState<number[]>([]);
 
   // Expose the handleSpin function for external triggers
   useImperativeHandle(ref, () => ({
@@ -52,27 +53,98 @@ export const ProfessionalWheel = forwardRef<
     "#4CAF50", // Green
   ];
 
-  // Generate static numbers for wheel display based on total numbers
+  // Generate wheel numbers from available numbers for real-time updates
   const generateWheelNumbers = () => {
-    const numbers = [];
     const segments = 12;
-    for (let i = 0; i < segments; i++) {
-      // Use fixed numbers instead of random for consistent display
-      const number =
-        Math.floor((totalNumbers / segments) * i) +
-        Math.floor(totalNumbers / segments / 2) +
-        1;
-      numbers.push(Math.min(number, totalNumbers));
+    const numbers = [];
+    
+    if (availableNumbers.length === 0) {
+      // Fallback to static generation if no available numbers yet
+      for (let i = 0; i < segments; i++) {
+        const number =
+          Math.floor((totalNumbers / segments) * i) +
+          Math.floor(totalNumbers / segments / 2) +
+          1;
+        numbers.push(Math.min(number, totalNumbers));
+      }
+      return numbers;
     }
+    
+    // Use available numbers to populate wheel segments
+    for (let i = 0; i < segments; i++) {
+      if (i < availableNumbers.length) {
+        // Distribute available numbers across segments
+        const index = Math.floor((availableNumbers.length / segments) * i);
+        numbers.push(availableNumbers[index]);
+      } else {
+        // If we have fewer available numbers than segments, reuse some
+        const index = i % availableNumbers.length;
+        numbers.push(availableNumbers[index]);
+      }
+    }
+    
     return numbers;
   };
 
   const [wheelNumbers, setWheelNumbers] = useState<number[]>([]);
 
-  // Initialize wheel numbers on component mount
+  // Fetch available numbers from API
+  const fetchAvailableNumbers = async (gameId: number) => {
+    try {
+      const response = await fetch(`/api/games/${gameId}/available-numbers`, {
+        credentials: 'include'
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setAvailableNumbers(data.availableNumbers);
+        return data.availableNumbers;
+      }
+    } catch (error) {
+      console.error('Failed to fetch available numbers:', error);
+    }
+    return [];
+  };
+
+  // Initialize wheel numbers and fetch available numbers
+  useEffect(() => {
+    // Extract gameId from URL if available
+    const path = window.location.pathname;
+    const gameIdMatch = path.match(/\/game\/(\d+)/);
+    
+    if (gameIdMatch) {
+      const gameId = parseInt(gameIdMatch[1]);
+      fetchAvailableNumbers(gameId).then(() => {
+        setWheelNumbers(generateWheelNumbers());
+      });
+    } else {
+      // Fallback for non-game pages
+      setWheelNumbers(generateWheelNumbers());
+    }
+  }, [totalNumbers]);
+
+  // Update wheel numbers when available numbers change
   useEffect(() => {
     setWheelNumbers(generateWheelNumbers());
-  }, [totalNumbers]);
+  }, [availableNumbers]);
+
+  // Set up periodic refresh of available numbers for real-time updates
+  useEffect(() => {
+    const path = window.location.pathname;
+    const gameIdMatch = path.match(/\/game\/(\d+)/);
+    
+    if (gameIdMatch) {
+      const gameId = parseInt(gameIdMatch[1]);
+      
+      // Refresh every 10 seconds to keep wheel updated when other players spin
+      const interval = setInterval(() => {
+        if (!isSpinning) { // Only refresh when not actively spinning
+          fetchAvailableNumbers(gameId);
+        }
+      }, 10000);
+      
+      return () => clearInterval(interval);
+    }
+  }, [isSpinning]);
 
   const handleSpin = async () => {
     if (isSpinning || disabled) return;
@@ -96,10 +168,16 @@ export const ProfessionalWheel = forwardRef<
       let targetSegmentIndex = currentWheelNumbers.findIndex(num => num === spinResult);
       
       if (targetSegmentIndex === -1) {
-        // If exact number not found, place it in a random segment
-        targetSegmentIndex = Math.floor(Math.random() * currentWheelNumbers.length);
-        currentWheelNumbers[targetSegmentIndex] = spinResult;
-        setWheelNumbers(currentWheelNumbers);
+        // If exact number not found, place it in the closest segment or random
+        if (availableNumbers.includes(spinResult)) {
+          // Place in random segment since it's available
+          targetSegmentIndex = Math.floor(Math.random() * currentWheelNumbers.length);
+          currentWheelNumbers[targetSegmentIndex] = spinResult;
+          setWheelNumbers(currentWheelNumbers);
+        } else {
+          // Number was already claimed, use fallback
+          targetSegmentIndex = Math.floor(Math.random() * currentWheelNumbers.length);
+        }
       }
 
       // Step 4: Calculate final rotation to land exactly on the result
@@ -119,13 +197,21 @@ export const ProfessionalWheel = forwardRef<
         numberAtPosition: currentWheelNumbers[targetSegmentIndex]
       });
 
-      // Step 6: After 8 seconds total, show the result
-      setTimeout(() => {
+      // Step 6: After 8 seconds total, show the result and refresh available numbers
+      setTimeout(async () => {
         setResult(spinResult);
         const isFree = spinResult >= freePlayStart;
         setIsFreePlay(isFree);
         setAmountCharged(isFree ? 0 : spinResult);
         setIsSpinning(false);
+        
+        // Refresh available numbers after spin
+        const path = window.location.pathname;
+        const gameIdMatch = path.match(/\/game\/(\d+)/);
+        if (gameIdMatch) {
+          const gameId = parseInt(gameIdMatch[1]);
+          await fetchAvailableNumbers(gameId);
+        }
         
         // Show result modal after wheel stops
         setTimeout(() => {

@@ -246,6 +246,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get available numbers for a game (for dynamic wheel updates)
+  app.get("/api/games/:id/available-numbers", async (req, res) => {
+    try {
+      const gameId = parseInt(req.params.id);
+      const availableNumbers = await storage.getAvailableNumbers(gameId);
+      
+      res.json({ 
+        availableNumbers,
+        totalAvailable: availableNumbers.length 
+      });
+    } catch (error) {
+      console.error("Error fetching available numbers:", error);
+      res.status(500).json({ message: "Failed to fetch available numbers" });
+    }
+  });
+
   // Get players for a game
   app.get("/api/games/:id/players", async (req, res) => {
     try {

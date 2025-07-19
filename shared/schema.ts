@@ -167,6 +167,15 @@ export const notifications = pgTable("notifications", {
   status: text("status").notNull().default("pending"), // "pending", "sent", "failed"
 });
 
+// Track claimed numbers per game to prevent duplicates
+export const claimedNumbers = pgTable("claimed_numbers", {
+  id: serial("id").primaryKey(),
+  gameId: integer("game_id").notNull(),
+  number: integer("number").notNull(),
+  userId: integer("user_id").notNull(),
+  claimedAt: timestamp("claimed_at").notNull().defaultNow(),
+});
+
 // Schema definitions
 export const insertAdminUserSchema = createInsertSchema(adminUsers).omit({
   id: true,
@@ -247,3 +256,4 @@ export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 export type InsertTransaction = z.infer<typeof insertTransactionSchema>;
 export type Transaction = typeof transactions.$inferSelect;
+export type ClaimedNumber = typeof claimedNumbers.$inferSelect;
