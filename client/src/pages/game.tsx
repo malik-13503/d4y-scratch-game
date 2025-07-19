@@ -82,10 +82,11 @@ export default function GamePage() {
     setShowDisclaimer(false);
     setIsSpinning(true);
     
-    // Trigger the wheel to start spinning and call the API
+    // Trigger the wheel to start spinning - this will call handleSpin internally
     if (wheelRef.current) {
       try {
         await wheelRef.current.triggerSpin();
+        setIsSpinning(false);
       } catch (error) {
         console.error('Spin failed:', error);
         setIsSpinning(false);

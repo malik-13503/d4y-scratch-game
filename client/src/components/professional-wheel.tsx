@@ -77,70 +77,51 @@ export const ProfessionalWheel = forwardRef<
   const handleSpin = async () => {
     if (isSpinning || disabled) return;
 
-    // Step 1: Reset to initial state immediately
-    setRotation(0);
-    setIsSpinning(false);
+    // Step 1: Start spinning animation first
+    setIsSpinning(true);
     setResult(null);
     setShowResultModal(false);
 
     try {
-      // Step 2: Await the result first
-      const spinResult = await onSpin();
-      console.log("Spin result received:", spinResult);
-
-      // Step 3: Store wheelNumbers in a temporary variable
-      let currentWheelNumbers = [...wheelNumbers];
-
-      // Step 4: Get index of the segment where this number appears
-      let segmentIndex = currentWheelNumbers.findIndex(num => num === spinResult);
-
-      // Step 5: Handle fallback if number isn't found (avoid crash)
-      if (segmentIndex === -1) {
-        segmentIndex = Math.floor(Math.random() * currentWheelNumbers.length);
-        currentWheelNumbers[segmentIndex] = spinResult;
-        setWheelNumbers(currentWheelNumbers);
-        console.warn(`Spin result ${spinResult} not found. Placing in segment ${segmentIndex}`);
-      }
-
-      // Step 6: Calculate the target angle
-      const segmentAngle = 360 / currentWheelNumbers.length;
-      const targetAngle = segmentAngle * segmentIndex + segmentAngle / 2;
-      const fullRotations = 4 * 360;
+      // Step 2: Start the wheel spinning animation immediately
+      const segmentAngle = 360 / wheelNumbers.length;
+      const randomSegmentIndex = Math.floor(Math.random() * wheelNumbers.length);
+      const targetAngle = segmentAngle * randomSegmentIndex + segmentAngle / 2;
+      const fullRotations = 4 * 360; // 4 full rotations
       const finalRotation = fullRotations + (360 - targetAngle);
       
-      console.log("Wheel alignment:", {
-        spinResult,
-        segmentIndex,
-        segmentAngle,
-        targetAngle,
-        finalRotation,
-        willShowNumber: currentWheelNumbers[segmentIndex],
-        calculatedAngle: 360 - targetAngle
-      });
-
-      // Step 7: Start spinning with proper timing
-      // Use double requestAnimationFrame to ensure proper state transition
+      // Step 3: Start spinning with proper timing
       requestAnimationFrame(() => {
-        setIsSpinning(true);
-        requestAnimationFrame(() => {
-          setRotation(finalRotation);
-        });
+        setRotation(finalRotation);
       });
 
-      // Step 8: Use a timeout to show the modal after animation
-      const spinDuration = 8000; // 8 seconds
-      setTimeout(() => {
-        setResult(spinResult);
-        const isFree = spinResult >= freePlayStart;
-        setIsFreePlay(isFree);
-        setAmountCharged(isFree ? 0 : spinResult);
+      // Step 4: After 6 seconds of spinning, call API to get actual result
+      setTimeout(async () => {
+        try {
+          const spinResult = await onSpin();
+          console.log("Spin result received:", spinResult);
+
+          // Step 5: Update the display to show the actual result
+          setResult(spinResult);
+          const isFree = spinResult >= freePlayStart;
+          setIsFreePlay(isFree);
+          setAmountCharged(isFree ? 0 : spinResult);
+        } catch (apiError) {
+          console.error("API spin error:", apiError);
+          // Show error result
+          setResult(0);
+          setIsFreePlay(true);
+          setAmountCharged(0);
+        }
+        
         setIsSpinning(false);
         
         // Wait 1 additional second after wheel stops, then show result modal
         setTimeout(() => {
           setShowResultModal(true);
         }, 1000);
-      }, spinDuration);
+      }, 6000); // Call API after 6 seconds of visual spinning
+
     } catch (err) {
       console.error("Spin error:", err);
       setIsSpinning(false);
