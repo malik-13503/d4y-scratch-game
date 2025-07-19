@@ -5,6 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
+import { saveAuthToStorage } from "@/lib/auth";
 
 interface LoginFormProps {
   onSuccess: () => void;
@@ -31,6 +32,12 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
 
     try {
       const response = await apiRequest("POST", "/api/login", { email });
+      const result = await response.json();
+      
+      // Save user to localStorage for persistence
+      if (result.user) {
+        saveAuthToStorage(result.user);
+      }
       
       toast({
         title: "Login Successful",

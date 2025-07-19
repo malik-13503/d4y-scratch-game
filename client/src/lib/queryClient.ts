@@ -1,7 +1,12 @@
 import { QueryClient, QueryFunction } from "@tanstack/react-query";
+import { clearAuthFromStorage } from "./auth";
 
 async function throwIfResNotOk(res: Response) {
   if (!res.ok) {
+    // Clear localStorage on 401 errors from any request
+    if (res.status === 401) {
+      clearAuthFromStorage();
+    }
     const text = (await res.text()) || res.statusText;
     throw new Error(`${res.status}: ${text}`);
   }
@@ -34,6 +39,8 @@ export const getQueryFn: <T>(options: {
     });
 
     if (unauthorizedBehavior === "returnNull" && res.status === 401) {
+      // Clear localStorage on 401 to force re-login
+      clearAuthFromStorage();
       return null;
     }
 
