@@ -553,7 +553,30 @@ export class DatabaseStorage implements IStorage {
 
   async getTransactionsByUserId(userId: number): Promise<Transaction[]> {
     try {
-      return await db.select().from(transactions).where(eq(transactions.userId, userId));
+      const result = await db
+        .select({
+          id: transactions.id,
+          userId: transactions.userId,
+          gameId: transactions.gameId,
+          spinResultId: transactions.spinResultId,
+          amount: transactions.amount,
+          createdAt: transactions.createdAt,
+          updatedAt: transactions.updatedAt,
+          status: transactions.status,
+          paymentMethod: transactions.paymentMethod,
+          cardLast4: transactions.cardLast4,
+          cardBrand: transactions.cardBrand,
+          squarePaymentId: transactions.squarePaymentId,
+          squareReceiptUrl: transactions.squareReceiptUrl,
+          currency: transactions.currency,
+          spunNumber: spinResults.spunNumber, // Add the actual spun number from spin_results
+        })
+        .from(transactions)
+        .leftJoin(spinResults, eq(transactions.spinResultId, spinResults.id))
+        .where(eq(transactions.userId, userId))
+        .orderBy(transactions.createdAt);
+      
+      return result;
     } catch (error) {
       console.error("Error getting transactions by user ID:", error);
       return [];

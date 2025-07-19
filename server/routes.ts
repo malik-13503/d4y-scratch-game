@@ -759,7 +759,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const freeSpins = transactions.filter(t => parseFloat(t.amount.toString()) === 0).length;
       
       // For wins, we'll count transactions where user got a "winning" number (subjective, but let's say numbers 1-50 are "wins")
-      const totalWins = transactions.filter(t => t.spinResult && t.spinResult <= 50).length;
+      const totalWins = transactions.filter(t => t.spunNumber && t.spunNumber <= 50).length;
 
       res.json({
         totalSpins,
@@ -804,12 +804,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const gameHistory = transactions.map(transaction => {
         const amount = parseFloat(transaction.amount.toString());
         return {
-          number: transaction.spinResult || 0,
+          number: transaction.spunNumber || 0, // Use spunNumber from the joined spin_results table
           amount: amount,
           isFreePlay: amount === 0,
           playedAt: transaction.createdAt,
           gameId: transaction.gameId || 1,
-          isWin: transaction.spinResult && transaction.spinResult <= 50 // Consider 1-50 as wins
+          isWin: transaction.spunNumber && transaction.spunNumber <= 50 // Consider 1-50 as wins
         };
       }).reverse(); // Show most recent first
 
