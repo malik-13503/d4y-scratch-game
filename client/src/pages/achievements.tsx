@@ -291,10 +291,10 @@ export default function Achievements() {
                           COMPLETED
                         </Badge>
                       </div>
-                      <h3 className="text-white font-bold text-lg mb-2">{achievement.title}</h3>
-                      <p className="text-gray-200 text-sm mb-3">{achievement.description}</p>
+                      <h3 className="text-white font-bold text-lg mb-2 drop-shadow-md">{achievement.title}</h3>
+                      <p className="text-white text-sm mb-3 drop-shadow-sm opacity-90">{achievement.description}</p>
                       {achievement.reward && (
-                        <p className="text-green-400 text-sm font-medium">🎁 {achievement.reward}</p>
+                        <p className="text-white text-sm font-medium drop-shadow-sm">🎁 {achievement.reward}</p>
                       )}
                     </div>
                   );
@@ -349,17 +349,17 @@ export default function Achievements() {
                           IN PROGRESS
                         </Badge>
                       </div>
-                      <h3 className="text-white font-bold text-lg mb-2">{achievement.title}</h3>
-                      <p className="text-gray-200 text-sm mb-4">{achievement.description}</p>
+                      <h3 className="text-white font-bold text-lg mb-2 drop-shadow-md">{achievement.title}</h3>
+                      <p className="text-white text-sm mb-4 drop-shadow-sm opacity-90">{achievement.description}</p>
                       <div className="mb-3">
                         <div className="flex justify-between text-sm mb-2">
-                          <span className="text-gray-300">{achievement.current}/{achievement.target}</span>
-                          <span className="text-gray-300">{Math.round(progress)}%</span>
+                          <span className="text-white font-medium drop-shadow-sm">{achievement.current}/{achievement.target}</span>
+                          <span className="text-white font-medium drop-shadow-sm">{Math.round(progress)}%</span>
                         </div>
                         <Progress value={progress} className="h-3 bg-slate-700" />
                       </div>
                       {achievement.reward && (
-                        <p className="text-gray-400 text-sm font-medium">🎁 {achievement.reward}</p>
+                        <p className="text-white text-sm font-medium drop-shadow-sm">🎁 {achievement.reward}</p>
                       )}
                     </div>
                   );
