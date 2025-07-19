@@ -138,8 +138,8 @@ export default function Dashboard() {
         {/* Enhanced Stats Overview with eye-catching gradients */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           {/* Total Wins Card */}
-          <Card className="relative overflow-hidden bg-gradient-to-br from-emerald-500/20 to-green-600/20 border-emerald-400/40 backdrop-blur-xl shadow-2xl hover:shadow-emerald-500/20 transition-all duration-300">
-            <div className="absolute inset-0 bg-gradient-to-br from-emerald-400/10 to-green-500/10 blur-xl"></div>
+          <Card className="relative overflow-hidden bg-gradient-to-br from-emerald-900/60 to-green-900/60 border-emerald-400/40 backdrop-blur-xl shadow-2xl hover:shadow-emerald-500/20 transition-all duration-300">
+            <div className="absolute inset-0 bg-gradient-to-br from-emerald-800/20 to-green-800/20 blur-xl"></div>
             <CardContent className="relative p-6">
               <div className="flex items-center space-x-4">
                 <div className="p-3 bg-gradient-to-br from-emerald-500 to-green-600 rounded-xl shadow-lg">
@@ -156,8 +156,8 @@ export default function Dashboard() {
           </Card>
 
           {/* Total Spent Card */}
-          <Card className="relative overflow-hidden bg-gradient-to-br from-blue-500/20 to-cyan-600/20 border-blue-400/40 backdrop-blur-xl shadow-2xl hover:shadow-blue-500/20 transition-all duration-300">
-            <div className="absolute inset-0 bg-gradient-to-br from-blue-400/10 to-cyan-500/10 blur-xl"></div>
+          <Card className="relative overflow-hidden bg-gradient-to-br from-blue-900/60 to-cyan-900/60 border-blue-400/40 backdrop-blur-xl shadow-2xl hover:shadow-blue-500/20 transition-all duration-300">
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-800/20 to-cyan-800/20 blur-xl"></div>
             <CardContent className="relative p-6">
               <div className="flex items-center space-x-4">
                 <div className="p-3 bg-gradient-to-br from-blue-500 to-cyan-600 rounded-xl shadow-lg">
@@ -174,8 +174,8 @@ export default function Dashboard() {
           </Card>
 
           {/* Total Spins Card */}
-          <Card className="relative overflow-hidden bg-gradient-to-br from-purple-500/20 to-pink-600/20 border-purple-400/40 backdrop-blur-xl shadow-2xl hover:shadow-purple-500/20 transition-all duration-300">
-            <div className="absolute inset-0 bg-gradient-to-br from-purple-400/10 to-pink-500/10 blur-xl"></div>
+          <Card className="relative overflow-hidden bg-gradient-to-br from-purple-900/60 to-pink-900/60 border-purple-400/40 backdrop-blur-xl shadow-2xl hover:shadow-purple-500/20 transition-all duration-300">
+            <div className="absolute inset-0 bg-gradient-to-br from-purple-800/20 to-pink-800/20 blur-xl"></div>
             <CardContent className="relative p-6">
               <div className="flex items-center space-x-4">
                 <div className="p-3 bg-gradient-to-br from-purple-500 to-pink-600 rounded-xl shadow-lg">
@@ -192,8 +192,8 @@ export default function Dashboard() {
           </Card>
 
           {/* Free Spins Card */}
-          <Card className="relative overflow-hidden bg-gradient-to-br from-yellow-500/20 to-orange-600/20 border-yellow-400/40 backdrop-blur-xl shadow-2xl hover:shadow-yellow-500/20 transition-all duration-300">
-            <div className="absolute inset-0 bg-gradient-to-br from-yellow-400/10 to-orange-500/10 blur-xl"></div>
+          <Card className="relative overflow-hidden bg-gradient-to-br from-yellow-900/60 to-orange-900/60 border-yellow-400/40 backdrop-blur-xl shadow-2xl hover:shadow-yellow-500/20 transition-all duration-300">
+            <div className="absolute inset-0 bg-gradient-to-br from-yellow-800/20 to-orange-800/20 blur-xl"></div>
             <CardContent className="relative p-6">
               <div className="flex items-center space-x-4">
                 <div className="p-3 bg-gradient-to-br from-yellow-500 to-orange-600 rounded-xl shadow-lg">
@@ -212,8 +212,8 @@ export default function Dashboard() {
 
         {/* Quick Action Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <Card className="relative overflow-hidden bg-gradient-to-br from-purple-500/20 to-blue-600/20 border-purple-400/40 backdrop-blur-xl shadow-2xl hover:shadow-purple-500/20 transition-all duration-300">
-            <div className="absolute inset-0 bg-gradient-to-br from-purple-400/10 to-blue-500/10 blur-xl"></div>
+          <Card className="relative overflow-hidden bg-gradient-to-br from-purple-900/70 to-blue-900/70 border-purple-400/40 backdrop-blur-xl shadow-2xl hover:shadow-purple-500/20 transition-all duration-300">
+            <div className="absolute inset-0 bg-gradient-to-br from-purple-800/30 to-blue-800/30 blur-xl"></div>
             <CardContent className="relative p-6">
               <div className="text-center">
                 <div className="p-4 bg-gradient-to-br from-purple-500 to-blue-600 rounded-xl mx-auto w-fit mb-4 shadow-lg">
@@ -231,8 +231,8 @@ export default function Dashboard() {
             </CardContent>
           </Card>
 
-          <Card className="relative overflow-hidden bg-gradient-to-br from-emerald-500/20 to-green-600/20 border-emerald-400/40 backdrop-blur-xl shadow-2xl hover:shadow-emerald-500/20 transition-all duration-300">
-            <div className="absolute inset-0 bg-gradient-to-br from-emerald-400/10 to-green-500/10 blur-xl"></div>
+          <Card className="relative overflow-hidden bg-gradient-to-br from-emerald-900/70 to-green-900/70 border-emerald-400/40 backdrop-blur-xl shadow-2xl hover:shadow-emerald-500/20 transition-all duration-300">
+            <div className="absolute inset-0 bg-gradient-to-br from-emerald-800/30 to-green-800/30 blur-xl"></div>
             <CardContent className="relative p-6">
               <div className="text-center">
                 <div className="p-4 bg-gradient-to-br from-emerald-500 to-green-600 rounded-xl mx-auto w-fit mb-4 shadow-lg">
@@ -250,8 +250,8 @@ export default function Dashboard() {
             </CardContent>
           </Card>
 
-          <Card className="relative overflow-hidden bg-gradient-to-br from-yellow-500/20 to-orange-600/20 border-yellow-400/40 backdrop-blur-xl shadow-2xl hover:shadow-yellow-500/20 transition-all duration-300">
-            <div className="absolute inset-0 bg-gradient-to-br from-yellow-400/10 to-orange-500/10 blur-xl"></div>
+          <Card className="relative overflow-hidden bg-gradient-to-br from-yellow-900/70 to-orange-900/70 border-yellow-400/40 backdrop-blur-xl shadow-2xl hover:shadow-yellow-500/20 transition-all duration-300">
+            <div className="absolute inset-0 bg-gradient-to-br from-yellow-800/30 to-orange-800/30 blur-xl"></div>
             <CardContent className="relative p-6">
               <div className="text-center">
                 <div className="p-4 bg-gradient-to-br from-yellow-500 to-orange-600 rounded-xl mx-auto w-fit mb-4 shadow-lg">
