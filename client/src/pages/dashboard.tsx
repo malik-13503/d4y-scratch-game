@@ -260,10 +260,10 @@ export default function Dashboard() {
                 <h3 className="text-lg font-bold text-white mb-2">Achievements</h3>
                 <p className="text-gray-200 text-sm mb-4">Track your wins and milestones</p>
                 <Button 
-                  disabled
-                  className="bg-gray-600 text-gray-300 cursor-not-allowed px-6 py-2 rounded-xl"
+                  onClick={() => setLocation("/achievements")}
+                  className="bg-gradient-to-r from-yellow-600 to-orange-600 hover:from-yellow-700 hover:to-orange-700 text-white font-bold px-6 py-2 rounded-xl shadow-lg transition-all duration-300"
                 >
-                  Coming Soon
+                  View Progress
                 </Button>
               </div>
             </CardContent>

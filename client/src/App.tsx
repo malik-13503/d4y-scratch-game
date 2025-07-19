@@ -19,6 +19,8 @@ import FreeSpins from "@/pages/free-spins";
 import WelcomePage from "@/pages/welcome";
 import AuthLandingPage from "@/pages/auth-landing";
 import Dashboard from "@/pages/dashboard";
+import Transactions from "@/pages/transactions";
+import Achievements from "@/pages/achievements";
 
 import NotFound from "@/pages/not-found";
 
@@ -41,6 +43,8 @@ function Router() {
       <Route path="/free-spins" component={FreeSpins} />
       <Route path="/welcome" component={WelcomePage} />
       <Route path="/dashboard" component={Dashboard} />
+      <Route path="/transactions" component={Transactions} />
+      <Route path="/achievements" component={Achievements} />
 
       <Route component={NotFound} />
     </Switch>
