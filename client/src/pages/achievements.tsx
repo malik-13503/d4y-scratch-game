@@ -186,23 +186,27 @@ export default function Achievements() {
         <div className="absolute bottom-20 right-10 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
       </div>
 
-      {/* Header */}
+      {/* Responsive Header */}
       <header className="relative z-10 bg-black/20 backdrop-blur-xl border-b border-purple-500/30">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
+          <div className="flex flex-col space-y-4 sm:space-y-0 sm:flex-row sm:items-center sm:justify-between">
+            
+            {/* Top Row: Back Button + Logo + Title */}
+            <div className="flex items-center space-x-2 sm:space-x-4">
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => setLocation("/dashboard")}
-                className="text-gray-300 hover:text-white hover:bg-white/10"
+                className="text-gray-300 hover:text-white hover:bg-white/10 px-2 sm:px-3"
               >
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Back to Dashboard
+                <ArrowLeft className="h-4 w-4 sm:mr-2" />
+                <span className="hidden sm:inline">Back to Dashboard</span>
               </Button>
-              <img src={logoPath} alt="Hit The Road Jackpot" className="h-8 w-auto" />
+              <img src={logoPath} alt="Hit The Road Jackpot" className="h-6 w-auto sm:h-8" />
+              <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-white drop-shadow-lg">
+                Achievements
+              </h1>
             </div>
-            <h1 className="text-2xl font-bold text-white">Achievements</h1>
           </div>
         </div>
       </header>

@@ -59,28 +59,45 @@ export default function Transactions() {
         <div className="absolute bottom-20 right-10 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
       </div>
 
-      {/* Header */}
+      {/* Responsive Header */}
       <header className="relative z-10 bg-black/20 backdrop-blur-xl border-b border-purple-500/30">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setLocation("/dashboard")}
-                className="text-gray-300 hover:text-white hover:bg-white/10"
-              >
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Back to Dashboard
-              </Button>
-              <img src={logoPath} alt="Hit The Road Jackpot" className="h-8 w-auto" />
-            </div>
-            <div className="flex items-center space-x-4">
-              <h1 className="text-2xl font-bold text-white">Transaction History</h1>
+          <div className="flex flex-col space-y-4 sm:space-y-0 sm:flex-row sm:items-center sm:justify-between">
+            
+            {/* Top Row: Back Button + Logo + Title */}
+            <div className="flex items-center justify-between sm:justify-start sm:space-x-4">
+              <div className="flex items-center space-x-2 sm:space-x-4">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setLocation("/dashboard")}
+                  className="text-gray-300 hover:text-white hover:bg-white/10 px-2 sm:px-3"
+                >
+                  <ArrowLeft className="h-4 w-4 sm:mr-2" />
+                  <span className="hidden sm:inline">Back to Dashboard</span>
+                </Button>
+                <img src={logoPath} alt="Hit The Road Jackpot" className="h-6 w-auto sm:h-8" />
+                <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-white drop-shadow-lg">
+                  Transaction History
+                </h1>
+              </div>
+              
+              {/* Mobile Refresh Button */}
               <Button
                 onClick={refreshData}
                 size="sm"
-                className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white border-0 shadow-lg"
+                className="sm:hidden bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white border-0 shadow-lg px-3"
+              >
+                <RefreshCw className="h-4 w-4" />
+              </Button>
+            </div>
+            
+            {/* Desktop Refresh Button */}
+            <div className="hidden sm:flex">
+              <Button
+                onClick={refreshData}
+                size="sm"
+                className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white border-0 shadow-lg"
               >
                 <RefreshCw className="h-4 w-4 mr-2" />
                 Refresh
