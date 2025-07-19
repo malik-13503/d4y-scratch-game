@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, forwardRef, useImperativeHandle } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Gift, DollarSign, Sparkles, Play } from "lucide-react";
@@ -10,13 +10,13 @@ interface ProfessionalWheelProps {
   onSpin: () => Promise<number>;
   disabled?: boolean;
   totalNumbers?: number;
+  onInitiateSpin?: () => void;
 }
 
-export function ProfessionalWheel({
-  onSpin,
-  disabled = false,
-  totalNumbers = 200,
-}: ProfessionalWheelProps) {
+export const ProfessionalWheel = forwardRef<
+  { triggerSpin: () => Promise<void> },
+  ProfessionalWheelProps
+>(({ onSpin, disabled = false, totalNumbers = 200, onInitiateSpin }, ref) => {
   const [isSpinning, setIsSpinning] = useState(false);
   const [rotation, setRotation] = useState(0);
   const [pointerRotation, setPointerRotation] = useState(0);
@@ -24,6 +24,13 @@ export function ProfessionalWheel({
   const [showResultModal, setShowResultModal] = useState(false);
   const [isFreePlay, setIsFreePlay] = useState(false);
   const [amountCharged, setAmountCharged] = useState<number>(0);
+
+  // Expose the handleSpin function for external triggers
+  useImperativeHandle(ref, () => ({
+    triggerSpin: async () => {
+      await handleSpin();
+    },
+  }));
 
   const wheelRef = useRef<HTMLDivElement>(null);
 
@@ -261,7 +268,7 @@ export function ProfessionalWheel({
 
       {/* Spin Button */}
       <Button
-        onClick={handleSpin}
+        onClick={onInitiateSpin || handleSpin}
         disabled={isSpinning || disabled}
         className="w-full max-w-xs bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-white font-bold py-3 sm:py-4 px-6 sm:px-8 rounded-xl text-base sm:text-lg shadow-lg transition-all duration-300 disabled:opacity-50 touch-manipulation"
       >
@@ -374,4 +381,4 @@ export function ProfessionalWheel({
       </Dialog>
     </div>
   );
-}
+});

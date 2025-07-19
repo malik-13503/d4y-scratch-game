@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams, useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { ProfessionalWheel } from "@/components/professional-wheel";
 import { Confetti } from "@/components/confetti";
+import { DisclaimerPopup } from "@/components/disclaimer-popup";
 import logoPath from "@assets/logo_1751918412862.png";
 import { 
   Clock, 
@@ -28,8 +29,10 @@ export default function GamePage() {
   const [, setLocation] = useLocation();
   const [lastResult, setLastResult] = useState<number | null>(null);
   const [showConfetti, setShowConfetti] = useState(false);
-
+  const [showDisclaimer, setShowDisclaimer] = useState(false);
+  const [isSpinning, setIsSpinning] = useState(false);
   const [playerCount, setPlayerCount] = useState(1);
+  const wheelRef = useRef<{ triggerSpin: () => Promise<void> }>(null);
 
   // Simulate real-time player count updates
   useEffect(() => {
@@ -71,6 +74,25 @@ export default function GamePage() {
     );
   }
 
+  const handleInitiateSpin = () => {
+    setShowDisclaimer(true);
+  };
+
+  const handleConfirmSpin = async () => {
+    setShowDisclaimer(false);
+    setIsSpinning(true);
+    
+    // Trigger the wheel to start spinning and call the API
+    if (wheelRef.current) {
+      try {
+        await wheelRef.current.triggerSpin();
+      } catch (error) {
+        console.error('Spin failed:', error);
+        setIsSpinning(false);
+      }
+    }
+  };
+
   const handleSpin = async (): Promise<number> => {
     if (!game) throw new Error("Game not found");
 
@@ -81,6 +103,7 @@ export default function GamePage() {
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include',
         body: JSON.stringify({
           gameId: game.id,
           agreedToTerms: true
@@ -97,6 +120,7 @@ export default function GamePage() {
       
       setLastResult(result);
       setShowConfetti(true);
+      setIsSpinning(false);
       
       // Hide confetti after 5 seconds
       setTimeout(() => setShowConfetti(false), 5000);
@@ -104,18 +128,9 @@ export default function GamePage() {
       return result;
     } catch (error) {
       console.error('Spin error:', error);
+      setIsSpinning(false);
       throw error;
     }
-  };
-
-  const handleNumberDraw = async (): Promise<number> => {
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    const result = Math.floor(Math.random() * 125) + 1;
-    setLastResult(result);
-    setShowConfetti(true);
-    setTimeout(() => setShowConfetti(false), 3000);
-    return result;
   };
 
   const progress = ((game.totalNumbers - game.numbersLeft) / game.totalNumbers) * 100;
@@ -208,9 +223,11 @@ export default function GamePage() {
               <CardContent className="p-2 sm:p-4 lg:p-8">
                 <div className="text-center">
                   <ProfessionalWheel 
+                    ref={wheelRef}
                     onSpin={handleSpin} 
-                    disabled={false}
+                    disabled={isSpinning}
                     totalNumbers={game?.totalNumbers || 200}
+                    onInitiateSpin={handleInitiateSpin}
                   />
                 </div>
               </CardContent>
@@ -306,6 +323,14 @@ export default function GamePage() {
           </div>
         </div>
       </main>
+
+      {/* Disclaimer Popup */}
+      <DisclaimerPopup
+        isOpen={showDisclaimer}
+        onClose={() => setShowDisclaimer(false)}
+        onConfirm={handleConfirmSpin}
+        gameTitle={game.name}
+      />
     </div>
   );
 }

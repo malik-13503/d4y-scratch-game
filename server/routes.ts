@@ -722,7 +722,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const user = await storage.getUser(userId);
-      if (!user || !user.cardOnFile) {
+      if (!user) {
+        return res.status(400).json({ message: "User not found" });
+      }
+
+      // For sandbox environment, bypass card check as we simulate card setup
+      if (process.env.SQUARE_ENVIRONMENT === 'sandbox') {
+        // Continue with spin logic
+      } else if (!user.cardOnFile) {
         return res.status(400).json({ message: "No card on file" });
       }
 
@@ -755,22 +762,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!spinResult.isFreePlay) {
         const chargeAmount = parseFloat(spinResult.amountCharged);
         
-        // Get user's cards
-        const cards = await squareService.getCustomerCards(user.squareCustomerId!);
-        if (cards.length === 0) {
-          return res.status(400).json({ message: "No cards on file" });
-        }
+        // For sandbox environment, simulate payment processing
+        if (process.env.SQUARE_ENVIRONMENT === 'sandbox') {
+          // Simulate successful payment for testing
+          console.log(`Simulated charge of $${chargeAmount} for user ${userId}`);
+        } else {
+          // Production payment processing
+          const cards = await squareService.getCustomerCards(user.squareCustomerId!);
+          if (cards.length === 0) {
+            return res.status(400).json({ message: "No cards on file" });
+          }
 
-        // Use the first card
-        const card = cards[0];
-        
-        // Process payment
-        const payment = await squareService.chargeCard(
-          chargeAmount,
-          "USD",
-          card.id!,
-          user.squareCustomerId
-        );
+          // Use the first card
+          const card = cards[0];
+          
+          // Process payment
+          const payment = await squareService.chargeCard(
+            chargeAmount,
+            "USD",
+            card.id!,
+            user.squareCustomerId
+          );
+        }
 
         // Record transaction
         await storage.createTransaction({
