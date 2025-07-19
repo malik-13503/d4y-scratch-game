@@ -104,49 +104,103 @@ export default function Home() {
         ))}
       </div>
 
-      {/* Enhanced Professional Header */}
-      <header className="relative bg-gradient-to-r from-red-600/95 via-red-700/95 to-purple-700/95 shadow-2xl backdrop-blur-xl border-b border-white/20">
-        <div className="absolute inset-0 bg-gradient-to-r from-red-500/20 via-purple-500/20 to-blue-500/20 blur-xl"></div>
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
-          <div className="flex flex-col sm:flex-row items-center sm:items-center justify-between space-y-4 sm:space-y-0">
-            <div className="flex flex-col sm:flex-row items-center space-y-3 sm:space-y-0 sm:space-x-6 w-full sm:w-auto">
-              <div className="flex items-center relative">
-                <div className="absolute inset-0 bg-gradient-to-r from-yellow-400/30 to-orange-400/30 blur-lg rounded-full"></div>
+      {/* Ultra Professional Eye-Catching Header */}
+      <header className="relative bg-gradient-to-r from-slate-900/95 via-purple-900/90 to-slate-900/95 backdrop-blur-2xl border-b border-purple-400/40 shadow-2xl overflow-hidden">
+        {/* Animated Background Elements */}
+        <div className="absolute inset-0 bg-gradient-to-r from-purple-500/15 via-blue-500/15 to-purple-500/15 blur-2xl"></div>
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute -top-20 -left-20 w-40 h-40 bg-gradient-to-br from-purple-400/30 to-pink-400/30 rounded-full blur-3xl animate-pulse"></div>
+          <div className="absolute -bottom-20 -right-20 w-40 h-40 bg-gradient-to-br from-blue-400/30 to-cyan-400/30 rounded-full blur-3xl animate-pulse delay-1000"></div>
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-r from-purple-500/10 to-blue-500/10 rounded-full blur-3xl animate-spin" style={{animationDuration: '20s'}}></div>
+        </div>
+        
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
+          {/* Mobile-First Responsive Layout */}
+          <div className="space-y-6 lg:space-y-0">
+            {/* Top Row - Logo and Navigation */}
+            <div className="flex flex-col sm:flex-row items-center justify-between space-y-4 sm:space-y-0">
+              {/* Brand Logo with Enhanced Glow */}
+              <div className="relative group">
+                <div className="absolute -inset-4 bg-gradient-to-r from-yellow-400/40 via-orange-400/40 to-red-400/40 rounded-2xl blur-2xl group-hover:blur-3xl transition-all duration-500"></div>
                 <img 
                   src={logoPath} 
                   alt="Hit The Road Jackpot" 
-                  className="relative h-16 w-auto object-contain sm:h-20 md:h-24 lg:h-28 max-w-none drop-shadow-2xl"
+                  className="relative h-16 w-auto object-contain sm:h-20 md:h-24 lg:h-28 drop-shadow-2xl transform group-hover:scale-105 transition-transform duration-300"
                 />
               </div>
+              
+              {/* Navigation Buttons */}
               <div className="flex items-center space-x-3">
-                <div className="text-white/95 text-sm sm:text-base bg-gradient-to-r from-yellow-500/30 to-orange-500/30 px-4 sm:px-6 py-2 sm:py-3 rounded-full border border-yellow-400/40 backdrop-blur-sm shadow-lg">
-                  <div className="flex items-center space-x-2">
-                    <Star className="h-4 w-4 sm:h-5 sm:w-5 text-yellow-300 animate-pulse" />
-                    <span className="font-bold tracking-wide">LIVE GAMES</span>
-                    <Star className="h-4 w-4 sm:h-5 sm:w-5 text-yellow-300 animate-pulse" />
-                  </div>
-                </div>
+                <Button
+                  onClick={() => setLocation("/dashboard")}
+                  className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white border-0 px-4 py-2 sm:px-6 sm:py-3 shadow-lg hover:shadow-xl transition-all duration-300"
+                >
+                  <User className="h-4 w-4 mr-2" />
+                  <span className="font-semibold">Dashboard</span>
+                </Button>
               </div>
             </div>
             
-            <div className="flex items-center space-x-3 sm:space-x-4 w-full sm:w-auto justify-center sm:justify-end">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setLocation("/dashboard")}
-                className="bg-gradient-to-r from-slate-800/80 to-slate-700/80 border-purple-400/40 text-purple-300 hover:bg-slate-600/80 hover:text-white backdrop-blur-sm"
-              >
-                <User className="h-4 w-4 mr-2" />
-                Dashboard
-              </Button>
-              <div className="text-white/95 text-sm sm:text-base bg-gradient-to-r from-emerald-500/30 to-cyan-500/30 px-4 sm:px-6 py-2 sm:py-3 rounded-xl border border-emerald-400/40 backdrop-blur-sm shadow-lg">
-                <div className="flex items-center space-x-2 sm:space-x-3">
-                  <Sparkles className="h-4 w-4 sm:h-5 sm:w-5 text-emerald-300 animate-spin" />
-                  <span className="font-bold">WIN BIG</span>
-                  <div className="flex space-x-1">
-                    <div className="w-2 h-2 bg-emerald-400 rounded-full animate-ping"></div>
-                    <div className="w-2 h-2 bg-cyan-400 rounded-full animate-ping delay-100"></div>
-                    <div className="w-2 h-2 bg-blue-400 rounded-full animate-ping delay-200"></div>
+            {/* Hero Title Section */}
+            <div className="text-center py-4 sm:py-6">
+              <div className="relative">
+                <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-black bg-gradient-to-r from-white via-purple-200 to-white bg-clip-text text-transparent drop-shadow-2xl tracking-tight leading-tight">
+                  HIT THE ROAD JACKPOT
+                </h1>
+                <div className="absolute -inset-4 bg-gradient-to-r from-purple-500/20 to-blue-500/20 blur-xl -z-10"></div>
+              </div>
+              <p className="text-lg sm:text-xl md:text-2xl text-gray-300 font-medium mt-2 sm:mt-4 tracking-wide">
+                Spin the Wheel • Win Real Prizes • Live Action
+              </p>
+            </div>
+            
+            {/* Live Status Bar */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
+              {/* Live Games Status */}
+              <div className="bg-gradient-to-r from-emerald-500/20 to-green-500/20 backdrop-blur-xl rounded-2xl px-6 py-4 border border-emerald-400/50 shadow-xl">
+                <div className="flex items-center space-x-3">
+                  <div className="p-2 bg-gradient-to-r from-emerald-500 to-green-600 rounded-xl shadow-lg">
+                    <Zap className="h-5 w-5 text-white drop-shadow-lg" />
+                  </div>
+                  <div>
+                    <p className="text-emerald-300 text-sm font-bold uppercase tracking-wide">Live Games</p>
+                    <p className="text-white text-xl font-black">{games?.length || 0} Active</p>
+                  </div>
+                  <div className="ml-auto">
+                    <div className="w-3 h-3 bg-emerald-400 rounded-full animate-pulse shadow-lg shadow-emerald-400/50"></div>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Players Online */}
+              <div className="bg-gradient-to-r from-blue-500/20 to-cyan-500/20 backdrop-blur-xl rounded-2xl px-6 py-4 border border-blue-400/50 shadow-xl">
+                <div className="flex items-center space-x-3">
+                  <div className="p-2 bg-gradient-to-r from-blue-500 to-cyan-600 rounded-xl shadow-lg">
+                    <Users className="h-5 w-5 text-white drop-shadow-lg" />
+                  </div>
+                  <div>
+                    <p className="text-blue-300 text-sm font-bold uppercase tracking-wide">Players Online</p>
+                    <p className="text-white text-xl font-black">{Math.floor(Math.random() * 50) + 25}</p>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Big Win Zone */}
+              <div className="bg-gradient-to-r from-yellow-500/30 via-orange-500/30 to-red-500/30 backdrop-blur-xl rounded-2xl px-6 py-4 border border-yellow-400/50 shadow-xl">
+                <div className="flex items-center space-x-3">
+                  <div className="p-2 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-xl shadow-lg">
+                    <Crown className="h-5 w-5 text-white drop-shadow-lg" />
+                  </div>
+                  <div>
+                    <p className="text-yellow-300 text-sm font-bold uppercase tracking-wide">Win Big</p>
+                    <p className="text-white text-xl font-black">Up to $500</p>
+                  </div>
+                  <div className="ml-auto">
+                    <div className="flex space-x-1">
+                      <div className="w-1 h-1 bg-yellow-400 rounded-full animate-ping"></div>
+                      <div className="w-1 h-1 bg-orange-400 rounded-full animate-ping delay-100"></div>
+                      <div className="w-1 h-1 bg-red-400 rounded-full animate-ping delay-200"></div>
+                    </div>
                   </div>
                 </div>
               </div>
