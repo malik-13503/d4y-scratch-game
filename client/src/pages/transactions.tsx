@@ -160,7 +160,7 @@ export default function Transactions() {
                 <Button
                   size="sm"
                   variant="outline"
-                  className="border-slate-600 text-gray-300 hover:bg-slate-700"
+                  className="border-slate-500 text-white bg-slate-700/50 hover:bg-slate-600 hover:text-white font-medium"
                   disabled
                 >
                   <Filter className="h-4 w-4 mr-2" />
@@ -169,7 +169,7 @@ export default function Transactions() {
                 <Button
                   size="sm"
                   variant="outline"
-                  className="border-slate-600 text-gray-300 hover:bg-slate-700"
+                  className="border-slate-500 text-white bg-slate-700/50 hover:bg-slate-600 hover:text-white font-medium"
                   disabled
                 >
                   <Download className="h-4 w-4 mr-2" />
@@ -214,7 +214,7 @@ export default function Transactions() {
                       <div>
                         <div className="flex items-center space-x-3">
                           <p className="text-white font-bold text-lg">
-                            Spin Result: {transaction.spinResult || 'N/A'}
+                            Spin Result: {transaction.spinResult ? transaction.spinResult : 'Processing'}
                           </p>
                           <Badge className={`${parseFloat(transaction.amount) === 0 ? "bg-gradient-to-r from-emerald-500 to-green-500" : "bg-gradient-to-r from-blue-500 to-cyan-500"} text-white border-0 font-bold`}>
                             {parseFloat(transaction.amount) === 0 ? 'Free Spin' : 'Paid Spin'}

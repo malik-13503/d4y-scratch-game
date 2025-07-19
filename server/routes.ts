@@ -868,10 +868,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
           );
         }
 
-        // Record transaction
+        // Record transaction with spin result
         await storage.createTransaction({
           userId: userId,
           gameId: gameId,
+          spinResult: spinResult.spunNumber, // Store the actual spun number
           spinResultId: spinResult.id,
           squarePaymentId: paymentResult.id,
           amount: chargeAmount.toString(),
