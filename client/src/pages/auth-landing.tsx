@@ -28,6 +28,7 @@ type FlowStep = "auth" | "card-setup" | "complete";
 
 export default function AuthLandingPage() {
   const [currentStep, setCurrentStep] = useState<FlowStep>("auth");
+  const [authType, setAuthType] = useState<"login" | "signup">("login");
   const [, setLocation] = useLocation();
   
   const { data: user, isLoading, refetch } = useQuery({
@@ -35,9 +36,15 @@ export default function AuthLandingPage() {
     queryFn: getQueryFn({ on401: "returnNull" }),
   });
 
-  const handleAuthSuccess = () => {
+  const handleAuthSuccess = (type: "login" | "signup") => {
     refetch();
-    setCurrentStep("card-setup");
+    setAuthType(type);
+    // Skip payment setup for login, only require for new signups
+    if (type === "login") {
+      setLocation("/games");
+    } else {
+      setCurrentStep("card-setup");
+    }
   };
 
   const handleCardSetupSuccess = () => {
@@ -194,11 +201,11 @@ export default function AuthLandingPage() {
                         </TabsList>
                         
                         <TabsContent value="signup">
-                          <SignupForm onSuccess={handleAuthSuccess} />
+                          <SignupForm onSuccess={() => handleAuthSuccess("signup")} />
                         </TabsContent>
                         
                         <TabsContent value="login">
-                          <LoginForm onSuccess={handleAuthSuccess} />
+                          <LoginForm onSuccess={() => handleAuthSuccess("login")} />
                         </TabsContent>
                       </Tabs>
                     </CardContent>

@@ -9,6 +9,7 @@ export const users = pgTable("users", {
   firstName: text("first_name").notNull(),
   lastName: text("last_name").notNull(),
   phone: text("phone"),
+  password: text("password").notNull(),
   isActive: boolean("is_active").notNull().default(true),
   squareCustomerId: text("square_customer_id").unique(),
   cardOnFile: boolean("card_on_file").notNull().default(false),
