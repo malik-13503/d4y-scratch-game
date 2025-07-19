@@ -150,59 +150,126 @@ export default function GamePage() {
 
       {/* Confetti is handled by the wheel component */}
 
-      {/* Header */}
-      <header className="relative z-10 bg-black/20 backdrop-blur-xl border-b border-purple-500/30 shadow-2xl">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between space-y-3 sm:space-y-0">
-            {/* Left side - Back button and game info */}
-            <div className="flex items-center space-x-3 sm:space-x-4 w-full sm:w-auto">
+      {/* Enhanced Professional Header */}
+      <header className="relative z-10 bg-gradient-to-r from-slate-900/90 via-purple-900/80 to-slate-900/90 backdrop-blur-2xl border-b border-purple-400/40 shadow-2xl">
+        {/* Animated Background Elements */}
+        <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 via-blue-500/10 to-purple-500/10 blur-xl"></div>
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute -top-10 -left-10 w-32 h-32 bg-gradient-to-br from-purple-400/20 to-pink-400/20 rounded-full blur-2xl animate-pulse"></div>
+          <div className="absolute -bottom-10 -right-10 w-32 h-32 bg-gradient-to-br from-blue-400/20 to-cyan-400/20 rounded-full blur-2xl animate-pulse delay-1000"></div>
+        </div>
+        
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-6">
+          {/* Mobile-First Layout */}
+          <div className="space-y-4 lg:space-y-0">
+            {/* Top Row - Back Button + Brand Logo */}
+            <div className="flex items-center justify-between">
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => setLocation("/")}
-                className="text-gray-300 hover:text-white hover:bg-white/10 flex-shrink-0"
+                className="text-gray-300 hover:text-white hover:bg-white/20 transition-all duration-300 bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg px-3 py-2"
               >
-                <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5 mr-1 sm:mr-2" />
-                <span className="hidden sm:inline">Back</span>
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                <span className="text-sm font-semibold">BACK TO GAMES</span>
               </Button>
-              <div className="flex items-center space-x-2 sm:space-x-3 min-w-0">
-                <div className="p-2 sm:p-3 bg-gradient-to-r from-red-500 to-red-600 rounded-xl shadow-lg flex-shrink-0">
-                  <span className="text-xl sm:text-3xl">{game.emoji}</span>
+              <img 
+                src={logoPath} 
+                alt="Hit The Road Jackpot" 
+                className="h-8 w-auto object-contain sm:h-10 md:h-12 lg:h-14 drop-shadow-lg"
+              />
+            </div>
+            
+            {/* Game Title Section */}
+            <div className="text-center lg:text-left">
+              <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
+                {/* Game Identity */}
+                <div className="flex flex-col sm:flex-row items-center sm:items-start lg:items-center space-y-3 sm:space-y-0 sm:space-x-4">
+                  <div className="relative">
+                    <div className="p-3 sm:p-4 bg-gradient-to-br from-red-500 via-pink-500 to-purple-600 rounded-2xl shadow-2xl relative overflow-hidden">
+                      <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent"></div>
+                      <span className="text-2xl sm:text-3xl lg:text-4xl relative z-10 drop-shadow-lg">{game.emoji}</span>
+                    </div>
+                    <div className="absolute -inset-2 bg-gradient-to-br from-red-400/30 to-purple-400/30 rounded-3xl blur-xl -z-10"></div>
+                  </div>
+                  
+                  <div className="text-center sm:text-left">
+                    <h1 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-black bg-gradient-to-r from-white via-purple-200 to-white bg-clip-text text-transparent drop-shadow-2xl tracking-tight leading-tight">
+                      {game.name}
+                    </h1>
+                    <div className="flex items-center justify-center sm:justify-start space-x-2 mt-1">
+                      <Badge className="bg-gradient-to-r from-purple-500 to-blue-500 text-white border-0 px-3 py-1 font-bold shadow-lg">
+                        <Zap className="h-3 w-3 mr-1" />
+                        LIVE
+                      </Badge>
+                      <span className="text-gray-300 font-mono text-sm bg-white/10 px-2 py-1 rounded border border-white/20">
+                        {game.code}
+                      </span>
+                    </div>
+                  </div>
                 </div>
-                <div className="min-w-0">
-                  <h1 className="text-xl sm:text-3xl font-bold bg-gradient-to-r from-red-400 to-pink-400 bg-clip-text text-transparent truncate">
-                    {game.name}
-                  </h1>
-                  <p className="text-gray-400 font-mono text-xs sm:text-sm">{game.code}</p>
+                
+                {/* Prize Showcase */}
+                <div className="flex justify-center lg:justify-end">
+                  <div className="relative">
+                    <div className="bg-gradient-to-r from-yellow-500/30 via-orange-500/30 to-red-500/30 backdrop-blur-xl rounded-2xl px-6 py-4 border border-yellow-400/50 shadow-2xl">
+                      <div className="flex items-center space-x-3">
+                        <div className="p-2 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-xl shadow-lg">
+                          <Trophy className="h-6 w-6 text-white drop-shadow-lg" />
+                        </div>
+                        <div>
+                          <p className="text-yellow-300 text-sm font-bold uppercase tracking-wide">Grand Prize</p>
+                          <p className="text-white text-xl sm:text-2xl font-black drop-shadow-lg">{game.prize}</p>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="absolute -inset-1 bg-gradient-to-r from-yellow-400/20 to-orange-400/20 rounded-2xl blur-lg -z-10"></div>
+                  </div>
                 </div>
               </div>
             </div>
             
-            {/* Right side - Logo and Live Stats */}
-            <div className="flex items-center space-x-3 sm:space-x-6 w-full sm:w-auto">
-              <img 
-                src={logoPath} 
-                alt="Hit The Road Jackpot" 
-                className="h-10 w-auto object-contain sm:h-12 md:h-14 lg:h-16"
-              />
-              <div className="flex items-center space-x-2 sm:space-x-4 bg-white/5 backdrop-blur-sm rounded-xl px-3 sm:px-4 py-2 border border-white/10 flex-1 sm:flex-none">
-                <div className="flex items-center space-x-1 sm:space-x-2">
-                  <Users className="h-3 w-3 sm:h-4 sm:w-4 text-green-400" />
-                  <span className="text-white font-bold text-sm sm:text-base">{playerCount}</span>
-                  <span className="text-gray-400 text-xs sm:text-sm">playing</span>
-                </div>
-                <div className="w-px h-4 sm:h-6 bg-white/20"></div>
-                <div className="flex items-center space-x-1 sm:space-x-2">
-                  <Clock className="h-3 w-3 sm:h-4 sm:w-4 text-blue-400" />
-                  <span className="text-white font-mono text-xs sm:text-sm">{formatTimeRemaining(new Date(game.endTime))}</span>
+            {/* Stats Row */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+              {/* Live Players */}
+              <div className="bg-gradient-to-r from-emerald-500/20 to-green-500/20 backdrop-blur-xl rounded-xl px-4 py-3 border border-emerald-400/40 shadow-lg">
+                <div className="flex items-center space-x-3">
+                  <div className="p-2 bg-gradient-to-r from-emerald-500 to-green-600 rounded-lg shadow-lg">
+                    <Users className="h-4 w-4 text-white" />
+                  </div>
+                  <div>
+                    <p className="text-emerald-300 text-xs font-bold uppercase tracking-wide">Live Players</p>
+                    <p className="text-white text-lg font-black">{playerCount}</p>
+                  </div>
+                  <div className="ml-auto">
+                    <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></div>
+                  </div>
                 </div>
               </div>
               
-              {/* Prize Display */}
-              <div className="bg-gradient-to-r from-yellow-500/20 to-orange-500/20 backdrop-blur-sm rounded-xl px-6 py-3 border border-yellow-500/30">
-                <div className="flex items-center space-x-2">
-                  <Trophy className="h-5 w-5 text-yellow-400" />
-                  <span className="text-yellow-400 font-bold text-xl">{game.prize}</span>
+              {/* Time Remaining */}
+              <div className="bg-gradient-to-r from-blue-500/20 to-cyan-500/20 backdrop-blur-xl rounded-xl px-4 py-3 border border-blue-400/40 shadow-lg">
+                <div className="flex items-center space-x-3">
+                  <div className="p-2 bg-gradient-to-r from-blue-500 to-cyan-600 rounded-lg shadow-lg">
+                    <Clock className="h-4 w-4 text-white" />
+                  </div>
+                  <div>
+                    <p className="text-blue-300 text-xs font-bold uppercase tracking-wide">Time Left</p>
+                    <p className="text-white text-lg font-black font-mono">{formatTimeRemaining(new Date(game.endTime))}</p>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Numbers Available */}
+              <div className="bg-gradient-to-r from-purple-500/20 to-pink-500/20 backdrop-blur-xl rounded-xl px-4 py-3 border border-purple-400/40 shadow-lg">
+                <div className="flex items-center space-x-3">
+                  <div className="p-2 bg-gradient-to-r from-purple-500 to-pink-600 rounded-lg shadow-lg">
+                    <Target className="h-4 w-4 text-white" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-purple-300 text-xs font-bold uppercase tracking-wide">Available</p>
+                    <p className="text-white text-lg font-black">{game.numbersLeft}/{game.totalNumbers}</p>
+                  </div>
                 </div>
               </div>
             </div>

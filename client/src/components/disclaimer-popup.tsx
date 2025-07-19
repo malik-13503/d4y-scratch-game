@@ -16,7 +16,12 @@ interface DisclaimerPopupProps {
   gameTitle: string;
 }
 
-export function DisclaimerPopup({ isOpen, onClose, onConfirm, gameTitle }: DisclaimerPopupProps) {
+export function DisclaimerPopup({
+  isOpen,
+  onClose,
+  onConfirm,
+  gameTitle,
+}: DisclaimerPopupProps) {
   const [isLoading, setIsLoading] = useState(false);
 
   const handleConfirm = async () => {
@@ -43,7 +48,8 @@ export function DisclaimerPopup({ isOpen, onClose, onConfirm, gameTitle }: Discl
           </DialogDescription>
           <div className="mt-4 p-4 bg-slate-700/50 rounded-lg border border-slate-600">
             <p className="text-sm text-gray-400">
-              By continuing, you agree to these terms for <strong className="text-white">{gameTitle}</strong>
+              By continuing, you agree to these terms for{" "}
+              <strong className="text-white">{gameTitle}</strong>
             </p>
           </div>
         </DialogHeader>
@@ -52,7 +58,7 @@ export function DisclaimerPopup({ isOpen, onClose, onConfirm, gameTitle }: Discl
             type="button"
             variant="outline"
             onClick={onClose}
-            className="w-full sm:w-auto border-slate-600 text-gray-300 hover:bg-slate-700"
+            className="w-full sm:w-auto border-slate-600 text-black-300 hover:bg-slate-700"
             disabled={isLoading}
           >
             Cancel
