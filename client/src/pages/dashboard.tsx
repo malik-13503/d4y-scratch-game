@@ -20,7 +20,8 @@ import {
   Clock,
   Gamepad2,
   RefreshCw,
-  Hash
+  Hash,
+  ChevronRight
 } from "lucide-react";
 import logoPath from "@assets/logo_1751918412862.png";
 
