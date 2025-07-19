@@ -9,6 +9,7 @@ import { ProfessionalWheel } from "@/components/professional-wheel";
 import { Confetti } from "@/components/confetti";
 import { DisclaimerPopup } from "@/components/disclaimer-popup";
 import { AuthRequiredPopup } from "@/components/auth-required-popup";
+import { PaymentRequiredPopup } from "@/components/payment-required-popup";
 import logoPath from "@assets/logo_1751918412862.png";
 import { 
   Clock, 
@@ -32,6 +33,7 @@ export default function GamePage() {
   const [showConfetti, setShowConfetti] = useState(false);
   const [showDisclaimer, setShowDisclaimer] = useState(false);
   const [showAuthPopup, setShowAuthPopup] = useState(false);
+  const [showPaymentPopup, setShowPaymentPopup] = useState(false);
   const [isSpinning, setIsSpinning] = useState(false);
   const [playerCount, setPlayerCount] = useState(1);
   const wheelRef = useRef<{ triggerSpin: () => Promise<void> }>(null);
@@ -47,6 +49,11 @@ export default function GamePage() {
   const { data: game, isLoading } = useQuery<Game>({
     queryKey: [`/api/games/${id}`],
     enabled: !!id,
+  });
+
+  const { data: user } = useQuery({
+    queryKey: ["/api/user"],
+    retry: false,
   });
 
   if (isLoading) {
@@ -77,6 +84,19 @@ export default function GamePage() {
   }
 
   const handleInitiateSpin = () => {
+    // Check if user is authenticated
+    if (!user) {
+      setShowAuthPopup(true);
+      return;
+    }
+
+    // Check if user has payment method
+    if (!user.cardOnFile) {
+      setShowPaymentPopup(true);
+      return;
+    }
+
+    // User is authenticated and has payment method - proceed with game
     setShowDisclaimer(true);
   };
 
@@ -415,6 +435,12 @@ export default function GamePage() {
           setShowAuthPopup(false);
           setLocation('/');
         }}
+      />
+
+      {/* Payment Method Required Popup */}
+      <PaymentRequiredPopup
+        isOpen={showPaymentPopup}
+        onClose={() => setShowPaymentPopup(false)}
       />
     </div>
   );

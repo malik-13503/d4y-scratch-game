@@ -135,16 +135,16 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
         <Button
           type="submit"
           disabled={isLoading || !email || !password}
-          className="relative w-full bg-gradient-to-r from-purple-600 via-blue-600 to-cyan-600 hover:from-purple-700 hover:via-blue-700 hover:to-cyan-700 disabled:from-gray-600 disabled:via-gray-700 disabled:to-gray-800 text-white font-black py-4 px-4 sm:px-6 rounded-xl shadow-2xl transform hover:scale-105 disabled:hover:scale-100 transition-all duration-300 text-sm sm:text-base lg:text-lg border-2 border-white/20 min-h-[56px] sm:min-h-[64px] flex items-center justify-center"
+          className="relative w-full bg-gradient-to-r from-purple-600 via-blue-600 to-cyan-600 hover:from-purple-700 hover:via-blue-700 hover:to-cyan-700 disabled:from-gray-600 disabled:via-gray-700 disabled:to-gray-800 text-white font-black py-3 sm:py-4 lg:py-5 px-4 sm:px-6 lg:px-8 rounded-xl shadow-2xl transform hover:scale-105 disabled:hover:scale-100 transition-all duration-300 text-xs sm:text-sm md:text-base lg:text-lg border-2 border-white/20 min-h-[48px] sm:min-h-[56px] md:min-h-[64px] lg:min-h-[72px] flex items-center justify-center touch-manipulation active:scale-95"
         >
           {isLoading ? (
             <>
-              <div className="inline-block animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-              <span className="text-sm sm:text-base">Signing In...</span>
+              <div className="inline-block animate-spin rounded-full h-4 w-4 sm:h-5 sm:w-5 border-b-2 border-white mr-2"></div>
+              <span className="text-xs sm:text-sm md:text-base font-bold">Signing In...</span>
             </>
           ) : (
-            <span className="text-sm sm:text-base lg:text-lg font-bold">
-              {isMobile ? "Sign In" : "Sign In & Continue"}
+            <span className="text-xs sm:text-sm md:text-base lg:text-lg font-bold tracking-wide">
+              {isMobile ? "SIGN IN" : "SIGN IN & CONTINUE"}
             </span>
           )}
         </Button>

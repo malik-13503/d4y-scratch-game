@@ -39,11 +39,13 @@ export default function AuthLandingPage() {
   const handleAuthSuccess = (type: "login" | "signup") => {
     refetch();
     setAuthType(type);
-    // Skip payment setup for login, only require for new signups
-    if (type === "login") {
-      setLocation("/games");
-    } else {
+    // Always require payment setup for new signups
+    // For login, check if user has payment method
+    if (type === "signup") {
       setCurrentStep("card-setup");
+    } else {
+      // For login, we'll let the redirect logic handle payment check
+      setTimeout(() => refetch(), 100);
     }
   };
 
@@ -58,8 +60,13 @@ export default function AuthLandingPage() {
 
   // Use useEffect to handle redirect to avoid render-time state updates
   React.useEffect(() => {
-    if (user && user.cardOnFile) {
-      setLocation("/games");
+    if (user) {
+      if (user.cardOnFile) {
+        setLocation("/games");
+      } else {
+        // User logged in but no payment method - force card setup
+        setCurrentStep("card-setup");
+      }
     }
   }, [user, setLocation]);
 

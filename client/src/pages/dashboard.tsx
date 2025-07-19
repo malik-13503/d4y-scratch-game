@@ -4,7 +4,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { queryClient } from "@/lib/queryClient";
+import { CardSetup } from "@/components/payment/card-setup";
 import { 
   User, 
   Trophy, 
@@ -21,12 +23,18 @@ import {
   Gamepad2,
   RefreshCw,
   Hash,
-  ChevronRight
+  ChevronRight,
+  Settings,
+  Gauge
 } from "lucide-react";
 import logoPath from "@assets/logo_1751918412862.png";
 
 export default function Dashboard() {
   const [, setLocation] = useLocation();
+  
+  // Get current tab from URL params
+  const urlParams = new URLSearchParams(window.location.search);
+  const currentTab = urlParams.get('tab') || 'overview';
 
   const refreshData = () => {
     queryClient.invalidateQueries({ queryKey: ["/api/user/stats"] });
@@ -65,6 +73,19 @@ export default function Dashboard() {
     setLocation('/');
     return null;
   }
+
+  const handleTabChange = (value: string) => {
+    const url = new URL(window.location.href);
+    url.searchParams.set('tab', value);
+    window.history.pushState({}, '', url);
+  };
+
+  const handleCardSetupSuccess = () => {
+    // Refetch user data to update payment status
+    queryClient.invalidateQueries({ queryKey: ["/api/user"] });
+    // Switch back to overview tab
+    handleTabChange('overview');
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950 to-slate-950">
@@ -172,8 +193,27 @@ export default function Dashboard() {
           </CardHeader>
         </Card>
 
-        {/* Enhanced Stats Overview with eye-catching gradients */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        {/* Tabs for Dashboard Sections */}
+        <Tabs value={currentTab} onValueChange={handleTabChange} className="w-full">
+          <TabsList className="grid w-full grid-cols-3 bg-slate-800/50 border border-purple-500/30 p-1 rounded-xl mb-8">
+            <TabsTrigger value="overview" className="text-gray-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-blue-600 data-[state=active]:text-white rounded-lg font-bold transition-all duration-300">
+              <Gauge className="h-4 w-4 mr-2" />
+              Overview
+            </TabsTrigger>
+            <TabsTrigger value="payment" className="text-gray-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-blue-600 data-[state=active]:text-white rounded-lg font-bold transition-all duration-300">
+              <CreditCard className="h-4 w-4 mr-2" />
+              Payment
+            </TabsTrigger>
+            <TabsTrigger value="settings" className="text-gray-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-blue-600 data-[state=active]:text-white rounded-lg font-bold transition-all duration-300">
+              <Settings className="h-4 w-4 mr-2" />
+              Settings
+            </TabsTrigger>
+          </TabsList>
+
+          {/* Overview Tab */}
+          <TabsContent value="overview" className="space-y-8">
+            {/* Enhanced Stats Overview with eye-catching gradients */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {/* Low Numbers Card (1-50) */}
           <Card className="relative overflow-hidden bg-gradient-to-br from-emerald-900/60 to-green-900/60 border-emerald-400/40 backdrop-blur-xl shadow-2xl hover:shadow-emerald-500/20 transition-all duration-300">
             <div className="absolute inset-0 bg-gradient-to-br from-emerald-800/20 to-green-800/20 blur-xl"></div>
@@ -383,48 +423,131 @@ export default function Dashboard() {
                   onClick={() => setLocation('/games')}
                   className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-bold px-8 py-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 text-lg"
                 >
-                  Play Now
+                  <Gamepad2 className="h-5 w-5 mr-2" />
+                  Start Playing Now
                 </Button>
               </div>
             ) : (
               <div className="space-y-4">
-                {gameHistory.slice(0, 10).map((game: any, index: number) => (
-                  <div 
-                    key={index}
-                    className="flex items-center justify-between p-6 bg-gradient-to-r from-slate-700/50 to-slate-800/50 rounded-xl border border-slate-600/30 hover:border-purple-500/30 transition-all duration-300 shadow-lg"
-                  >
-                    <div className="flex items-center space-x-4">
-                      <div className={`w-4 h-4 rounded-full shadow-lg ${game.isFreePlay ? 'bg-gradient-to-r from-green-400 to-emerald-500' : 'bg-gradient-to-r from-blue-400 to-cyan-500'}`}></div>
+                {gameHistory.slice(0, 5).map((game: any, index: number) => (
+                  <div key={index} className="p-4 bg-gradient-to-r from-slate-700/50 to-slate-800/50 rounded-xl border border-slate-600/30">
+                    <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-white font-bold text-lg">Number: {game.number}</p>
-                        <p className="text-gray-200 flex items-center font-medium">
-                          <Clock className="h-4 w-4 mr-2" />
-                          {new Date(game.playedAt).toLocaleDateString()}
-                        </p>
+                        <p className="text-white font-semibold">Game #{game.id}</p>
+                        <p className="text-gray-400 text-sm">Recent activity</p>
                       </div>
-                    </div>
-                    <div className="text-right">
-                      <p className={`font-black text-xl ${game.isFreePlay ? 'text-emerald-400' : 'text-cyan-400'}`}>
-                        {game.isFreePlay ? 'FREE' : `$${parseFloat(game.amount).toFixed(2)}`}
-                      </p>
-                      <Badge className={`${game.isFreePlay ? "bg-gradient-to-r from-emerald-500 to-green-500" : "bg-gradient-to-r from-blue-500 to-cyan-500"} text-white border-0 font-bold shadow-lg`}>
-                        {game.isFreePlay ? 'Free Play' : 'Paid'}
-                      </Badge>
+                      <div className="text-right">
+                        <p className="text-purple-400 font-bold">${game.amount}</p>
+                        <p className="text-gray-400 text-sm">{new Date(game.createdAt).toLocaleDateString()}</p>
+                      </div>
                     </div>
                   </div>
                 ))}
-                
-                {gameHistory.length > 10 && (
-                  <div className="text-center pt-6">
-                    <p className="text-gray-200 font-medium">
-                      Showing 10 of {gameHistory.length} games
-                    </p>
-                  </div>
-                )}
               </div>
             )}
           </CardContent>
         </Card>
+          </TabsContent>
+
+          {/* Payment Tab */}
+          <TabsContent value="payment" className="space-y-8">
+            <Card className="relative overflow-hidden bg-gradient-to-br from-slate-800/80 to-slate-900/80 border-purple-400/40 backdrop-blur-xl shadow-2xl">
+              <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-blue-500/10 blur-2xl"></div>
+              <CardHeader className="relative">
+                <CardTitle className="text-2xl font-bold bg-gradient-to-r from-white to-gray-200 bg-clip-text text-transparent flex items-center">
+                  <div className="p-2 bg-gradient-to-br from-purple-500 to-blue-500 rounded-lg mr-3 shadow-lg">
+                    <CreditCard className="h-6 w-6 text-white" />
+                  </div>
+                  Payment Methods
+                </CardTitle>
+                <p className="text-gray-300 text-lg mt-2">Manage your payment methods securely</p>
+              </CardHeader>
+              <CardContent className="relative">
+                {user.cardOnFile ? (
+                  <div className="space-y-6">
+                    <div className="p-6 bg-gradient-to-r from-emerald-900/40 to-green-900/40 rounded-xl border border-emerald-500/30">
+                      <div className="flex items-center space-x-4">
+                        <div className="p-3 bg-gradient-to-br from-emerald-500 to-green-600 rounded-xl shadow-lg">
+                          <CreditCard className="h-8 w-8 text-white" />
+                        </div>
+                        <div>
+                          <h3 className="text-white font-bold text-xl">Payment Method Active</h3>
+                          <p className="text-gray-300">
+                            {user.cardBrand} ending in {user.cardLast4}
+                          </p>
+                        </div>
+                        <div className="ml-auto">
+                          <Badge className="bg-gradient-to-r from-emerald-500 to-green-500 text-white px-4 py-2 font-bold">
+                            Verified
+                          </Badge>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="p-4 bg-blue-900/20 rounded-xl border border-blue-500/30">
+                      <p className="text-blue-300 text-sm">
+                        Your payment method is secure and ready for transactions. You can update it anytime.
+                      </p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-6">
+                    <div className="text-center py-8">
+                      <div className="relative inline-block mb-6">
+                        <div className="absolute inset-0 bg-gradient-to-br from-red-500/30 to-orange-500/30 blur-2xl rounded-full"></div>
+                        <div className="relative p-6 bg-gradient-to-br from-red-500 to-orange-600 rounded-full shadow-2xl">
+                          <CreditCard className="h-12 w-12 text-white" />
+                        </div>
+                      </div>
+                      <h3 className="text-2xl font-bold text-white mb-4">No Payment Method</h3>
+                      <p className="text-gray-300 text-lg mb-8">Add a payment method to start playing games and winning prizes!</p>
+                    </div>
+                    <CardSetup onSuccess={handleCardSetupSuccess} />
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Settings Tab */}
+          <TabsContent value="settings" className="space-y-8">
+            <Card className="relative overflow-hidden bg-gradient-to-br from-slate-800/80 to-slate-900/80 border-purple-400/40 backdrop-blur-xl shadow-2xl">
+              <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-blue-500/10 blur-2xl"></div>
+              <CardHeader className="relative">
+                <CardTitle className="text-2xl font-bold bg-gradient-to-r from-white to-gray-200 bg-clip-text text-transparent flex items-center">
+                  <div className="p-2 bg-gradient-to-br from-purple-500 to-blue-500 rounded-lg mr-3 shadow-lg">
+                    <Settings className="h-6 w-6 text-white" />
+                  </div>
+                  Account Settings
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="relative">
+                <div className="space-y-6">
+                  <div className="p-6 bg-slate-700/50 rounded-xl border border-slate-600/30">
+                    <h3 className="text-white font-bold text-lg mb-4">Account Information</h3>
+                    <div className="space-y-3">
+                      <div className="flex justify-between items-center">
+                        <span className="text-gray-300">Email:</span>
+                        <span className="text-white font-medium">{user.email}</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-gray-300">Name:</span>
+                        <span className="text-white font-medium">
+                          {user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : 'Not set'}
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-gray-300">Account Status:</span>
+                        <Badge className="bg-gradient-to-r from-emerald-500 to-green-500 text-white">
+                          Active
+                        </Badge>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );
