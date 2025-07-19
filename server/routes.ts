@@ -756,14 +756,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const totalSpins = transactions.length;
       const totalSpent = transactions.reduce((sum, t) => sum + parseFloat(t.amount.toString()), 0);
-      const freeSpins = transactions.filter(t => parseFloat(t.amount.toString()) === 0).length;
       
-      // For wins, we'll count transactions where user got a "winning" number (subjective, but let's say numbers 1-50 are "wins")
-      const totalWins = transactions.filter(t => t.spunNumber && t.spunNumber <= 50).length;
+      // Free spins are spins in the free play range (151-200) OR spins that cost $0
+      const freeSpins = transactions.filter(t => {
+        const amount = parseFloat(t.amount.toString());
+        const spunNumber = t.spunNumber || 0;
+        return amount === 0 || (spunNumber >= 151 && spunNumber <= 200);
+      }).length;
+      
+      // Total wins should count actual prizes won, not arbitrary number ranges
+      // For now, let's count numbers 1-50 as potential "winning" numbers, but make it clear
+      const lowNumberHits = transactions.filter(t => t.spunNumber && t.spunNumber <= 50).length;
 
       res.json({
         totalSpins,
-        totalWins,
+        totalWins: lowNumberHits, // Rename for clarity - these are low numbers (1-50)
         freeSpins,
         totalSpent: parseFloat(totalSpent.toFixed(2))
       });
@@ -809,7 +816,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           isFreePlay: amount === 0,
           playedAt: transaction.createdAt,
           gameId: transaction.gameId || 1,
-          isWin: transaction.spunNumber && transaction.spunNumber <= 50 // Consider 1-50 as wins
+          isWin: transaction.spunNumber && transaction.spunNumber <= 50 // Low numbers (1-50) have better prize chances
         };
       }).reverse(); // Show most recent first
 

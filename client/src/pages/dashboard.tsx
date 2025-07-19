@@ -174,7 +174,7 @@ export default function Dashboard() {
 
         {/* Enhanced Stats Overview with eye-catching gradients */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          {/* Total Wins Card */}
+          {/* Low Numbers Card (1-50) */}
           <Card className="relative overflow-hidden bg-gradient-to-br from-emerald-900/60 to-green-900/60 border-emerald-400/40 backdrop-blur-xl shadow-2xl hover:shadow-emerald-500/20 transition-all duration-300">
             <div className="absolute inset-0 bg-gradient-to-br from-emerald-800/20 to-green-800/20 blur-xl"></div>
             <CardContent className="relative p-6">
@@ -183,7 +183,7 @@ export default function Dashboard() {
                   <Trophy className="h-8 w-8 text-white drop-shadow-lg" />
                 </div>
                 <div>
-                  <p className="text-white text-lg font-black tracking-wide drop-shadow-lg">Total Wins</p>
+                  <p className="text-white text-lg font-black tracking-wide drop-shadow-lg">Low Numbers</p>
                   <p className="text-4xl font-black text-white drop-shadow-lg">
                     {statsLoading ? '...' : (userStats?.totalWins || 0)}
                   </p>
