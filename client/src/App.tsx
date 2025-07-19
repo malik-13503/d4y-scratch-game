@@ -3,7 +3,9 @@ import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { useAuthPersistence } from "@/hooks/useAuthPersistence";
+import { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { saveAuthToStorage, getAuthFromStorage, clearAuthFromStorage } from "@/lib/auth";
 import Home from "@/pages/home";
 import GamePage from "@/pages/game";
 import AdminPage from "@/pages/admin";
@@ -27,16 +29,48 @@ import MyNumbers from "@/pages/my-numbers";
 import NotFound from "@/pages/not-found";
 
 function Router() {
-  const { user, isAuthenticated, isLoading } = useAuthPersistence();
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+  const [user, setUser] = useState(null);
+  
+  const { data: serverUser, isLoading: serverLoading, error } = useQuery({
+    queryKey: ["/api/user"],
+    retry: false,
+    staleTime: 0,
+  });
+
+  useEffect(() => {
+    // Check localStorage first
+    const storedAuth = getAuthFromStorage();
+    
+    if (storedAuth && storedAuth.isAuthenticated) {
+      setUser(storedAuth.user);
+    }
+    
+    // If server responds with user, update both state and localStorage
+    if (serverUser) {
+      setUser(serverUser);
+      saveAuthToStorage(serverUser);
+    }
+    
+    // If server returns 401 and we have stored auth, clear it
+    if (error && storedAuth) {
+      clearAuthFromStorage();
+      setUser(null);
+    }
+    
+    setIsCheckingAuth(false);
+  }, [serverUser, error]);
 
   // Show loading spinner while checking auth state
-  if (isLoading) {
+  if (isCheckingAuth || serverLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
         <div className="animate-spin w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full"></div>
       </div>
     );
   }
+
+  const isAuthenticated = !!user;
 
   return (
     <Switch>
