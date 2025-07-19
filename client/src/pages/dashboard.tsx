@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { queryClient } from "@/lib/queryClient";
 import { 
   User, 
   Trophy, 
@@ -17,12 +18,18 @@ import {
   Award,
   Activity,
   Clock,
-  Gamepad2
+  Gamepad2,
+  RefreshCw
 } from "lucide-react";
 import logoPath from "@assets/logo_1751918412862.png";
 
 export default function Dashboard() {
   const [, setLocation] = useLocation();
+
+  const refreshData = () => {
+    queryClient.invalidateQueries({ queryKey: ["/api/user/stats"] });
+    queryClient.invalidateQueries({ queryKey: ["/api/user/game-history"] });
+  };
   
   const { data: user, isLoading: userLoading } = useQuery({
     queryKey: ["/api/user"],
@@ -31,11 +38,15 @@ export default function Dashboard() {
   const { data: userStats, isLoading: statsLoading } = useQuery({
     queryKey: ["/api/user/stats"],
     enabled: !!user,
+    refetchInterval: 5000, // Refetch every 5 seconds for real-time updates
+    refetchOnWindowFocus: true,
   });
 
   const { data: gameHistory, isLoading: historyLoading } = useQuery({
     queryKey: ["/api/user/game-history"],
     enabled: !!user,
+    refetchInterval: 5000, // Refetch every 5 seconds for real-time updates
+    refetchOnWindowFocus: true,
   });
 
   if (userLoading) {
@@ -75,7 +86,17 @@ export default function Dashboard() {
               </Button>
               <img src={logoPath} alt="Hit The Road Jackpot" className="h-8 w-auto" />
             </div>
-            <h1 className="text-2xl font-bold text-white">My Dashboard</h1>
+            <div className="flex items-center space-x-4">
+              <h1 className="text-2xl font-bold text-white">My Dashboard</h1>
+              <Button
+                onClick={refreshData}
+                size="sm"
+                className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white border-0 shadow-lg"
+              >
+                <RefreshCw className="h-4 w-4 mr-2" />
+                Refresh
+              </Button>
+            </div>
           </div>
         </div>
       </header>
@@ -123,7 +144,7 @@ export default function Dashboard() {
                   <Trophy className="h-8 w-8 text-white drop-shadow-lg" />
                 </div>
                 <div>
-                  <p className="text-emerald-200 text-lg font-bold tracking-wide">Total Wins</p>
+                  <p className="text-white text-lg font-black tracking-wide drop-shadow-lg">Total Wins</p>
                   <p className="text-4xl font-black text-white drop-shadow-lg">
                     {statsLoading ? '...' : (userStats?.totalWins || 0)}
                   </p>
@@ -141,7 +162,7 @@ export default function Dashboard() {
                   <DollarSign className="h-8 w-8 text-white drop-shadow-lg" />
                 </div>
                 <div>
-                  <p className="text-blue-200 text-lg font-bold tracking-wide">Total Spent</p>
+                  <p className="text-white text-lg font-black tracking-wide drop-shadow-lg">Total Spent</p>
                   <p className="text-4xl font-black text-white drop-shadow-lg">
                     ${statsLoading ? '...' : (userStats?.totalSpent || 0).toFixed(2)}
                   </p>
@@ -159,7 +180,7 @@ export default function Dashboard() {
                   <Target className="h-8 w-8 text-white drop-shadow-lg" />
                 </div>
                 <div>
-                  <p className="text-purple-200 text-lg font-bold tracking-wide">Total Spins</p>
+                  <p className="text-white text-lg font-black tracking-wide drop-shadow-lg">Total Spins</p>
                   <p className="text-4xl font-black text-white drop-shadow-lg">
                     {statsLoading ? '...' : (userStats?.totalSpins || 0)}
                   </p>
@@ -177,7 +198,7 @@ export default function Dashboard() {
                   <Award className="h-8 w-8 text-white drop-shadow-lg" />
                 </div>
                 <div>
-                  <p className="text-yellow-200 text-lg font-bold tracking-wide">Free Spins</p>
+                  <p className="text-white text-lg font-black tracking-wide drop-shadow-lg">Free Spins</p>
                   <p className="text-4xl font-black text-white drop-shadow-lg">
                     {statsLoading ? '...' : (userStats?.freeSpins || 0)}
                   </p>
@@ -186,6 +207,91 @@ export default function Dashboard() {
             </CardContent>
           </Card>
         </div>
+
+        {/* Quick Action Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <Card className="relative overflow-hidden bg-gradient-to-br from-purple-500/20 to-blue-600/20 border-purple-400/40 backdrop-blur-xl shadow-2xl hover:shadow-purple-500/20 transition-all duration-300">
+            <div className="absolute inset-0 bg-gradient-to-br from-purple-400/10 to-blue-500/10 blur-xl"></div>
+            <CardContent className="relative p-6">
+              <div className="text-center">
+                <div className="p-4 bg-gradient-to-br from-purple-500 to-blue-600 rounded-xl mx-auto w-fit mb-4 shadow-lg">
+                  <Target className="h-8 w-8 text-white" />
+                </div>
+                <h3 className="text-lg font-bold text-white mb-2">Play Games</h3>
+                <p className="text-gray-200 text-sm mb-4">Spin the wheel and win amazing prizes</p>
+                <Button 
+                  onClick={() => setLocation("/games")}
+                  className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-bold px-6 py-2 rounded-xl shadow-lg transition-all duration-300"
+                >
+                  Play Now
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="relative overflow-hidden bg-gradient-to-br from-emerald-500/20 to-green-600/20 border-emerald-400/40 backdrop-blur-xl shadow-2xl hover:shadow-emerald-500/20 transition-all duration-300">
+            <div className="absolute inset-0 bg-gradient-to-br from-emerald-400/10 to-green-500/10 blur-xl"></div>
+            <CardContent className="relative p-6">
+              <div className="text-center">
+                <div className="p-4 bg-gradient-to-br from-emerald-500 to-green-600 rounded-xl mx-auto w-fit mb-4 shadow-lg">
+                  <CreditCard className="h-8 w-8 text-white" />
+                </div>
+                <h3 className="text-lg font-bold text-white mb-2">Transactions</h3>
+                <p className="text-gray-200 text-sm mb-4">View your payment history and spins</p>
+                <Button 
+                  onClick={() => setLocation("/transactions")}
+                  className="bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 text-white font-bold px-6 py-2 rounded-xl shadow-lg transition-all duration-300"
+                >
+                  View History
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="relative overflow-hidden bg-gradient-to-br from-yellow-500/20 to-orange-600/20 border-yellow-400/40 backdrop-blur-xl shadow-2xl hover:shadow-yellow-500/20 transition-all duration-300">
+            <div className="absolute inset-0 bg-gradient-to-br from-yellow-400/10 to-orange-500/10 blur-xl"></div>
+            <CardContent className="relative p-6">
+              <div className="text-center">
+                <div className="p-4 bg-gradient-to-br from-yellow-500 to-orange-600 rounded-xl mx-auto w-fit mb-4 shadow-lg">
+                  <Trophy className="h-8 w-8 text-white" />
+                </div>
+                <h3 className="text-lg font-bold text-white mb-2">Achievements</h3>
+                <p className="text-gray-200 text-sm mb-4">Track your wins and milestones</p>
+                <Button 
+                  disabled
+                  className="bg-gray-600 text-gray-300 cursor-not-allowed px-6 py-2 rounded-xl"
+                >
+                  Coming Soon
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Real-time Activity Feed */}
+        <Card className="mb-8 relative overflow-hidden bg-gradient-to-br from-slate-800/80 to-slate-900/80 border-slate-600/40 backdrop-blur-xl shadow-2xl">
+          <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-purple-500/5 blur-2xl"></div>
+          <CardHeader className="relative">
+            <CardTitle className="text-2xl font-bold bg-gradient-to-r from-white to-gray-200 bg-clip-text text-transparent flex items-center">
+              <div className="p-2 bg-gradient-to-br from-blue-500 to-purple-500 rounded-lg mr-3 shadow-lg">
+                <Activity className="h-6 w-6 text-white" />
+              </div>
+              Live Activity
+              <div className="flex items-center space-x-2 ml-auto">
+                <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
+                <span className="text-green-300 font-bold text-sm">LIVE</span>
+              </div>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="relative">
+            <div className="space-y-3">
+              <div className="p-4 bg-gradient-to-r from-slate-700/50 to-slate-800/50 rounded-xl border border-slate-600/30">
+                <p className="text-gray-200 font-medium">Welcome to your dashboard! Start playing games to see your activity here.</p>
+                <p className="text-gray-400 text-sm mt-1">Your spins and wins will appear in real-time</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Enhanced Game History */}
         <Card className="relative overflow-hidden bg-gradient-to-br from-slate-800/80 to-slate-900/80 border-slate-600/40 backdrop-blur-xl shadow-2xl">

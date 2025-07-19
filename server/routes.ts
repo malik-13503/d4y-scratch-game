@@ -644,7 +644,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // User dashboard routes
+  // User dashboard routes with real data tracking
   app.get("/api/user/stats", async (req, res) => {
     try {
       const userId = (req.session as any)?.userId;
@@ -652,12 +652,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: "Not authenticated" });
       }
 
-      // Get spin results count and stats - for now return mock data until we have real spin history
+      // Get user's transaction history to calculate real stats
+      const transactions = await storage.getTransactionsByUserId(userId);
+      
+      const totalSpins = transactions.length;
+      const totalSpent = transactions.reduce((sum, t) => sum + t.amount, 0);
+      const freeSpins = transactions.filter(t => t.amount === 0).length;
+      
+      // For wins, we'll count transactions where user got a "winning" number (subjective, but let's say numbers 1-50 are "wins")
+      const totalWins = transactions.filter(t => t.spinResult && t.spinResult <= 50).length;
+
       res.json({
-        totalSpins: 0,
-        totalWins: 0,
-        freeSpins: 0,
-        totalSpent: 0
+        totalSpins,
+        totalWins,
+        freeSpins,
+        totalSpent: parseFloat(totalSpent.toFixed(2))
       });
     } catch (error) {
       console.error("Error fetching user stats:", error);
@@ -672,8 +681,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: "Not authenticated" });
       }
 
-      // Return empty array for now until we have real spin history
-      res.json([]);
+      // Get user's transaction history and format it for game history
+      const transactions = await storage.getTransactionsByUserId(userId);
+      
+      const gameHistory = transactions.map(transaction => ({
+        number: transaction.spinResult || 0,
+        amount: transaction.amount,
+        isFreePlay: transaction.amount === 0,
+        playedAt: transaction.createdAt,
+        gameId: transaction.gameId || 1,
+        isWin: transaction.spinResult && transaction.spinResult <= 50 // Consider 1-50 as wins
+      })).reverse(); // Show most recent first
+
+      res.json(gameHistory);
     } catch (error) {
       console.error("Error fetching game history:", error);
       res.status(500).json({ message: "Failed to fetch game history" });
