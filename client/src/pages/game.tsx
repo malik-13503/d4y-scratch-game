@@ -121,7 +121,6 @@ export default function GamePage() {
       
       setLastResult(result);
       setShowConfetti(true);
-      setIsSpinning(false);
       
       // Hide confetti after 5 seconds
       setTimeout(() => setShowConfetti(false), 5000);
@@ -129,7 +128,6 @@ export default function GamePage() {
       return result;
     } catch (error) {
       console.error('Spin error:', error);
-      setIsSpinning(false);
       throw error;
     }
   };

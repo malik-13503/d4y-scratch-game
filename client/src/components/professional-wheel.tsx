@@ -77,50 +77,63 @@ export const ProfessionalWheel = forwardRef<
   const handleSpin = async () => {
     if (isSpinning || disabled) return;
 
-    // Step 1: Start spinning animation first
+    // Step 1: Reset wheel to starting position and clear previous results
     setIsSpinning(true);
     setResult(null);
     setShowResultModal(false);
+    
+    // Reset rotation to 0 and force a reflow
+    setRotation(0);
+    await new Promise(resolve => setTimeout(resolve, 100));
 
     try {
-      // Step 2: Start the wheel spinning animation immediately
-      const segmentAngle = 360 / wheelNumbers.length;
-      const randomSegmentIndex = Math.floor(Math.random() * wheelNumbers.length);
-      const targetAngle = segmentAngle * randomSegmentIndex + segmentAngle / 2;
-      const fullRotations = 4 * 360; // 4 full rotations
+      // Step 2: Get the actual result from API first
+      const spinResult = await onSpin();
+      console.log("Spin result received:", spinResult);
+
+      // Step 3: Find which segment should show this number
+      let targetSegmentIndex = 0;
+      let currentWheelNumbers = [...wheelNumbers];
+      
+      // Update the wheel numbers to include the result
+      const segmentForResult = Math.floor(Math.random() * currentWheelNumbers.length);
+      currentWheelNumbers[segmentForResult] = spinResult;
+      setWheelNumbers(currentWheelNumbers);
+      targetSegmentIndex = segmentForResult;
+
+      // Step 4: Calculate precise landing position
+      const segmentAngle = 360 / currentWheelNumbers.length;
+      const targetAngle = segmentAngle * targetSegmentIndex + segmentAngle / 2;
+      const fullRotations = 5 * 360; // 5 full rotations for consistent timing
       const finalRotation = fullRotations + (360 - targetAngle);
       
-      // Step 3: Start spinning with proper timing
+      console.log("Wheel will land on:", {
+        spinResult,
+        targetSegmentIndex,
+        segmentAngle,
+        targetAngle,
+        finalRotation,
+        numberAtPosition: currentWheelNumbers[targetSegmentIndex]
+      });
+
+      // Step 5: Start spinning animation
       requestAnimationFrame(() => {
         setRotation(finalRotation);
       });
 
-      // Step 4: After 6 seconds of spinning, call API to get actual result
-      setTimeout(async () => {
-        try {
-          const spinResult = await onSpin();
-          console.log("Spin result received:", spinResult);
-
-          // Step 5: Update the display to show the actual result
-          setResult(spinResult);
-          const isFree = spinResult >= freePlayStart;
-          setIsFreePlay(isFree);
-          setAmountCharged(isFree ? 0 : spinResult);
-        } catch (apiError) {
-          console.error("API spin error:", apiError);
-          // Show error result
-          setResult(0);
-          setIsFreePlay(true);
-          setAmountCharged(0);
-        }
-        
+      // Step 6: After 8 seconds, show the result
+      setTimeout(() => {
+        setResult(spinResult);
+        const isFree = spinResult >= freePlayStart;
+        setIsFreePlay(isFree);
+        setAmountCharged(isFree ? 0 : spinResult);
         setIsSpinning(false);
         
-        // Wait 1 additional second after wheel stops, then show result modal
+        // Show result modal after wheel stops
         setTimeout(() => {
           setShowResultModal(true);
-        }, 1000);
-      }, 6000); // Call API after 6 seconds of visual spinning
+        }, 500);
+      }, 8000); // 8 seconds total spin time
 
     } catch (err) {
       console.error("Spin error:", err);
@@ -173,7 +186,9 @@ export const ProfessionalWheel = forwardRef<
                     transform: `rotate(${rotation}deg)`,
                     transition: isSpinning
                       ? `transform 8s cubic-bezier(0.17, 0.67, 0.12, 0.99)`
-                      : "transform 0.1s ease-out",
+                      : rotation === 0 
+                        ? "none" 
+                        : "transform 0.5s ease-out",
                     boxShadow:
                       "inset 0 0 30px rgba(0, 0, 0, 0.4), 0 0 40px rgba(255, 215, 0, 0.3)",
                   }}
@@ -201,7 +216,9 @@ export const ProfessionalWheel = forwardRef<
                             transform: `translate(-50%, -50%) translate(${Math.cos(((angle + 360 / segmentColors.length / 2 - 90) * Math.PI) / 180) * numberRadius}px, ${Math.sin(((angle + 360 / segmentColors.length / 2 - 90) * Math.PI) / 180) * numberRadius}px) rotate(${-rotation}deg)`,
                             transition: isSpinning
                               ? `transform 8s cubic-bezier(0.17, 0.67, 0.12, 0.99)`
-                              : "transform 0.1s ease-out",
+                              : rotation === 0 
+                                ? "none" 
+                                : "transform 0.5s ease-out",
                           }}
                         >
                           {wheelNumbers[index]}
