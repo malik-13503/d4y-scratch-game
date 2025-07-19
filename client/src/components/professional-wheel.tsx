@@ -77,51 +77,49 @@ export const ProfessionalWheel = forwardRef<
   const handleSpin = async () => {
     if (isSpinning || disabled) return;
 
-    // Step 1: Reset wheel to starting position and clear previous results
+    // Step 1: Reset wheel and start spinning animation immediately
     setIsSpinning(true);
     setResult(null);
     setShowResultModal(false);
     
-    // Reset rotation to 0 and force a reflow
+    // Reset rotation to 0 with no transition
     setRotation(0);
-    await new Promise(resolve => setTimeout(resolve, 100));
 
     try {
-      // Step 2: Get the actual result from API first
+      // Step 2: Get API result first to ensure accurate display
       const spinResult = await onSpin();
-      console.log("Spin result received:", spinResult);
+      console.log("API spin result received:", spinResult);
 
-      // Step 3: Find which segment should show this number
-      let targetSegmentIndex = 0;
+      // Step 3: Calculate precise landing position for this result
+      const segmentAngle = 360 / wheelNumbers.length;
       let currentWheelNumbers = [...wheelNumbers];
+      let targetSegmentIndex = currentWheelNumbers.findIndex(num => num === spinResult);
       
-      // Update the wheel numbers to include the result
-      const segmentForResult = Math.floor(Math.random() * currentWheelNumbers.length);
-      currentWheelNumbers[segmentForResult] = spinResult;
-      setWheelNumbers(currentWheelNumbers);
-      targetSegmentIndex = segmentForResult;
+      if (targetSegmentIndex === -1) {
+        // If exact number not found, place it in a random segment
+        targetSegmentIndex = Math.floor(Math.random() * currentWheelNumbers.length);
+        currentWheelNumbers[targetSegmentIndex] = spinResult;
+        setWheelNumbers(currentWheelNumbers);
+      }
 
-      // Step 4: Calculate precise landing position
-      const segmentAngle = 360 / currentWheelNumbers.length;
+      // Step 4: Calculate final rotation to land exactly on the result
       const targetAngle = segmentAngle * targetSegmentIndex + segmentAngle / 2;
-      const fullRotations = 5 * 360; // 5 full rotations for consistent timing
+      const fullRotations = 5 * 360; // 5 full rotations
       const finalRotation = fullRotations + (360 - targetAngle);
-      
-      console.log("Wheel will land on:", {
+
+      // Step 5: Start the spinning animation
+      setTimeout(() => {
+        setRotation(finalRotation);
+      }, 50);
+
+      console.log("Wheel will land on correct result:", {
         spinResult,
         targetSegmentIndex,
         segmentAngle,
-        targetAngle,
-        finalRotation,
         numberAtPosition: currentWheelNumbers[targetSegmentIndex]
       });
 
-      // Step 5: Start spinning animation
-      requestAnimationFrame(() => {
-        setRotation(finalRotation);
-      });
-
-      // Step 6: After 8 seconds, show the result
+      // Step 6: After 8 seconds total, show the result
       setTimeout(() => {
         setResult(spinResult);
         const isFree = spinResult >= freePlayStart;
@@ -133,15 +131,18 @@ export const ProfessionalWheel = forwardRef<
         setTimeout(() => {
           setShowResultModal(true);
         }, 500);
-      }, 8000); // 8 seconds total spin time
+      }, 8000);
 
     } catch (err) {
       console.error("Spin error:", err);
       setIsSpinning(false);
-      setResult(Math.floor(Math.random() * totalNumbers) + 1);
-      setIsFreePlay(false);
-      setAmountCharged(50);
-      setShowResultModal(true);
+      // Show error result
+      setResult(1);
+      setIsFreePlay(true);
+      setAmountCharged(0);
+      setTimeout(() => {
+        setShowResultModal(true);
+      }, 500);
     }
   };
 

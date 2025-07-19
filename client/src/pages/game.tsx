@@ -80,13 +80,11 @@ export default function GamePage() {
 
   const handleConfirmSpin = async () => {
     setShowDisclaimer(false);
-    setIsSpinning(true);
     
     // Trigger the wheel to start spinning - this will call handleSpin internally
     if (wheelRef.current) {
       try {
         await wheelRef.current.triggerSpin();
-        setIsSpinning(false);
       } catch (error) {
         console.error('Spin failed:', error);
         setIsSpinning(false);
@@ -113,6 +111,11 @@ export default function GamePage() {
 
       if (!response.ok) {
         const error = await response.json();
+        if (response.status === 401) {
+          // Redirect to signup/login if not authenticated
+          setLocation('/');
+          throw new Error('Please login to continue');
+        }
         throw new Error(error.message || 'Failed to spin');
       }
 
