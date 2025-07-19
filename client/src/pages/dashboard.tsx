@@ -74,24 +74,41 @@ export default function Dashboard() {
         <div className="absolute bottom-20 right-10 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
       </div>
 
-      {/* Header */}
+      {/* Responsive Header */}
       <header className="relative z-10 bg-black/20 backdrop-blur-xl border-b border-purple-500/30">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
+          <div className="flex flex-col space-y-4 sm:space-y-0 sm:flex-row sm:items-center sm:justify-between">
+            
+            {/* Top Row: Back Button + Logo + Title */}
+            <div className="flex items-center justify-between sm:justify-start sm:space-x-4">
+              <div className="flex items-center space-x-2 sm:space-x-4">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setLocation("/games")}
+                  className="text-gray-300 hover:text-white hover:bg-white/10 px-2 sm:px-3"
+                >
+                  <ArrowLeft className="h-4 w-4 sm:mr-2" />
+                  <span className="hidden sm:inline">Back to Games</span>
+                </Button>
+                <img src={logoPath} alt="Hit The Road Jackpot" className="h-6 w-auto sm:h-8" />
+                <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-white drop-shadow-lg">
+                  My Dashboard
+                </h1>
+              </div>
+              
+              {/* Mobile Refresh Button */}
               <Button
-                variant="ghost"
+                onClick={refreshData}
                 size="sm"
-                onClick={() => setLocation("/games")}
-                className="text-gray-300 hover:text-white hover:bg-white/10"
+                className="sm:hidden bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white border-0 shadow-lg px-3"
               >
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Back to Games
+                <RefreshCw className="h-4 w-4" />
               </Button>
-              <img src={logoPath} alt="Hit The Road Jackpot" className="h-8 w-auto" />
             </div>
-            <div className="flex items-center space-x-4">
-              <h1 className="text-2xl font-bold text-white">My Dashboard</h1>
+            
+            {/* Desktop Refresh Button */}
+            <div className="hidden sm:flex">
               <Button
                 onClick={refreshData}
                 size="sm"
@@ -106,31 +123,49 @@ export default function Dashboard() {
       </header>
 
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 py-8">
-        {/* Enhanced User Profile Section */}
+        {/* Responsive Enhanced User Profile Section */}
         <Card className="mb-8 relative overflow-hidden bg-gradient-to-br from-slate-800/80 to-slate-900/80 border-purple-400/40 backdrop-blur-xl shadow-2xl">
           <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-blue-500/10 blur-2xl"></div>
-          <CardHeader className="relative">
-            <div className="flex items-center space-x-6">
-              <div className="relative">
-                <div className="w-20 h-20 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center shadow-2xl">
-                  <User className="h-10 w-10 text-white drop-shadow-lg" />
+          <CardHeader className="relative p-4 sm:p-6">
+            <div className="flex flex-col sm:flex-row sm:items-center space-y-4 sm:space-y-0 sm:space-x-6">
+              
+              {/* Avatar and Mobile User Info */}
+              <div className="flex items-center space-x-4 sm:space-x-0">
+                <div className="relative flex-shrink-0">
+                  <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center shadow-2xl">
+                    <User className="h-8 w-8 sm:h-10 sm:w-10 text-white drop-shadow-lg" />
+                  </div>
+                  <div className="absolute -inset-1 sm:-inset-2 bg-gradient-to-br from-purple-400/30 to-blue-400/30 rounded-full blur-lg"></div>
                 </div>
-                <div className="absolute -inset-2 bg-gradient-to-br from-purple-400/30 to-blue-400/30 rounded-full blur-lg"></div>
+                
+                {/* Mobile User Details */}
+                <div className="sm:hidden min-w-0">
+                  <CardTitle className="text-xl font-black bg-gradient-to-r from-white to-gray-200 bg-clip-text text-transparent drop-shadow-lg truncate">
+                    {user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : 'Player'}
+                  </CardTitle>
+                  <p className="text-gray-200 text-sm font-medium truncate">{user.email}</p>
+                </div>
               </div>
-              <div>
-                <CardTitle className="text-3xl font-black bg-gradient-to-r from-white to-gray-200 bg-clip-text text-transparent drop-shadow-lg">
+              
+              {/* Desktop User Details */}
+              <div className="hidden sm:block flex-1 min-w-0">
+                <CardTitle className="text-2xl lg:text-3xl font-black bg-gradient-to-r from-white to-gray-200 bg-clip-text text-transparent drop-shadow-lg truncate">
                   {user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : 'Player'}
                 </CardTitle>
-                <p className="text-gray-200 text-lg font-medium">{user.email}</p>
-                <div className="flex items-center space-x-3 mt-3">
-                  <Badge className={`${user.cardOnFile ? "bg-gradient-to-r from-emerald-500 to-green-500 text-white" : "bg-gradient-to-r from-red-500 to-pink-500 text-white"} border-0 px-4 py-2 font-bold shadow-lg`}>
-                    <CreditCard className="h-4 w-4 mr-2" />
+                <p className="text-gray-200 text-base lg:text-lg font-medium truncate">{user.email}</p>
+              </div>
+              
+              {/* Responsive Status Badges */}
+              <div className="flex flex-wrap gap-2 sm:gap-3">
+                <Badge className={`${user.cardOnFile ? "bg-gradient-to-r from-emerald-500 to-green-500 text-white" : "bg-gradient-to-r from-red-500 to-pink-500 text-white"} border-0 px-3 py-2 sm:px-4 sm:py-2 font-bold shadow-lg text-xs sm:text-sm`}>
+                  <CreditCard className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                  <span className="drop-shadow-sm whitespace-nowrap">
                     {user.cardOnFile ? "Payment Verified" : "Payment Required"}
-                  </Badge>
-                  <div className="flex items-center space-x-2">
-                    <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
-                    <span className="text-green-300 font-bold">ONLINE</span>
-                  </div>
+                  </span>
+                </Badge>
+                <div className="flex items-center space-x-2 bg-gradient-to-r from-blue-500/20 to-green-500/20 px-3 py-2 sm:px-4 sm:py-2 rounded-full border border-green-400/30">
+                  <div className="w-2 h-2 sm:w-3 sm:h-3 bg-green-400 rounded-full animate-pulse"></div>
+                  <span className="text-green-300 font-bold text-xs sm:text-sm drop-shadow-sm">ONLINE</span>
                 </div>
               </div>
             </div>
