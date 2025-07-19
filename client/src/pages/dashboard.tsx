@@ -40,6 +40,7 @@ export default function Dashboard() {
     enabled: !!user,
     refetchInterval: 5000, // Refetch every 5 seconds for real-time updates
     refetchOnWindowFocus: true,
+    staleTime: 0, // Always consider data stale for real-time updates
   });
 
   const { data: gameHistory, isLoading: historyLoading } = useQuery({
@@ -47,6 +48,7 @@ export default function Dashboard() {
     enabled: !!user,
     refetchInterval: 5000, // Refetch every 5 seconds for real-time updates
     refetchOnWindowFocus: true,
+    staleTime: 0, // Always consider data stale for real-time updates
   });
 
   if (userLoading) {
@@ -347,7 +349,7 @@ export default function Dashboard() {
                     </div>
                     <div className="text-right">
                       <p className={`font-black text-xl ${game.isFreePlay ? 'text-emerald-400' : 'text-cyan-400'}`}>
-                        {game.isFreePlay ? 'FREE' : `$${game.amount.toFixed(2)}`}
+                        {game.isFreePlay ? 'FREE' : `$${parseFloat(game.amount).toFixed(2)}`}
                       </p>
                       <Badge className={`${game.isFreePlay ? "bg-gradient-to-r from-emerald-500 to-green-500" : "bg-gradient-to-r from-blue-500 to-cyan-500"} text-white border-0 font-bold shadow-lg`}>
                         {game.isFreePlay ? 'Free Play' : 'Paid'}

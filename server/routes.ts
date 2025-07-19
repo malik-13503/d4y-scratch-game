@@ -656,8 +656,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const transactions = await storage.getTransactionsByUserId(userId);
       
       const totalSpins = transactions.length;
-      const totalSpent = transactions.reduce((sum, t) => sum + t.amount, 0);
-      const freeSpins = transactions.filter(t => t.amount === 0).length;
+      const totalSpent = transactions.reduce((sum, t) => sum + parseFloat(t.amount.toString()), 0);
+      const freeSpins = transactions.filter(t => parseFloat(t.amount.toString()) === 0).length;
       
       // For wins, we'll count transactions where user got a "winning" number (subjective, but let's say numbers 1-50 are "wins")
       const totalWins = transactions.filter(t => t.spinResult && t.spinResult <= 50).length;
@@ -684,14 +684,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Get user's transaction history and format it for game history
       const transactions = await storage.getTransactionsByUserId(userId);
       
-      const gameHistory = transactions.map(transaction => ({
-        number: transaction.spinResult || 0,
-        amount: transaction.amount,
-        isFreePlay: transaction.amount === 0,
-        playedAt: transaction.createdAt,
-        gameId: transaction.gameId || 1,
-        isWin: transaction.spinResult && transaction.spinResult <= 50 // Consider 1-50 as wins
-      })).reverse(); // Show most recent first
+      const gameHistory = transactions.map(transaction => {
+        const amount = parseFloat(transaction.amount.toString());
+        return {
+          number: transaction.spinResult || 0,
+          amount: amount,
+          isFreePlay: amount === 0,
+          playedAt: transaction.createdAt,
+          gameId: transaction.gameId || 1,
+          isWin: transaction.spinResult && transaction.spinResult <= 50 // Consider 1-50 as wins
+        };
+      }).reverse(); // Show most recent first
 
       res.json(gameHistory);
     } catch (error) {
