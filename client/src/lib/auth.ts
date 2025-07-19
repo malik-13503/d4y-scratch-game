@@ -36,9 +36,9 @@ export const getAuthFromStorage = (): StoredAuth | null => {
     
     const authData: StoredAuth = JSON.parse(stored);
     
-    // Check if auth is expired (24 hours)
-    const TWENTY_FOUR_HOURS = 24 * 60 * 60 * 1000;
-    if (Date.now() - authData.timestamp > TWENTY_FOUR_HOURS) {
+    // Check if auth is expired (7 days for better persistence)
+    const SEVEN_DAYS = 7 * 24 * 60 * 60 * 1000;
+    if (Date.now() - authData.timestamp > SEVEN_DAYS) {
       clearAuthFromStorage();
       return null;
     }

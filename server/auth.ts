@@ -21,9 +21,10 @@ export function setupAuth(app: Express) {
     cookie: {
       secure: false, // Set to false for development
       httpOnly: true,
-      maxAge: 24 * 60 * 60 * 1000, // 24 hours
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days for better persistence
       sameSite: 'lax', // Allow cross-site requests
     },
+    rolling: true, // Extend session on each request
   };
 
   app.set("trust proxy", 1);

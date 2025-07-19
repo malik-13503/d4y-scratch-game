@@ -55,14 +55,19 @@ function Router() {
       saveAuthToStorage(serverUser);
     }
     
-    // If server returns error, check if we should clear localStorage
+    // If server returns error, handle gracefully
     if (error && !serverUser) {
       console.log("Server authentication error:", error);
-      // Only clear localStorage if it's been some time since login
+      // Only clear localStorage if it's been significant time since login
       const storedAuth = getAuthFromStorage();
-      if (storedAuth && (Date.now() - storedAuth.timestamp) > 60000) { // 1 minute
+      if (storedAuth && (Date.now() - storedAuth.timestamp) > 300000) { // 5 minutes
+        console.log("Clearing stale authentication");
         clearAuthFromStorage();
         setUser(null);
+      } else if (storedAuth) {
+        // Keep using localStorage auth for short-term server errors
+        console.log("Using cached auth during server error");
+        setUser(storedAuth.user);
       }
     }
     

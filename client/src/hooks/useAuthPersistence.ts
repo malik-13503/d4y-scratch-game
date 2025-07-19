@@ -30,9 +30,9 @@ export function useAuthPersistence() {
     }
   }, [serverUser, error, storedAuth, isInitialized]);
 
-  // Check if localStorage auth is still valid (within 24 hours)
+  // Check if localStorage auth is still valid (within 7 days)
   const isStoredAuthValid = storedAuth && storedAuth.timestamp && 
-    (Date.now() - storedAuth.timestamp) < (24 * 60 * 60 * 1000);
+    (Date.now() - storedAuth.timestamp) < (7 * 24 * 60 * 60 * 1000);
 
   // Determine authentication state
   const isAuthenticated = !!(serverUser || (isStoredAuthValid && !error));
