@@ -1,10 +1,12 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { saveAuthToStorage, getAuthFromStorage, clearAuthFromStorage } from '@/lib/auth';
 
 export function useAuthPersistence() {
   const [isInitialized, setIsInitialized] = useState(false);
-  const [localAuth, setLocalAuth] = useState(() => getAuthFromStorage());
+  
+  // Get initial auth from localStorage
+  const storedAuth = getAuthFromStorage();
   
   // Try to get user from server
   const { data: serverUser, isLoading: serverLoading, error } = useQuery({
@@ -13,42 +15,29 @@ export function useAuthPersistence() {
     staleTime: 0,
   });
 
-  const updateLocalAuth = useCallback((user: any) => {
-    if (user) {
-      const authData = {
-        isAuthenticated: true,
-        user,
-        timestamp: Date.now()
-      };
-      saveAuthToStorage(user);
-      setLocalAuth(authData);
-    } else {
-      clearAuthFromStorage();
-      setLocalAuth(null);
-    }
-  }, []);
-
   useEffect(() => {
     // If we get user from server, save to localStorage
     if (serverUser) {
-      updateLocalAuth(serverUser);
+      saveAuthToStorage(serverUser);
     }
     // If server returns 401, clear localStorage
-    else if (error) {
-      updateLocalAuth(null);
+    else if (error && storedAuth) {
+      clearAuthFromStorage();
     }
     
-    setIsInitialized(true);
-  }, [serverUser, error, updateLocalAuth]);
+    if (!isInitialized) {
+      setIsInitialized(true);
+    }
+  }, [serverUser, error, storedAuth, isInitialized]);
 
   // Check if localStorage auth is still valid (within 24 hours)
-  const isLocalAuthValid = localAuth && localAuth.timestamp && 
-    (Date.now() - localAuth.timestamp) < (24 * 60 * 60 * 1000);
+  const isStoredAuthValid = storedAuth && storedAuth.timestamp && 
+    (Date.now() - storedAuth.timestamp) < (24 * 60 * 60 * 1000);
 
   // Determine authentication state
-  const isAuthenticated = !!(serverUser || (isLocalAuthValid && !error));
-  const user = serverUser || (isLocalAuthValid ? localAuth?.user : null);
-  const isLoading = !isInitialized || (serverLoading && !isLocalAuthValid);
+  const isAuthenticated = !!(serverUser || (isStoredAuthValid && !error));
+  const user = serverUser || (isStoredAuthValid ? storedAuth.user : null);
+  const isLoading = !isInitialized || (serverLoading && !isStoredAuthValid);
 
   return {
     user,
