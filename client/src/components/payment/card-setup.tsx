@@ -50,7 +50,7 @@ export function CardSetup({ onSuccess, user }: CardSetupProps) {
     }
   };
 
-  if (user.cardOnFile) {
+  if (user?.cardOnFile) {
     return (
       <Card className="w-full max-w-md mx-auto">
         <CardHeader>
@@ -66,7 +66,7 @@ export function CardSetup({ onSuccess, user }: CardSetupProps) {
                 <CreditCard className="text-green-600" size={20} />
                 <div>
                   <p className="font-medium text-green-800">
-                    {user.cardBrand} ending in {user.cardLast4}
+                    {user?.cardBrand || 'Card'} ending in {user?.cardLast4 || '****'}
                   </p>
                   <p className="text-sm text-green-700">
                     Verified and ready for games
