@@ -4,6 +4,7 @@ import { saveAuthToStorage, getAuthFromStorage, clearAuthFromStorage } from '@/l
 
 export function useAuthPersistence() {
   const [isInitialized, setIsInitialized] = useState(false);
+  const [localAuth] = useState(() => getAuthFromStorage());
   
   // Try to get user from server, but also check localStorage
   const { data: serverUser, isLoading: serverLoading, error } = useQuery({
@@ -12,26 +13,20 @@ export function useAuthPersistence() {
     staleTime: 0,
   });
 
-  const [localAuth, setLocalAuth] = useState(() => getAuthFromStorage());
-
   useEffect(() => {
     // If we get user from server, save to localStorage
     if (serverUser) {
       saveAuthToStorage(serverUser);
-      setLocalAuth({
-        isAuthenticated: true,
-        user: serverUser,
-        timestamp: Date.now()
-      });
     }
-    // If server returns 401 but we have localStorage auth, clear it
-    else if (error && localAuth) {
+    // If server returns 401, clear localStorage
+    else if (error) {
       clearAuthFromStorage();
-      setLocalAuth(null);
     }
     
-    setIsInitialized(true);
-  }, [serverUser, error, localAuth]);
+    if (!isInitialized) {
+      setIsInitialized(true);
+    }
+  }, [serverUser, error, isInitialized]);
 
   // Determine authentication state
   const isAuthenticated = !!(serverUser || (localAuth && !error));

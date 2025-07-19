@@ -113,6 +113,8 @@ This is a real-time prize game web application that allows users to participate 
   - **Button Improvements**: Fixed button text visibility and enabled achievement tracking functionality
   - **Session Persistence**: Added localStorage authentication system to maintain login state after page refresh
   - **Text Visibility**: Fixed achievement text colors to white with drop shadows for better readability on dark backgrounds
+  - **My Numbers Page**: Created comprehensive page showing all user's played numbers with wins, charges, and free spins
+  - **Navigation Enhancement**: Added "My Numbers" card to dashboard navigation and updated routing system
 - January 15, 2025: Implemented comprehensive authentication-first user experience
   - Created new branded authentication landing page as default homepage (/)
   - Moved games listing to /games route for authenticated users

@@ -19,7 +19,8 @@ import {
   Activity,
   Clock,
   Gamepad2,
-  RefreshCw
+  RefreshCw,
+  Hash
 } from "lucide-react";
 import logoPath from "@assets/logo_1751918412862.png";
 
@@ -211,7 +212,7 @@ export default function Dashboard() {
         </div>
 
         {/* Quick Action Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <Card className="relative overflow-hidden bg-gradient-to-br from-purple-900/70 to-blue-900/70 border-purple-400/40 backdrop-blur-xl shadow-2xl hover:shadow-purple-500/20 transition-all duration-300">
             <div className="absolute inset-0 bg-gradient-to-br from-purple-800/30 to-blue-800/30 blur-xl"></div>
             <CardContent className="relative p-6">
@@ -265,6 +266,25 @@ export default function Dashboard() {
                 >
                   View Progress
                 </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card 
+            className="relative overflow-hidden bg-gradient-to-br from-cyan-900/60 to-teal-900/60 border-cyan-400/30 backdrop-blur-xl shadow-2xl cursor-pointer hover:scale-105 transition-all duration-300 group"
+            onClick={() => setLocation('/my-numbers')}
+          >
+            <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/10 to-teal-500/10 blur-2xl group-hover:blur-xl transition-all duration-300"></div>
+            <CardContent className="relative p-6">
+              <div className="flex items-center space-x-4">
+                <div className="p-3 bg-gradient-to-br from-cyan-500 to-teal-600 rounded-xl shadow-lg group-hover:shadow-2xl transition-all duration-300">
+                  <Hash className="h-8 w-8 text-white drop-shadow-lg" />
+                </div>
+                <div>
+                  <h3 className="text-white font-bold text-xl drop-shadow-lg">My Numbers</h3>
+                  <p className="text-gray-200 drop-shadow-sm">View all your spins</p>
+                </div>
+                <ChevronRight className="h-6 w-6 text-white/70 ml-auto group-hover:translate-x-1 transition-all duration-300" />
               </div>
             </CardContent>
           </Card>
