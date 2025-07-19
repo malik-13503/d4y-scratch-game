@@ -114,9 +114,9 @@ export default function Home() {
           <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-r from-purple-500/10 to-blue-500/10 rounded-full blur-3xl animate-spin" style={{animationDuration: '20s'}}></div>
         </div>
         
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-5">
           {/* Mobile-First Responsive Layout */}
-          <div className="space-y-6 lg:space-y-0">
+          <div className="space-y-4 lg:space-y-0">
             {/* Top Row - Logo and Navigation */}
             <div className="flex flex-col sm:flex-row items-center justify-between space-y-4 sm:space-y-0">
               {/* Brand Logo with Enhanced Glow */}
@@ -141,62 +141,62 @@ export default function Home() {
               </div>
             </div>
             
-            {/* Hero Title Section */}
-            <div className="text-center py-4 sm:py-6">
+            {/* Compact Hero Title Section */}
+            <div className="text-center py-2 sm:py-3">
               <div className="relative">
-                <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-black bg-gradient-to-r from-white via-purple-200 to-white bg-clip-text text-transparent drop-shadow-2xl tracking-tight leading-tight">
+                <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-white via-purple-200 to-white bg-clip-text text-transparent drop-shadow-lg tracking-tight">
                   HIT THE ROAD JACKPOT
                 </h1>
-                <div className="absolute -inset-4 bg-gradient-to-r from-purple-500/20 to-blue-500/20 blur-xl -z-10"></div>
+                <div className="absolute -inset-2 bg-gradient-to-r from-purple-500/15 to-blue-500/15 blur-lg -z-10"></div>
               </div>
-              <p className="text-lg sm:text-xl md:text-2xl text-gray-300 font-medium mt-2 sm:mt-4 tracking-wide">
+              <p className="text-sm sm:text-base text-gray-400 font-medium mt-1 sm:mt-2">
                 Spin the Wheel • Win Real Prizes • Live Action
               </p>
             </div>
             
-            {/* Live Status Bar */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
+            {/* Compact Status Bar */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
               {/* Live Games Status */}
-              <div className="bg-gradient-to-r from-emerald-500/20 to-green-500/20 backdrop-blur-xl rounded-2xl px-6 py-4 border border-emerald-400/50 shadow-xl">
-                <div className="flex items-center space-x-3">
-                  <div className="p-2 bg-gradient-to-r from-emerald-500 to-green-600 rounded-xl shadow-lg">
-                    <Zap className="h-5 w-5 text-white drop-shadow-lg" />
+              <div className="bg-gradient-to-r from-emerald-500/20 to-green-500/20 backdrop-blur-xl rounded-xl px-4 py-3 border border-emerald-400/50 shadow-lg">
+                <div className="flex items-center space-x-2">
+                  <div className="p-1.5 bg-gradient-to-r from-emerald-500 to-green-600 rounded-lg shadow-md">
+                    <Zap className="h-4 w-4 text-white" />
                   </div>
                   <div>
-                    <p className="text-emerald-300 text-sm font-bold uppercase tracking-wide">Live Games</p>
-                    <p className="text-white text-xl font-black">{games?.length || 0} Active</p>
+                    <p className="text-emerald-300 text-xs font-semibold uppercase tracking-wide">Live Games</p>
+                    <p className="text-white text-lg font-bold">{games?.length || 0} Active</p>
                   </div>
                   <div className="ml-auto">
-                    <div className="w-3 h-3 bg-emerald-400 rounded-full animate-pulse shadow-lg shadow-emerald-400/50"></div>
+                    <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse shadow-md shadow-emerald-400/50"></div>
                   </div>
                 </div>
               </div>
               
               {/* Players Online */}
-              <div className="bg-gradient-to-r from-blue-500/20 to-cyan-500/20 backdrop-blur-xl rounded-2xl px-6 py-4 border border-blue-400/50 shadow-xl">
-                <div className="flex items-center space-x-3">
-                  <div className="p-2 bg-gradient-to-r from-blue-500 to-cyan-600 rounded-xl shadow-lg">
-                    <Users className="h-5 w-5 text-white drop-shadow-lg" />
+              <div className="bg-gradient-to-r from-blue-500/20 to-cyan-500/20 backdrop-blur-xl rounded-xl px-4 py-3 border border-blue-400/50 shadow-lg">
+                <div className="flex items-center space-x-2">
+                  <div className="p-1.5 bg-gradient-to-r from-blue-500 to-cyan-600 rounded-lg shadow-md">
+                    <Users className="h-4 w-4 text-white" />
                   </div>
                   <div>
-                    <p className="text-blue-300 text-sm font-bold uppercase tracking-wide">Players Online</p>
-                    <p className="text-white text-xl font-black">{Math.floor(Math.random() * 50) + 25}</p>
+                    <p className="text-blue-300 text-xs font-semibold uppercase tracking-wide">Players Online</p>
+                    <p className="text-white text-lg font-bold">{Math.floor(Math.random() * 50) + 25}</p>
                   </div>
                 </div>
               </div>
               
               {/* Big Win Zone */}
-              <div className="bg-gradient-to-r from-yellow-500/30 via-orange-500/30 to-red-500/30 backdrop-blur-xl rounded-2xl px-6 py-4 border border-yellow-400/50 shadow-xl">
-                <div className="flex items-center space-x-3">
-                  <div className="p-2 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-xl shadow-lg">
-                    <Crown className="h-5 w-5 text-white drop-shadow-lg" />
+              <div className="bg-gradient-to-r from-yellow-500/25 via-orange-500/25 to-red-500/25 backdrop-blur-xl rounded-xl px-4 py-3 border border-yellow-400/50 shadow-lg">
+                <div className="flex items-center space-x-2">
+                  <div className="p-1.5 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-lg shadow-md">
+                    <Crown className="h-4 w-4 text-white" />
                   </div>
                   <div>
-                    <p className="text-yellow-300 text-sm font-bold uppercase tracking-wide">Win Big</p>
-                    <p className="text-white text-xl font-black">Up to $500</p>
+                    <p className="text-yellow-300 text-xs font-semibold uppercase tracking-wide">Win Big</p>
+                    <p className="text-white text-lg font-bold">Up to $500</p>
                   </div>
                   <div className="ml-auto">
-                    <div className="flex space-x-1">
+                    <div className="flex space-x-0.5">
                       <div className="w-1 h-1 bg-yellow-400 rounded-full animate-ping"></div>
                       <div className="w-1 h-1 bg-orange-400 rounded-full animate-ping delay-100"></div>
                       <div className="w-1 h-1 bg-red-400 rounded-full animate-ping delay-200"></div>
