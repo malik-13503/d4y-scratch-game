@@ -955,7 +955,11 @@
 .admin-dashboard[data-admin-dashboard] .bg-red-500\/10,
 .admin-dashboard[data-admin-dashboard] .bg-indigo-500\/10,
 .admin-dashboard[data-admin-dashboard] .bg-yellow-500\/10,
-.admin-dashboard[data-admin-dashboard] .bg-pink-500\/10 {
+.admin-dashboard[data-admin-dashboard] .bg-pink-500\/10,
+.admin-dashboard[data-admin-dashboard] .bg-white\/80,
+.admin-dashboard[data-admin-dashboard] .bg-white,
+.admin-dashboard[data-admin-dashboard] .bg-gray-50,
+.admin-dashboard[data-admin-dashboard] .bg-slate-50 {
   background: linear-gradient(to bottom right, rgba(5, 150, 105, 0.9), rgba(34, 197, 94, 0.9)) !important;
   backdrop-filter: blur(4px) !important;
   border: 1px solid rgba(52, 211, 153, 0.8) !important;
@@ -986,7 +990,29 @@
 .admin-dashboard[data-admin-dashboard] .text-yellow-600,
 .admin-dashboard[data-admin-dashboard] .text-pink-600,
 .admin-dashboard[data-admin-dashboard] .text-slate-600,
-.admin-dashboard[data-admin-dashboard] .text-gray-600 {
+.admin-dashboard[data-admin-dashboard] .text-gray-600,
+.admin-dashboard[data-admin-dashboard] .text-gray-500,
+.admin-dashboard[data-admin-dashboard] .text-gray-700,
+.admin-dashboard[data-admin-dashboard] .text-gray-800,
+.admin-dashboard[data-admin-dashboard] .text-slate-500,
+.admin-dashboard[data-admin-dashboard] .text-slate-700,
+.admin-dashboard[data-admin-dashboard] .text-slate-800,
+.admin-dashboard[data-admin-dashboard] h3,
+.admin-dashboard[data-admin-dashboard] p,
+.admin-dashboard[data-admin-dashboard] span {
+  color: white !important;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8) !important;
+}
+
+/* Force all text in admin dashboard cards to be white with shadows */
+.admin-dashboard[data-admin-dashboard] .bg-blue-500\/10 *,
+.admin-dashboard[data-admin-dashboard] .bg-green-500\/10 *,
+.admin-dashboard[data-admin-dashboard] .bg-purple-500\/10 *,
+.admin-dashboard[data-admin-dashboard] .bg-orange-500\/10 *,
+.admin-dashboard[data-admin-dashboard] .bg-white\/80 *,
+.admin-dashboard[data-admin-dashboard] .bg-white *,
+.admin-dashboard[data-admin-dashboard] .bg-gray-50 *,
+.admin-dashboard[data-admin-dashboard] .bg-slate-50 * {
   color: white !important;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8) !important;
 }

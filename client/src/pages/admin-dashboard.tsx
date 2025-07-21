@@ -845,28 +845,28 @@ export default function AdminDashboard() {
 
             {/* User Stats Cards */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-              <Card className="bg-gradient-to-br from-blue-600/20 to-cyan-600/20 border border-blue-400/30">
+              <Card className="bg-gradient-to-br from-emerald-600/90 to-green-600/90 backdrop-blur-sm border border-emerald-400/80 hover:border-emerald-300 transition-all duration-300 cursor-pointer hover:shadow-2xl hover:shadow-emerald-500/40 hover:scale-105">
                 <CardContent className="p-6 text-center">
-                  <div className="text-3xl font-bold text-blue-300 mb-2">{users?.length || 0}</div>
-                  <div className="text-sm text-blue-200">Total Users</div>
+                  <div className="text-3xl font-bold text-white mb-2 drop-shadow-lg">{users?.length || 0}</div>
+                  <div className="text-sm text-white drop-shadow-md">Total Users</div>
                 </CardContent>
               </Card>
-              <Card className="bg-gradient-to-br from-green-600/20 to-emerald-600/20 border border-green-400/30">
+              <Card className="bg-gradient-to-br from-emerald-600/90 to-green-600/90 backdrop-blur-sm border border-emerald-400/80 hover:border-emerald-300 transition-all duration-300 cursor-pointer hover:shadow-2xl hover:shadow-emerald-500/40 hover:scale-105">
                 <CardContent className="p-6 text-center">
-                  <div className="text-3xl font-bold text-green-300 mb-2">{users?.filter(u => u.cardOnFile).length || 0}</div>
-                  <div className="text-sm text-green-200">Verified Users</div>
+                  <div className="text-3xl font-bold text-white mb-2 drop-shadow-lg">{users?.filter(u => u.cardOnFile).length || 0}</div>
+                  <div className="text-sm text-white drop-shadow-md">Verified Users</div>
                 </CardContent>
               </Card>
-              <Card className="bg-gradient-to-br from-purple-600/20 to-pink-600/20 border border-purple-400/30">
+              <Card className="bg-gradient-to-br from-emerald-600/90 to-green-600/90 backdrop-blur-sm border border-emerald-400/80 hover:border-emerald-300 transition-all duration-300 cursor-pointer hover:shadow-2xl hover:shadow-emerald-500/40 hover:scale-105">
                 <CardContent className="p-6 text-center">
-                  <div className="text-3xl font-bold text-purple-300 mb-2">{users?.filter(u => u.createdAt && new Date(u.createdAt) > new Date(Date.now() - 24*60*60*1000)).length || 0}</div>
-                  <div className="text-sm text-purple-200">New Today</div>
+                  <div className="text-3xl font-bold text-white mb-2 drop-shadow-lg">{users?.filter(u => u.createdAt && new Date(u.createdAt) > new Date(Date.now() - 24*60*60*1000)).length || 0}</div>
+                  <div className="text-sm text-white drop-shadow-md">New Today</div>
                 </CardContent>
               </Card>
-              <Card className="bg-gradient-to-br from-orange-600/20 to-red-600/20 border border-orange-400/30">
+              <Card className="bg-gradient-to-br from-emerald-600/90 to-green-600/90 backdrop-blur-sm border border-emerald-400/80 hover:border-emerald-300 transition-all duration-300 cursor-pointer hover:shadow-2xl hover:shadow-emerald-500/40 hover:scale-105">
                 <CardContent className="p-6 text-center">
-                  <div className="text-3xl font-bold text-orange-300 mb-2">{users?.filter(u => u.isActive).length || users?.length || 0}</div>
-                  <div className="text-sm text-orange-200">Active Users</div>
+                  <div className="text-3xl font-bold text-white mb-2 drop-shadow-lg">{users?.filter(u => u.isActive).length || users?.length || 0}</div>
+                  <div className="text-sm text-white drop-shadow-md">Active Users</div>
                 </CardContent>
               </Card>
             </div>
@@ -956,41 +956,41 @@ export default function AdminDashboard() {
 
             {/* Analytics Overview */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <Card className="bg-gradient-to-br from-green-600/20 to-emerald-600/20 border border-green-400/30">
+              <Card className="bg-gradient-to-br from-emerald-600/90 to-green-600/90 backdrop-blur-sm border border-emerald-400/80 hover:border-emerald-300 transition-all duration-300 cursor-pointer hover:shadow-2xl hover:shadow-emerald-500/40 hover:scale-105">
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <div className="text-3xl font-bold text-green-300 mb-2">${analytics?.totalRevenue?.toLocaleString() || '0'}</div>
-                      <div className="text-sm text-green-200">Total Revenue</div>
-                      <div className="text-xs text-green-400 mt-1">+{analytics?.revenueGrowth || 0}% this month</div>
+                      <div className="text-3xl font-bold text-white mb-2 drop-shadow-lg">${analytics?.totalRevenue?.toLocaleString() || '0'}</div>
+                      <div className="text-sm text-white drop-shadow-md">Total Revenue</div>
+                      <div className="text-xs text-white/90 mt-1 drop-shadow-sm">+{analytics?.revenueGrowth || 0}% this month</div>
                     </div>
-                    <DollarSign className="h-8 w-8 text-green-400" />
+                    <DollarSign className="h-8 w-8 text-white drop-shadow-lg" />
                   </div>
                 </CardContent>
               </Card>
               
-              <Card className="bg-gradient-to-br from-blue-600/20 to-cyan-600/20 border border-blue-400/30">
+              <Card className="bg-gradient-to-br from-emerald-600/90 to-green-600/90 backdrop-blur-sm border border-emerald-400/80 hover:border-emerald-300 transition-all duration-300 cursor-pointer hover:shadow-2xl hover:shadow-emerald-500/40 hover:scale-105">
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <div className="text-3xl font-bold text-blue-300 mb-2">{analytics?.totalSpins?.toLocaleString() || '0'}</div>
-                      <div className="text-sm text-blue-200">Total Spins</div>
-                      <div className="text-xs text-blue-400 mt-1">Across all games</div>
+                      <div className="text-3xl font-bold text-white mb-2 drop-shadow-lg">{analytics?.totalSpins?.toLocaleString() || '0'}</div>
+                      <div className="text-sm text-white drop-shadow-md">Total Spins</div>
+                      <div className="text-xs text-white/90 mt-1 drop-shadow-sm">Across all games</div>
                     </div>
-                    <Target className="h-8 w-8 text-blue-400" />
+                    <Target className="h-8 w-8 text-white drop-shadow-lg" />
                   </div>
                 </CardContent>
               </Card>
               
-              <Card className="bg-gradient-to-br from-purple-600/20 to-pink-600/20 border border-purple-400/30">
+              <Card className="bg-gradient-to-br from-emerald-600/90 to-green-600/90 backdrop-blur-sm border border-emerald-400/80 hover:border-emerald-300 transition-all duration-300 cursor-pointer hover:shadow-2xl hover:shadow-emerald-500/40 hover:scale-105">
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <div className="text-3xl font-bold text-purple-300 mb-2">{analytics?.conversionRate || '0'}%</div>
-                      <div className="text-sm text-purple-200">Conversion Rate</div>
-                      <div className="text-xs text-purple-400 mt-1">Visitor to player</div>
+                      <div className="text-3xl font-bold text-white mb-2 drop-shadow-lg">{analytics?.conversionRate || '0'}%</div>
+                      <div className="text-sm text-white drop-shadow-md">Conversion Rate</div>
+                      <div className="text-xs text-white/90 mt-1 drop-shadow-sm">Visitor to player</div>
                     </div>
-                    <TrendingUp className="h-8 w-8 text-purple-400" />
+                    <TrendingUp className="h-8 w-8 text-white drop-shadow-lg" />
                   </div>
                 </CardContent>
               </Card>
