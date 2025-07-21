@@ -122,10 +122,12 @@ export const ProfessionalWheel = forwardRef<
     }
   }, [totalNumbers]);
 
-  // Update wheel numbers when available numbers change
+  // Update wheel numbers when available numbers change (but NOT during spinning)
   useEffect(() => {
-    setWheelNumbers(generateWheelNumbers());
-  }, [availableNumbers]);
+    if (!isSpinning) {
+      setWheelNumbers(generateWheelNumbers());
+    }
+  }, [availableNumbers, isSpinning]);
 
   // Set up periodic refresh of available numbers for real-time updates
   useEffect(() => {
@@ -151,26 +153,22 @@ export const ProfessionalWheel = forwardRef<
 
     console.log("🎯 Starting spin sequence...");
     
-    // Step 1: Reset wheel and start spinning animation immediately
+    // Step 1: Lock the wheel state and prepare for spinning
     setIsSpinning(true);
     setResult(null);
     setShowResultModal(false);
     
-    // Reset rotation to 0 with no transition
+    // Step 2: Freeze current wheel numbers during the entire spin
+    const frozenWheelNumbers = [...wheelNumbers];
+    
+    // Step 3: Reset rotation to 0 with no transition
     setRotation(0);
-
-    // Step 2: Start visual spinning animation immediately to provide instant feedback
-    setTimeout(() => {
-      const tempRotation = 1800 + Math.random() * 360; // 5 rotations + random
-      setRotation(tempRotation);
-      console.log("🎯 Wheel animation started");
-    }, 100);
 
     let spinResult = null;
     let apiCallSuccessful = false;
 
     try {
-      // Step 3: Get API result (this processes payment and gets actual number)
+      // Step 4: Get API result (this processes payment and gets actual number)
       console.log("🎯 Making API call for spin result...");
       spinResult = await onSpin();
       apiCallSuccessful = true;
@@ -185,69 +183,70 @@ export const ProfessionalWheel = forwardRef<
       spinResult = 1; // Safe fallback - always free
     }
 
-    // Step 4: Calculate precise landing position for the result
-    // This happens regardless of API success to ensure wheel always completes
-    const segmentAngle = 360 / wheelNumbers.length;
-    let currentWheelNumbers = [...wheelNumbers];
-    let targetSegmentIndex = currentWheelNumbers.findIndex(num => num === spinResult);
+    // Step 5: Calculate precise landing position using FROZEN wheel numbers
+    const segmentAngle = 360 / frozenWheelNumbers.length;
+    let targetSegmentIndex = frozenWheelNumbers.findIndex(num => num === spinResult);
     
     if (targetSegmentIndex === -1) {
-      // If exact number not found, place it in a segment
-      if (availableNumbers.includes(spinResult)) {
-        targetSegmentIndex = Math.floor(Math.random() * currentWheelNumbers.length);
-        currentWheelNumbers[targetSegmentIndex] = spinResult;
-        setWheelNumbers(currentWheelNumbers);
-      } else {
-        targetSegmentIndex = Math.floor(Math.random() * currentWheelNumbers.length);
-      }
+      // If exact number not found, temporarily place it in a segment
+      targetSegmentIndex = Math.floor(Math.random() * frozenWheelNumbers.length);
+      frozenWheelNumbers[targetSegmentIndex] = spinResult;
+      // Update wheel numbers ONLY with the result number for landing
+      setWheelNumbers([...frozenWheelNumbers]);
     }
 
-    // Step 5: Calculate final precise rotation to land exactly on result
+    // Step 6: Calculate final precise rotation to land exactly on result
     const targetAngle = segmentAngle * targetSegmentIndex + segmentAngle / 2;
-    const fullRotations = 5 * 360; // 5 full rotations
+    const fullRotations = 5 * 360; // 5 full rotations for exactly 8 seconds
     const finalRotation = fullRotations + (360 - targetAngle);
 
-    // Step 6: Apply the precise final rotation at 1 second mark
+    // Step 7: Start the 8-second spinning animation immediately
     setTimeout(() => {
       setRotation(finalRotation);
-      console.log("🎯 Final rotation applied:", {
+      console.log("🎯 8-second wheel animation started - will land on:", {
         spinResult,
         targetSegmentIndex,
+        frozenNumbers: frozenWheelNumbers,
         finalRotation,
         apiCallSuccessful
       });
-    }, 1000);
+    }, 100);
 
-    // Step 7: Complete the spin sequence after exactly 8 seconds total
+    // Step 8: Complete the spin sequence after EXACTLY 8 seconds
     setTimeout(async () => {
-      console.log("🎯 Completing spin sequence...");
+      console.log("🎯 8-second spin completed, showing result...");
       
+      // Set final result
       setResult(spinResult);
       const isFree = spinResult >= freePlayStart;
       setIsFreePlay(isFree);
       setAmountCharged(isFree ? 0 : spinResult);
-      setIsSpinning(false);
       
-      // Refresh available numbers after spin (only if API was successful)
-      if (apiCallSuccessful) {
-        const path = window.location.pathname;
-        const gameIdMatch = path.match(/\/game\/(\d+)/);
-        if (gameIdMatch) {
-          const gameId = parseInt(gameIdMatch[1]);
-          await fetchAvailableNumbers(gameId);
-        }
-      }
-      
-      // Show result modal after wheel stops
+      // Show result modal immediately after wheel stops
       setTimeout(() => {
         setShowResultModal(true);
         if (!apiCallSuccessful) {
-          // For API failures, show an error state but still complete the wheel animation
-          console.error("⚠️ Spin completed with API failure - user will see error in result modal");
+          console.error("⚠️ Spin completed with API failure - showing error in modal");
         }
-      }, 500);
+      }, 200);
       
-      console.log("🎯 Spin sequence completed - API success:", apiCallSuccessful);
+      // Only after modal is shown, release the spinning state and refresh numbers
+      setTimeout(async () => {
+        setIsSpinning(false);
+        
+        // Refresh available numbers ONLY after everything is complete
+        if (apiCallSuccessful) {
+          const path = window.location.pathname;
+          const gameIdMatch = path.match(/\/game\/(\d+)/);
+          if (gameIdMatch) {
+            const gameId = parseInt(gameIdMatch[1]);
+            await fetchAvailableNumbers(gameId);
+          }
+        }
+        
+        console.log("🎯 Spin sequence fully completed");
+      }, 1000);
+      
     }, 8000);
   };
 
@@ -291,10 +290,10 @@ export const ProfessionalWheel = forwardRef<
                   style={{
                     transform: `rotate(${rotation}deg)`,
                     transition: isSpinning
-                      ? `transform 8s cubic-bezier(0.17, 0.67, 0.12, 0.99)`
+                      ? `transform 7.9s cubic-bezier(0.25, 0.1, 0.25, 1.0)`
                       : rotation === 0 
                         ? "none" 
-                        : "transform 0.5s ease-out",
+                        : "none", // No transition when stopping to prevent drift
                     boxShadow:
                       "inset 0 0 30px rgba(0, 0, 0, 0.4), 0 0 40px rgba(255, 215, 0, 0.3)",
                   }}
@@ -321,10 +320,8 @@ export const ProfessionalWheel = forwardRef<
                           style={{
                             transform: `translate(-50%, -50%) translate(${Math.cos(((angle + 360 / segmentColors.length / 2 - 90) * Math.PI) / 180) * numberRadius}px, ${Math.sin(((angle + 360 / segmentColors.length / 2 - 90) * Math.PI) / 180) * numberRadius}px) rotate(${-rotation}deg)`,
                             transition: isSpinning
-                              ? `transform 8s cubic-bezier(0.17, 0.67, 0.12, 0.99)`
-                              : rotation === 0 
-                                ? "none" 
-                                : "transform 0.5s ease-out",
+                              ? `transform 7.9s cubic-bezier(0.25, 0.1, 0.25, 1.0)`
+                              : "none", // Keep numbers stationary when not spinning
                           }}
                         >
                           {wheelNumbers[index]}
@@ -351,8 +348,8 @@ export const ProfessionalWheel = forwardRef<
                     style={{
                       transform: `translate(-50%, -50%) rotate(${-rotation}deg)`,
                       transition: isSpinning
-                        ? `transform 8s cubic-bezier(0.17, 0.67, 0.12, 0.99)`
-                        : "transform 0.1s ease-out",
+                        ? `transform 7.9s cubic-bezier(0.25, 0.1, 0.25, 1.0)`
+                        : "none", // Keep center logo stationary when not spinning
                     }}
                   >
                     <div className="w-12 h-12 sm:w-28 sm:h-28 md:w-32 md:h-32 lg:w-36 lg:h-36 bg-black rounded-full border-2 border-orange-400 flex items-center justify-center p-2">
