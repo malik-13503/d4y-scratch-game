@@ -100,15 +100,15 @@ This is a real-time prize game web application that allows users to participate 
 
 ## Changelog
 
-- January 21, 2025: **CRITICAL FIXES** - Fixed wheel spinning reliability for multiple consecutive spins
-  - **Wheel Reset Fix**: Fixed rotation reset timing to ensure proper wheel positioning between spins
-  - **Sequential Spin Support**: Wheel now spins correctly on 2nd, 3rd, and all subsequent spins without issues
-  - **Animation Timing**: Added proper delay (150ms) for rotation reset to take effect before next spin starts
-  - **Session Persistence**: IP address tracking with 30-day session cookies and 2-hour grace period
-  - **Authentication Stability**: Users stay logged in across app restarts and server reconnections
-  - **Error Prevention**: Fixed useEffect imports and resolved all React component warnings
-  - **Consistent Performance**: Each spin gets exact 8-second duration with perfect landing accuracy
-  - **State Management**: Proper wheel state locking prevents mid-spin updates and number changes
+- January 21, 2025: **CRITICAL FIXES** - Enhanced authentication persistence and improved modal design
+  - **Robust Session Persistence**: localStorage authentication now prioritized over server errors for seamless user experience
+  - **Enhanced Authentication Modal**: Redesigned with professional golden theme, better contrast, and eye-catching visual elements
+  - **IP-based Authentication**: Server tracks client IP addresses with comprehensive session logging for debugging
+  - **Fallback Authentication**: Users stay logged in during server restarts and connectivity issues using local storage
+  - **Improved UX**: Authentication modal now matches game branding with gradient backgrounds and better readability
+  - **Wheel Mechanics**: Fixed rotation reset timing for perfect consecutive spins with 8-second duration
+  - **Error Prevention**: Resolved all React component warnings and improved state management
+  - **Session Management**: Extended grace periods and automatic fallback to localStorage authentication
 - January 19, 2025: Enhanced games page header with professional eye-catching design and fixed authentication persistence
   - **Games Header Transformation**: Completely redesigned the main games page (/games) header with ultra-professional layout
   - **Eye-catching Visual Elements**: Added animated gradient backgrounds, floating orbs, and dynamic glow effects

@@ -176,15 +176,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/logout", (req, res) => {
     const clientIP = req.ip || req.connection.remoteAddress || req.socket.remoteAddress;
-    console.log("User logged out from IP:", clientIP);
+    const userId = (req.session as any)?.userId;
+    
+    if (userId) {
+      console.log("User", userId, "logged out from IP:", clientIP);
+    } else {
+      console.log("Logout attempt from IP:", clientIP, "(no active session)");
+    }
     
     (req.session as any).userId = null;
     req.session.destroy((err) => {
       if (err) {
+        console.error("Session destroy error:", err);
         return res.status(500).json({ message: "Logout failed" });
       }
-      res.clearCookie('hit_the_road_session');
-      res.clearCookie('connect.sid');
+      
+      // Clear all possible cookie variations
+      res.clearCookie('hit_the_road_session', { path: '/' });
+      res.clearCookie('connect.sid', { path: '/' });
+      res.clearCookie('session', { path: '/' });
+      
       res.json({ message: "Logout successful" });
     });
   });

@@ -53,29 +53,36 @@ function Router() {
       console.log("Server authenticated user:", serverUser);
       setUser(serverUser);
       saveAuthToStorage(serverUser);
+      setIsCheckingAuth(false);
     } else if (error && !serverLoading) {
-      // Only clear auth if server explicitly rejects and significant time has passed
+      // If we have stored auth and server error, prioritize stored auth
       const storedAuth = getAuthFromStorage();
-      if (storedAuth && (Date.now() - storedAuth.timestamp) > 7200000) { // 2 hours grace period
-        console.log("Clearing expired authentication after 2 hours");
-        clearAuthFromStorage();
+      if (storedAuth && storedAuth.isAuthenticated) {
+        // Always prioritize localStorage auth during server connectivity issues
+        console.log("Server authentication failed, using stored authentication for user:", storedAuth.user?.email);
+        setUser(storedAuth.user);
+        setIsCheckingAuth(false);
+      } else {
+        // No stored auth and server error - user is not authenticated
+        console.log("No authentication available");
         setUser(null);
-      } else if (storedAuth) {
-        // Keep using localStorage auth for server connectivity issues
-        console.log("Maintaining cached authentication during server issues");
-        // Keep user authenticated with localStorage data
-        if (!user) {
-          setUser(storedAuth.user);
-        }
+        setIsCheckingAuth(false);
       }
+    } else if (!serverLoading && !serverUser && !error) {
+      // Server responded but no user - check localStorage
+      const storedAuth = getAuthFromStorage();
+      if (storedAuth && storedAuth.isAuthenticated) {
+        console.log("No server session, but using stored authentication for user:", storedAuth.user?.email);
+        setUser(storedAuth.user);
+      } else {
+        setUser(null);
+      }
+      setIsCheckingAuth(false);
     }
-    
-    // Mark authentication check as complete after server response
-    setIsCheckingAuth(false);
   }, [serverUser, serverLoading, error]);
 
-  // Show loading spinner while checking auth state
-  if (isCheckingAuth || serverLoading) {
+  // Show loading spinner while checking auth state (but only briefly)
+  if (isCheckingAuth) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
         <div className="animate-spin w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full"></div>
