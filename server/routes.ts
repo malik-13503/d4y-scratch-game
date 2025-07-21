@@ -839,7 +839,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const gameHistory = transactions.map(transaction => {
         const amount = parseFloat(transaction.amount.toString());
         return {
-          number: Math.floor(Math.random() * 200) + 1, // Generate a random number since we don't have spunNumber in transactions
+          number: (transaction as any).spunNumber || Math.floor(Math.random() * 200) + 1,
           amount: amount,
           isFreePlay: amount === 0,
           playedAt: transaction.createdAt,
@@ -852,6 +852,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching game history:", error);
       res.status(500).json({ message: "Failed to fetch game history" });
+    }
+  });
+
+  // Get recent numbers from all users for a specific game
+  app.get("/api/games/:gameId/recent-numbers", async (req, res) => {
+    try {
+      const gameId = parseInt(req.params.gameId);
+      
+      // Get recent transactions for this game from all users
+      const recentTransactions = await storage.getRecentGameTransactions(gameId, 6);
+      
+      const recentNumbers = recentTransactions.map((transaction: any) => ({
+        number: transaction.spunNumber,
+        timestamp: transaction.createdAt,
+        userId: transaction.userId // Don't expose user details for privacy
+      }));
+
+      res.json(recentNumbers);
+    } catch (error) {
+      console.error("Error fetching recent numbers:", error);
+      res.status(500).json({ message: "Failed to fetch recent numbers" });
     }
   });
 
@@ -916,7 +937,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
 
         // Create card on file
-        const card = await squareService.createCard(squareCustomerId, cardNonce, cardNonce);
+        const card = await squareService.createCard(squareCustomerId || '', cardNonce, cardNonce);
         
         // Update user with card info
         await storage.updateUser(userId, {

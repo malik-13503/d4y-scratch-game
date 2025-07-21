@@ -7,7 +7,7 @@ import {
   type SpinResult, type InsertSpinResult, type User, type InsertUser, type Transaction, type InsertTransaction
 } from "@shared/schema";
 import { db } from "./db";
-import { eq } from "drizzle-orm";
+import { eq, desc, sql, and, isNotNull } from "drizzle-orm";
 import session from "express-session";
 import MemoryStore from "memorystore";
 import { hashPassword } from "./utils"; // Import hashPassword
@@ -579,6 +579,36 @@ export class DatabaseStorage implements IStorage {
       return result;
     } catch (error) {
       console.error("Error getting transactions by user ID:", error);
+      return [];
+    }
+  }
+
+  async getRecentGameTransactions(gameId: number, limit: number = 6): Promise<any[]> {
+    try {
+      const result = await db
+        .select({
+          id: transactions.id,
+          userId: transactions.userId,
+          gameId: transactions.gameId,
+          spinResultId: transactions.spinResultId,
+          amount: transactions.amount,
+          createdAt: transactions.createdAt,
+          spunNumber: spinResults.spunNumber,
+        })
+        .from(transactions)
+        .leftJoin(spinResults, eq(transactions.spinResultId, spinResults.id))
+        .where(
+          and(
+            eq(transactions.gameId, gameId),
+            isNotNull(spinResults.spunNumber)
+          )
+        )
+        .orderBy(desc(transactions.createdAt))
+        .limit(limit);
+      
+      return result;
+    } catch (error) {
+      console.error("Error getting recent game transactions:", error);
       return [];
     }
   }
