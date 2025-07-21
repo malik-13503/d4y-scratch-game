@@ -946,3 +946,71 @@
     backdrop-filter: blur(8px);
   }
 }
+
+/* Admin Dashboard Emerald/Green Gradient Styling */
+.admin-dashboard[data-admin-dashboard] .bg-blue-500\/10,
+.admin-dashboard[data-admin-dashboard] .bg-green-500\/10,
+.admin-dashboard[data-admin-dashboard] .bg-purple-500\/10,
+.admin-dashboard[data-admin-dashboard] .bg-orange-500\/10,
+.admin-dashboard[data-admin-dashboard] .bg-red-500\/10,
+.admin-dashboard[data-admin-dashboard] .bg-indigo-500\/10,
+.admin-dashboard[data-admin-dashboard] .bg-yellow-500\/10,
+.admin-dashboard[data-admin-dashboard] .bg-pink-500\/10 {
+  background: linear-gradient(to bottom right, rgba(5, 150, 105, 0.9), rgba(34, 197, 94, 0.9)) !important;
+  backdrop-filter: blur(4px) !important;
+  border: 1px solid rgba(52, 211, 153, 0.8) !important;
+  transition: all 0.3s ease !important;
+  cursor: pointer !important;
+}
+
+.admin-dashboard[data-admin-dashboard] .bg-blue-500\/10:hover,
+.admin-dashboard[data-admin-dashboard] .bg-green-500\/10:hover,
+.admin-dashboard[data-admin-dashboard] .bg-purple-500\/10:hover,
+.admin-dashboard[data-admin-dashboard] .bg-orange-500\/10:hover,
+.admin-dashboard[data-admin-dashboard] .bg-red-500\/10:hover,
+.admin-dashboard[data-admin-dashboard] .bg-indigo-500\/10:hover,
+.admin-dashboard[data-admin-dashboard] .bg-yellow-500\/10:hover,
+.admin-dashboard[data-admin-dashboard] .bg-pink-500\/10:hover {
+  border-color: rgba(110, 231, 183, 1) !important;
+  box-shadow: 0 25px 50px -12px rgba(5, 150, 105, 0.4) !important;
+  transform: scale(1.05) !important;
+}
+
+/* Enhanced Text Visibility for Admin Dashboard Cards */
+.admin-dashboard[data-admin-dashboard] .text-blue-600,
+.admin-dashboard[data-admin-dashboard] .text-green-600,
+.admin-dashboard[data-admin-dashboard] .text-purple-600,
+.admin-dashboard[data-admin-dashboard] .text-orange-600,
+.admin-dashboard[data-admin-dashboard] .text-red-600,
+.admin-dashboard[data-admin-dashboard] .text-indigo-600,
+.admin-dashboard[data-admin-dashboard] .text-yellow-600,
+.admin-dashboard[data-admin-dashboard] .text-pink-600,
+.admin-dashboard[data-admin-dashboard] .text-slate-600,
+.admin-dashboard[data-admin-dashboard] .text-gray-600 {
+  color: white !important;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8) !important;
+}
+
+/* Admin Dashboard Card Backgrounds */
+.admin-dashboard[data-admin-dashboard] .bg-slate-800\/90,
+.admin-dashboard[data-admin-dashboard] .bg-gray-800\/90,
+.admin-dashboard[data-admin-dashboard] .bg-slate-700\/50 {
+  background: linear-gradient(to bottom right, rgba(15, 23, 42, 0.95), rgba(30, 41, 59, 0.9)) !important;
+  backdrop-filter: blur(8px) !important;
+  border: 1px solid rgba(52, 211, 153, 0.3) !important;
+}
+
+/* Input and Form Elements in Admin Dashboard */
+.admin-dashboard[data-admin-dashboard] input,
+.admin-dashboard[data-admin-dashboard] select,
+.admin-dashboard[data-admin-dashboard] textarea {
+  background: rgba(15, 23, 42, 0.8) !important;
+  color: white !important;
+  border: 1px solid rgba(52, 211, 153, 0.5) !important;
+}
+
+.admin-dashboard[data-admin-dashboard] input::placeholder,
+.admin-dashboard[data-admin-dashboard] select::placeholder,
+.admin-dashboard[data-admin-dashboard] textarea::placeholder {
+  color: rgba(255, 255, 255, 0.6) !important;
+}
