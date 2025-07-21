@@ -100,15 +100,15 @@ This is a real-time prize game web application that allows users to participate 
 
 ## Changelog
 
-- January 21, 2025: **CRITICAL FIXES** - Enhanced session persistence with IP tracking and bulletproof authentication
-  - **IP Address Tracking**: Server now tracks client IP addresses for enhanced session security and persistence
-  - **Extended Session Duration**: Increased session cookies to 30 days with rolling renewal on each request
-  - **Robust Authentication**: 2-hour grace period prevents logout during temporary server connectivity issues  
-  - **Enhanced Logging**: Comprehensive IP tracking and session monitoring for better user experience debugging
-  - **Persistent Storage**: localStorage maintains authentication for 30 days with automatic session restoration
-  - **Wheel Mechanics**: Guaranteed 8-second spin duration with frozen number segments during animation
+- January 21, 2025: **CRITICAL FIXES** - Fixed wheel spinning reliability for multiple consecutive spins
+  - **Wheel Reset Fix**: Fixed rotation reset timing to ensure proper wheel positioning between spins
+  - **Sequential Spin Support**: Wheel now spins correctly on 2nd, 3rd, and all subsequent spins without issues
+  - **Animation Timing**: Added proper delay (150ms) for rotation reset to take effect before next spin starts
+  - **Session Persistence**: IP address tracking with 30-day session cookies and 2-hour grace period
+  - **Authentication Stability**: Users stay logged in across app restarts and server reconnections
   - **Error Prevention**: Fixed useEffect imports and resolved all React component warnings
-  - **User Experience**: Users stay logged in across app restarts and server reconnections
+  - **Consistent Performance**: Each spin gets exact 8-second duration with perfect landing accuracy
+  - **State Management**: Proper wheel state locking prevents mid-spin updates and number changes
 - January 19, 2025: Enhanced games page header with professional eye-catching design and fixed authentication persistence
   - **Games Header Transformation**: Completely redesigned the main games page (/games) header with ultra-professional layout
   - **Eye-catching Visual Elements**: Added animated gradient backgrounds, floating orbs, and dynamic glow effects

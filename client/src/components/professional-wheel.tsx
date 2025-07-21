@@ -161,47 +161,48 @@ export const ProfessionalWheel = forwardRef<
     // Step 2: Freeze current wheel numbers during the entire spin
     const frozenWheelNumbers = [...wheelNumbers];
     
-    // Step 3: Reset rotation to 0 with no transition
+    // Step 3: Reset rotation to 0 with no transition, then wait for reset to take effect
     setRotation(0);
 
-    let spinResult = null;
-    let apiCallSuccessful = false;
+    // Step 4: Wait for reset, then make API call and calculate spin
+    setTimeout(async () => {
+      let spinResult = null;
+      let apiCallSuccessful = false;
 
-    try {
-      // Step 4: Get API result (this processes payment and gets actual number)
-      console.log("🎯 Making API call for spin result...");
-      spinResult = await onSpin();
-      apiCallSuccessful = true;
-      console.log("🎯 API call successful, result:", spinResult);
+      try {
+        // Get API result (this processes payment and gets actual number)
+        console.log("🎯 Making API call for spin result...");
+        spinResult = await onSpin();
+        apiCallSuccessful = true;
+        console.log("🎯 API call successful, result:", spinResult);
 
-    } catch (apiError) {
-      console.error("🚨 API call failed:", apiError);
-      apiCallSuccessful = false;
+      } catch (apiError) {
+        console.error("🚨 API call failed:", apiError);
+        apiCallSuccessful = false;
+        
+        // Even if API fails, we need to complete the wheel animation
+        // Use a fallback result to ensure wheel doesn't hang
+        spinResult = 1; // Safe fallback - always free
+      }
+
+      // Step 5: Calculate precise landing position using FROZEN wheel numbers
+      const segmentAngle = 360 / frozenWheelNumbers.length;
+      let targetSegmentIndex = frozenWheelNumbers.findIndex(num => num === spinResult);
       
-      // Even if API fails, we need to complete the wheel animation
-      // Use a fallback result to ensure wheel doesn't hang
-      spinResult = 1; // Safe fallback - always free
-    }
+      if (targetSegmentIndex === -1) {
+        // If exact number not found, temporarily place it in a segment
+        targetSegmentIndex = Math.floor(Math.random() * frozenWheelNumbers.length);
+        frozenWheelNumbers[targetSegmentIndex] = spinResult;
+        // Update wheel numbers ONLY with the result number for landing
+        setWheelNumbers([...frozenWheelNumbers]);
+      }
 
-    // Step 5: Calculate precise landing position using FROZEN wheel numbers
-    const segmentAngle = 360 / frozenWheelNumbers.length;
-    let targetSegmentIndex = frozenWheelNumbers.findIndex(num => num === spinResult);
-    
-    if (targetSegmentIndex === -1) {
-      // If exact number not found, temporarily place it in a segment
-      targetSegmentIndex = Math.floor(Math.random() * frozenWheelNumbers.length);
-      frozenWheelNumbers[targetSegmentIndex] = spinResult;
-      // Update wheel numbers ONLY with the result number for landing
-      setWheelNumbers([...frozenWheelNumbers]);
-    }
+      // Step 6: Calculate final precise rotation to land exactly on result
+      const targetAngle = segmentAngle * targetSegmentIndex + segmentAngle / 2;
+      const fullRotations = 5 * 360; // 5 full rotations for exactly 8 seconds
+      const finalRotation = fullRotations + (360 - targetAngle);
 
-    // Step 6: Calculate final precise rotation to land exactly on result
-    const targetAngle = segmentAngle * targetSegmentIndex + segmentAngle / 2;
-    const fullRotations = 5 * 360; // 5 full rotations for exactly 8 seconds
-    const finalRotation = fullRotations + (360 - targetAngle);
-
-    // Step 7: Start the 8-second spinning animation immediately
-    setTimeout(() => {
+      // Step 7: Start the 8-second spinning animation
       setRotation(finalRotation);
       console.log("🎯 8-second wheel animation started - will land on:", {
         spinResult,
@@ -210,44 +211,47 @@ export const ProfessionalWheel = forwardRef<
         finalRotation,
         apiCallSuccessful
       });
-    }, 100);
 
-    // Step 8: Complete the spin sequence after EXACTLY 8 seconds
-    setTimeout(async () => {
-      console.log("🎯 8-second spin completed, showing result...");
-      
-      // Set final result
-      setResult(spinResult);
-      const isFree = spinResult >= freePlayStart;
-      setIsFreePlay(isFree);
-      setAmountCharged(isFree ? 0 : spinResult);
-      
-      // Show result modal immediately after wheel stops
-      setTimeout(() => {
-        setShowResultModal(true);
-        if (!apiCallSuccessful) {
-          console.error("⚠️ Spin completed with API failure - showing error in modal");
-        }
-      }, 200);
-      
-      // Only after modal is shown, release the spinning state and refresh numbers
+      // Step 8: Complete the spin sequence after EXACTLY 8 seconds from animation start
       setTimeout(async () => {
-        setIsSpinning(false);
+        console.log("🎯 8-second spin completed, showing result...");
         
-        // Refresh available numbers ONLY after everything is complete
-        if (apiCallSuccessful) {
-          const path = window.location.pathname;
-          const gameIdMatch = path.match(/\/game\/(\d+)/);
-          if (gameIdMatch) {
-            const gameId = parseInt(gameIdMatch[1]);
-            await fetchAvailableNumbers(gameId);
+        // Set final result
+        setResult(spinResult);
+        const isFree = spinResult >= freePlayStart;
+        setIsFreePlay(isFree);
+        setAmountCharged(isFree ? 0 : spinResult);
+        
+        // Show result modal immediately after wheel stops
+        setTimeout(() => {
+          setShowResultModal(true);
+          if (!apiCallSuccessful) {
+            console.error("⚠️ Spin completed with API failure - showing error in modal");
           }
-        }
+        }, 200);
         
-        console.log("🎯 Spin sequence fully completed");
-      }, 1000);
+        // Only after modal is shown, release the spinning state and refresh numbers
+        setTimeout(async () => {
+          setIsSpinning(false);
+          
+          // Refresh available numbers ONLY after everything is complete
+          if (apiCallSuccessful) {
+            const path = window.location.pathname;
+            const gameIdMatch = path.match(/\/game\/(\d+)/);
+            if (gameIdMatch) {
+              const gameId = parseInt(gameIdMatch[1]);
+              await fetchAvailableNumbers(gameId);
+            }
+          }
+          
+          console.log("🎯 Spin sequence fully completed");
+        }, 1000);
+        
+      }, 8000);
       
-    }, 8000);
+    }, 150); // Wait 150ms for rotation reset to take effect
+
+
   };
 
   const [numberRadius, setNumberRadius] = useState(110);
