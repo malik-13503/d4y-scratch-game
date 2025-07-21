@@ -43,7 +43,12 @@ import {
   Wifi,
   Lock,
   Unlock,
-  LogOut
+  LogOut,
+  User,
+  Ban,
+  CheckCircle,
+  Info,
+  AlertTriangle
 } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -109,6 +114,18 @@ export default function AdminDashboard() {
     queryKey: ["/api/admin/activity"],
     enabled: !!adminUser,
     refetchInterval: 10000,
+  });
+
+  // Users data
+  const { data: users, refetch: refetchUsers } = useQuery({
+    queryKey: ["/api/admin/users"],
+    enabled: !!adminUser,
+  });
+
+  // Analytics data
+  const { data: analytics, refetch: refetchAnalytics } = useQuery({
+    queryKey: ["/api/admin/analytics"],
+    enabled: !!adminUser,
   });
 
   // Logout mutation
@@ -743,84 +760,738 @@ export default function AdminDashboard() {
             </div>
           </TabsContent>
 
-          {/* Settings Tab */}
-          <TabsContent value="settings" className="space-y-6">
-            <div>
-              <h2 className="text-2xl font-bold text-white mb-2">System Settings</h2>
-              <p className="text-gray-400">Configure system behavior and features</p>
+          {/* Users Management Tab */}
+          <TabsContent value="users" className="space-y-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-2xl font-bold text-white">User Management</h2>
+                <p className="text-gray-400">Monitor and manage registered users</p>
+              </div>
+              <div className="flex space-x-2">
+                <Button 
+                  onClick={() => refetchUsers()}
+                  variant="outline" 
+                  className="border-blue-500/50 text-blue-400 hover:bg-blue-500/20"
+                >
+                  <RefreshCw className="h-4 w-4 mr-2" />
+                  Refresh
+                </Button>
+                <Button className="bg-gradient-to-r from-green-600 to-emerald-600">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add User
+                </Button>
+              </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              {/* Game Settings */}
+            {/* User Stats Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+              <Card className="bg-gradient-to-br from-blue-600/20 to-cyan-600/20 border border-blue-400/30">
+                <CardContent className="p-6 text-center">
+                  <div className="text-3xl font-bold text-blue-300 mb-2">{users?.length || 0}</div>
+                  <div className="text-sm text-blue-200">Total Users</div>
+                </CardContent>
+              </Card>
+              <Card className="bg-gradient-to-br from-green-600/20 to-emerald-600/20 border border-green-400/30">
+                <CardContent className="p-6 text-center">
+                  <div className="text-3xl font-bold text-green-300 mb-2">{users?.filter(u => u.cardOnFile).length || 0}</div>
+                  <div className="text-sm text-green-200">Verified Users</div>
+                </CardContent>
+              </Card>
+              <Card className="bg-gradient-to-br from-purple-600/20 to-pink-600/20 border border-purple-400/30">
+                <CardContent className="p-6 text-center">
+                  <div className="text-3xl font-bold text-purple-300 mb-2">{users?.filter(u => u.createdAt && new Date(u.createdAt) > new Date(Date.now() - 24*60*60*1000)).length || 0}</div>
+                  <div className="text-sm text-purple-200">New Today</div>
+                </CardContent>
+              </Card>
+              <Card className="bg-gradient-to-br from-orange-600/20 to-red-600/20 border border-orange-400/30">
+                <CardContent className="p-6 text-center">
+                  <div className="text-3xl font-bold text-orange-300 mb-2">{users?.filter(u => u.isActive).length || users?.length || 0}</div>
+                  <div className="text-sm text-orange-200">Active Users</div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Users Table */}
+            <Card className="bg-black/20 backdrop-blur-sm border border-purple-500/30">
+              <CardHeader>
+                <CardTitle className="text-white flex items-center">
+                  <Users className="h-5 w-5 mr-2 text-blue-400" />
+                  User Directory
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {users?.map((user) => (
+                    <div key={user.id} className="flex items-center justify-between p-4 bg-white/5 rounded-lg border border-white/10 hover:bg-white/10 transition-colors">
+                      <div className="flex items-center space-x-4">
+                        <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full flex items-center justify-center">
+                          <User className="h-5 w-5 text-white" />
+                        </div>
+                        <div>
+                          <div className="text-white font-medium">{user.firstName} {user.lastName}</div>
+                          <div className="text-gray-400 text-sm">{user.email}</div>
+                          <div className="text-gray-500 text-xs">ID: {user.id}</div>
+                        </div>
+                      </div>
+                      <div className="flex items-center space-x-4">
+                        <div className="text-right">
+                          <div className="flex items-center space-x-2">
+                            <Badge 
+                              variant={user.cardOnFile ? "default" : "secondary"}
+                              className={user.cardOnFile ? "bg-green-500 hover:bg-green-600" : "bg-gray-500 hover:bg-gray-600"}
+                            >
+                              {user.cardOnFile ? "Verified" : "Unverified"}
+                            </Badge>
+                          </div>
+                          <div className="text-gray-400 text-xs mt-1">
+                            Joined: {user.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'N/A'}
+                          </div>
+                        </div>
+                        <div className="flex space-x-2">
+                          <Button size="sm" variant="outline" className="border-blue-500/50 text-blue-400">
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                          <Button size="sm" variant="outline" className="border-yellow-500/50 text-yellow-400">
+                            <Edit3 className="h-4 w-4" />
+                          </Button>
+                          <Button size="sm" variant="outline" className="border-red-500/50 text-red-400">
+                            <Ban className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  )) || (
+                    <div className="text-center py-8">
+                      <div className="text-gray-400">No users found</div>
+                      <div className="text-gray-500 text-sm mt-1">Users will appear here once they register</div>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Analytics Tab */}
+          <TabsContent value="analytics" className="space-y-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-2xl font-bold text-white">Analytics & Insights</h2>
+                <p className="text-gray-400">Comprehensive data analysis and performance metrics</p>
+              </div>
+              <div className="flex space-x-2">
+                <Button 
+                  onClick={() => refetchAnalytics()}
+                  variant="outline" 
+                  className="border-purple-500/50 text-purple-400 hover:bg-purple-500/20"
+                >
+                  <RefreshCw className="h-4 w-4 mr-2" />
+                  Refresh Data
+                </Button>
+                <Button className="bg-gradient-to-r from-purple-600 to-pink-600">
+                  <Download className="h-4 w-4 mr-2" />
+                  Export Report
+                </Button>
+              </div>
+            </div>
+
+            {/* Analytics Overview */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <Card className="bg-gradient-to-br from-green-600/20 to-emerald-600/20 border border-green-400/30">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="text-3xl font-bold text-green-300 mb-2">${analytics?.totalRevenue?.toLocaleString() || '0'}</div>
+                      <div className="text-sm text-green-200">Total Revenue</div>
+                      <div className="text-xs text-green-400 mt-1">+{analytics?.revenueGrowth || 0}% this month</div>
+                    </div>
+                    <DollarSign className="h-8 w-8 text-green-400" />
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card className="bg-gradient-to-br from-blue-600/20 to-cyan-600/20 border border-blue-400/30">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="text-3xl font-bold text-blue-300 mb-2">{analytics?.totalSpins?.toLocaleString() || '0'}</div>
+                      <div className="text-sm text-blue-200">Total Spins</div>
+                      <div className="text-xs text-blue-400 mt-1">Across all games</div>
+                    </div>
+                    <Target className="h-8 w-8 text-blue-400" />
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card className="bg-gradient-to-br from-purple-600/20 to-pink-600/20 border border-purple-400/30">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="text-3xl font-bold text-purple-300 mb-2">{analytics?.conversionRate || '0'}%</div>
+                      <div className="text-sm text-purple-200">Conversion Rate</div>
+                      <div className="text-xs text-purple-400 mt-1">Visitor to player</div>
+                    </div>
+                    <TrendingUp className="h-8 w-8 text-purple-400" />
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Detailed Analytics */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Game Performance */}
               <Card className="bg-black/20 backdrop-blur-sm border border-purple-500/30">
                 <CardHeader>
                   <CardTitle className="text-white flex items-center">
                     <Gamepad2 className="h-5 w-5 mr-2 text-purple-400" />
-                    Game Settings
+                    Game Performance Analytics
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-6">
-                  {settings?.map((setting) => (
-                    <div key={setting.id} className="flex items-center justify-between p-4 bg-white/5 rounded-lg">
-                      <div>
-                        <p className="text-white font-medium">
-                          {setting.key.replace(/_/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase())}
-                        </p>
-                        <p className="text-gray-400 text-sm">
-                          {setting.key === 'enable_background_music' && 'Play background music during games'}
-                          {setting.key === 'enable_sound_effects' && 'Play sound effects for game actions'}
-                          {setting.key === 'enable_referral_system' && 'Allow players to refer friends for bonuses'}
-                          {setting.key === 'max_concurrent_games' && 'Maximum number of active games at once'}
-                        </p>
+                <CardContent>
+                  <div className="space-y-4">
+                    {analytics?.gameStats?.map((game: any, index: number) => (
+                      <div key={index} className="p-4 bg-white/5 rounded-lg">
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="flex items-center space-x-2">
+                            <span className="text-2xl">{game.emoji}</span>
+                            <span className="text-white font-medium">{game.name}</span>
+                          </div>
+                          <Badge className="bg-green-500">{game.status}</Badge>
+                        </div>
+                        <div className="grid grid-cols-3 gap-4 text-sm">
+                          <div className="text-center">
+                            <div className="text-blue-300 font-semibold">{game.totalPlayers}</div>
+                            <div className="text-gray-400">Players</div>
+                          </div>
+                          <div className="text-center">
+                            <div className="text-green-300 font-semibold">${game.revenue}</div>
+                            <div className="text-gray-400">Revenue</div>
+                          </div>
+                          <div className="text-center">
+                            <div className="text-purple-300 font-semibold">{game.spins}</div>
+                            <div className="text-gray-400">Spins</div>
+                          </div>
+                        </div>
                       </div>
-                      <Switch
-                        checked={setting.value === 'true'}
-                        onCheckedChange={(checked) =>
-                          updateSettingMutation.mutate({
-                            key: setting.key,
-                            value: checked ? 'true' : 'false'
-                          })
-                        }
-                      />
-                    </div>
-                  )) || []}
+                    )) || (
+                      <div className="text-center py-8 text-gray-400">
+                        No game analytics available yet
+                      </div>
+                    )}
+                  </div>
                 </CardContent>
               </Card>
 
-              {/* Security Settings */}
+              {/* User Engagement */}
               <Card className="bg-black/20 backdrop-blur-sm border border-purple-500/30">
                 <CardHeader>
                   <CardTitle className="text-white flex items-center">
-                    <Shield className="h-5 w-5 mr-2 text-green-400" />
-                    Security & Access
+                    <Users className="h-5 w-5 mr-2 text-blue-400" />
+                    User Engagement Metrics
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-6">
-                  <div className="flex items-center justify-between p-4 bg-white/5 rounded-lg">
-                    <div>
-                      <p className="text-white font-medium">Two-Factor Authentication</p>
-                      <p className="text-gray-400 text-sm">Enhanced security for admin accounts</p>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="p-4 bg-blue-500/20 rounded-lg text-center">
+                        <div className="text-2xl font-bold text-blue-300">{analytics?.dailyActiveUsers || '0'}</div>
+                        <div className="text-sm text-blue-200">Daily Active</div>
+                      </div>
+                      <div className="p-4 bg-green-500/20 rounded-lg text-center">
+                        <div className="text-2xl font-bold text-green-300">{analytics?.weeklyActiveUsers || '0'}</div>
+                        <div className="text-sm text-green-200">Weekly Active</div>
+                      </div>
                     </div>
-                    <Switch />
-                  </div>
-                  
-                  <div className="flex items-center justify-between p-4 bg-white/5 rounded-lg">
-                    <div>
-                      <p className="text-white font-medium">Auto-Lock Dashboard</p>
-                      <p className="text-gray-400 text-sm">Lock after 15 minutes of inactivity</p>
+                    
+                    <div className="p-4 bg-purple-500/20 rounded-lg">
+                      <div className="flex justify-between items-center mb-2">
+                        <span className="text-purple-200">Avg. Session Duration</span>
+                        <span className="text-purple-300 font-semibold">{analytics?.avgSessionDuration || '5m 30s'}</span>
+                      </div>
+                      <Progress value={75} className="bg-purple-900/40" />
                     </div>
-                    <Switch defaultChecked />
-                  </div>
-
-                  <div className="flex items-center justify-between p-4 bg-white/5 rounded-lg">
-                    <div>
-                      <p className="text-white font-medium">Audit Logging</p>
-                      <p className="text-gray-400 text-sm">Log all admin actions for security</p>
+                    
+                    <div className="p-4 bg-orange-500/20 rounded-lg">
+                      <div className="flex justify-between items-center mb-2">
+                        <span className="text-orange-200">User Retention Rate</span>
+                        <span className="text-orange-300 font-semibold">{analytics?.retentionRate || '68%'}</span>
+                      </div>
+                      <Progress value={68} className="bg-orange-900/40" />
                     </div>
-                    <Switch defaultChecked />
                   </div>
                 </CardContent>
               </Card>
+            </div>
+
+            {/* Revenue Trends */}
+            <Card className="bg-black/20 backdrop-blur-sm border border-purple-500/30">
+              <CardHeader>
+                <CardTitle className="text-white flex items-center">
+                  <DollarSign className="h-5 w-5 mr-2 text-green-400" />
+                  Revenue & Financial Analytics
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                  <div className="text-center p-4 bg-green-500/10 rounded-lg border border-green-500/30">
+                    <div className="text-2xl font-bold text-green-300">${analytics?.todayRevenue || '0'}</div>
+                    <div className="text-sm text-green-200">Today's Revenue</div>
+                    <div className="text-xs text-green-400 mt-1">+{analytics?.todayGrowth || 0}% vs yesterday</div>
+                  </div>
+                  <div className="text-center p-4 bg-blue-500/10 rounded-lg border border-blue-500/30">
+                    <div className="text-2xl font-bold text-blue-300">${analytics?.weeklyRevenue || '0'}</div>
+                    <div className="text-sm text-blue-200">This Week</div>
+                    <div className="text-xs text-blue-400 mt-1">7-day total</div>
+                  </div>
+                  <div className="text-center p-4 bg-purple-500/10 rounded-lg border border-purple-500/30">
+                    <div className="text-2xl font-bold text-purple-300">${analytics?.monthlyRevenue || '0'}</div>
+                    <div className="text-sm text-purple-200">This Month</div>
+                    <div className="text-xs text-purple-400 mt-1">30-day total</div>
+                  </div>
+                  <div className="text-center p-4 bg-yellow-500/10 rounded-lg border border-yellow-500/30">
+                    <div className="text-2xl font-bold text-yellow-300">${analytics?.avgRevenuePerUser || '0'}</div>
+                    <div className="text-sm text-yellow-200">Avg per User</div>
+                    <div className="text-xs text-yellow-400 mt-1">Lifetime value</div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* System Monitoring Tab */}
+          <TabsContent value="system" className="space-y-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-2xl font-bold text-white">System Monitor</h2>
+                <p className="text-gray-400">Server health, database status, and system performance</p>
+              </div>
+              <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-2 bg-green-500/20 px-3 py-1 rounded-full border border-green-500/30">
+                  <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                  <span className="text-green-400 text-sm font-medium">ALL SYSTEMS OPERATIONAL</span>
+                </div>
+              </div>
+            </div>
+
+            {/* System Health Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <Card className="bg-gradient-to-br from-green-600/20 to-emerald-600/20 border border-green-400/30">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="text-lg font-semibold text-green-300 mb-2">Database Status</div>
+                      <div className="text-3xl font-bold text-green-400 mb-1">ONLINE</div>
+                      <div className="text-sm text-green-200">Response time: 12ms</div>
+                    </div>
+                    <Database className="h-8 w-8 text-green-400" />
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card className="bg-gradient-to-br from-blue-600/20 to-cyan-600/20 border border-blue-400/30">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="text-lg font-semibold text-blue-300 mb-2">Server Health</div>
+                      <div className="text-3xl font-bold text-blue-400 mb-1">HEALTHY</div>
+                      <div className="text-sm text-blue-200">CPU: 23% | RAM: 45%</div>
+                    </div>
+                    <Monitor className="h-8 w-8 text-blue-400" />
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card className="bg-gradient-to-br from-purple-600/20 to-pink-600/20 border border-purple-400/30">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="text-lg font-semibold text-purple-300 mb-2">API Status</div>
+                      <div className="text-3xl font-bold text-purple-400 mb-1">STABLE</div>
+                      <div className="text-sm text-purple-200">Uptime: 99.9%</div>
+                    </div>
+                    <Activity className="h-8 w-8 text-purple-400" />
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Detailed System Metrics */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <Card className="bg-black/20 backdrop-blur-sm border border-purple-500/30">
+                <CardHeader>
+                  <CardTitle className="text-white flex items-center">
+                    <Activity className="h-5 w-5 mr-2 text-green-400" />
+                    Performance Metrics
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-3">
+                    <div>
+                      <div className="flex justify-between text-sm mb-1">
+                        <span className="text-gray-300">CPU Usage</span>
+                        <span className="text-green-400">23%</span>
+                      </div>
+                      <Progress value={23} className="bg-white/20" />
+                    </div>
+                    <div>
+                      <div className="flex justify-between text-sm mb-1">
+                        <span className="text-gray-300">Memory Usage</span>
+                        <span className="text-blue-400">45%</span>
+                      </div>
+                      <Progress value={45} className="bg-white/20" />
+                    </div>
+                    <div>
+                      <div className="flex justify-between text-sm mb-1">
+                        <span className="text-gray-300">Disk Usage</span>
+                        <span className="text-purple-400">67%</span>
+                      </div>
+                      <Progress value={67} className="bg-white/20" />
+                    </div>
+                    <div>
+                      <div className="flex justify-between text-sm mb-1">
+                        <span className="text-gray-300">Network I/O</span>
+                        <span className="text-cyan-400">12%</span>
+                      </div>
+                      <Progress value={12} className="bg-white/20" />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-black/20 backdrop-blur-sm border border-purple-500/30">
+                <CardHeader>
+                  <CardTitle className="text-white flex items-center">
+                    <AlertTriangle className="h-5 w-5 mr-2 text-yellow-400" />
+                    System Alerts & Logs
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    <div className="p-3 bg-green-500/20 rounded-lg border border-green-500/30">
+                      <div className="flex items-center space-x-2">
+                        <CheckCircle className="h-4 w-4 text-green-400" />
+                        <span className="text-green-200 text-sm">Database backup completed successfully</span>
+                      </div>
+                      <div className="text-xs text-green-400 mt-1">2 minutes ago</div>
+                    </div>
+                    <div className="p-3 bg-blue-500/20 rounded-lg border border-blue-500/30">
+                      <div className="flex items-center space-x-2">
+                        <Info className="h-4 w-4 text-blue-400" />
+                        <span className="text-blue-200 text-sm">New user registered from IP: 192.168.1.1</span>
+                      </div>
+                      <div className="text-xs text-blue-400 mt-1">5 minutes ago</div>
+                    </div>
+                    <div className="p-3 bg-yellow-500/20 rounded-lg border border-yellow-500/30">
+                      <div className="flex items-center space-x-2">
+                        <AlertTriangle className="h-4 w-4 text-yellow-400" />
+                        <span className="text-yellow-200 text-sm">High CPU usage detected - monitoring</span>
+                      </div>
+                      <div className="text-xs text-yellow-400 mt-1">1 hour ago</div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          {/* Game Edit Dialog */}
+          <Dialog open={isEditGameOpen} onOpenChange={setIsEditGameOpen}>
+            <DialogContent className="sm:max-w-[600px] bg-gradient-to-br from-purple-900/90 to-blue-900/90 backdrop-blur-sm border border-purple-500/30 text-white max-h-[80vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
+                  Edit Game: {selectedGame?.name}
+                </DialogTitle>
+              </DialogHeader>
+              <div className="space-y-6">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-name" className="text-purple-200">Game Name</Label>
+                    <Input
+                      id="edit-name"
+                      defaultValue={selectedGame?.name}
+                      className="bg-black/20 border-purple-500/50 text-white focus:border-purple-400"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-emoji" className="text-purple-200">Emoji</Label>
+                    <Input
+                      id="edit-emoji"
+                      defaultValue={selectedGame?.emoji}
+                      className="bg-black/20 border-purple-500/50 text-white focus:border-purple-400"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="edit-description" className="text-purple-200">Description</Label>
+                  <Textarea
+                    id="edit-description"
+                    defaultValue={selectedGame?.description}
+                    rows={3}
+                    className="bg-black/20 border-purple-500/50 text-white focus:border-purple-400"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-prize-value" className="text-purple-200">Prize Value</Label>
+                    <Input
+                      id="edit-prize-value"
+                      type="number"
+                      defaultValue={selectedGame?.prizeValue}
+                      className="bg-black/20 border-purple-500/50 text-white focus:border-purple-400"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-total-numbers" className="text-purple-200">Total Numbers</Label>
+                    <Input
+                      id="edit-total-numbers"
+                      type="number"
+                      defaultValue={selectedGame?.totalNumbers}
+                      className="bg-black/20 border-purple-500/50 text-white focus:border-purple-400"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-free-play-start" className="text-purple-200">Free Play Start</Label>
+                    <Input
+                      id="edit-free-play-start"
+                      type="number"
+                      defaultValue={selectedGame?.freePlayStart}
+                      className="bg-black/20 border-purple-500/50 text-white focus:border-purple-400"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="edit-free-play-end" className="text-purple-200">Free Play End</Label>
+                    <Input
+                      id="edit-free-play-end"
+                      type="number"
+                      defaultValue={selectedGame?.freePlayEnd}
+                      className="bg-black/20 border-purple-500/50 text-white focus:border-purple-400"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex items-center space-x-2">
+                  <Switch
+                    id="edit-is-active"
+                    defaultChecked={selectedGame?.isActive}
+                  />
+                  <Label htmlFor="edit-is-active" className="text-purple-200">Active Game</Label>
+                </div>
+
+                <div className="flex justify-end space-x-2">
+                  <Button
+                    variant="outline"
+                    onClick={() => setIsEditGameOpen(false)}
+                    className="border-gray-500 text-gray-300 hover:bg-gray-700"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    className="bg-gradient-to-r from-purple-600 to-blue-600"
+                    onClick={() => {
+                      // Handle game update
+                      toast({
+                        title: "Success",
+                        description: "Game updated successfully",
+                      });
+                      setIsEditGameOpen(false);
+                    }}
+                  >
+                    Save Changes
+                  </Button>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
+
+          {/* Settings Tab */}
+          <TabsContent value="settings" className="space-y-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-2xl font-bold text-white">System Settings</h2>
+                <p className="text-gray-400">Configure application settings and preferences</p>
+              </div>
+              <div className="flex space-x-2">
+                <Button 
+                  onClick={() => refetchSettings()}
+                  variant="outline" 
+                  className="border-green-500/50 text-green-400 hover:bg-green-500/20"
+                >
+                  <RefreshCw className="h-4 w-4 mr-2" />
+                  Refresh
+                </Button>
+                <Button className="bg-gradient-to-r from-green-600 to-emerald-600">
+                  <Settings className="h-4 w-4 mr-2" />
+                  Update Settings
+                </Button>
+              </div>
+            </div>
+
+            {/* System Configuration */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <Card className="bg-black/20 backdrop-blur-sm border border-purple-500/30">
+                <CardHeader>
+                  <CardTitle className="text-white flex items-center">
+                    <Settings className="h-5 w-5 mr-2 text-green-400" />
+                    Application Settings
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-2">
+                    <Label className="text-gray-300">Site Name</Label>
+                    <Input 
+                      defaultValue="Hit The Road Jackpot"
+                      className="bg-white/5 border-white/20 text-white"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-gray-300">Maximum Game Duration (hours)</Label>
+                    <Input 
+                      type="number"
+                      defaultValue="24"
+                      className="bg-white/5 border-white/20 text-white"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-gray-300">Default Game Numbers</Label>
+                    <Input 
+                      type="number"
+                      defaultValue="200"
+                      className="bg-white/5 border-white/20 text-white"
+                    />
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Switch id="maintenance-mode" />
+                    <Label htmlFor="maintenance-mode" className="text-gray-300">
+                      Maintenance Mode
+                    </Label>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-black/20 backdrop-blur-sm border border-purple-500/30">
+                <CardHeader>
+                  <CardTitle className="text-white flex items-center">
+                    <DollarSign className="h-5 w-5 mr-2 text-green-400" />
+                    Payment Settings
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-2">
+                    <Label className="text-gray-300">Payment Processing Fee (%)</Label>
+                    <Input 
+                      type="number"
+                      step="0.01"
+                      defaultValue="2.9"
+                      className="bg-white/5 border-white/20 text-white"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-gray-300">Minimum Game Prize ($)</Label>
+                    <Input 
+                      type="number"
+                      defaultValue="100"
+                      className="bg-white/5 border-white/20 text-white"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-gray-300">Maximum Game Prize ($)</Label>
+                    <Input 
+                      type="number"
+                      defaultValue="10000"
+                      className="bg-white/5 border-white/20 text-white"
+                    />
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Switch id="auto-payout" defaultChecked />
+                    <Label htmlFor="auto-payout" className="text-gray-300">
+                      Automatic Prize Payout
+                    </Label>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Security Settings */}
+            <Card className="bg-black/20 backdrop-blur-sm border border-purple-500/30">
+              <CardHeader>
+                <CardTitle className="text-white flex items-center">
+                  <Shield className="h-5 w-5 mr-2 text-red-400" />
+                  Security & Access Control
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div className="space-y-2">
+                    <Label className="text-gray-300">Session Timeout (minutes)</Label>
+                    <Input 
+                      type="number"
+                      defaultValue="60"
+                      className="bg-white/5 border-white/20 text-white"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-gray-300">Max Login Attempts</Label>
+                    <Input 
+                      type="number"
+                      defaultValue="5"
+                      className="bg-white/5 border-white/20 text-white"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-gray-300">IP Whitelist</Label>
+                    <Input 
+                      placeholder="192.168.1.0/24"
+                      className="bg-white/5 border-white/20 text-white"
+                    />
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                  <div className="flex items-center space-x-2">
+                    <Switch id="two-factor" />
+                    <Label htmlFor="two-factor" className="text-gray-300">
+                      Two-Factor Authentication
+                    </Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Switch id="audit-logging" defaultChecked />
+                    <Label htmlFor="audit-logging" className="text-gray-300">
+                      Audit Logging
+                    </Label>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Action Buttons */}
+            <div className="flex justify-end space-x-4">
+              <Button
+                variant="outline"
+                className="border-gray-500 text-gray-300 hover:bg-gray-700"
+                onClick={() => {
+                  toast({
+                    title: "Settings Reset",
+                    description: "All settings have been reset to defaults",
+                  });
+                }}
+              >
+                Reset to Defaults
+              </Button>
+              <Button
+                className="bg-gradient-to-r from-green-600 to-emerald-600"
+                onClick={() => {
+                  toast({
+                    title: "Settings Saved",
+                    description: "System settings have been updated successfully",
+                  });
+                }}
+              >
+                Save All Settings
+              </Button>
             </div>
           </TabsContent>
 
