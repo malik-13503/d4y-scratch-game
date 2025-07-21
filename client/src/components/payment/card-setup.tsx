@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { CreditCard, Shield, CheckCircle } from "lucide-react";
+import { ErrorDialog } from "@/components/error-dialog";
 
 interface CardSetupProps {
   onSuccess: () => void;
@@ -19,6 +20,8 @@ interface CardSetupProps {
 
 export function CardSetup({ onSuccess, user }: CardSetupProps) {
   const [isLoading, setIsLoading] = useState(false);
+  const [showErrorDialog, setShowErrorDialog] = useState(false);
+  const [dialogError, setDialogError] = useState("");
   const { toast } = useToast();
 
   const handleCardSetup = async () => {
@@ -41,13 +44,10 @@ export function CardSetup({ onSuccess, user }: CardSetupProps) {
       });
       
       onSuccess();
-    } catch (error) {
+    } catch (error: any) {
       console.error("Card setup error:", error);
-      toast({
-        title: "Payment Setup Failed",
-        description: error.message || "Unable to verify payment method. Please try again.",
-        variant: "destructive",
-      });
+      setDialogError(error.message || "Payment setup failed");
+      setShowErrorDialog(true);
     } finally {
       setIsLoading(false);
     }

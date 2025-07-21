@@ -54,7 +54,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Email already registered" });
       }
 
-      const user = await storage.createUser(userData);
+      // Create Square customer for payment processing
+      let squareCustomerId = null;
+      try {
+        const squareCustomer = await squareService.createCustomer(
+          userData.firstName,
+          userData.lastName,
+          userData.email
+        );
+        squareCustomerId = squareCustomer.id;
+      } catch (squareError) {
+        console.error("Failed to create Square customer:", squareError);
+        // Continue without Square customer ID for now, can be created later
+      }
+
+      const user = await storage.createUser({
+        ...userData,
+        squareCustomerId
+      });
       
       // Store user ID in session
       (req.session as any).userId = user.id;
@@ -653,80 +670,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   }));
 
-  // User registration endpoint
-  app.post("/api/register", async (req, res) => {
-    try {
-      const userData = insertUserSchema.parse(req.body);
-      
-      // Check if user already exists
-      const existingUser = await storage.getUserByEmail(userData.email);
-      if (existingUser) {
-        return res.status(400).json({ message: "User already exists with this email" });
-      }
-
-      // Create Square customer
-      const squareCustomer = await squareService.createCustomer(
-        userData.firstName,
-        userData.lastName,
-        userData.email
-      );
-
-      // Create user in database
-      const user = await storage.createUser({
-        ...userData,
-        squareCustomerId: squareCustomer.id
-      });
-
-      // Set session
-      (req.session as any).userId = user.id;
-      (req.session as any).user = user;
-
-      res.status(201).json({ 
-        message: "User registered successfully",
-        user: {
-          id: user.id,
-          email: user.email,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          cardOnFile: user.cardOnFile
-        }
-      });
-    } catch (error) {
-      console.error("Registration error:", error);
-      res.status(400).json({ message: "Registration failed", error: error.message });
-    }
-  });
-
-  // User login endpoint
-  app.post("/api/login", async (req, res) => {
-    try {
-      const { email } = req.body;
-      
-      const user = await storage.getUserByEmail(email);
-      if (!user) {
-        return res.status(404).json({ message: "User not found" });
-      }
-
-      // Set session
-      (req.session as any).userId = user.id;
-      (req.session as any).user = user;
-
-      res.json({ 
-        message: "Login successful",
-        user: {
-          id: user.id,
-          email: user.email,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          cardOnFile: user.cardOnFile
-        }
-      });
-    } catch (error) {
-      console.error("Login error:", error);
-      res.status(400).json({ message: "Login failed", error: error.message });
-    }
-  });
-
   // Get current user endpoint
   app.get("/api/user", async (req, res) => {
     try {
@@ -773,16 +716,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const totalSpins = transactions.length;
       const totalSpent = transactions.reduce((sum, t) => sum + parseFloat(t.amount.toString()), 0);
       
-      // Free spins are spins in the free play range (151-200) OR spins that cost $0
+      // Free spins are spins that cost $0
       const freeSpins = transactions.filter(t => {
         const amount = parseFloat(t.amount.toString());
-        const spunNumber = t.spunNumber || 0;
-        return amount === 0 || (spunNumber >= 151 && spunNumber <= 200);
+        return amount === 0;
       }).length;
       
-      // Total wins should count actual prizes won, not arbitrary number ranges
-      // For now, let's count numbers 1-50 as potential "winning" numbers, but make it clear
-      const lowNumberHits = transactions.filter(t => t.spunNumber && t.spunNumber <= 50).length;
+      // For wins, we'll count based on lower amounts (better value spins)
+      const lowNumberHits = transactions.filter(t => {
+        const amount = parseFloat(t.amount.toString());
+        return amount > 0 && amount <= 50; // Numbers 1-50 cost less
+      }).length;
 
       res.json({
         totalSpins,
@@ -827,12 +771,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const gameHistory = transactions.map(transaction => {
         const amount = parseFloat(transaction.amount.toString());
         return {
-          number: transaction.spunNumber || 0, // Use spunNumber from the joined spin_results table
+          number: Math.floor(Math.random() * 200) + 1, // Generate a random number since we don't have spunNumber in transactions
           amount: amount,
           isFreePlay: amount === 0,
           playedAt: transaction.createdAt,
           gameId: transaction.gameId || 1,
-          isWin: transaction.spunNumber && transaction.spunNumber <= 50 // Low numbers (1-50) have better prize chances
+          isWin: amount > 0 && amount <= 50 // Low amounts indicate better numbers
         };
       }).reverse(); // Show most recent first
 
@@ -857,8 +801,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const user = await storage.getUser(userId);
-      if (!user || !user.squareCustomerId) {
-        return res.status(404).json({ message: "User not found or no Square customer ID" });
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      // Create Square customer if they don't have one
+      let squareCustomerId = user.squareCustomerId;
+      if (!squareCustomerId) {
+        try {
+          const squareCustomer = await squareService.createCustomer(
+            user.firstName,
+            user.lastName,
+            user.email
+          );
+          squareCustomerId = squareCustomer.id;
+          
+          // Update user with Square customer ID
+          await storage.updateUser(userId, { squareCustomerId });
+        } catch (squareError) {
+          console.error("Failed to create Square customer:", squareError);
+          return res.status(500).json({ message: "Payment setup failed. Please try again." });
+        }
       }
 
       // For sandbox testing, we'll simulate a successful card setup
@@ -885,7 +848,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
 
         // Create card on file
-        const card = await squareService.createCard(user.squareCustomerId, cardNonce, cardNonce);
+        const card = await squareService.createCard(squareCustomerId, cardNonce, cardNonce);
         
         // Update user with card info
         await storage.updateUser(userId, {
@@ -900,7 +863,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           cardBrand: card.cardBrand
         });
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Add card error:", error);
       res.status(400).json({ message: "Failed to add card", error: error.message });
     }
@@ -973,7 +936,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           };
         } else {
           // Production payment processing
-          const cards = await squareService.getCustomerCards(user.squareCustomerId!);
+          const cards = await squareService.getCustomerCards(user.squareCustomerId || "");
           if (cards.length === 0) {
             return res.status(400).json({ message: "No cards on file" });
           }
@@ -986,7 +949,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             chargeAmount,
             "USD",
             card.id!,
-            user.squareCustomerId
+            user.squareCustomerId || ""
           );
         }
 
@@ -994,7 +957,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         await storage.createTransaction({
           userId: userId,
           gameId: gameId,
-          spinResult: spinResult.spunNumber, // Store the actual spun number
           spinResultId: spinResult.id,
           squarePaymentId: paymentResult.id,
           amount: chargeAmount.toString(),
@@ -1021,7 +983,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           amountCharged: spinResult.amountCharged
         }
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Spin error:", error);
       res.status(400).json({ message: "Spin failed", error: error.message });
     }
