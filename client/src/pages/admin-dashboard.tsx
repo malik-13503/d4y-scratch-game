@@ -136,13 +136,28 @@ export default function AdminDashboard() {
   });
 
   // Users data
-  const { data: users, refetch: refetchUsers } = useQuery({
+  const { data: users, refetch: refetchUsers } = useQuery<any[]>({
     queryKey: ["/api/admin/users"],
     enabled: !!currentAdmin,
   });
 
   // Analytics data
-  const { data: analytics, refetch: refetchAnalytics } = useQuery({
+  const { data: analytics, refetch: refetchAnalytics } = useQuery<{
+    totalRevenue: number;
+    revenueGrowth: number;
+    totalSpins: number;
+    conversionRate: number;
+    gameStats: any[];
+    dailyActiveUsers: number;
+    weeklyActiveUsers: number;
+    avgSessionDuration: number;
+    retentionRate: number;
+    todayRevenue: number;
+    todayGrowth: number;
+    weeklyRevenue: number;
+    monthlyRevenue: number;
+    avgRevenuePerUser: number;
+  }>({
     queryKey: ["/api/admin/analytics"],
     enabled: !!currentAdmin,
   });
