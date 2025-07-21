@@ -69,8 +69,14 @@ export default function Dashboard() {
     );
   }
 
+  // Use useEffect to avoid setState during render
+  useEffect(() => {
+    if (!userLoading && !user) {
+      setLocation('/');
+    }
+  }, [userLoading, user, setLocation]);
+
   if (!user) {
-    setLocation('/');
     return null;
   }
 

@@ -39,41 +39,40 @@ function Router() {
   });
 
   useEffect(() => {
-    // Always initialize from localStorage first
-    if (!user) {
-      const storedAuth = getAuthFromStorage();
-      if (storedAuth && storedAuth.isAuthenticated) {
-        console.log("Using stored auth from localStorage");
-        setUser(storedAuth.user);
-      }
+    // Initialize from localStorage on app startup ONLY
+    const storedAuth = getAuthFromStorage();
+    if (storedAuth && storedAuth.isAuthenticated && !user) {
+      console.log("Restored authentication from localStorage");
+      setUser(storedAuth.user);
     }
-    
-    // If server responds with user, update everything
+  }, []); // Only run once on app startup
+
+  useEffect(() => {
+    // Handle server authentication responses
     if (serverUser) {
       console.log("Server authenticated user:", serverUser);
       setUser(serverUser);
       saveAuthToStorage(serverUser);
-    }
-    
-    // If server returns error, handle gracefully
-    if (error && !serverUser) {
-      console.log("Server authentication error:", error);
-      // Only clear localStorage if it's been significant time since login
+    } else if (error && !serverLoading) {
+      // Only clear auth if server explicitly rejects and enough time has passed
       const storedAuth = getAuthFromStorage();
-      if (storedAuth && (Date.now() - storedAuth.timestamp) > 300000) { // 5 minutes
-        console.log("Clearing stale authentication");
+      if (storedAuth && (Date.now() - storedAuth.timestamp) > 1800000) { // 30 minutes grace period
+        console.log("Clearing expired authentication");
         clearAuthFromStorage();
         setUser(null);
       } else if (storedAuth) {
         // Keep using localStorage auth for short-term server errors
-        console.log("Using cached auth during server error");
-        setUser(storedAuth.user);
+        console.log("Using cached auth during temporary server issues");
+        // Don't overwrite user if already set to prevent flashing
+        if (!user) {
+          setUser(storedAuth.user);
+        }
       }
     }
     
-    // Set initialized after first check
+    // Mark authentication check as complete after server response
     setIsCheckingAuth(false);
-  }, [serverUser, error, user]);
+  }, [serverUser, serverLoading, error]);
 
   // Show loading spinner while checking auth state
   if (isCheckingAuth || serverLoading) {

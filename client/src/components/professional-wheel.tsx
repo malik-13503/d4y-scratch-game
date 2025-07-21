@@ -291,9 +291,7 @@ export const ProfessionalWheel = forwardRef<
                     transform: `rotate(${rotation}deg)`,
                     transition: isSpinning
                       ? `transform 7.9s cubic-bezier(0.25, 0.1, 0.25, 1.0)`
-                      : rotation === 0 
-                        ? "none" 
-                        : "none", // No transition when stopping to prevent drift
+                      : "none", // No transition when stopping to prevent drift
                     boxShadow:
                       "inset 0 0 30px rgba(0, 0, 0, 0.4), 0 0 40px rgba(255, 215, 0, 0.3)",
                   }}
@@ -371,7 +369,8 @@ export const ProfessionalWheel = forwardRef<
       <Button
         onClick={onInitiateSpin || handleSpin}
         disabled={isSpinning || disabled}
-        className="w-full max-w-xs bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-white font-bold py-3 sm:py-4 px-6 sm:px-8 rounded-xl text-base sm:text-lg shadow-lg transition-all duration-300 disabled:opacity-50 touch-manipulation"
+        className="w-full max-w-xs bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-white font-bold py-3 sm:py-4 px-6 sm:px-8 rounded-xl text-base sm:text-lg shadow-lg transition-all duration-300 disabled:opacity-50 touch-manipulation focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:ring-offset-2"
+        aria-label={isSpinning ? "Wheel is spinning, please wait" : "Spin the wheel to play"}
       >
         {isSpinning ? (
           <div className="flex items-center justify-center space-x-2">
