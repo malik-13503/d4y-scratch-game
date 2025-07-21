@@ -188,9 +188,18 @@ export function setupAuth(app: Express) {
 
 // Middleware to require authentication
 export function requireAuth(req: any, res: any, next: any) {
+  console.log("RequireAuth check:", {
+    isAuthenticated: req.isAuthenticated(),
+    hasUser: !!req.user,
+    sessionID: req.sessionID,
+    userID: req.user?.id
+  });
+  
   if (req.isAuthenticated() && req.user) {
     return next();
   }
+  
+  console.log("Authentication failed - redirecting to login");
   res.status(401).json({ message: "Authentication required" });
 }
 
