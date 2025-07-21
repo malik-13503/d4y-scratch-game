@@ -116,9 +116,10 @@ export default function GamePage() {
 
   const handleSpin = async (): Promise<number> => {
     if (!game) throw new Error("Game not found");
-
+    
+    console.log("🎯 Starting API call for game spin...");
+    
     try {
-      // Call the backend spin endpoint with payment processing
       const response = await fetch('/api/spin', {
         method: 'POST',
         headers: {
@@ -133,16 +134,30 @@ export default function GamePage() {
 
       if (!response.ok) {
         const error = await response.json();
+        console.error("🚨 API call failed:", error);
+        
         if (response.status === 401) {
-          // Show auth popup instead of immediate redirect
           setShowAuthPopup(true);
-          throw new Error('Please login to continue');
+          throw new Error('Authentication required');
         }
-        throw new Error(error.message || 'Failed to spin');
+        
+        // For payment failures, we want to throw specific errors
+        if (response.status === 400 && error.message?.includes('card')) {
+          throw new Error('Payment method error: ' + error.message);
+        }
+        
+        throw new Error(error.message || 'Spin request failed');
       }
 
       const data = await response.json();
+      
+      if (!data.success || !data.spinResult) {
+        console.error("🚨 Invalid API response:", data);
+        throw new Error('Invalid response from server');
+      }
+      
       const result = data.spinResult.number;
+      console.log("🎯 API call successful, received result:", result);
       
       setLastResult(result);
       setShowConfetti(true);
@@ -152,7 +167,8 @@ export default function GamePage() {
       
       return result;
     } catch (error) {
-      console.error('Spin error:', error);
+      console.error('🚨 Spin API error:', error);
+      // Re-throw the error so the wheel component can handle it appropriately
       throw error;
     }
   };

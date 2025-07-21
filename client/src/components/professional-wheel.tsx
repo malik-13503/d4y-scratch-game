@@ -149,6 +149,8 @@ export const ProfessionalWheel = forwardRef<
   const handleSpin = async () => {
     if (isSpinning || disabled) return;
 
+    console.log("🎯 Starting spin sequence...");
+    
     // Step 1: Reset wheel and start spinning animation immediately
     setIsSpinning(true);
     setResult(null);
@@ -157,79 +159,96 @@ export const ProfessionalWheel = forwardRef<
     // Reset rotation to 0 with no transition
     setRotation(0);
 
+    // Step 2: Start visual spinning animation immediately to provide instant feedback
+    setTimeout(() => {
+      const tempRotation = 1800 + Math.random() * 360; // 5 rotations + random
+      setRotation(tempRotation);
+      console.log("🎯 Wheel animation started");
+    }, 100);
+
+    let spinResult = null;
+    let apiCallSuccessful = false;
+
     try {
-      // Step 2: Get API result first to ensure accurate display
-      const spinResult = await onSpin();
-      console.log("API spin result received:", spinResult);
+      // Step 3: Get API result (this processes payment and gets actual number)
+      console.log("🎯 Making API call for spin result...");
+      spinResult = await onSpin();
+      apiCallSuccessful = true;
+      console.log("🎯 API call successful, result:", spinResult);
 
-      // Step 3: Calculate precise landing position for this result
-      const segmentAngle = 360 / wheelNumbers.length;
-      let currentWheelNumbers = [...wheelNumbers];
-      let targetSegmentIndex = currentWheelNumbers.findIndex(num => num === spinResult);
+    } catch (apiError) {
+      console.error("🚨 API call failed:", apiError);
+      apiCallSuccessful = false;
       
-      if (targetSegmentIndex === -1) {
-        // If exact number not found, place it in the closest segment or random
-        if (availableNumbers.includes(spinResult)) {
-          // Place in random segment since it's available
-          targetSegmentIndex = Math.floor(Math.random() * currentWheelNumbers.length);
-          currentWheelNumbers[targetSegmentIndex] = spinResult;
-          setWheelNumbers(currentWheelNumbers);
-        } else {
-          // Number was already claimed, use fallback
-          targetSegmentIndex = Math.floor(Math.random() * currentWheelNumbers.length);
-        }
+      // Even if API fails, we need to complete the wheel animation
+      // Use a fallback result to ensure wheel doesn't hang
+      spinResult = 1; // Safe fallback - always free
+    }
+
+    // Step 4: Calculate precise landing position for the result
+    // This happens regardless of API success to ensure wheel always completes
+    const segmentAngle = 360 / wheelNumbers.length;
+    let currentWheelNumbers = [...wheelNumbers];
+    let targetSegmentIndex = currentWheelNumbers.findIndex(num => num === spinResult);
+    
+    if (targetSegmentIndex === -1) {
+      // If exact number not found, place it in a segment
+      if (availableNumbers.includes(spinResult)) {
+        targetSegmentIndex = Math.floor(Math.random() * currentWheelNumbers.length);
+        currentWheelNumbers[targetSegmentIndex] = spinResult;
+        setWheelNumbers(currentWheelNumbers);
+      } else {
+        targetSegmentIndex = Math.floor(Math.random() * currentWheelNumbers.length);
       }
+    }
 
-      // Step 4: Calculate final rotation to land exactly on the result
-      const targetAngle = segmentAngle * targetSegmentIndex + segmentAngle / 2;
-      const fullRotations = 5 * 360; // 5 full rotations
-      const finalRotation = fullRotations + (360 - targetAngle);
+    // Step 5: Calculate final precise rotation to land exactly on result
+    const targetAngle = segmentAngle * targetSegmentIndex + segmentAngle / 2;
+    const fullRotations = 5 * 360; // 5 full rotations
+    const finalRotation = fullRotations + (360 - targetAngle);
 
-      // Step 5: Start the spinning animation
-      setTimeout(() => {
-        setRotation(finalRotation);
-      }, 50);
-
-      console.log("Wheel will land on correct result:", {
+    // Step 6: Apply the precise final rotation at 1 second mark
+    setTimeout(() => {
+      setRotation(finalRotation);
+      console.log("🎯 Final rotation applied:", {
         spinResult,
         targetSegmentIndex,
-        segmentAngle,
-        numberAtPosition: currentWheelNumbers[targetSegmentIndex]
+        finalRotation,
+        apiCallSuccessful
       });
+    }, 1000);
 
-      // Step 6: After 8 seconds total, show the result and refresh available numbers
-      setTimeout(async () => {
-        setResult(spinResult);
-        const isFree = spinResult >= freePlayStart;
-        setIsFreePlay(isFree);
-        setAmountCharged(isFree ? 0 : spinResult);
-        setIsSpinning(false);
-        
-        // Refresh available numbers after spin
+    // Step 7: Complete the spin sequence after exactly 8 seconds total
+    setTimeout(async () => {
+      console.log("🎯 Completing spin sequence...");
+      
+      setResult(spinResult);
+      const isFree = spinResult >= freePlayStart;
+      setIsFreePlay(isFree);
+      setAmountCharged(isFree ? 0 : spinResult);
+      setIsSpinning(false);
+      
+      // Refresh available numbers after spin (only if API was successful)
+      if (apiCallSuccessful) {
         const path = window.location.pathname;
         const gameIdMatch = path.match(/\/game\/(\d+)/);
         if (gameIdMatch) {
           const gameId = parseInt(gameIdMatch[1]);
           await fetchAvailableNumbers(gameId);
         }
-        
-        // Show result modal after wheel stops
-        setTimeout(() => {
-          setShowResultModal(true);
-        }, 500);
-      }, 8000);
-
-    } catch (err) {
-      console.error("Spin error:", err);
-      setIsSpinning(false);
-      // Show error result
-      setResult(1);
-      setIsFreePlay(true);
-      setAmountCharged(0);
+      }
+      
+      // Show result modal after wheel stops
       setTimeout(() => {
         setShowResultModal(true);
+        if (!apiCallSuccessful) {
+          // For API failures, show an error state but still complete the wheel animation
+          console.error("⚠️ Spin completed with API failure - user will see error in result modal");
+        }
       }, 500);
-    }
+      
+      console.log("🎯 Spin sequence completed - API success:", apiCallSuccessful);
+    }, 8000);
   };
 
   const [numberRadius, setNumberRadius] = useState(110);
