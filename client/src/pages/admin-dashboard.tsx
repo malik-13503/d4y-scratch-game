@@ -68,18 +68,37 @@ export default function AdminDashboard() {
   });
   const { toast } = useToast();
 
-  // Check authentication
+  // Check authentication with localStorage fallback
   const { data: adminUser, isLoading: authLoading, error } = useQuery({
     queryKey: ["/api/admin/user"],
     retry: false,
   });
 
+  // Get admin user from localStorage if available
+  const [localAdminUser, setLocalAdminUser] = useState(null);
+  
   useEffect(() => {
-    if (!authLoading && (!adminUser || error)) {
-      console.log("Redirecting to login - adminUser:", adminUser, "error:", error);
+    const stored = localStorage.getItem("admin_user");
+    if (stored) {
+      try {
+        setLocalAdminUser(JSON.parse(stored));
+      } catch (e) {
+        console.error("Failed to parse stored admin user:", e);
+        localStorage.removeItem("admin_user");
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    // Only redirect if we have no authentication from server AND no localStorage
+    if (!authLoading && (!adminUser && !localAdminUser)) {
+      console.log("No authentication found, redirecting to login");
       setLocation("/admin-login");
     }
-  }, [adminUser, authLoading, error, setLocation]);
+  }, [adminUser, localAdminUser, authLoading, setLocation]);
+
+  // Use server data if available, otherwise use localStorage
+  const currentAdmin = adminUser || localAdminUser;
 
   // Dashboard stats with enhanced metrics
   const { data: dashboardStats, refetch: refetchStats } = useQuery<{
@@ -93,39 +112,39 @@ export default function AdminDashboard() {
     conversionRate: number;
   }>({
     queryKey: ["/api/admin/dashboard/stats"],
-    enabled: !!adminUser,
+    enabled: !!currentAdmin,
     refetchInterval: 5000, // Real-time updates
   });
 
   // Games data
   const { data: games, refetch: refetchGames } = useQuery<any[]>({
     queryKey: ["/api/admin/games"],
-    enabled: !!adminUser,
+    enabled: !!currentAdmin,
   });
 
   // System settings
   const { data: settings, refetch: refetchSettings } = useQuery<any[]>({
     queryKey: ["/api/admin/settings"],
-    enabled: !!adminUser,
+    enabled: !!currentAdmin,
   });
 
   // Recent activity
   const { data: recentActivity } = useQuery<any[]>({
     queryKey: ["/api/admin/activity"],
-    enabled: !!adminUser,
+    enabled: !!currentAdmin,
     refetchInterval: 10000,
   });
 
   // Users data
   const { data: users, refetch: refetchUsers } = useQuery({
     queryKey: ["/api/admin/users"],
-    enabled: !!adminUser,
+    enabled: !!currentAdmin,
   });
 
   // Analytics data
   const { data: analytics, refetch: refetchAnalytics } = useQuery({
     queryKey: ["/api/admin/analytics"],
-    enabled: !!adminUser,
+    enabled: !!currentAdmin,
   });
 
   // Logout mutation
@@ -134,6 +153,7 @@ export default function AdminDashboard() {
       await apiRequest("POST", "/api/admin/logout");
     },
     onSuccess: () => {
+      localStorage.removeItem("admin_user");
       queryClient.clear();
       setLocation("/admin-login");
     },

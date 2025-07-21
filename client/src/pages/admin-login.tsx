@@ -21,12 +21,16 @@ export default function AdminLoginPage() {
       return response.json();
     },
     onSuccess: (data) => {
+      console.log("Login successful, received data:", data);
       toast({
-        title: "Login successful",
-        description: `Welcome back, ${data.user.firstName}!`,
+        title: "Login successful", 
+        description: `Welcome back, ${data.user.firstName || data.user.email}!`,
       });
       localStorage.setItem("admin_user", JSON.stringify(data.user));
-      setLocation("/admin-dashboard");
+      // Small delay to ensure session is set
+      setTimeout(() => {
+        setLocation("/admin-dashboard");
+      }, 100);
     },
     onError: (error: any) => {
       toast({
