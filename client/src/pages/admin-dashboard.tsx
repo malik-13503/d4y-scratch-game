@@ -90,10 +90,24 @@ export default function AdminDashboard() {
   }, []);
 
   useEffect(() => {
-    // Only redirect if we have no authentication from server AND no localStorage
-    if (!authLoading && (!adminUser && !localAdminUser)) {
+    // Always redirect to login if no authentication is found after loading completes
+    if (!authLoading && !adminUser && !localAdminUser) {
       console.log("No authentication found, redirecting to login");
-      setLocation("/admin-login");
+      // Immediate redirect with small delay for user experience
+      setTimeout(() => {
+        setLocation("/admin-login");
+      }, 1500); // Show access denied message for 1.5 seconds
+      return;
+    }
+    
+    // Clear localStorage if server auth fails but localStorage exists (session expired)
+    if (!authLoading && !adminUser && localAdminUser) {
+      console.log("Server authentication failed, clearing localStorage and redirecting");
+      localStorage.removeItem("admin_user");
+      setLocalAdminUser(null);
+      setTimeout(() => {
+        setLocation("/admin-login");
+      }, 1500);
     }
   }, [adminUser, localAdminUser, authLoading, setLocation]);
 
@@ -227,19 +241,30 @@ export default function AdminDashboard() {
     return () => clearInterval(interval);
   }, []);
 
-  if (authLoading) {
+  // Show loading screen while checking authentication
+  if (authLoading || (!adminUser && !localAdminUser && !error)) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-16 w-16 border-4 border-purple-500 border-t-transparent mx-auto mb-4"></div>
-          <p className="text-white text-xl font-semibold">Loading Admin Dashboard...</p>
+          <p className="text-white text-xl font-semibold drop-shadow-lg">Loading Admin Dashboard...</p>
+          <p className="text-gray-300 text-sm mt-2">Checking authentication...</p>
         </div>
       </div>
     );
   }
 
-  if (!adminUser) {
-    return null;
+  // If authentication check failed and we have no local storage, show redirect screen
+  if (!currentAdmin) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin w-10 h-10 border-4 border-red-500 border-t-transparent rounded-full mx-auto mb-4" />
+          <p className="text-white text-xl font-semibold drop-shadow-lg">Access Denied</p>
+          <p className="text-gray-300 mt-2">Redirecting to admin login...</p>
+        </div>
+      </div>
+    );
   }
 
   const handleCreateGame = (e: React.FormEvent<HTMLFormElement>) => {
