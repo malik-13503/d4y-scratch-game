@@ -8,6 +8,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { saveAuthToStorage } from "@/lib/auth";
 import { AlertCircle, CheckCircle, Mail, Lock } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { ErrorDialog } from "@/components/error-dialog";
 
 interface LoginFormProps {
   onSuccess: () => void;
@@ -19,6 +20,8 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [error, setError] = useState("");
+  const [showErrorDialog, setShowErrorDialog] = useState(false);
+  const [dialogError, setDialogError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const { toast } = useToast();
 
@@ -54,18 +57,9 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
       
       onSuccess();
     } catch (error: any) {
-      // Beautiful error popup for wrong credentials
-      const errorMessage = error.message || "Invalid email or password";
-      setError(errorMessage);
-      
-      toast({
-        title: "⚠️ Login Failed",
-        description: errorMessage.includes("credentials") || errorMessage.includes("Invalid") 
-          ? "The email or password you entered is incorrect. Please double-check and try again."
-          : errorMessage,
-        variant: "destructive",
-        className: "bg-gradient-to-r from-red-500 to-rose-600 text-white border-red-400",
-      });
+      const errorMessage = error.message || "Login failed";
+      setDialogError(errorMessage);
+      setShowErrorDialog(true);
     } finally {
       setIsLoading(false);
     }
@@ -155,6 +149,18 @@ export function LoginForm({ onSuccess }: LoginFormProps) {
           Don't have an account? Switch to Sign Up tab above
         </p>
       </div>
+      
+      {/* Professional Error Dialog */}
+      <ErrorDialog
+        open={showErrorDialog}
+        onOpenChange={setShowErrorDialog}
+        error={dialogError}
+        onRetry={() => {
+          // Clear form errors and allow retry
+          setError("");
+          setDialogError("");
+        }}
+      />
     </form>
   );
 }

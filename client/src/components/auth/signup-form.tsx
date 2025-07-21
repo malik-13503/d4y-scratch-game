@@ -8,6 +8,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { saveAuthToStorage } from "@/lib/auth";
 import { AlertCircle, User, Mail, Phone, Lock } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { ErrorDialog } from "@/components/error-dialog";
 
 interface SignupFormProps {
   onSuccess: () => void;
@@ -25,6 +26,8 @@ export function SignupForm({ onSuccess }: SignupFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [error, setError] = useState("");
+  const [showErrorDialog, setShowErrorDialog] = useState(false);
+  const [dialogError, setDialogError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const { toast } = useToast();
@@ -75,17 +78,9 @@ export function SignupForm({ onSuccess }: SignupFormProps) {
       
       onSuccess();
     } catch (error: any) {
-      const errorMessage = error.message || "Something went wrong. Please try again.";
-      setError(errorMessage);
-      
-      toast({
-        title: "⚠️ Registration Failed", 
-        description: errorMessage.includes("email") 
-          ? "This email is already registered. Please try logging in or use a different email."
-          : errorMessage,
-        variant: "destructive",
-        className: "bg-gradient-to-r from-red-500 to-rose-600 text-white border-red-400",
-      });
+      const errorMessage = error.message || "Registration failed";
+      setDialogError(errorMessage);
+      setShowErrorDialog(true);
     } finally {
       setIsLoading(false);
     }
@@ -270,6 +265,18 @@ export function SignupForm({ onSuccess }: SignupFormProps) {
           Already have an account? Switch to Sign In tab above
         </p>
       </div>
+      
+      {/* Professional Error Dialog */}
+      <ErrorDialog
+        open={showErrorDialog}
+        onOpenChange={setShowErrorDialog}
+        error={dialogError}
+        onRetry={() => {
+          // Clear form errors and allow retry
+          setError("");
+          setDialogError("");
+        }}
+      />
     </form>
   );
 }
