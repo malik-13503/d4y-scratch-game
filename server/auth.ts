@@ -15,17 +15,17 @@ declare global {
 export function setupAuth(app: Express) {
   const sessionSettings: session.SessionOptions = {
     secret: process.env.SESSION_SECRET || "your-secret-key-change-in-production",
-    resave: false,
-    saveUninitialized: false,
+    resave: true, // Force session save on each request
+    saveUninitialized: true, // Save uninitialized sessions
     store: storage.sessionStore,
     cookie: {
       secure: false, // Set to false for development
       httpOnly: true,
-      maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days for persistent sessions
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days for admin sessions
       sameSite: 'lax',
     },
     rolling: true, // Extend session on each request
-    name: 'hit_the_road_session', // Custom session name
+    name: 'admin_session', // Unique session name for admin
   };
 
   app.set("trust proxy", 1);
@@ -70,12 +70,24 @@ export function setupAuth(app: Express) {
     )
   );
 
-  passport.serializeUser((user, done) => done(null, user.id));
+  passport.serializeUser((user, done) => {
+    console.log("Serializing user:", user.id);
+    done(null, user.id);
+  });
+  
   passport.deserializeUser(async (id: number, done) => {
     try {
+      console.log("Deserializing user ID:", id);
       const user = await storage.getAdminUser(id);
-      done(null, user);
+      if (user) {
+        console.log("User found during deserialization:", user.email);
+        done(null, user);
+      } else {
+        console.log("User not found during deserialization:", id);
+        done(null, false);
+      }
     } catch (error) {
+      console.error("Deserialization error:", error);
       done(error);
     }
   });
@@ -111,22 +123,39 @@ export function setupAuth(app: Express) {
   app.post("/api/admin/login", (req, res, next) => {
     passport.authenticate("local", (err: any, user: AdminUser | false, info: any) => {
       if (err) {
+        console.error("Login authentication error:", err);
         return res.status(500).json({ message: "Authentication error" });
       }
       if (!user) {
+        console.log("Login failed - no user:", info?.message);
         return res.status(401).json({ message: info?.message || "Invalid credentials" });
       }
 
       req.logIn(user, (err) => {
         if (err) {
+          console.error("req.logIn error:", err);
           return res.status(500).json({ message: "Login failed" });
         }
         
-        // Don't return password
-        const { password: _, ...userWithoutPassword } = user;
-        res.json({ 
-          message: "Login successful", 
-          user: userWithoutPassword 
+        console.log("Login successful, session created:", {
+          sessionID: req.sessionID,
+          userID: user.id,
+          isAuthenticated: req.isAuthenticated()
+        });
+        
+        // Force save session
+        req.session.save((saveErr) => {
+          if (saveErr) {
+            console.error("Session save error:", saveErr);
+            return res.status(500).json({ message: "Session save failed" });
+          }
+          
+          // Don't return password
+          const { password: _, ...userWithoutPassword } = user;
+          res.json({ 
+            message: "Login successful", 
+            user: userWithoutPassword 
+          });
         });
       });
     })(req, res, next);

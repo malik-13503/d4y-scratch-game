@@ -88,7 +88,9 @@ export class DatabaseStorage implements IStorage {
 
   constructor() {
     this.sessionStore = new MemStore({
-      checkPeriod: 86400000 // prune expired entries every 24h
+      checkPeriod: 86400000, // prune expired entries every 24h
+      ttl: 7 * 24 * 60 * 60 * 1000, // 7 days TTL
+      stale: false // Don't return stale sessions
     });
 
     this.initializeSampleData();

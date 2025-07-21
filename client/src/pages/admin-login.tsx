@@ -27,10 +27,10 @@ export default function AdminLoginPage() {
         description: `Welcome back, ${data.user.firstName || data.user.email}!`,
       });
       localStorage.setItem("admin_user", JSON.stringify(data.user));
-      // Small delay to ensure session is set
+      // Longer delay to ensure session is fully established
       setTimeout(() => {
         setLocation("/admin-dashboard");
-      }, 100);
+      }, 1000);
     },
     onError: (error: any) => {
       toast({

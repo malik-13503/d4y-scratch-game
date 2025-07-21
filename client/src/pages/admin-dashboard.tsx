@@ -90,26 +90,27 @@ export default function AdminDashboard() {
   }, []);
 
   useEffect(() => {
-    // Always redirect to login if no authentication is found after loading completes
+    // Wait longer for authentication to complete
     if (!authLoading && !adminUser && !localAdminUser) {
       console.log("No authentication found, redirecting to login");
-      // Immediate redirect with small delay for user experience
+      // Longer delay to prevent redirect loops during session establishment
       setTimeout(() => {
         setLocation("/admin-login");
-      }, 1500); // Show access denied message for 1.5 seconds
+      }, 2000);
       return;
     }
     
-    // Clear localStorage if server auth fails but localStorage exists (session expired)
-    if (!authLoading && !adminUser && localAdminUser) {
-      console.log("Server authentication failed, clearing localStorage and redirecting");
+    // Only clear localStorage after multiple failed attempts
+    if (!authLoading && !adminUser && localAdminUser && error) {
+      console.log("Server authentication failed after login, clearing localStorage and redirecting");
       localStorage.removeItem("admin_user");
       setLocalAdminUser(null);
+      // Don't redirect immediately to avoid loops
       setTimeout(() => {
         setLocation("/admin-login");
-      }, 1500);
+      }, 3000);
     }
-  }, [adminUser, localAdminUser, authLoading, setLocation]);
+  }, [adminUser, localAdminUser, authLoading, error, setLocation]);
 
   // Use server data if available, otherwise use localStorage
   const currentAdmin = adminUser || localAdminUser;
