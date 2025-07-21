@@ -73,8 +73,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         squareCustomerId
       });
       
-      // Store user ID in session
+      // Store user ID and IP in session for tracking
+      const clientIP = req.ip || req.connection.remoteAddress || req.socket.remoteAddress;
       (req.session as any).userId = user.id;
+      (req.session as any).loginIP = clientIP;
+      (req.session as any).lastAccess = new Date();
+      
+      console.log("New user registered and logged in:", user.email, "from IP:", clientIP);
 
       res.status(201).json({
         message: "Registration successful",
@@ -95,38 +100,90 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/user", (req, res) => {
+  app.get("/api/user", async (req, res) => {
     const userId = (req.session as any)?.userId;
+    const clientIP = req.ip || req.connection.remoteAddress || req.socket.remoteAddress;
+    
     if (!userId) {
+      console.log("No session found for IP:", clientIP);
       return res.status(401).json({ message: "Not authenticated" });
     }
 
-    storage.getUser(userId)
-      .then(user => {
-        if (!user) {
-          return res.status(401).json({ message: "User not found" });
-        }
-        
-        res.json({
+    try {
+      const user = await storage.getUser(userId);
+      if (!user) {
+        console.log("User not found for session userId:", userId, "IP:", clientIP);
+        req.session.destroy(() => {});
+        return res.status(401).json({ message: "User not found" });
+      }
+      
+      // Update session tracking
+      (req.session as any).lastIP = clientIP;
+      (req.session as any).lastAccess = new Date();
+      
+      console.log("Authenticated user:", user.email, "from IP:", clientIP);
+      
+      res.json({
+        id: user.id,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        cardOnFile: user.cardOnFile
+      });
+    } catch (error) {
+      console.error("Get user error:", error);
+      res.status(500).json({ message: "Failed to get user" });
+    }
+  });
+
+  app.post("/api/login", async (req, res) => {
+    try {
+      const { email, password } = req.body;
+      
+      if (!email || !password) {
+        return res.status(400).json({ message: "Email and password are required" });
+      }
+      
+      const user = await storage.getUserByEmail(email);
+      if (!user) {
+        return res.status(401).json({ message: "Invalid credentials" });
+      }
+      
+      // For now, just verify the email exists (password verification would go here)
+      // Store user ID and IP in session for tracking
+      const clientIP = req.ip || req.connection.remoteAddress || req.socket.remoteAddress;
+      (req.session as any).userId = user.id;
+      (req.session as any).loginIP = clientIP;
+      (req.session as any).lastAccess = new Date();
+      
+      console.log("User logged in:", user.email, "from IP:", clientIP);
+      
+      res.json({
+        message: "Login successful",
+        user: {
           id: user.id,
           email: user.email,
           firstName: user.firstName,
           lastName: user.lastName,
           cardOnFile: user.cardOnFile
-        });
-      })
-      .catch(error => {
-        console.error("Get user error:", error);
-        res.status(500).json({ message: "Failed to get user" });
+        }
       });
+    } catch (error) {
+      console.error("Login error:", error);
+      res.status(500).json({ message: "Login failed" });
+    }
   });
 
   app.post("/api/logout", (req, res) => {
+    const clientIP = req.ip || req.connection.remoteAddress || req.socket.remoteAddress;
+    console.log("User logged out from IP:", clientIP);
+    
     (req.session as any).userId = null;
     req.session.destroy((err) => {
       if (err) {
         return res.status(500).json({ message: "Logout failed" });
       }
+      res.clearCookie('hit_the_road_session');
       res.clearCookie('connect.sid');
       res.json({ message: "Logout successful" });
     });

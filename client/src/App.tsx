@@ -54,16 +54,16 @@ function Router() {
       setUser(serverUser);
       saveAuthToStorage(serverUser);
     } else if (error && !serverLoading) {
-      // Only clear auth if server explicitly rejects and enough time has passed
+      // Only clear auth if server explicitly rejects and significant time has passed
       const storedAuth = getAuthFromStorage();
-      if (storedAuth && (Date.now() - storedAuth.timestamp) > 1800000) { // 30 minutes grace period
-        console.log("Clearing expired authentication");
+      if (storedAuth && (Date.now() - storedAuth.timestamp) > 7200000) { // 2 hours grace period
+        console.log("Clearing expired authentication after 2 hours");
         clearAuthFromStorage();
         setUser(null);
       } else if (storedAuth) {
-        // Keep using localStorage auth for short-term server errors
-        console.log("Using cached auth during temporary server issues");
-        // Don't overwrite user if already set to prevent flashing
+        // Keep using localStorage auth for server connectivity issues
+        console.log("Maintaining cached authentication during server issues");
+        // Keep user authenticated with localStorage data
         if (!user) {
           setUser(storedAuth.user);
         }
