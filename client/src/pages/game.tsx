@@ -249,14 +249,14 @@ export default function GamePage() {
                 {/* Prize Showcase */}
                 <div className="flex justify-center xl:justify-end flex-shrink-0">
                   <div className="relative">
-                    <div className="bg-gradient-to-r from-yellow-500/30 via-orange-500/30 to-red-500/30 backdrop-blur-xl rounded-xl sm:rounded-2xl px-3 sm:px-4 lg:px-6 py-2 sm:py-3 lg:py-4 border border-yellow-400/50 shadow-2xl">
-                      <div className="flex items-center space-x-2 sm:space-x-3">
-                        <div className="p-1.5 sm:p-2 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-lg sm:rounded-xl shadow-lg">
-                          <Trophy className="h-4 w-4 sm:h-5 sm:w-5 lg:h-6 lg:w-6 text-white drop-shadow-lg" />
+                    <div className="bg-gradient-to-r from-yellow-500/30 via-orange-500/30 to-red-500/30 backdrop-blur-xl rounded-xl sm:rounded-2xl px-4 sm:px-5 lg:px-6 xl:px-8 2xl:px-10 py-3 sm:py-4 lg:py-5 xl:py-6 border border-yellow-400/50 shadow-2xl">
+                      <div className="flex items-center space-x-3 sm:space-x-4 lg:space-x-5">
+                        <div className="p-2 sm:p-2.5 lg:p-3 xl:p-4 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-lg sm:rounded-xl shadow-lg flex-shrink-0">
+                          <Trophy className="h-5 w-5 sm:h-6 sm:w-6 lg:h-7 lg:w-7 xl:h-8 xl:w-8 2xl:h-10 2xl:w-10 text-white drop-shadow-lg" />
                         </div>
-                        <div className="min-w-0">
-                          <p className="text-yellow-300 text-xs sm:text-sm font-bold uppercase tracking-wide">Grand Prize</p>
-                          <p className="text-white text-sm sm:text-lg lg:text-xl xl:text-2xl font-black drop-shadow-lg break-words">{game.prize}</p>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-yellow-300 text-xs sm:text-sm lg:text-base xl:text-lg font-bold uppercase tracking-wide">Grand Prize</p>
+                          <p className="text-white text-base sm:text-lg lg:text-xl xl:text-2xl 2xl:text-3xl font-black drop-shadow-lg break-words leading-tight">{game.prize}</p>
                         </div>
                       </div>
                     </div>
