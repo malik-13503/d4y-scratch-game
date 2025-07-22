@@ -64,7 +64,7 @@ export default function AuthLandingPage() {
 
   // Use useEffect to handle redirect to avoid render-time state updates
   React.useEffect(() => {
-    if (user && typeof user === 'object') {
+    if (user && typeof user === "object") {
       if ((user as any).cardOnFile) {
         setLocation("/games");
       } else {
@@ -211,16 +211,16 @@ export default function AuthLandingPage() {
                       </div>
 
                       <Tabs defaultValue="signup" className="w-full">
-                        <TabsList className="grid w-full grid-cols-2 mb-6 sm:mb-8 bg-slate-800/80 border-2 border-white/20 rounded-2xl p-2 backdrop-blur-sm">
+                        <TabsList className="grid w-full grid-cols-2 mb-6 sm:mb-8 bg-slate-800/80 border-2 border-white/20 rounded-2xl p-1 backdrop-blur-sm">
                           <TabsTrigger
                             value="signup"
-                            className="text-white font-bold text-base sm:text-lg py-3 px-4 rounded-xl data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-blue-600 data-[state=active]:shadow-lg transition-all duration-300 flex items-center justify-center min-h-[48px]"
+                            className="text-white font-bold text-base sm:text-lg py-0 px-4 mt-0 rounded-xl data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-blue-600 data-[state=active]:shadow-lg transition-all duration-300 flex items-center justify-center min-h-[30px] mb-10"
                           >
                             Sign Up
                           </TabsTrigger>
                           <TabsTrigger
                             value="login"
-                            className="text-white font-bold text-base sm:text-lg py-3 px-4 rounded-xl data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-blue-600 data-[state=active]:shadow-lg transition-all duration-300 flex items-center justify-center min-h-[48px]"
+                            className="text-white font-bold text-base sm:text-lg py-0 px-4 rounded-xl data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-blue-600 data-[state=active]:shadow-lg transition-all duration-300 flex items-center justify-center min-h-[30px] mb-10"
                           >
                             Login
                           </TabsTrigger>
@@ -265,7 +265,10 @@ export default function AuthLandingPage() {
                           Add your payment method to start playing!
                         </p>
                       </div>
-                      <CardSetup user={user as any} onSuccess={handleCardSetupSuccess} />
+                      <CardSetup
+                        user={user as any}
+                        onSuccess={handleCardSetupSuccess}
+                      />
                     </CardContent>
                   </Card>
                 </div>
@@ -289,8 +292,8 @@ export default function AuthLandingPage() {
                         You're All Set!
                       </h2>
                       <p className="text-gray-300 text-xl font-medium mb-10">
-                        Welcome, {(user as any)?.firstName || "Player"}! Your account is ready to
-                        play.
+                        Welcome, {(user as any)?.firstName || "Player"}! Your
+                        account is ready to play.
                       </p>
                       <Button
                         onClick={handleContinueToGames}

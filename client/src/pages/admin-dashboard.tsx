@@ -127,8 +127,9 @@ export default function AdminDashboard() {
     conversionRate: number;
   }>({
     queryKey: ["/api/admin/dashboard/stats"],
-    enabled: !!currentAdmin,
-    refetchInterval: 5000, // Real-time updates
+    enabled: !!currentAdmin && activeTab === 'overview',
+    refetchInterval: activeTab === 'overview' ? 15000 : false, // Only refresh on overview tab
+    staleTime: 30000, // Cache for 30 seconds
   });
 
   // Games data
@@ -146,8 +147,9 @@ export default function AdminDashboard() {
   // Recent activity
   const { data: recentActivity } = useQuery<any[]>({
     queryKey: ["/api/admin/activity"],
-    enabled: !!currentAdmin,
-    refetchInterval: 10000,
+    enabled: !!currentAdmin && activeTab === 'overview',
+    refetchInterval: activeTab === 'overview' ? 20000 : false,
+    staleTime: 30000,
   });
 
   // Users data

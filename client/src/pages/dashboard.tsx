@@ -48,18 +48,18 @@ export default function Dashboard() {
 
   const { data: userStats, isLoading: statsLoading } = useQuery({
     queryKey: ["/api/user/stats"],
-    enabled: !!user,
-    refetchInterval: 5000, // Refetch every 5 seconds for real-time updates
-    refetchOnWindowFocus: true,
-    staleTime: 0, // Always consider data stale for real-time updates
+    enabled: !!user && currentTab === 'overview',
+    refetchInterval: currentTab === 'overview' ? 10000 : false, // Only refresh on overview tab
+    refetchOnWindowFocus: false, // Disable aggressive refetching
+    staleTime: 30000, // Cache for 30 seconds
   });
 
   const { data: gameHistory, isLoading: historyLoading } = useQuery({
     queryKey: ["/api/user/game-history"],
-    enabled: !!user,
-    refetchInterval: 5000, // Refetch every 5 seconds for real-time updates
-    refetchOnWindowFocus: true,
-    staleTime: 0, // Always consider data stale for real-time updates
+    enabled: !!user && currentTab === 'overview',
+    refetchInterval: currentTab === 'overview' ? 10000 : false, // Only refresh on overview tab
+    refetchOnWindowFocus: false, // Disable aggressive refetching
+    staleTime: 30000, // Cache for 30 seconds
   });
 
   if (userLoading) {
@@ -169,26 +169,26 @@ export default function Dashboard() {
                 {/* Mobile User Details */}
                 <div className="sm:hidden min-w-0">
                   <CardTitle className="text-xl font-black bg-gradient-to-r from-white to-gray-200 bg-clip-text text-transparent drop-shadow-lg truncate">
-                    {user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : 'Player'}
+                    {(user as any).firstName && (user as any).lastName ? `${(user as any).firstName} ${(user as any).lastName}` : 'Player'}
                   </CardTitle>
-                  <p className="text-gray-200 text-sm font-medium truncate">{user.email}</p>
+                  <p className="text-gray-200 text-sm font-medium truncate">{(user as any).email}</p>
                 </div>
               </div>
               
               {/* Desktop User Details */}
               <div className="hidden sm:block flex-1 min-w-0">
                 <CardTitle className="text-2xl lg:text-3xl font-black bg-gradient-to-r from-white to-gray-200 bg-clip-text text-transparent drop-shadow-lg truncate">
-                  {user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : 'Player'}
+                  {(user as any).firstName && (user as any).lastName ? `${(user as any).firstName} ${(user as any).lastName}` : 'Player'}
                 </CardTitle>
-                <p className="text-gray-200 text-base lg:text-lg font-medium truncate">{user.email}</p>
+                <p className="text-gray-200 text-base lg:text-lg font-medium truncate">{(user as any).email}</p>
               </div>
               
               {/* Responsive Status Badges */}
               <div className="flex flex-wrap gap-2 sm:gap-3">
-                <Badge className={`${user.cardOnFile ? "bg-gradient-to-r from-emerald-500 to-green-500 text-white" : "bg-gradient-to-r from-red-500 to-pink-500 text-white"} border-0 px-3 py-2 sm:px-4 sm:py-2 font-bold shadow-lg text-xs sm:text-sm`}>
+                <Badge className={`${(user as any).cardOnFile ? "bg-gradient-to-r from-emerald-500 to-green-500 text-white" : "bg-gradient-to-r from-red-500 to-pink-500 text-white"} border-0 px-3 py-2 sm:px-4 sm:py-2 font-bold shadow-lg text-xs sm:text-sm`}>
                   <CreditCard className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
                   <span className="drop-shadow-sm whitespace-nowrap">
-                    {user.cardOnFile ? "Payment Verified" : "Payment Required"}
+                    {(user as any).cardOnFile ? "Payment Verified" : "Payment Required"}
                   </span>
                 </Badge>
                 <div className="flex items-center space-x-2 bg-gradient-to-r from-blue-500/20 to-green-500/20 px-3 py-2 sm:px-4 sm:py-2 rounded-full border border-green-400/30">
@@ -202,18 +202,26 @@ export default function Dashboard() {
 
         {/* Tabs for Dashboard Sections */}
         <Tabs value={currentTab} onValueChange={handleTabChange} className="w-full">
-          <TabsList className="grid w-full grid-cols-3 bg-slate-800/50 border border-purple-500/30 p-1 rounded-xl mb-8">
-            <TabsTrigger value="overview" className="text-gray-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-blue-600 data-[state=active]:text-white rounded-lg font-bold transition-all duration-300">
+          <TabsList className="grid w-full grid-cols-2 lg:grid-cols-5 bg-black/40 backdrop-blur-xl border border-purple-500/30 rounded-2xl p-2">
+            <TabsTrigger value="overview" className="text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-blue-600 rounded-xl transition-all duration-200">
               <Gauge className="h-4 w-4 mr-2" />
               Overview
             </TabsTrigger>
-            <TabsTrigger value="payment" className="text-gray-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-blue-600 data-[state=active]:text-white rounded-lg font-bold transition-all duration-300">
+            <TabsTrigger value="transactions" className="text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-blue-600 rounded-xl transition-all duration-200">
+              <Activity className="h-4 w-4 mr-2" />
+              Transactions
+            </TabsTrigger>
+            <TabsTrigger value="achievements" className="text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-blue-600 rounded-xl transition-all duration-200">
+              <Award className="h-4 w-4 mr-2" />
+              Achievements
+            </TabsTrigger>
+            <TabsTrigger value="payment" className="text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-blue-600 rounded-xl transition-all duration-200">
               <CreditCard className="h-4 w-4 mr-2" />
               Payment
             </TabsTrigger>
-            <TabsTrigger value="settings" className="text-gray-300 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-blue-600 data-[state=active]:text-white rounded-lg font-bold transition-all duration-300">
+            <TabsTrigger value="system" className="text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-blue-600 rounded-xl transition-all duration-200">
               <Settings className="h-4 w-4 mr-2" />
-              Settings
+              System
             </TabsTrigger>
           </TabsList>
 
@@ -232,7 +240,7 @@ export default function Dashboard() {
                 <div>
                   <p className="text-white text-lg font-black tracking-wide drop-shadow-lg">Low Numbers</p>
                   <p className="text-4xl font-black text-white drop-shadow-lg">
-                    {statsLoading ? '...' : (userStats?.totalWins || 0)}
+                    {statsLoading ? '...' : ((userStats as any)?.totalWins || 0)}
                   </p>
                 </div>
               </div>
@@ -250,7 +258,7 @@ export default function Dashboard() {
                 <div>
                   <p className="text-white text-lg font-black tracking-wide drop-shadow-lg">Total Spent</p>
                   <p className="text-4xl font-black text-white drop-shadow-lg">
-                    ${statsLoading ? '...' : (userStats?.totalSpent || 0).toFixed(2)}
+                    ${statsLoading ? '...' : ((userStats as any)?.totalSpent || 0).toFixed(2)}
                   </p>
                 </div>
               </div>
@@ -268,7 +276,7 @@ export default function Dashboard() {
                 <div>
                   <p className="text-white text-lg font-black tracking-wide drop-shadow-lg">Total Spins</p>
                   <p className="text-4xl font-black text-white drop-shadow-lg">
-                    {statsLoading ? '...' : (userStats?.totalSpins || 0)}
+                    {statsLoading ? '...' : ((userStats as any)?.totalSpins || 0)}
                   </p>
                 </div>
               </div>
@@ -286,7 +294,7 @@ export default function Dashboard() {
                 <div>
                   <p className="text-white text-lg font-black tracking-wide drop-shadow-lg">Free Spins</p>
                   <p className="text-4xl font-black text-white drop-shadow-lg">
-                    {statsLoading ? '...' : (userStats?.freeSpins || 0)}
+                    {statsLoading ? '...' : ((userStats as any)?.freeSpins || 0)}
                   </p>
                 </div>
               </div>
@@ -418,7 +426,7 @@ export default function Dashboard() {
                 </div>
                 <p className="ml-4 text-gray-200 font-medium">Loading game history...</p>
               </div>
-            ) : !gameHistory || gameHistory.length === 0 ? (
+            ) : !gameHistory || (gameHistory as any).length === 0 ? (
               <div className="text-center py-16">
                 <div className="relative inline-block mb-6">
                   <div className="absolute inset-0 bg-gradient-to-br from-gray-500/20 to-gray-600/20 blur-2xl rounded-full"></div>
@@ -436,7 +444,7 @@ export default function Dashboard() {
               </div>
             ) : (
               <div className="space-y-4">
-                {gameHistory.slice(0, 5).map((game: any, index: number) => (
+                {(gameHistory as any).slice(0, 5).map((game: any, index: number) => (
                   <div key={index} className="p-4 bg-gradient-to-r from-slate-700/50 to-slate-800/50 rounded-xl border border-slate-600/30">
                     <div className="flex items-center justify-between">
                       <div>
@@ -470,7 +478,7 @@ export default function Dashboard() {
                 <p className="text-gray-300 text-lg mt-2">Manage your payment methods securely</p>
               </CardHeader>
               <CardContent className="relative">
-                {user.cardOnFile ? (
+                {(user as any).cardOnFile ? (
                   <div className="space-y-6">
                     <div className="p-6 bg-gradient-to-r from-emerald-900/40 to-green-900/40 rounded-xl border border-emerald-500/30">
                       <div className="flex items-center space-x-4">
@@ -480,7 +488,7 @@ export default function Dashboard() {
                         <div>
                           <h3 className="text-white font-bold text-xl">Payment Method Active</h3>
                           <p className="text-gray-300">
-                            {user.cardBrand} ending in {user.cardLast4}
+                            {(user as any).cardBrand} ending in {(user as any).cardLast4}
                           </p>
                         </div>
                         <div className="ml-auto">
@@ -508,7 +516,7 @@ export default function Dashboard() {
                       <h3 className="text-2xl font-bold text-white mb-4">No Payment Method</h3>
                       <p className="text-gray-300 text-lg mb-8">Add a payment method to start playing games and winning prizes!</p>
                     </div>
-                    <CardSetup onSuccess={handleCardSetupSuccess} />
+                    <CardSetup user={user as any} onSuccess={handleCardSetupSuccess} />
                   </div>
                 )}
               </CardContent>
@@ -534,12 +542,12 @@ export default function Dashboard() {
                     <div className="space-y-3">
                       <div className="flex justify-between items-center">
                         <span className="text-gray-300">Email:</span>
-                        <span className="text-white font-medium">{user.email}</span>
+                        <span className="text-white font-medium">{(user as any).email}</span>
                       </div>
                       <div className="flex justify-between items-center">
                         <span className="text-gray-300">Name:</span>
                         <span className="text-white font-medium">
-                          {user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : 'Not set'}
+                          {(user as any).firstName && (user as any).lastName ? `${(user as any).firstName} ${(user as any).lastName}` : 'Not set'}
                         </span>
                       </div>
                       <div className="flex justify-between items-center">
