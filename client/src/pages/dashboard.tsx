@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -32,10 +32,22 @@ import logoPath from "@assets/logo_1751918412862.png";
 
 export default function Dashboard() {
   const [, setLocation] = useLocation();
+  const [currentTab, setCurrentTab] = useState('overview');
   
-  // Get current tab from URL params
-  const urlParams = new URLSearchParams(window.location.search);
-  const currentTab = urlParams.get('tab') || 'overview';
+  const handleTabChange = (value: string) => {
+    setCurrentTab(value);
+    // Update URL without page reload
+    const newUrl = new URL(window.location.href);
+    newUrl.searchParams.set('tab', value);
+    window.history.pushState({}, '', newUrl.toString());
+  };
+
+  // Initialize tab from URL on mount
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const tabFromUrl = urlParams.get('tab') || 'overview';
+    setCurrentTab(tabFromUrl);
+  }, []);
 
   const refreshData = () => {
     queryClient.invalidateQueries({ queryKey: ["/api/user/stats"] });
@@ -81,11 +93,7 @@ export default function Dashboard() {
     return null;
   }
 
-  const handleTabChange = (value: string) => {
-    const url = new URL(window.location.href);
-    url.searchParams.set('tab', value);
-    window.history.pushState({}, '', url);
-  };
+
 
   const handleCardSetupSuccess = () => {
     // Refetch user data to update payment status
@@ -523,8 +531,44 @@ export default function Dashboard() {
             </Card>
           </TabsContent>
 
-          {/* Settings Tab */}
-          <TabsContent value="settings" className="space-y-8">
+          {/* Transactions Tab */}
+          <TabsContent value="transactions" className="space-y-8">
+            <Card className="relative overflow-hidden bg-gradient-to-br from-slate-800/80 to-slate-900/80 border-purple-400/40 backdrop-blur-xl shadow-2xl">
+              <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-blue-500/10 blur-2xl"></div>
+              <CardHeader className="relative">
+                <CardTitle className="text-2xl font-bold bg-gradient-to-r from-white to-gray-200 bg-clip-text text-transparent flex items-center">
+                  <div className="p-2 bg-gradient-to-br from-purple-500 to-blue-500 rounded-lg mr-3 shadow-lg">
+                    <Activity className="h-6 w-6 text-white" />
+                  </div>
+                  Transaction History
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="relative">
+                <p className="text-gray-300 text-center py-8">Transaction history coming soon...</p>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Achievements Tab */}
+          <TabsContent value="achievements" className="space-y-8">
+            <Card className="relative overflow-hidden bg-gradient-to-br from-slate-800/80 to-slate-900/80 border-purple-400/40 backdrop-blur-xl shadow-2xl">
+              <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-blue-500/10 blur-2xl"></div>
+              <CardHeader className="relative">
+                <CardTitle className="text-2xl font-bold bg-gradient-to-r from-white to-gray-200 bg-clip-text text-transparent flex items-center">
+                  <div className="p-2 bg-gradient-to-br from-purple-500 to-blue-500 rounded-lg mr-3 shadow-lg">
+                    <Award className="h-6 w-6 text-white" />
+                  </div>
+                  Achievements
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="relative">
+                <p className="text-gray-300 text-center py-8">Achievements system coming soon...</p>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* System Tab */}
+          <TabsContent value="system" className="space-y-8">
             <Card className="relative overflow-hidden bg-gradient-to-br from-slate-800/80 to-slate-900/80 border-purple-400/40 backdrop-blur-xl shadow-2xl">
               <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-blue-500/10 blur-2xl"></div>
               <CardHeader className="relative">
