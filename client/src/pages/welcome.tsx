@@ -108,11 +108,11 @@ export default function WelcomePage() {
             </Tabs>
           )}
 
-          {currentStep === "card-setup" && user && (
+          {currentStep === "card-setup" && user ? (
             <div>
               <CardSetup user={user as any} onSuccess={handleCardSetupSuccess} />
             </div>
-          )}
+          ) : null}
 
           {currentStep === "complete" && (
             <Card className="w-full max-w-md mx-auto">
