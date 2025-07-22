@@ -161,10 +161,17 @@ export const ProfessionalWheel = forwardRef<
     // Step 2: Freeze current wheel numbers during the entire spin
     const frozenWheelNumbers = [...wheelNumbers];
     
-    // Step 3: Reset rotation to 0 with no transition, then wait for reset to take effect
+    // Step 3: Force complete rotation reset to ensure clean starting position
     setRotation(0);
+    
+    // Force a DOM reflow to ensure rotation reset is applied
+    if (wheelRef.current) {
+      wheelRef.current.style.transform = 'rotate(0deg)';
+      wheelRef.current.style.transition = 'none';
+      wheelRef.current.offsetHeight; // Force reflow
+    }
 
-    // Step 4: Wait for reset, then make API call and calculate spin
+    // Step 4: Wait longer for rotation reset to fully take effect, then make API call and calculate spin
     setTimeout(async () => {
       let spinResult = null;
       let apiCallSuccessful = false;
@@ -199,11 +206,17 @@ export const ProfessionalWheel = forwardRef<
 
       // Step 6: Calculate final precise rotation to land exactly on result
       const targetAngle = segmentAngle * targetSegmentIndex + segmentAngle / 2;
-      const fullRotations = 5 * 360; // 5 full rotations for exactly 8 seconds
+      const fullRotations = 6 * 360; // 6 full rotations for consistent 8-second animation
       const finalRotation = fullRotations + (360 - targetAngle);
 
-      // Step 7: Start the 8-second spinning animation
+      // Step 7: Start the 8-second spinning animation with proper timing
       setRotation(finalRotation);
+      
+      // Ensure transition is properly applied
+      if (wheelRef.current) {
+        wheelRef.current.style.transition = 'transform 8.0s cubic-bezier(0.25, 0.1, 0.25, 1.0)';
+        wheelRef.current.style.transform = `rotate(${finalRotation}deg)`;
+      }
       console.log("🎯 8-second wheel animation started - will land on:", {
         spinResult,
         targetSegmentIndex,
@@ -247,9 +260,9 @@ export const ProfessionalWheel = forwardRef<
           console.log("🎯 Spin sequence fully completed");
         }, 1000);
         
-      }, 8000);
+      }, 8000); // Exactly 8 seconds for animation completion
       
-    }, 150); // Wait 150ms for rotation reset to take effect
+    }, 200); // Wait 200ms for rotation reset to fully take effect
 
 
   };
@@ -294,7 +307,7 @@ export const ProfessionalWheel = forwardRef<
                   style={{
                     transform: `rotate(${rotation}deg)`,
                     transition: isSpinning
-                      ? `transform 7.9s cubic-bezier(0.25, 0.1, 0.25, 1.0)`
+                      ? `transform 8.0s cubic-bezier(0.25, 0.1, 0.25, 1.0)`
                       : "none", // No transition when stopping to prevent drift
                     boxShadow:
                       "inset 0 0 30px rgba(0, 0, 0, 0.4), 0 0 40px rgba(255, 215, 0, 0.3)",
