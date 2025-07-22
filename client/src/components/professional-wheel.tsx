@@ -301,18 +301,20 @@ export const ProfessionalWheel = forwardRef<
           <div className="relative p-3 sm:p-4 rounded-full bg-gradient-to-r from-yellow-600 via-orange-500 to-red-600 shadow-2xl">
             <div className="p-2 sm:p-2 rounded-full bg-gradient-to-r from-purple-600 via-blue-600 to-cyan-500 shadow-xl">
               <div className="p-2 sm:p-2 rounded-full bg-gradient-to-r from-yellow-500 via-yellow-300 to-yellow-500 border-3 sm:border-4 border-white shadow-inner">
-                <div
-                  ref={wheelRef}
-                  className="w-[270px] h-[270px] sm:w-96 sm:h-96 md:w-[480px] md:h-[480px] lg:w-[520px] lg:h-[520px] rounded-full relative overflow-hidden"
-                  style={{
-                    transform: `rotate(${rotation}deg)`,
-                    transition: isSpinning
-                      ? `transform 8.0s cubic-bezier(0.25, 0.1, 0.25, 1.0)`
-                      : "none", // No transition when stopping to prevent drift
-                    boxShadow:
-                      "inset 0 0 30px rgba(0, 0, 0, 0.4), 0 0 40px rgba(255, 215, 0, 0.3)",
-                  }}
-                >
+                <div className="relative">
+                  {/* Spinning wheel container */}
+                  <div
+                    ref={wheelRef}
+                    className="w-[270px] h-[270px] sm:w-96 sm:h-96 md:w-[480px] md:h-[480px] lg:w-[520px] lg:h-[520px] rounded-full relative overflow-hidden"
+                    style={{
+                      transform: `rotate(${rotation}deg)`,
+                      transition: isSpinning
+                        ? `transform 8.0s cubic-bezier(0.25, 0.1, 0.25, 1.0)`
+                        : "none", // No transition when stopping to prevent drift
+                      boxShadow:
+                        "inset 0 0 30px rgba(0, 0, 0, 0.4), 0 0 40px rgba(255, 215, 0, 0.3)",
+                    }}
+                  >
                   {/* Wheel Segments */}
                   {segmentColors.map((color, index) => {
                     const angle = (360 / segmentColors.length) * index;
@@ -357,11 +359,13 @@ export const ProfessionalWheel = forwardRef<
                     }}
                   ></div>
 
-                  {/* Center hub with brand logo - Completely Static (never rotates) */}
+                  </div>
+                  
+                  {/* Center hub with brand logo - COMPLETELY STATIC - Outside spinning wheel */}
                   <div 
-                    className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-16 h-16 sm:w-32 sm:h-32 md:w-36 md:h-36 lg:w-40 lg:h-40 bg-gradient-to-br from-slate-900 to-slate-700 rounded-full border-3 sm:border-4 border-yellow-300 shadow-2xl flex items-center justify-center overflow-hidden z-40"
+                    className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-16 h-16 sm:w-32 sm:h-32 md:w-36 md:h-36 lg:w-40 lg:h-40 bg-gradient-to-br from-slate-900 to-slate-700 rounded-full border-3 sm:border-4 border-yellow-300 shadow-2xl flex items-center justify-center overflow-hidden z-50"
                     style={{
-                      // No rotation transform - logo stays completely static
+                      // NEVER MOVES - positioned outside the rotating wheel div
                       boxShadow: "0 0 30px rgba(234, 179, 8, 0.6), inset 0 0 15px rgba(255, 255, 255, 0.3)"
                     }}
                   >
