@@ -335,7 +335,7 @@ export const ProfessionalWheel = forwardRef<
                           style={{
                             transform: `translate(-50%, -50%) translate(${Math.cos(((angle + 360 / segmentColors.length / 2 - 90) * Math.PI) / 180) * numberRadius}px, ${Math.sin(((angle + 360 / segmentColors.length / 2 - 90) * Math.PI) / 180) * numberRadius}px) rotate(${-rotation}deg)`,
                             transition: isSpinning
-                              ? `transform 7.9s cubic-bezier(0.25, 0.1, 0.25, 1.0)`
+                              ? `transform 8.0s cubic-bezier(0.25, 0.1, 0.25, 1.0)`
                               : "none", // Keep numbers stationary when not spinning
                           }}
                         >
@@ -357,14 +357,12 @@ export const ProfessionalWheel = forwardRef<
                     }}
                   ></div>
 
-                  {/* Center hub with brand logo - Static (doesn't rotate) */}
+                  {/* Center hub with brand logo - Completely Static (never rotates) */}
                   <div 
                     className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-16 h-16 sm:w-32 sm:h-32 md:w-36 md:h-36 lg:w-40 lg:h-40 bg-gradient-to-br from-slate-900 to-slate-700 rounded-full border-3 sm:border-4 border-yellow-300 shadow-2xl flex items-center justify-center overflow-hidden z-40"
                     style={{
-                      transform: `translate(-50%, -50%) rotate(${-rotation}deg)`,
-                      transition: isSpinning
-                        ? `transform 7.9s cubic-bezier(0.25, 0.1, 0.25, 1.0)`
-                        : "none", // Keep center logo stationary when not spinning
+                      // No rotation transform - logo stays completely static
+                      boxShadow: "0 0 30px rgba(234, 179, 8, 0.6), inset 0 0 15px rgba(255, 255, 255, 0.3)"
                     }}
                   >
                     <div className="w-12 h-12 sm:w-28 sm:h-28 md:w-32 md:h-32 lg:w-36 lg:h-36 bg-black rounded-full border-2 border-orange-400 flex items-center justify-center p-2">
