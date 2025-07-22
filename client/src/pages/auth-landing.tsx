@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
-import { SignupForm } from "@/components/auth/signup-form";
-import { LoginForm } from "@/components/auth/login-form";
+import { ImprovedSignupForm } from "@/components/auth/improved-signup-form";
+import { ImprovedLoginForm } from "@/components/auth/improved-login-form";
 import { CardSetup } from "@/components/payment/card-setup";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -64,8 +64,8 @@ export default function AuthLandingPage() {
 
   // Use useEffect to handle redirect to avoid render-time state updates
   React.useEffect(() => {
-    if (user) {
-      if (user.cardOnFile) {
+    if (user && typeof user === 'object') {
+      if ((user as any).cardOnFile) {
         setLocation("/games");
       } else {
         // User logged in but no payment method - force card setup
@@ -226,14 +226,14 @@ export default function AuthLandingPage() {
                           </TabsTrigger>
                         </TabsList>
 
-                        <TabsContent value="signup">
-                          <SignupForm
+                        <TabsContent value="signup" className="mt-6">
+                          <ImprovedSignupForm
                             onSuccess={() => handleAuthSuccess("signup")}
                           />
                         </TabsContent>
 
-                        <TabsContent value="login">
-                          <LoginForm
+                        <TabsContent value="login" className="mt-6">
+                          <ImprovedLoginForm
                             onSuccess={() => handleAuthSuccess("login")}
                           />
                         </TabsContent>
@@ -265,7 +265,7 @@ export default function AuthLandingPage() {
                           Add your payment method to start playing!
                         </p>
                       </div>
-                      <CardSetup onSuccess={handleCardSetupSuccess} />
+                      <CardSetup user={user} onSuccess={handleCardSetupSuccess} />
                     </CardContent>
                   </Card>
                 </div>
@@ -289,7 +289,7 @@ export default function AuthLandingPage() {
                         You're All Set!
                       </h2>
                       <p className="text-gray-300 text-xl font-medium mb-10">
-                        Welcome, {user?.firstName}! Your account is ready to
+                        Welcome, {(user as any)?.firstName || "Player"}! Your account is ready to
                         play.
                       </p>
                       <Button
