@@ -93,9 +93,19 @@ export default function WelcomePage() {
         <div className="flex flex-col items-center justify-center">
           {currentStep === "auth" && (
             <Tabs defaultValue="signup" className="w-full max-w-md">
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="signup">Sign Up</TabsTrigger>
-                <TabsTrigger value="login">Login</TabsTrigger>
+              <TabsList className="grid w-full grid-cols-2 bg-slate-800/80 border-2 border-white/20 rounded-2xl p-2 backdrop-blur-sm">
+                <TabsTrigger 
+                  value="signup"
+                  className="text-white font-bold text-base sm:text-lg py-3 px-4 rounded-xl data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-blue-600 data-[state=active]:shadow-lg transition-all duration-300 flex items-center justify-center min-h-[48px]"
+                >
+                  Sign Up
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="login"
+                  className="text-white font-bold text-base sm:text-lg py-3 px-4 rounded-xl data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-blue-600 data-[state=active]:shadow-lg transition-all duration-300 flex items-center justify-center min-h-[48px]"
+                >
+                  Login
+                </TabsTrigger>
               </TabsList>
 
               <TabsContent value="signup">
