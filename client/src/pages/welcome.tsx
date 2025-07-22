@@ -14,12 +14,16 @@ type FlowStep = "auth" | "card-setup" | "complete";
 export default function WelcomePage() {
   const [currentStep, setCurrentStep] = useState<FlowStep>("auth");
   const [, setLocation] = useLocation();
-  
+
   // Get the game ID from URL query parameters
   const urlParams = new URLSearchParams(window.location.search);
-  const gameId = urlParams.get('gameId');
-  
-  const { data: user, isLoading, refetch } = useQuery({
+  const gameId = urlParams.get("gameId");
+
+  const {
+    data: user,
+    isLoading,
+    refetch,
+  } = useQuery({
     queryKey: ["/api/user"],
     queryFn: getQueryFn({ on401: "returnNull" }),
   });
@@ -50,7 +54,7 @@ export default function WelcomePage() {
     );
   }
 
-  if (user && user.cardOnFile) {
+  if (user && typeof user === 'object' && (user as any).cardOnFile) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-900 via-purple-900 to-pink-900">
         <div className="container mx-auto px-4 py-8">
@@ -60,7 +64,7 @@ export default function WelcomePage() {
                 <div className="text-6xl mb-4">🎉</div>
                 <h1 className="text-2xl font-bold mb-2">You're All Set!</h1>
                 <p className="text-gray-600 mb-6">
-                  Welcome back, {user.firstName}! Your account is ready to play.
+                  Welcome back, {(user as any)?.firstName || "Player"}! Your account is ready to play.
                 </p>
                 <Button
                   onClick={handleContinueToGames}
@@ -83,9 +87,7 @@ export default function WelcomePage() {
           <h1 className="text-4xl font-bold text-white mb-2">
             Hit the Road Jackpot
           </h1>
-          <p className="text-white/80 text-lg">
-            Your adventure starts here!
-          </p>
+          <p className="text-white/80 text-lg">Your adventure starts here!</p>
         </div>
 
         <div className="flex flex-col items-center justify-center">
@@ -95,11 +97,11 @@ export default function WelcomePage() {
                 <TabsTrigger value="signup">Sign Up</TabsTrigger>
                 <TabsTrigger value="login">Login</TabsTrigger>
               </TabsList>
-              
+
               <TabsContent value="signup">
                 <SignupForm onSuccess={handleAuthSuccess} />
               </TabsContent>
-              
+
               <TabsContent value="login">
                 <LoginForm onSuccess={handleAuthSuccess} />
               </TabsContent>
@@ -107,19 +109,21 @@ export default function WelcomePage() {
           )}
 
           {currentStep === "card-setup" && user && (
-            <CardSetup 
-              onSuccess={handleCardSetupSuccess}
-              user={user}
-            />
+            <div>
+              <CardSetup user={user as any} onSuccess={handleCardSetupSuccess} />
+            </div>
           )}
 
           {currentStep === "complete" && (
             <Card className="w-full max-w-md mx-auto">
               <CardContent className="p-6 text-center">
                 <div className="text-6xl mb-4">🎉</div>
-                <h1 className="text-2xl font-bold mb-2">Welcome to the Game!</h1>
+                <h1 className="text-2xl font-bold mb-2">
+                  Welcome to the Game!
+                </h1>
                 <p className="text-gray-600 mb-6">
-                  Your account is set up and ready to play. Time to win some prizes!
+                  Your account is set up and ready to play. Time to win some
+                  prizes!
                 </p>
                 <Button
                   onClick={handleContinueToGames}

@@ -265,7 +265,7 @@ export default function AuthLandingPage() {
                           Add your payment method to start playing!
                         </p>
                       </div>
-                      <CardSetup user={user} onSuccess={handleCardSetupSuccess} />
+                      <CardSetup user={user as any} onSuccess={handleCardSetupSuccess} />
                     </CardContent>
                   </Card>
                 </div>
