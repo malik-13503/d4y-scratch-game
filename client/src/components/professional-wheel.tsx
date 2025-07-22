@@ -16,8 +16,7 @@ interface ProfessionalWheelProps {
 export const ProfessionalWheel = forwardRef<
   { triggerSpin: () => Promise<void> },
   ProfessionalWheelProps
->((props, ref) => {
-  const { onSpin, disabled = false, totalNumbers = 200, onInitiateSpin } = props;
+>(({ onSpin, disabled = false, totalNumbers = 200, onInitiateSpin }, ref) => {
   const [isSpinning, setIsSpinning] = useState(false);
   const [rotation, setRotation] = useState(0);
   const [pointerRotation, setPointerRotation] = useState(0);
@@ -302,23 +301,19 @@ export const ProfessionalWheel = forwardRef<
           <div className="relative p-3 sm:p-4 rounded-full bg-gradient-to-r from-yellow-600 via-orange-500 to-red-600 shadow-2xl">
             <div className="p-2 sm:p-2 rounded-full bg-gradient-to-r from-purple-600 via-blue-600 to-cyan-500 shadow-xl">
               <div className="p-2 sm:p-2 rounded-full bg-gradient-to-r from-yellow-500 via-yellow-300 to-yellow-500 border-3 sm:border-4 border-white shadow-inner">
-                <div className="w-[270px] h-[270px] sm:w-96 sm:h-96 md:w-[480px] md:h-[480px] lg:w-[520px] lg:h-[520px] rounded-full relative overflow-hidden"
-                     style={{
-                       boxShadow: "inset 0 0 30px rgba(0, 0, 0, 0.4), 0 0 40px rgba(255, 215, 0, 0.3)",
-                     }}>
-                  
-                  {/* Rotating wheel segments only */}
-                  <div
-                    ref={wheelRef}
-                    className="absolute inset-0 w-full h-full rounded-full"
-                    style={{
-                      transform: `rotate(${rotation}deg)`,
-                      transition: isSpinning
-                        ? `transform 8.0s cubic-bezier(0.25, 0.1, 0.25, 1.0)`
-                        : "none", // No transition when stopping to prevent drift
-                    }}
-                  >
-                    {/* Wheel Segments */}
+                <div
+                  ref={wheelRef}
+                  className="w-[270px] h-[270px] sm:w-96 sm:h-96 md:w-[480px] md:h-[480px] lg:w-[520px] lg:h-[520px] rounded-full relative overflow-hidden"
+                  style={{
+                    transform: `rotate(${rotation}deg)`,
+                    transition: isSpinning
+                      ? `transform 8.0s cubic-bezier(0.25, 0.1, 0.25, 1.0)`
+                      : "none", // No transition when stopping to prevent drift
+                    boxShadow:
+                      "inset 0 0 30px rgba(0, 0, 0, 0.4), 0 0 40px rgba(255, 215, 0, 0.3)",
+                  }}
+                >
+                  {/* Wheel Segments */}
                   {segmentColors.map((color, index) => {
                     const angle = (360 / segmentColors.length) * index;
                     const nextAngle =
@@ -333,26 +328,19 @@ export const ProfessionalWheel = forwardRef<
                           background: `linear-gradient(135deg, ${color}, ${color}dd)`,
                         }}
                       >
-                        {/* Just the colored segment - no number */}
-                      </div>
-                    );
-                  })}
-                  </div>
-
-                  {/* Static elements that don't rotate */}
-                  
-                  {/* Static numbers overlay */}
-                  {wheelNumbers.map((number, index) => {
-                    const angle = (360 / wheelNumbers.length) * index + (360 / wheelNumbers.length) / 2;
-                    return (
-                      <div
-                        key={`static-${index}`}
-                        className="absolute top-1/2 left-1/2 text-white font-bold text-xs sm:text-sm md:text-base flex items-center justify-center z-15 pointer-events-none"
-                        style={{
-                          transform: `translate(-50%, -50%) translate(${Math.cos(((angle - 90) * Math.PI) / 180) * numberRadius}px, ${Math.sin(((angle - 90) * Math.PI) / 180) * numberRadius}px)`,
-                        }}
-                      >
-                        {number}
+                        {/* Static segment number - positioned with responsive class and counter-rotation */}
+                        <div
+                          id={`wheel-number-${index}`}
+                          className="wheel-prize-number text-white font-bold text-xs sm:text-sm md:text-base flex items-center justify-center"
+                          style={{
+                            transform: `translate(-50%, -50%) translate(${Math.cos(((angle + 360 / segmentColors.length / 2 - 90) * Math.PI) / 180) * numberRadius}px, ${Math.sin(((angle + 360 / segmentColors.length / 2 - 90) * Math.PI) / 180) * numberRadius}px) rotate(${-rotation}deg)`,
+                            transition: isSpinning
+                              ? `transform 7.9s cubic-bezier(0.25, 0.1, 0.25, 1.0)`
+                              : "none", // Keep numbers stationary when not spinning
+                          }}
+                        >
+                          {wheelNumbers[index]}
+                        </div>
                       </div>
                     );
                   })}
@@ -369,8 +357,16 @@ export const ProfessionalWheel = forwardRef<
                     }}
                   ></div>
 
-                  {/* Center hub with brand logo - Always Static */}
-                  <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-16 h-16 sm:w-32 sm:h-32 md:w-36 md:h-36 lg:w-40 lg:h-40 bg-gradient-to-br from-slate-900 to-slate-700 rounded-full border-3 sm:border-4 border-yellow-300 shadow-2xl flex items-center justify-center overflow-hidden z-40">
+                  {/* Center hub with brand logo - Static (doesn't rotate) */}
+                  <div 
+                    className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-16 h-16 sm:w-32 sm:h-32 md:w-36 md:h-36 lg:w-40 lg:h-40 bg-gradient-to-br from-slate-900 to-slate-700 rounded-full border-3 sm:border-4 border-yellow-300 shadow-2xl flex items-center justify-center overflow-hidden z-40"
+                    style={{
+                      transform: `translate(-50%, -50%) rotate(${-rotation}deg)`,
+                      transition: isSpinning
+                        ? `transform 7.9s cubic-bezier(0.25, 0.1, 0.25, 1.0)`
+                        : "none", // Keep center logo stationary when not spinning
+                    }}
+                  >
                     <div className="w-12 h-12 sm:w-28 sm:h-28 md:w-32 md:h-32 lg:w-36 lg:h-36 bg-black rounded-full border-2 border-orange-400 flex items-center justify-center p-2">
                       <img
                         src={logoPath}
