@@ -1,0 +1,57 @@
+Do this steps for me:
+
+1.In userdashboard the transaction tab is not working and not show the data, same the achievement tab also 
+doesnt show anything. 
+2.And also in payment tab add more features for users so they can easily manage everything.
+3.And also make the setting tab more advanced so user can manage everything easily. 
+
+Now in admin dashboard
+
+1.On admin dashboard in overview section when i click on 
+🎮 Create New Game
+Launch a new spinning wheel game instantly
+
+Create Game
+this card to create the game then it not work and it showing nothing. Please correc this so its perfect. 
+and when i click on manage game then first create game popup will show and then when i close it and then landed on 
+manage game tab. also correct the structure that when we click on create game then create game popup will show 
+not to click on manage game
+
+2.In manage games tab the "View
+Edit" button are not working and their background and text color not matched and we cant see the text clearly
+please also correc this. 
+
+3. And also in user tab we didnt see the userdata and their analytics 
+"No users found
+Users will appear here once they register"
+and also remove the add user option. 
+
+4.And also make sure the analytics tab is also working. 
+
+5.In create game page i want that i can change the exact and same layout game in admin dashboard like this is 
+game container where we can see all the details
+"Gift Card Bundle
+GFT001
+Multi-store gift card bundle worth $250
+
+LIVE
+45 playing
+Game Progress
+183 / 200 left
+9%Complete
+Free Play Range
+151-200
+🎁 No cost
+Paid Range
+1-150
+💰 Pay exact
+Game ends:
+Ended
+ENDING SOON
+"
+Like i can create a new game container same like this or maybe you can give the exact container in admin dashboard
+in the create game option so we can make the changes and create new a game and it will connect with the whole 
+application, and user can see on the games page and aslo everthing will be create automatically when we create the game 
+like wheel game page and content everthing will be update automatically and linked with the application on real time
+
+6. And in manage game option i can also see the exact layout to manage game and update their content and other things.  

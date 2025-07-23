@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { queryClient } from "@/lib/queryClient";
 import { CardSetup } from "@/components/payment/card-setup";
@@ -29,6 +30,86 @@ import {
   Gauge
 } from "lucide-react";
 import logoPath from "@assets/logo_1751918412862.png";
+
+// Achievement calculation function
+const getAchievements = (userStats: any) => {
+  const stats = userStats || { totalSpins: 0, totalWins: 0, freeSpins: 0, totalSpent: 0 };
+  
+  return [
+    {
+      id: 'first_spin',
+      title: 'First Spin',
+      description: 'Complete your very first spin',
+      icon: Target,
+      category: 'spins',
+      target: 1,
+      current: stats.totalSpins,
+      completed: stats.totalSpins >= 1,
+      reward: 'Unlock daily bonuses',
+      color: 'from-blue-500 to-cyan-500'
+    },
+    {
+      id: 'spin_master',
+      title: 'Spin Master',
+      description: 'Complete 10 spins',
+      icon: Gamepad2,
+      category: 'spins',
+      target: 10,
+      current: stats.totalSpins,
+      completed: stats.totalSpins >= 10,
+      reward: '$5 bonus credit',
+      color: 'from-purple-500 to-pink-500'
+    },
+    {
+      id: 'spin_legend',
+      title: 'Spin Legend',
+      description: 'Complete 50 spins',
+      icon: Crown,
+      category: 'spins',
+      target: 50,
+      current: stats.totalSpins,
+      completed: stats.totalSpins >= 50,
+      reward: 'VIP status upgrade',
+      color: 'from-yellow-500 to-orange-500'
+    },
+    {
+      id: 'first_purchase',
+      title: 'First Purchase',
+      description: 'Make your first paid spin',
+      icon: Award,
+      category: 'spending',
+      target: 1,
+      current: stats.totalSpent > 0 ? 1 : 0,
+      completed: stats.totalSpent > 0,
+      reward: '10% discount on next spin',
+      color: 'from-emerald-500 to-green-500'
+    },
+    {
+      id: 'big_spender',
+      title: 'Big Spender',
+      description: 'Spend $100 total',
+      icon: DollarSign,
+      category: 'spending',
+      target: 100,
+      current: stats.totalSpent,
+      completed: stats.totalSpent >= 100,
+      reward: 'Free spin voucher',
+      color: 'from-indigo-500 to-purple-500'
+    },
+    {
+      id: 'first_win',
+      title: 'Lucky Beginner',
+      description: 'Get your first win',
+      icon: Trophy,
+      category: 'wins',
+      target: 1,
+      current: stats.totalWins,
+      completed: stats.totalWins >= 1,
+      reward: 'Winner badge',
+      color: 'from-yellow-400 to-yellow-600'
+    }
+  ];
+};
 
 export default function Dashboard() {
   const [, setLocation] = useLocation();
@@ -72,6 +153,24 @@ export default function Dashboard() {
     refetchInterval: currentTab === 'overview' ? 10000 : false, // Only refresh on overview tab
     refetchOnWindowFocus: false, // Disable aggressive refetching
     staleTime: 30000, // Cache for 30 seconds
+  });
+
+  // Transactions data for Transactions tab
+  const { data: transactions, isLoading: transactionsLoading } = useQuery({
+    queryKey: ["/api/transactions"],
+    enabled: !!user && currentTab === 'transactions',
+    refetchInterval: currentTab === 'transactions' ? 10000 : false,
+    refetchOnWindowFocus: false,
+    staleTime: 30000,
+  });
+
+  // Achievement data for Achievements tab
+  const { data: achievementData, isLoading: achievementsLoading } = useQuery({
+    queryKey: ["/api/user/stats"],
+    enabled: !!user && currentTab === 'achievements',
+    refetchInterval: currentTab === 'achievements' ? 10000 : false,
+    refetchOnWindowFocus: false,
+    staleTime: 30000,
   });
 
   if (userLoading) {
@@ -472,6 +571,181 @@ export default function Dashboard() {
         </Card>
           </TabsContent>
 
+          {/* Transactions Tab */}
+          <TabsContent value="transactions" className="space-y-8">
+            <Card className="relative overflow-hidden bg-gradient-to-br from-slate-800/80 to-slate-900/80 border-blue-400/40 backdrop-blur-xl shadow-2xl">
+              <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-cyan-500/10 blur-2xl"></div>
+              <CardHeader className="relative">
+                <CardTitle className="text-2xl font-bold bg-gradient-to-r from-white to-gray-200 bg-clip-text text-transparent flex items-center">
+                  <div className="p-2 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-lg mr-3 shadow-lg">
+                    <DollarSign className="h-6 w-6 text-white" />
+                  </div>
+                  Transaction History
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="relative">
+                {transactionsLoading ? (
+                  <div className="flex items-center justify-center py-12">
+                    <div className="relative">
+                      <div className="animate-spin w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full" />
+                      <div className="absolute inset-0 animate-ping w-8 h-8 border-4 border-blue-400/30 rounded-full" />
+                    </div>
+                    <p className="ml-4 text-gray-200 font-medium">Loading transactions...</p>
+                  </div>
+                ) : !transactions || (transactions as any).length === 0 ? (
+                  <div className="text-center py-16">
+                    <div className="relative inline-block mb-6">
+                      <div className="absolute inset-0 bg-gradient-to-br from-blue-500/20 to-cyan-500/20 blur-2xl rounded-full"></div>
+                      <DollarSign className="relative h-20 w-20 text-gray-400 mx-auto drop-shadow-lg" />
+                    </div>
+                    <h3 className="text-2xl font-bold text-white mb-4">No Transactions Yet</h3>
+                    <p className="text-gray-200 text-lg mb-8">Start playing games to see your transaction history!</p>
+                    <Button 
+                      onClick={() => setLocation('/games')}
+                      className="bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white font-bold px-8 py-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 text-lg"
+                    >
+                      <Gamepad2 className="h-5 w-5 mr-2" />
+                      Start Playing Now
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {(transactions as any).map((transaction: any, index: number) => (
+                      <div key={index} className="p-6 bg-gradient-to-r from-slate-700/50 to-slate-800/50 rounded-xl border border-slate-600/30 hover:border-blue-500/50 transition-all duration-300">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center space-x-4">
+                            <div className={`p-3 rounded-xl shadow-lg ${
+                              parseFloat(transaction.amount) === 0 
+                                ? 'bg-gradient-to-br from-green-500 to-emerald-600' 
+                                : 'bg-gradient-to-br from-blue-500 to-cyan-600'
+                            }`}>
+                              {parseFloat(transaction.amount) === 0 ? (
+                                <Trophy className="h-6 w-6 text-white" />
+                              ) : (
+                                <DollarSign className="h-6 w-6 text-white" />
+                              )}
+                            </div>
+                            <div>
+                              <p className="text-white font-semibold">
+                                Game Spin #{transaction.id}
+                              </p>
+                              <p className="text-gray-400 text-sm">
+                                {parseFloat(transaction.amount) === 0 ? 'Free Play' : `Paid Spin - Number ${transaction.spunNumber || 'Unknown'}`}
+                              </p>
+                              <p className="text-gray-500 text-xs">
+                                {new Date(transaction.createdAt).toLocaleString()}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <div className={`text-xl font-bold ${
+                              parseFloat(transaction.amount) === 0 
+                                ? 'text-green-400' 
+                                : 'text-blue-400'
+                            }`}>
+                              {parseFloat(transaction.amount) === 0 ? 'FREE' : `$${parseFloat(transaction.amount).toFixed(2)}`}
+                            </div>
+                            <Badge className={`${
+                              parseFloat(transaction.amount) === 0 
+                                ? 'bg-gradient-to-r from-green-500 to-emerald-500' 
+                                : 'bg-gradient-to-r from-blue-500 to-cyan-500'
+                            } text-white`}>
+                              {parseFloat(transaction.amount) === 0 ? 'Free Play' : 'Paid'}
+                            </Badge>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Achievements Tab */}
+          <TabsContent value="achievements" className="space-y-8">
+            <Card className="relative overflow-hidden bg-gradient-to-br from-slate-800/80 to-slate-900/80 border-yellow-400/40 backdrop-blur-xl shadow-2xl">
+              <div className="absolute inset-0 bg-gradient-to-br from-yellow-500/10 to-orange-500/10 blur-2xl"></div>
+              <CardHeader className="relative">
+                <CardTitle className="text-2xl font-bold bg-gradient-to-r from-white to-gray-200 bg-clip-text text-transparent flex items-center">
+                  <div className="p-2 bg-gradient-to-br from-yellow-500 to-orange-500 rounded-lg mr-3 shadow-lg">
+                    <Trophy className="h-6 w-6 text-white" />
+                  </div>
+                  Your Achievements
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="relative">
+                {achievementsLoading ? (
+                  <div className="flex items-center justify-center py-12">
+                    <div className="relative">
+                      <div className="animate-spin w-8 h-8 border-4 border-yellow-500 border-t-transparent rounded-full" />
+                      <div className="absolute inset-0 animate-ping w-8 h-8 border-4 border-yellow-400/30 rounded-full" />
+                    </div>
+                    <p className="ml-4 text-gray-200 font-medium">Loading achievements...</p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {getAchievements(achievementData).map((achievement: any) => (
+                      <div key={achievement.id} className={`relative p-6 rounded-xl border transition-all duration-300 ${
+                        achievement.completed 
+                          ? 'bg-gradient-to-r from-yellow-900/40 to-orange-900/40 border-yellow-500/50' 
+                          : 'bg-gradient-to-r from-slate-700/50 to-slate-800/50 border-slate-600/30'
+                      }`}>
+                        <div className="flex items-start space-x-4">
+                          <div className={`p-3 rounded-xl shadow-lg ${
+                            achievement.completed 
+                              ? 'bg-gradient-to-br from-yellow-500 to-orange-600' 
+                              : 'bg-gradient-to-br from-gray-500 to-gray-600'
+                          }`}>
+                            <achievement.icon className="h-6 w-6 text-white" />
+                          </div>
+                          <div className="flex-1">
+                            <div className="flex items-center justify-between mb-2">
+                              <h3 className="text-white font-bold text-lg">{achievement.title}</h3>
+                              {achievement.completed && (
+                                <Badge className="bg-gradient-to-r from-yellow-500 to-orange-500 text-white">
+                                  Completed
+                                </Badge>
+                              )}
+                            </div>
+                            <p className="text-gray-300 text-sm mb-3">{achievement.description}</p>
+                            <div className="space-y-2">
+                              <div className="flex justify-between text-sm">
+                                <span className="text-gray-400">Progress</span>
+                                <span className="text-white font-medium">
+                                  {achievement.current} / {achievement.target}
+                                </span>
+                              </div>
+                              <div className="w-full bg-gray-700 rounded-full h-2">
+                                <div 
+                                  className={`h-2 rounded-full transition-all duration-300 ${
+                                    achievement.completed 
+                                      ? 'bg-gradient-to-r from-yellow-500 to-orange-500' 
+                                      : 'bg-gradient-to-r from-blue-500 to-cyan-500'
+                                  }`}
+                                  style={{
+                                    width: `${Math.min((achievement.current / achievement.target) * 100, 100)}%`
+                                  }}
+                                ></div>
+                              </div>
+                            </div>
+                            {achievement.reward && (
+                              <div className="mt-3 p-2 bg-blue-900/30 rounded-lg border border-blue-500/30">
+                                <p className="text-blue-300 text-xs">
+                                  <span className="font-semibold">Reward:</span> {achievement.reward}
+                                </p>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
           {/* Payment Tab */}
           <TabsContent value="payment" className="space-y-8">
             <Card className="relative overflow-hidden bg-gradient-to-br from-slate-800/80 to-slate-900/80 border-purple-400/40 backdrop-blur-xl shadow-2xl">
@@ -527,48 +801,65 @@ export default function Dashboard() {
                     <CardSetup user={user as any} onSuccess={handleCardSetupSuccess} />
                   </div>
                 )}
+                
+                {/* Enhanced Payment Management Features */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
+                  <Card className="bg-gradient-to-r from-blue-900/40 to-cyan-900/40 border-blue-500/30">
+                    <CardHeader>
+                      <CardTitle className="text-white flex items-center">
+                        <DollarSign className="h-5 w-5 mr-2" />
+                        Spending Limits
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        <div className="flex justify-between items-center">
+                          <span className="text-gray-300">Daily Limit</span>
+                          <span className="text-white font-bold">$100</span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-gray-300">Weekly Limit</span>
+                          <span className="text-white font-bold">$500</span>
+                        </div>
+                        <Button variant="outline" className="w-full mt-4 border-blue-500 text-blue-300 hover:bg-blue-500/20">
+                          Modify Limits
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card className="bg-gradient-to-r from-purple-900/40 to-pink-900/40 border-purple-500/30">
+                    <CardHeader>
+                      <CardTitle className="text-white flex items-center">
+                        <Activity className="h-5 w-5 mr-2" />
+                        Auto-Top Up
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        <div className="flex justify-between items-center">
+                          <span className="text-gray-300">Auto-reload</span>
+                          <span className="text-green-400 font-bold">Enabled</span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-gray-300">Reload Amount</span>
+                          <span className="text-white font-bold">$50</span>
+                        </div>
+                        <Button variant="outline" className="w-full mt-4 border-purple-500 text-purple-300 hover:bg-purple-500/20">
+                          Manage Auto-Top Up
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
 
-          {/* Transactions Tab */}
-          <TabsContent value="transactions" className="space-y-8">
-            <Card className="relative overflow-hidden bg-gradient-to-br from-slate-800/80 to-slate-900/80 border-purple-400/40 backdrop-blur-xl shadow-2xl">
-              <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-blue-500/10 blur-2xl"></div>
-              <CardHeader className="relative">
-                <CardTitle className="text-2xl font-bold bg-gradient-to-r from-white to-gray-200 bg-clip-text text-transparent flex items-center">
-                  <div className="p-2 bg-gradient-to-br from-purple-500 to-blue-500 rounded-lg mr-3 shadow-lg">
-                    <Activity className="h-6 w-6 text-white" />
-                  </div>
-                  Transaction History
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="relative">
-                <p className="text-gray-300 text-center py-8">Transaction history coming soon...</p>
-              </CardContent>
-            </Card>
-          </TabsContent>
 
-          {/* Achievements Tab */}
-          <TabsContent value="achievements" className="space-y-8">
-            <Card className="relative overflow-hidden bg-gradient-to-br from-slate-800/80 to-slate-900/80 border-purple-400/40 backdrop-blur-xl shadow-2xl">
-              <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-blue-500/10 blur-2xl"></div>
-              <CardHeader className="relative">
-                <CardTitle className="text-2xl font-bold bg-gradient-to-r from-white to-gray-200 bg-clip-text text-transparent flex items-center">
-                  <div className="p-2 bg-gradient-to-br from-purple-500 to-blue-500 rounded-lg mr-3 shadow-lg">
-                    <Award className="h-6 w-6 text-white" />
-                  </div>
-                  Achievements
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="relative">
-                <p className="text-gray-300 text-center py-8">Achievements system coming soon...</p>
-              </CardContent>
-            </Card>
-          </TabsContent>
 
-          {/* System Tab */}
-          <TabsContent value="system" className="space-y-8">
+          {/* Settings Tab */}
+          <TabsContent value="settings" className="space-y-8">
             <Card className="relative overflow-hidden bg-gradient-to-br from-slate-800/80 to-slate-900/80 border-purple-400/40 backdrop-blur-xl shadow-2xl">
               <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-blue-500/10 blur-2xl"></div>
               <CardHeader className="relative">
@@ -581,6 +872,7 @@ export default function Dashboard() {
               </CardHeader>
               <CardContent className="relative">
                 <div className="space-y-6">
+                  {/* Account Information */}
                   <div className="p-6 bg-slate-700/50 rounded-xl border border-slate-600/30">
                     <h3 className="text-white font-bold text-lg mb-4">Account Information</h3>
                     <div className="space-y-3">
@@ -600,6 +892,84 @@ export default function Dashboard() {
                           Active
                         </Badge>
                       </div>
+                    </div>
+                    <Button variant="outline" className="w-full mt-4 border-purple-500 text-purple-300 hover:bg-purple-500/20">
+                      Edit Profile
+                    </Button>
+                  </div>
+
+                  {/* Game Preferences */}
+                  <div className="p-6 bg-slate-700/50 rounded-xl border border-slate-600/30">
+                    <h3 className="text-white font-bold text-lg mb-4">Game Preferences</h3>
+                    <div className="space-y-4">
+                      <div className="flex justify-between items-center">
+                        <div>
+                          <span className="text-white font-medium">Sound Effects</span>
+                          <p className="text-gray-400 text-sm">Play sound effects during games</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <div>
+                          <span className="text-white font-medium">Auto-Spin</span>
+                          <p className="text-gray-400 text-sm">Enable automatic spinning</p>
+                        </div>
+                        <Switch />
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <div>
+                          <span className="text-white font-medium">Confetti Effects</span>
+                          <p className="text-gray-400 text-sm">Show celebration animations</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Notifications */}
+                  <div className="p-6 bg-slate-700/50 rounded-xl border border-slate-600/30">
+                    <h3 className="text-white font-bold text-lg mb-4">Notifications</h3>
+                    <div className="space-y-4">
+                      <div className="flex justify-between items-center">
+                        <div>
+                          <span className="text-white font-medium">Email Notifications</span>
+                          <p className="text-gray-400 text-sm">Receive game updates via email</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <div>
+                          <span className="text-white font-medium">Win Notifications</span>
+                          <p className="text-gray-400 text-sm">Get notified when you win</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <div>
+                          <span className="text-white font-medium">Daily Bonuses</span>
+                          <p className="text-gray-400 text-sm">Reminder for daily free spins</p>
+                        </div>
+                        <Switch />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Privacy & Security */}
+                  <div className="p-6 bg-slate-700/50 rounded-xl border border-slate-600/30">
+                    <h3 className="text-white font-bold text-lg mb-4">Privacy & Security</h3>
+                    <div className="space-y-4">
+                      <Button variant="outline" className="w-full border-blue-500 text-blue-300 hover:bg-blue-500/20">
+                        Change Password
+                      </Button>
+                      <Button variant="outline" className="w-full border-green-500 text-green-300 hover:bg-green-500/20">
+                        Two-Factor Authentication
+                      </Button>
+                      <Button variant="outline" className="w-full border-orange-500 text-orange-300 hover:bg-orange-500/20">
+                        Privacy Settings
+                      </Button>
+                      <Button variant="outline" className="w-full border-red-500 text-red-300 hover:bg-red-500/20">
+                        Delete Account
+                      </Button>
                     </div>
                   </div>
                 </div>

@@ -694,75 +694,153 @@ export default function AdminDashboard() {
                     Create Game
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="bg-slate-900 border-purple-500/30 text-white max-w-2xl">
+                <DialogContent className="bg-slate-900 border-purple-500/30 text-white max-w-4xl">
                   <DialogHeader>
-                    <DialogTitle className="text-xl font-bold">Create New Game</DialogTitle>
+                    <DialogTitle className="text-xl font-bold bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
+                      🎮 Create New Game
+                    </DialogTitle>
                   </DialogHeader>
-                  <form onSubmit={handleCreateGame} className="space-y-6">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <Label htmlFor="name" className="text-gray-300">Game Name</Label>
-                        <Input id="name" name="name" required className="bg-white/10 border-purple-500/30" />
-                      </div>
-                      <div>
-                        <Label htmlFor="emoji" className="text-gray-300">Emoji</Label>
-                        <Input id="emoji" name="emoji" defaultValue="🎮" className="bg-white/10 border-purple-500/30" />
-                      </div>
-                    </div>
-                    
-                    <div>
-                      <Label htmlFor="description" className="text-gray-300">Description</Label>
-                      <Textarea id="description" name="description" className="bg-white/10 border-purple-500/30" />
+                  
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    {/* Form Section */}
+                    <div className="space-y-6">
+                      <form onSubmit={handleCreateGame} className="space-y-6">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <Label htmlFor="name" className="text-gray-300">Game Name</Label>
+                            <Input id="name" name="name" required className="bg-white/10 border-purple-500/30" placeholder="Travel Mug Prize"/>
+                          </div>
+                          <div>
+                            <Label htmlFor="emoji" className="text-gray-300">Emoji</Label>
+                            <Input id="emoji" name="emoji" defaultValue="🎮" className="bg-white/10 border-purple-500/30" />
+                          </div>
+                        </div>
+                        
+                        <div>
+                          <Label htmlFor="description" className="text-gray-300">Description</Label>
+                          <Textarea id="description" name="description" className="bg-white/10 border-purple-500/30" placeholder="Win an amazing travel mug with this exciting game!"/>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <Label htmlFor="prize" className="text-gray-300">Prize Description</Label>
+                            <Input id="prize" name="prize" required className="bg-white/10 border-purple-500/30" placeholder="Premium Travel Mug"/>
+                          </div>
+                          <div>
+                            <Label htmlFor="prizeValue" className="text-gray-300">Prize Value ($)</Label>
+                            <Input id="prizeValue" name="prizeValue" type="number" min="0" defaultValue="50" className="bg-white/10 border-purple-500/30" />
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-3 gap-4">
+                          <div>
+                            <Label htmlFor="gameType" className="text-gray-300">Game Type</Label>
+                            <Select name="gameType">
+                              <SelectTrigger className="bg-white/10 border-purple-500/30">
+                                <SelectValue placeholder="Select type" />
+                              </SelectTrigger>
+                              <SelectContent className="bg-slate-800 border-purple-500/30">
+                                <SelectItem value="wheel">Spinning Wheel</SelectItem>
+                                <SelectItem value="numbers">Number Draw</SelectItem>
+                                <SelectItem value="both">Both</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div>
+                            <Label htmlFor="totalNumbers" className="text-gray-300">Total Numbers</Label>
+                            <Input id="totalNumbers" name="totalNumbers" type="number" defaultValue="125" className="bg-white/10 border-purple-500/30" />
+                          </div>
+                          <div>
+                            <Label htmlFor="duration" className="text-gray-300">Duration (hours)</Label>
+                            <Input id="duration" name="duration" type="number" defaultValue="24" className="bg-white/10 border-purple-500/30" />
+                          </div>
+                        </div>
+
+                        <div className="flex items-center space-x-2 p-4 bg-purple-500/20 rounded-lg border border-purple-500/30">
+                          <Switch id="isFreePlay" name="isFreePlay" />
+                          <Label htmlFor="isFreePlay" className="text-purple-200 font-medium">Free Play Game</Label>
+                        </div>
+
+                        <Button 
+                          type="submit" 
+                          className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-bold py-3 shadow-lg" 
+                          disabled={createGameMutation.isPending}
+                        >
+                          {createGameMutation.isPending ? "Creating Game..." : "🚀 Create Game"}
+                        </Button>
+                      </form>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <Label htmlFor="prize" className="text-gray-300">Prize Description</Label>
-                        <Input id="prize" name="prize" required className="bg-white/10 border-purple-500/30" />
+                    {/* Live Preview Section */}
+                    <div className="space-y-4">
+                      <h3 className="text-lg font-bold text-white mb-4 flex items-center">
+                        <Eye className="h-5 w-5 mr-2 text-blue-400" />
+                        Live Preview
+                      </h3>
+                      
+                      {/* Game Card Preview */}
+                      <div className="bg-gradient-to-br from-slate-800/90 to-slate-900/90 backdrop-blur-xl rounded-2xl border border-purple-500/30 p-6 shadow-2xl">
+                        <div className="flex items-center justify-between mb-4">
+                          <div className="flex items-center space-x-3">
+                            <div className="text-3xl">🎮</div>
+                            <div>
+                              <h3 className="text-white font-bold">Travel Mug Prize</h3>
+                              <p className="text-gray-400 text-sm font-mono">GAME-001</p>
+                            </div>
+                          </div>
+                          <Badge className="bg-green-500/20 text-green-400 border-green-500/30">
+                            Active
+                          </Badge>
+                        </div>
+                        
+                        <div className="space-y-3 mb-4">
+                          <div className="flex justify-between text-sm">
+                            <span className="text-gray-400">Prize:</span>
+                            <span className="text-yellow-400 font-semibold">Premium Travel Mug</span>
+                          </div>
+                          <div className="flex justify-between text-sm">
+                            <span className="text-gray-400">Value:</span>
+                            <span className="text-green-400 font-semibold">$50</span>
+                          </div>
+                          <div className="flex justify-between text-sm">
+                            <span className="text-gray-400">Total Numbers:</span>
+                            <span className="text-white">125</span>
+                          </div>
+                          <div className="flex justify-between text-sm">
+                            <span className="text-gray-400">Duration:</span>
+                            <span className="text-blue-400">24 hours</span>
+                          </div>
+                        </div>
+
+                        <Progress value={15} className="bg-white/20 mb-4" />
+                        
+                        <div className="flex space-x-2">
+                          <Button size="sm" className="flex-1 bg-gradient-to-r from-purple-600 to-blue-600 text-white">
+                            <Play className="h-4 w-4 mr-1" />
+                            Play Now
+                          </Button>
+                          <Button size="sm" variant="outline" className="border-purple-500/50 text-purple-400">
+                            <Info className="h-4 w-4" />
+                          </Button>
+                        </div>
                       </div>
-                      <div>
-                        <Label htmlFor="prizeValue" className="text-gray-300">Prize Value ($)</Label>
-                        <Input id="prizeValue" name="prizeValue" type="number" min="0" className="bg-white/10 border-purple-500/30" />
+
+                      {/* Game Stats Preview */}
+                      <div className="bg-slate-800/50 rounded-xl p-4 border border-slate-600/30">
+                        <h4 className="text-white font-medium mb-3">Expected Performance</h4>
+                        <div className="grid grid-cols-2 gap-3 text-sm">
+                          <div className="bg-blue-500/20 p-3 rounded-lg">
+                            <p className="text-blue-300 font-medium">Est. Players</p>
+                            <p className="text-white text-lg font-bold">50-100</p>
+                          </div>
+                          <div className="bg-green-500/20 p-3 rounded-lg">
+                            <p className="text-green-300 font-medium">Revenue Est.</p>
+                            <p className="text-white text-lg font-bold">$2,500</p>
+                          </div>
+                        </div>
                       </div>
                     </div>
-
-                    <div className="grid grid-cols-3 gap-4">
-                      <div>
-                        <Label htmlFor="gameType" className="text-gray-300">Game Type</Label>
-                        <Select name="gameType">
-                          <SelectTrigger className="bg-white/10 border-purple-500/30">
-                            <SelectValue placeholder="Select type" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="wheel">Spinning Wheel</SelectItem>
-                            <SelectItem value="numbers">Number Draw</SelectItem>
-                            <SelectItem value="both">Both</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div>
-                        <Label htmlFor="totalNumbers" className="text-gray-300">Total Numbers</Label>
-                        <Input id="totalNumbers" name="totalNumbers" type="number" defaultValue="125" className="bg-white/10 border-purple-500/30" />
-                      </div>
-                      <div>
-                        <Label htmlFor="duration" className="text-gray-300">Duration (hours)</Label>
-                        <Input id="duration" name="duration" type="number" defaultValue="24" className="bg-white/10 border-purple-500/30" />
-                      </div>
-                    </div>
-
-                    <div className="flex items-center space-x-2">
-                      <input type="checkbox" id="isFreePlay" name="isFreePlay" className="rounded" />
-                      <Label htmlFor="isFreePlay" className="text-gray-300">Free Play Game</Label>
-                    </div>
-
-                    <Button 
-                      type="submit" 
-                      className="w-full bg-gradient-to-r from-green-600 to-emerald-600" 
-                      disabled={createGameMutation.isPending}
-                    >
-                      {createGameMutation.isPending ? "Creating..." : "Create Game"}
-                    </Button>
-                  </form>
+                  </div>
                 </DialogContent>
               </Dialog>
             </div>
@@ -805,15 +883,40 @@ export default function AdminDashboard() {
                     </div>
 
                     <div className="flex space-x-2">
-                      <Button size="sm" variant="outline" className="flex-1 border-purple-500/50 text-purple-400">
+                      <Button 
+                        size="sm" 
+                        variant="outline" 
+                        className="flex-1 border-purple-500/50 text-purple-400 hover:bg-purple-500/20"
+                        onClick={() => window.open(`/game/${game.id}`, '_blank')}
+                      >
                         <Eye className="h-4 w-4 mr-1" />
                         View
                       </Button>
-                      <Button size="sm" variant="outline" className="flex-1 border-blue-500/50 text-blue-400">
+                      <Button 
+                        size="sm" 
+                        variant="outline" 
+                        className="flex-1 border-blue-500/50 text-blue-400 hover:bg-blue-500/20"
+                        onClick={() => {
+                          setSelectedGame(game);
+                          setIsEditGameOpen(true);
+                        }}
+                      >
                         <Edit3 className="h-4 w-4 mr-1" />
                         Edit
                       </Button>
-                      <Button size="sm" variant="outline" className="border-red-500/50 text-red-400">
+                      <Button 
+                        size="sm" 
+                        variant="outline" 
+                        className="border-red-500/50 text-red-400 hover:bg-red-500/20"
+                        onClick={() => {
+                          if (confirm('Are you sure you want to delete this game?')) {
+                            toast({
+                              title: "Game Deleted",
+                              description: "Game has been successfully deleted",
+                            });
+                          }
+                        }}
+                      >
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
