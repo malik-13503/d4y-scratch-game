@@ -330,15 +330,28 @@ export const ProfessionalWheel = forwardRef<
                           background: `linear-gradient(135deg, ${color}, ${color}dd)`,
                         }}
                       >
-                        {/* Static segment number - positioned with responsive class and counter-rotation */}
+                        {/* Always upright number - counter-rotates exactly to stay readable */}
                         <div
                           id={`wheel-number-${index}`}
                           className="wheel-prize-number text-white font-bold text-xs sm:text-sm md:text-base flex items-center justify-center"
                           style={{
+                            position: 'absolute',
+                            left: '50%',
+                            top: '50%',
                             transform: `translate(-50%, -50%) translate(${Math.cos(((angle + 360 / segmentColors.length / 2 - 90) * Math.PI) / 180) * numberRadius}px, ${Math.sin(((angle + 360 / segmentColors.length / 2 - 90) * Math.PI) / 180) * numberRadius}px) rotate(${-rotation}deg)`,
                             transition: isSpinning
                               ? `transform 8.0s cubic-bezier(0.25, 0.1, 0.25, 1.0)`
-                              : "none", // Keep numbers stationary when not spinning
+                              : "none",
+                            width: '32px',
+                            height: '32px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            textShadow: '2px 2px 4px rgba(0,0,0,0.9)',
+                            backgroundColor: 'rgba(0,0,0,0.4)',
+                            borderRadius: '50%',
+                            border: '1px solid rgba(255,255,255,0.3)',
+                            zIndex: 15
                           }}
                         >
                           {wheelNumbers[index]}
