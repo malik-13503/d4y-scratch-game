@@ -62,6 +62,7 @@ export default function AdminDashboard() {
   const [selectedGame, setSelectedGame] = useState<any>(null);
   const [isCreateGameOpen, setIsCreateGameOpen] = useState(false);
   const [isEditGameOpen, setIsEditGameOpen] = useState(false);
+  const [editingGame, setEditingGame] = useState<any>(null);
   
   // Live preview state
   const [previewData, setPreviewData] = useState({
@@ -73,6 +74,18 @@ export default function AdminDashboard() {
     totalNumbers: "125",
     duration: "24"
   });
+  
+  // Edit data state for editing existing games
+  const [editData, setEditData] = useState({
+    name: "",
+    emoji: "",
+    description: "",
+    prize: "",
+    prizeValue: "",
+    totalNumbers: "",
+    duration: ""
+  });
+  
   const [realTimeStats, setRealTimeStats] = useState({
     activeUsers: 247,
     totalSpins: 15420,
@@ -228,6 +241,31 @@ export default function AdminDashboard() {
     },
   });
 
+  // Update game mutation
+  const updateGameMutation = useMutation({
+    mutationFn: async ({ id, gameData }: { id: number; gameData: any }) => {
+      const response = await apiRequest("PATCH", `/api/admin/games/${id}`, gameData);
+      return response.json();
+    },
+    onSuccess: () => {
+      refetchGames();
+      refetchStats();
+      setIsEditGameOpen(false);
+      setEditingGame(null);
+      toast({
+        title: "Success",
+        description: "Game updated successfully",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update game",
+        variant: "destructive",
+      });
+    },
+  });
+
   // Update setting mutation
   const updateSettingMutation = useMutation({
     mutationFn: async ({ key, value }: { key: string; value: string }) => {
@@ -300,6 +338,37 @@ export default function AdminDashboard() {
     };
 
     createGameMutation.mutate(gameData);
+  };
+
+  const handleEditGame = (game: any) => {
+    setEditingGame(game);
+    setEditData({
+      name: game.name,
+      emoji: game.emoji,
+      description: game.description || "",
+      prize: game.prize,
+      prizeValue: game.prizeValue.toString(),
+      totalNumbers: game.totalNumbers.toString(),
+      duration: "24" // Default duration for edit
+    });
+    setIsEditGameOpen(true);
+  };
+
+  const handleUpdateGame = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    
+    const gameData = {
+      name: formData.get("name") as string,
+      prize: formData.get("prize") as string,
+      prizeValue: parseInt(formData.get("prizeValue") as string) || 0,
+      totalNumbers: parseInt(formData.get("totalNumbers") as string) || 125,
+      gameType: formData.get("gameType") as string,
+      emoji: formData.get("emoji") as string || "🎮",
+      description: formData.get("description") as string,
+    };
+
+    updateGameMutation.mutate({ id: editingGame.id, gameData });
   };
 
   return (
@@ -976,6 +1045,256 @@ export default function AdminDashboard() {
               </Dialog>
             </div>
 
+            {/* Edit Game Dialog */}
+            <Dialog open={isEditGameOpen} onOpenChange={setIsEditGameOpen}>
+              <DialogContent className="bg-slate-900 border-purple-500/30 text-white max-w-7xl w-[95vw] max-h-[95vh] p-0">
+                <div className="flex flex-col h-full max-h-[95vh]">
+                  <DialogHeader className="px-6 py-4 border-b border-purple-500/30 flex-shrink-0">
+                    <DialogTitle className="text-xl font-bold bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
+                      ✏️ Edit Game: {editingGame?.name}
+                    </DialogTitle>
+                    <DialogDescription className="text-gray-400 mt-2">
+                      Edit your game settings and see how it will appear to players in real-time.
+                    </DialogDescription>
+                  </DialogHeader>
+                  
+                  <div className="flex-1 overflow-hidden">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 h-full">
+                      {/* Form Section */}
+                      <div className="p-6 overflow-y-auto max-h-full">
+                        <form onSubmit={handleUpdateGame} className="space-y-6">
+                          <div className="grid grid-cols-2 gap-4">
+                            <div>
+                              <Label htmlFor="edit-name" className="text-gray-300">Game Name</Label>
+                              <Input 
+                                id="edit-name" 
+                                name="name" 
+                                value={editData.name}
+                                onChange={(e) => setEditData({...editData, name: e.target.value})}
+                                required 
+                                className="bg-white/10 border-purple-500/30" 
+                                placeholder="Travel Mug Prize"
+                              />
+                            </div>
+                            <div>
+                              <Label htmlFor="edit-emoji" className="text-gray-300">Emoji</Label>
+                              <Input 
+                                id="edit-emoji" 
+                                name="emoji" 
+                                value={editData.emoji}
+                                onChange={(e) => setEditData({...editData, emoji: e.target.value})}
+                                className="bg-white/10 border-purple-500/30" 
+                              />
+                            </div>
+                          </div>
+                          
+                          <div>
+                            <Label htmlFor="edit-description" className="text-gray-300">Description</Label>
+                            <Textarea 
+                              id="edit-description" 
+                              name="description" 
+                              value={editData.description}
+                              onChange={(e) => setEditData({...editData, description: e.target.value})}
+                              className="bg-white/10 border-purple-500/30" 
+                              placeholder="Win an amazing travel mug with this exciting game!"
+                            />
+                          </div>
+
+                          <div className="grid grid-cols-2 gap-4">
+                            <div>
+                              <Label htmlFor="edit-prize" className="text-gray-300">Prize Description</Label>
+                              <Input 
+                                id="edit-prize" 
+                                name="prize" 
+                                value={editData.prize}
+                                onChange={(e) => setEditData({...editData, prize: e.target.value})}
+                                required 
+                                className="bg-white/10 border-purple-500/30" 
+                                placeholder="Premium Travel Mug"
+                              />
+                            </div>
+                            <div>
+                              <Label htmlFor="edit-prizeValue" className="text-gray-300">Prize Value ($)</Label>
+                              <Input 
+                                id="edit-prizeValue" 
+                                name="prizeValue" 
+                                type="number"
+                                value={editData.prizeValue}
+                                onChange={(e) => setEditData({...editData, prizeValue: e.target.value})}
+                                required 
+                                className="bg-white/10 border-purple-500/30" 
+                                placeholder="50.00"
+                              />
+                            </div>
+                          </div>
+
+                          <div className="grid grid-cols-2 gap-4">
+                            <div>
+                              <Label htmlFor="edit-totalNumbers" className="text-gray-300">Total Numbers</Label>
+                              <Input 
+                                id="edit-totalNumbers" 
+                                name="totalNumbers" 
+                                type="number"
+                                value={editData.totalNumbers}
+                                onChange={(e) => setEditData({...editData, totalNumbers: e.target.value})}
+                                required 
+                                className="bg-white/10 border-purple-500/30" 
+                                placeholder="125"
+                              />
+                            </div>
+                            <div>
+                              <Label htmlFor="edit-gameType" className="text-gray-300">Game Type</Label>
+                              <Select name="gameType" defaultValue="wheel">
+                                <SelectTrigger className="bg-white/10 border-purple-500/30">
+                                  <SelectValue placeholder="Select game type" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="wheel">Wheel Spin</SelectItem>
+                                  <SelectItem value="raffle">Raffle Draw</SelectItem>
+                                  <SelectItem value="instant">Instant Win</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                          </div>
+
+                          <div className="flex space-x-4 pt-4 border-t border-purple-500/30">
+                            <Button 
+                              type="button" 
+                              variant="outline" 
+                              onClick={() => setIsEditGameOpen(false)}
+                              className="flex-1 border-gray-500 text-gray-300 hover:bg-gray-700"
+                            >
+                              Cancel
+                            </Button>
+                            <Button 
+                              type="submit" 
+                              className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white"
+                              disabled={updateGameMutation.isPending}
+                            >
+                              {updateGameMutation.isPending ? "Updating..." : "Update Game"}
+                            </Button>
+                          </div>
+                        </form>
+                      </div>
+
+                      {/* Live Preview Section - Exact same design as games page */}
+                      <div className="p-6 overflow-y-auto max-h-full bg-slate-800/30 border-l border-purple-500/30">
+                        <h3 className="text-lg font-bold text-white mb-4">Game Card Preview</h3>
+                        <p className="text-gray-400 text-sm mb-6">This is exactly how your game will appear on the games page</p>
+                        
+                        {/* Game Card - Exact copy from games page */}
+                        <div className="relative group hover:scale-[1.02] transition-all duration-300">
+                          <div className="absolute inset-0 bg-gradient-to-br from-purple-500/20 via-blue-500/20 to-pink-500/20 rounded-2xl blur-xl group-hover:blur-2xl transition-all duration-500 opacity-50 group-hover:opacity-75"></div>
+                          
+                          <div className="relative bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden shadow-2xl hover:border-purple-400/50 transition-all duration-300">
+                            {/* Game Header */}
+                            <div className="relative p-4 sm:p-6 bg-gradient-to-br from-purple-600/10 via-blue-600/10 to-indigo-600/10 border-b border-white/10">
+                              <div className="flex items-start space-x-3 sm:space-x-4 pr-[90px] sm:pr-[110px] md:pr-[120px]">
+                                <div className="relative p-2 sm:p-3 md:p-4 rounded-xl sm:rounded-2xl bg-gradient-to-br from-blue-500/80 to-purple-600/80 shadow-2xl group-hover:scale-110 transition-transform duration-500 flex-shrink-0">
+                                  <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent rounded-xl sm:rounded-2xl"></div>
+                                  <span className="relative text-lg sm:text-xl md:text-2xl text-white drop-shadow-lg">{editData.emoji}</span>
+                                </div>
+                                
+                                <div className="flex-1 min-w-0 pt-1">
+                                  <div className="flex flex-col space-y-2 mb-3">
+                                    <h2 className="text-base sm:text-lg md:text-xl font-black text-white tracking-wide leading-tight">{editData.name}</h2>
+                                    <Badge className="bg-blue-500/30 text-white text-xs font-bold px-2 py-1 rounded-full border border-white/20 w-fit">
+                                      {editingGame?.code || "GAME-001"}
+                                    </Badge>
+                                  </div>
+                                  <p className="text-gray-300 text-xs sm:text-sm mb-2 sm:mb-3 leading-relaxed line-clamp-2">{editData.description}</p>
+                                  
+                                  {/* Status indicators */}
+                                  <div className="flex flex-col space-y-1">
+                                    <div className="flex items-center space-x-2">
+                                      <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse shadow-lg shadow-green-400/50"></div>
+                                      <span className="text-green-400 font-bold text-xs">LIVE</span>
+                                    </div>
+                                    <div className="flex items-center space-x-2">
+                                      <Users className="h-3 w-3 text-blue-400" />
+                                      <span className="text-blue-400 font-bold text-xs">25 playing</span>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Enhanced Responsive Game Progress */}
+                              <div className="mt-4 sm:mt-6 space-y-2 sm:space-y-3">
+                                <div className="flex justify-between items-center">
+                                  <span className="text-xs sm:text-sm font-bold text-white">Game Progress</span>
+                                  <span className="text-xs text-gray-300 font-mono bg-slate-800/50 px-2 py-1 rounded-full border border-white/10">{Number(editData.totalNumbers) - 25} / {editData.totalNumbers} left</span>
+                                </div>
+                                <div className="relative">
+                                  <Progress value={20} className="h-2 bg-slate-800/50 border border-white/10" />
+                                  <div className="absolute inset-0 bg-gradient-to-r from-purple-500/20 via-blue-500/20 to-red-500/20 rounded-full blur-sm"></div>
+                                </div>
+                                <div className="text-center">
+                                  <span className="text-lg sm:text-xl font-black text-white">20%</span>
+                                  <span className="text-gray-400 ml-2 text-xs sm:text-sm">Complete</span>
+                                </div>
+                              </div>
+
+                              {/* Enhanced Responsive Game Details Grid */}
+                              <div className="mt-4 sm:mt-6 grid grid-cols-2 gap-2 sm:gap-3">
+                                <div className="bg-gradient-to-br from-green-500/20 to-emerald-500/20 p-2 sm:p-3 rounded-lg border border-green-400/30 backdrop-blur-sm">
+                                  <div className="text-xs text-green-300 font-bold uppercase tracking-wider">Free Play Range</div>
+                                  <div className="text-sm sm:text-base font-black text-green-200 mt-1">{Math.ceil(Number(editData.totalNumbers) * 0.75)}-{editData.totalNumbers}</div>
+                                  <div className="text-xs text-green-400 mt-1">🎁 No cost</div>
+                                </div>
+                                <div className="bg-gradient-to-br from-blue-500/20 to-cyan-500/20 p-2 sm:p-3 rounded-lg border border-blue-400/30 backdrop-blur-sm">
+                                  <div className="text-xs text-blue-300 font-bold uppercase tracking-wider">Paid Range</div>
+                                  <div className="text-sm sm:text-base font-black text-blue-200 mt-1">1-{Math.floor(Number(editData.totalNumbers) * 0.75) - 1}</div>
+                                  <div className="text-xs text-blue-400 mt-1">💰 Pay exact</div>
+                                </div>
+                              </div>
+
+                              {/* Enhanced Responsive Action Section */}
+                              <div className="mt-4 sm:mt-6 pt-3 sm:pt-4 border-t border-white/10">
+                                <div className="flex flex-col space-y-3 sm:space-y-4">
+                                  <div className="flex items-center justify-center space-x-2">
+                                    <DollarSign className="h-4 w-4 sm:h-5 sm:w-5 text-yellow-400" />
+                                    <span className="text-yellow-400 font-black text-lg sm:text-xl md:text-2xl">${editData.prizeValue}</span>
+                                    <span className="text-gray-300 text-xs sm:text-sm font-medium">Prize Value</span>
+                                  </div>
+                                  
+                                  <div className="flex items-center justify-between bg-black/30 p-2 sm:p-3 rounded-lg border border-red-500/30">
+                                    <div className="flex items-center space-x-1">
+                                      <div className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse"></div>
+                                      <span className="text-red-400 font-bold text-xs">ENDING SOON</span>
+                                    </div>
+                                  </div>
+                                  <Button size="lg" className="w-full bg-gradient-to-r from-blue-500/80 to-purple-600/80 hover:opacity-90 text-white font-black text-sm sm:text-base px-4 sm:px-6 py-2.5 sm:py-3 shadow-2xl border border-white/20 backdrop-blur-sm group-hover:shadow-purple-500/30 transition-all duration-300">
+                                    <Zap className="h-4 w-4 mr-2 animate-pulse" />
+                                    SPIN TO WIN
+                                    <Crown className="h-4 w-4 ml-2 animate-bounce" />
+                                  </Button>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Game Stats Preview */}
+                        <div className="bg-slate-800/50 rounded-xl p-4 border border-slate-600/30 mt-6">
+                          <h4 className="text-white font-medium mb-3">Expected Performance</h4>
+                          <div className="grid grid-cols-2 gap-3 text-sm">
+                            <div className="bg-blue-500/20 p-3 rounded-lg">
+                              <p className="text-blue-300 font-medium">Est. Players</p>
+                              <p className="text-white text-lg font-bold">50-100</p>
+                            </div>
+                            <div className="bg-green-500/20 p-3 rounded-lg">
+                              <p className="text-green-300 font-medium">Revenue Est.</p>
+                              <p className="text-white text-lg font-bold">${Math.round(Number(editData.prizeValue) * 50)}</p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </DialogContent>
+            </Dialog>
+
             {/* Games Grid */}
             {gamesLoading ? (
               <div className="text-center py-12">
@@ -1033,10 +1352,7 @@ export default function AdminDashboard() {
                         size="sm" 
                         variant="outline" 
                         className="flex-1 border-blue-500/50 text-blue-400 hover:bg-blue-500/20"
-                        onClick={() => {
-                          setSelectedGame(game);
-                          setIsEditGameOpen(true);
-                        }}
+                        onClick={() => handleEditGame(game)}
                       >
                         <Edit3 className="h-4 w-4 mr-1" />
                         Edit
