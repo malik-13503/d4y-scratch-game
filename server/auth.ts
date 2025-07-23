@@ -15,8 +15,8 @@ declare global {
 export function setupAuth(app: Express) {
   const sessionSettings: session.SessionOptions = {
     secret: process.env.SESSION_SECRET || "your-secret-key-change-in-production",
-    resave: true, // Force session save on each request
-    saveUninitialized: true, // Save uninitialized sessions
+    resave: false, // Don't force session save if unmodified
+    saveUninitialized: false, // Don't save uninitialized sessions for security
     store: storage.sessionStore,
     cookie: {
       secure: false, // Set to false for development
@@ -213,6 +213,19 @@ export function setupAuth(app: Express) {
       res.status(500).json({ message: "Failed to change password" });
     }
   });
+
+  // Session debug route (for development)
+  app.get("/api/admin/session-debug", (req, res) => {
+    res.json({
+      sessionID: req.sessionID,
+      isAuthenticated: req.isAuthenticated(),
+      hasUser: !!req.user,
+      userID: req.user?.id,
+      userEmail: req.user?.email,
+      sessionExists: !!req.session,
+      cookies: req.headers.cookie ? "present" : "missing"
+    });
+  });
 }
 
 // Middleware to require authentication
@@ -221,10 +234,15 @@ export function requireAuth(req: any, res: any, next: any) {
     isAuthenticated: req.isAuthenticated(),
     hasUser: !!req.user,
     sessionID: req.sessionID,
-    userID: req.user?.id
+    userID: req.user?.id,
+    session: req.session ? "exists" : "missing",
+    cookies: req.headers.cookie ? "present" : "missing"
   });
   
-  if (req.isAuthenticated() && req.user) {
+  // Check if user session exists and is valid
+  if (req.isAuthenticated() && req.user && req.user.isActive) {
+    // Touch session to keep it alive
+    req.session.touch();
     return next();
   }
   

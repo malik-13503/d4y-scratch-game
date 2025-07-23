@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
@@ -713,6 +713,9 @@ export default function AdminDashboard() {
                       <DialogTitle className="text-xl font-bold bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
                         🎮 Create New Game
                       </DialogTitle>
+                      <DialogDescription className="text-gray-400 mt-2">
+                        Configure your new prize game with custom settings and preview how it will appear to players.
+                      </DialogDescription>
                     </DialogHeader>
                     
                     <div className="flex-1 overflow-hidden">
@@ -902,7 +905,7 @@ export default function AdminDashboard() {
                           <div className="mt-4 sm:mt-6 space-y-2 sm:space-y-3">
                             <div className="flex justify-between items-center">
                               <span className="text-xs sm:text-sm font-bold text-white">Game Progress</span>
-                              <span className="text-xs text-gray-300 font-mono bg-slate-800/50 px-2 py-1 rounded-full border border-white/10">{previewData.totalNumbers - 25} / {previewData.totalNumbers} left</span>
+                              <span className="text-xs text-gray-300 font-mono bg-slate-800/50 px-2 py-1 rounded-full border border-white/10">{Number(previewData.totalNumbers) - 25} / {previewData.totalNumbers} left</span>
                             </div>
                             <div className="relative">
                               <Progress value={20} className="h-2 bg-slate-800/50 border border-white/10" />
