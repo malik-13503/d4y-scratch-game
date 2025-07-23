@@ -523,14 +523,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.patch("/api/admin/games/:id", requireAuth, async (req, res) => {
     try {
-      const id = parseInt(req.params.id);
-      const updates = req.body;
-      const game = await storage.updateGame(id, updates);
-      if (!game) {
-        return res.status(404).json({ message: "Game not found" });
-      }
-      res.json(game);
+      const gameId = parseInt(req.params.id);
+      const updatedGame = await storage.updateGame(gameId, req.body);
+      res.json(updatedGame);
     } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid game data", errors: error.errors });
+      }
       console.error("Failed to update game:", error);
       res.status(500).json({ message: "Failed to update game" });
     }
@@ -547,6 +546,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Failed to delete game:", error);
       res.status(500).json({ message: "Failed to delete game" });
+    }
+  });
+
+  // Get specific game for admin
+  app.get("/api/admin/games/:id", requireAuth, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const game = await storage.getGame(id);
+      if (!game) {
+        return res.status(404).json({ message: "Game not found" });
+      }
+      res.json(game);
+    } catch (error) {
+      console.error("Failed to fetch game:", error);
+      res.status(500).json({ message: "Failed to fetch game" });
     }
   });
 

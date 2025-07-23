@@ -325,16 +325,25 @@ export default function AdminDashboard() {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     
+    const durationHours = parseInt(formData.get("duration") as string) || 24;
+    const prizeValue = formData.get("prizeValue") as string;
+    
     const gameData = {
       name: formData.get("name") as string,
-      prize: formData.get("prize") as string,
-      prizeValue: parseInt(formData.get("prizeValue") as string) || 0,
-      totalNumbers: parseInt(formData.get("totalNumbers") as string) || 125,
-      gameType: formData.get("gameType") as string,
-      endTime: new Date(Date.now() + parseInt(formData.get("duration") as string) * 60 * 60 * 1000),
-      isFreePlay: formData.get("isFreePlay") === "on",
-      emoji: formData.get("emoji") as string || "🎮",
+      code: `G${Date.now().toString().slice(-6)}`, // Generate unique code
       description: formData.get("description") as string,
+      gameType: (formData.get("gameType") as string) || "wheel_spin",
+      prize: formData.get("prize") as string,
+      prizeValue: prizeValue, // Keep as string for decimal field
+      prizeDescription: formData.get("description") as string,
+      totalNumbers: parseInt(formData.get("totalNumbers") as string) || 125,
+      freePlayStart: Math.ceil((parseInt(formData.get("totalNumbers") as string) || 125) * 0.75),
+      freePlayEnd: parseInt(formData.get("totalNumbers") as string) || 125,
+      maxWinners: 1,
+      startTime: new Date(), // Start immediately
+      endTime: new Date(Date.now() + durationHours * 60 * 60 * 1000),
+      isScheduled: false,
+      emoji: formData.get("emoji") as string || "🎮",
     };
 
     createGameMutation.mutate(gameData);
@@ -360,12 +369,15 @@ export default function AdminDashboard() {
     
     const gameData = {
       name: formData.get("name") as string,
-      prize: formData.get("prize") as string,
-      prizeValue: parseInt(formData.get("prizeValue") as string) || 0,
-      totalNumbers: parseInt(formData.get("totalNumbers") as string) || 125,
-      gameType: formData.get("gameType") as string,
-      emoji: formData.get("emoji") as string || "🎮",
       description: formData.get("description") as string,
+      prize: formData.get("prize") as string,
+      prizeValue: formData.get("prizeValue") as string, // Keep as string for decimal field
+      prizeDescription: formData.get("description") as string,
+      totalNumbers: parseInt(formData.get("totalNumbers") as string) || 125,
+      freePlayStart: Math.ceil((parseInt(formData.get("totalNumbers") as string) || 125) * 0.75),
+      freePlayEnd: parseInt(formData.get("totalNumbers") as string) || 125,
+      gameType: (formData.get("gameType") as string) || "wheel_spin",
+      emoji: formData.get("emoji") as string || "🎮",
     };
 
     updateGameMutation.mutate({ id: editingGame.id, gameData });
