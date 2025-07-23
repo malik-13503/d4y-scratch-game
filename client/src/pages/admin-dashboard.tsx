@@ -62,6 +62,17 @@ export default function AdminDashboard() {
   const [selectedGame, setSelectedGame] = useState<any>(null);
   const [isCreateGameOpen, setIsCreateGameOpen] = useState(false);
   const [isEditGameOpen, setIsEditGameOpen] = useState(false);
+  
+  // Live preview state
+  const [previewData, setPreviewData] = useState({
+    name: "Premium Travel Mug",
+    emoji: "🎮",
+    description: "High-quality travel mug with thermal insulation",
+    prize: "Premium Travel Mug",
+    prizeValue: "50.00",
+    totalNumbers: "125",
+    duration: "24"
+  });
   const [realTimeStats, setRealTimeStats] = useState({
     activeUsers: 247,
     totalSpins: 15420,
@@ -696,89 +707,142 @@ export default function AdminDashboard() {
                     Create Game
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="bg-slate-900 border-purple-500/30 text-white max-w-4xl">
-                  <DialogHeader>
-                    <DialogTitle className="text-xl font-bold bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
-                      🎮 Create New Game
-                    </DialogTitle>
-                  </DialogHeader>
-                  
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    {/* Form Section */}
-                    <div className="space-y-6">
-                      <form onSubmit={handleCreateGame} className="space-y-6">
-                        <div className="grid grid-cols-2 gap-4">
-                          <div>
-                            <Label htmlFor="name" className="text-gray-300">Game Name</Label>
-                            <Input id="name" name="name" required className="bg-white/10 border-purple-500/30" placeholder="Travel Mug Prize"/>
-                          </div>
-                          <div>
-                            <Label htmlFor="emoji" className="text-gray-300">Emoji</Label>
-                            <Input id="emoji" name="emoji" defaultValue="🎮" className="bg-white/10 border-purple-500/30" />
-                          </div>
-                        </div>
-                        
-                        <div>
-                          <Label htmlFor="description" className="text-gray-300">Description</Label>
-                          <Textarea id="description" name="description" className="bg-white/10 border-purple-500/30" placeholder="Win an amazing travel mug with this exciting game!"/>
+                <DialogContent className="bg-slate-900 border-purple-500/30 text-white max-w-7xl w-[95vw] max-h-[95vh] p-0">
+                  <div className="flex flex-col h-full max-h-[95vh]">
+                    <DialogHeader className="px-6 py-4 border-b border-purple-500/30 flex-shrink-0">
+                      <DialogTitle className="text-xl font-bold bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
+                        🎮 Create New Game
+                      </DialogTitle>
+                    </DialogHeader>
+                    
+                    <div className="flex-1 overflow-hidden">
+                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 h-full">
+                        {/* Form Section */}
+                        <div className="p-6 overflow-y-auto max-h-full">
+                          <form onSubmit={handleCreateGame} className="space-y-6">
+                            <div className="grid grid-cols-2 gap-4">
+                              <div>
+                                <Label htmlFor="name" className="text-gray-300">Game Name</Label>
+                                <Input 
+                                  id="name" 
+                                  name="name" 
+                                  value={previewData.name}
+                                  onChange={(e) => setPreviewData({...previewData, name: e.target.value})}
+                                  required 
+                                  className="bg-white/10 border-purple-500/30" 
+                                  placeholder="Travel Mug Prize"
+                                />
+                              </div>
+                              <div>
+                                <Label htmlFor="emoji" className="text-gray-300">Emoji</Label>
+                                <Input 
+                                  id="emoji" 
+                                  name="emoji" 
+                                  value={previewData.emoji}
+                                  onChange={(e) => setPreviewData({...previewData, emoji: e.target.value})}
+                                  className="bg-white/10 border-purple-500/30" 
+                                />
+                              </div>
+                            </div>
+                            
+                            <div>
+                              <Label htmlFor="description" className="text-gray-300">Description</Label>
+                              <Textarea 
+                                id="description" 
+                                name="description" 
+                                value={previewData.description}
+                                onChange={(e) => setPreviewData({...previewData, description: e.target.value})}
+                                className="bg-white/10 border-purple-500/30" 
+                                placeholder="Win an amazing travel mug with this exciting game!"
+                              />
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4">
+                              <div>
+                                <Label htmlFor="prize" className="text-gray-300">Prize Description</Label>
+                                <Input 
+                                  id="prize" 
+                                  name="prize" 
+                                  value={previewData.prize}
+                                  onChange={(e) => setPreviewData({...previewData, prize: e.target.value})}
+                                  required 
+                                  className="bg-white/10 border-purple-500/30" 
+                                  placeholder="Premium Travel Mug"
+                                />
+                              </div>
+                              <div>
+                                <Label htmlFor="prizeValue" className="text-gray-300">Prize Value ($)</Label>
+                                <Input 
+                                  id="prizeValue" 
+                                  name="prizeValue" 
+                                  type="number" 
+                                  min="0" 
+                                  value={previewData.prizeValue}
+                                  onChange={(e) => setPreviewData({...previewData, prizeValue: e.target.value})}
+                                  className="bg-white/10 border-purple-500/30" 
+                                />
+                              </div>
+                            </div>
+
+                            <div className="grid grid-cols-3 gap-4">
+                              <div>
+                                <Label htmlFor="gameType" className="text-gray-300">Game Type</Label>
+                                <Select name="gameType">
+                                  <SelectTrigger className="bg-white/10 border-purple-500/30">
+                                    <SelectValue placeholder="Select type" />
+                                  </SelectTrigger>
+                                  <SelectContent className="bg-slate-800 border-purple-500/30">
+                                    <SelectItem value="wheel">Spinning Wheel</SelectItem>
+                                    <SelectItem value="numbers">Number Draw</SelectItem>
+                                    <SelectItem value="both">Both</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                              <div>
+                                <Label htmlFor="totalNumbers" className="text-gray-300">Total Numbers</Label>
+                                <Input 
+                                  id="totalNumbers" 
+                                  name="totalNumbers" 
+                                  type="number" 
+                                  value={previewData.totalNumbers}
+                                  onChange={(e) => setPreviewData({...previewData, totalNumbers: e.target.value})}
+                                  className="bg-white/10 border-purple-500/30" 
+                                />
+                              </div>
+                              <div>
+                                <Label htmlFor="duration" className="text-gray-300">Duration (hours)</Label>
+                                <Input 
+                                  id="duration" 
+                                  name="duration" 
+                                  type="number" 
+                                  value={previewData.duration}
+                                  onChange={(e) => setPreviewData({...previewData, duration: e.target.value})}
+                                  className="bg-white/10 border-purple-500/30" 
+                                />
+                              </div>
+                            </div>
+
+                            <div className="flex items-center space-x-2 p-4 bg-purple-500/20 rounded-lg border border-purple-500/30">
+                              <Switch id="isFreePlay" name="isFreePlay" />
+                              <Label htmlFor="isFreePlay" className="text-purple-200 font-medium">Free Play Game</Label>
+                            </div>
+
+                            <Button 
+                              type="submit" 
+                              className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-bold py-3 shadow-lg" 
+                              disabled={createGameMutation.isPending}
+                            >
+                              {createGameMutation.isPending ? "Creating Game..." : "🚀 Create Game"}
+                            </Button>
+                          </form>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-4">
-                          <div>
-                            <Label htmlFor="prize" className="text-gray-300">Prize Description</Label>
-                            <Input id="prize" name="prize" required className="bg-white/10 border-purple-500/30" placeholder="Premium Travel Mug"/>
-                          </div>
-                          <div>
-                            <Label htmlFor="prizeValue" className="text-gray-300">Prize Value ($)</Label>
-                            <Input id="prizeValue" name="prizeValue" type="number" min="0" defaultValue="50" className="bg-white/10 border-purple-500/30" />
-                          </div>
-                        </div>
-
-                        <div className="grid grid-cols-3 gap-4">
-                          <div>
-                            <Label htmlFor="gameType" className="text-gray-300">Game Type</Label>
-                            <Select name="gameType">
-                              <SelectTrigger className="bg-white/10 border-purple-500/30">
-                                <SelectValue placeholder="Select type" />
-                              </SelectTrigger>
-                              <SelectContent className="bg-slate-800 border-purple-500/30">
-                                <SelectItem value="wheel">Spinning Wheel</SelectItem>
-                                <SelectItem value="numbers">Number Draw</SelectItem>
-                                <SelectItem value="both">Both</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </div>
-                          <div>
-                            <Label htmlFor="totalNumbers" className="text-gray-300">Total Numbers</Label>
-                            <Input id="totalNumbers" name="totalNumbers" type="number" defaultValue="125" className="bg-white/10 border-purple-500/30" />
-                          </div>
-                          <div>
-                            <Label htmlFor="duration" className="text-gray-300">Duration (hours)</Label>
-                            <Input id="duration" name="duration" type="number" defaultValue="24" className="bg-white/10 border-purple-500/30" />
-                          </div>
-                        </div>
-
-                        <div className="flex items-center space-x-2 p-4 bg-purple-500/20 rounded-lg border border-purple-500/30">
-                          <Switch id="isFreePlay" name="isFreePlay" />
-                          <Label htmlFor="isFreePlay" className="text-purple-200 font-medium">Free Play Game</Label>
-                        </div>
-
-                        <Button 
-                          type="submit" 
-                          className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-bold py-3 shadow-lg" 
-                          disabled={createGameMutation.isPending}
-                        >
-                          {createGameMutation.isPending ? "Creating Game..." : "🚀 Create Game"}
-                        </Button>
-                      </form>
-                    </div>
-
-                    {/* Live Preview Section */}
-                    <div className="space-y-4">
-                      <h3 className="text-lg font-bold text-white mb-4 flex items-center">
-                        <Eye className="h-5 w-5 mr-2 text-blue-400" />
-                        Live Preview
-                      </h3>
+                        {/* Live Preview Section - Now scrollable */}
+                        <div className="p-6 overflow-y-auto max-h-full space-y-4">
+                          <h3 className="text-lg font-bold text-white mb-4 flex items-center">
+                            <Eye className="h-5 w-5 mr-2 text-blue-400" />
+                            Live Preview
+                          </h3>
                       
                       {/* Game Card Preview - Exact Copy from Home Page */}
                       <div className="relative bg-gradient-to-br from-slate-900/95 via-slate-800/95 to-slate-900/95 backdrop-blur-xl shadow-2xl hover:shadow-purple-500/25 transition-all duration-500 cursor-pointer border border-white/10 overflow-hidden transform hover:scale-105 hover:-translate-y-2 group rounded-2xl">
@@ -799,7 +863,7 @@ export default function AdminDashboard() {
                           <div className="absolute top-3 right-3 sm:top-4 sm:right-4 z-10">
                             <div className="bg-gradient-to-r from-blue-500/80 to-purple-600/80 text-white px-2 py-1 sm:px-3 sm:py-2 rounded-lg sm:rounded-xl font-black shadow-2xl flex items-center space-x-1 border border-white/20 backdrop-blur-sm">
                               <Trophy className="h-3 w-3 sm:h-4 sm:w-4 animate-pulse flex-shrink-0" />
-                              <span className="text-xs sm:text-sm md:text-base whitespace-nowrap">$50.00</span>
+                              <span className="text-xs sm:text-sm md:text-base whitespace-nowrap">${previewData.prizeValue}</span>
                               <Sparkles className="h-2 w-2 sm:h-3 sm:w-3 animate-spin flex-shrink-0" />
                             </div>
                           </div>
@@ -808,17 +872,17 @@ export default function AdminDashboard() {
                           <div className="flex items-start space-x-3 sm:space-x-4 pr-[90px] sm:pr-[110px] md:pr-[120px]">
                             <div className="relative p-2 sm:p-3 md:p-4 rounded-xl sm:rounded-2xl bg-gradient-to-br from-blue-500/80 to-purple-600/80 shadow-2xl group-hover:scale-110 transition-transform duration-500 flex-shrink-0">
                               <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent rounded-xl sm:rounded-2xl"></div>
-                              <Coffee className="relative h-5 w-5 sm:h-6 sm:w-6 md:h-8 md:w-8 text-white drop-shadow-lg" />
+                              <span className="relative text-lg sm:text-xl md:text-2xl text-white drop-shadow-lg">{previewData.emoji}</span>
                             </div>
                             
                             <div className="flex-1 min-w-0 pt-1">
                               <div className="flex flex-col space-y-2 mb-3">
-                                <h2 className="text-base sm:text-lg md:text-xl font-black text-white tracking-wide leading-tight">Premium Travel Mug</h2>
+                                <h2 className="text-base sm:text-lg md:text-xl font-black text-white tracking-wide leading-tight">{previewData.name}</h2>
                                 <Badge className="bg-blue-500/30 text-white text-xs font-bold px-2 py-1 rounded-full border border-white/20 w-fit">
                                   GAME-001
                                 </Badge>
                               </div>
-                              <p className="text-gray-300 text-xs sm:text-sm mb-2 sm:mb-3 leading-relaxed line-clamp-2">High-quality travel mug with thermal insulation</p>
+                              <p className="text-gray-300 text-xs sm:text-sm mb-2 sm:mb-3 leading-relaxed line-clamp-2">{previewData.description}</p>
                               
                               {/* Status indicators */}
                               <div className="flex flex-col space-y-1">
@@ -838,7 +902,7 @@ export default function AdminDashboard() {
                           <div className="mt-4 sm:mt-6 space-y-2 sm:space-y-3">
                             <div className="flex justify-between items-center">
                               <span className="text-xs sm:text-sm font-bold text-white">Game Progress</span>
-                              <span className="text-xs text-gray-300 font-mono bg-slate-800/50 px-2 py-1 rounded-full border border-white/10">100 / 125 left</span>
+                              <span className="text-xs text-gray-300 font-mono bg-slate-800/50 px-2 py-1 rounded-full border border-white/10">{previewData.totalNumbers - 25} / {previewData.totalNumbers} left</span>
                             </div>
                             <div className="relative">
                               <Progress value={20} className="h-2 bg-slate-800/50 border border-white/10" />
@@ -854,12 +918,12 @@ export default function AdminDashboard() {
                           <div className="mt-4 sm:mt-6 grid grid-cols-2 gap-2 sm:gap-3">
                             <div className="bg-gradient-to-br from-green-500/20 to-emerald-500/20 p-2 sm:p-3 rounded-lg border border-green-400/30 backdrop-blur-sm">
                               <div className="text-xs text-green-300 font-bold uppercase tracking-wider">Free Play Range</div>
-                              <div className="text-sm sm:text-base font-black text-green-200 mt-1">94-125</div>
+                              <div className="text-sm sm:text-base font-black text-green-200 mt-1">{Math.ceil(Number(previewData.totalNumbers) * 0.75)}-{previewData.totalNumbers}</div>
                               <div className="text-xs text-green-400 mt-1">🎁 No cost</div>
                             </div>
                             <div className="bg-gradient-to-br from-blue-500/20 to-cyan-500/20 p-2 sm:p-3 rounded-lg border border-blue-400/30 backdrop-blur-sm">
                               <div className="text-xs text-blue-300 font-bold uppercase tracking-wider">Paid Range</div>
-                              <div className="text-sm sm:text-base font-black text-blue-200 mt-1">1-93</div>
+                              <div className="text-sm sm:text-base font-black text-blue-200 mt-1">1-{Math.floor(Number(previewData.totalNumbers) * 0.75) - 1}</div>
                               <div className="text-xs text-blue-400 mt-1">💰 Pay exact</div>
                             </div>
                           </div>
@@ -870,7 +934,7 @@ export default function AdminDashboard() {
                               <div className="flex justify-between items-center">
                                 <div className="text-xs text-gray-400">
                                   <span className="font-medium">Game ends:</span>
-                                  <div className="text-white font-bold text-xs sm:text-sm">24 hours</div>
+                                  <div className="text-white font-bold text-xs sm:text-sm">{previewData.duration} hours</div>
                                 </div>
                                 <div className="flex items-center space-x-1">
                                   <div className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse"></div>
@@ -903,6 +967,8 @@ export default function AdminDashboard() {
                       </div>
                     </div>
                   </div>
+                </div>
+                </div>
                 </DialogContent>
               </Dialog>
             </div>
