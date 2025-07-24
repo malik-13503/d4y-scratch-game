@@ -1250,137 +1250,96 @@ export default function AdminDashboard() {
                         </form>
                       </div>
 
-                      {/* Live Preview Section - Exact Frontend Game Card Design */}
+                      {/* Live Preview Section - Exact Admin Games Tab Card Design */}
                       <div className="p-6 overflow-y-auto max-h-full bg-slate-800/30 border-l border-purple-500/30">
                         <h3 className="text-lg font-bold text-white mb-4 flex items-center">
                           <Eye className="h-5 w-5 mr-2" />
                           Live Preview
                         </h3>
-                        <p className="text-gray-400 text-sm mb-6">This is exactly how your game will appear on the games page</p>
+                        <p className="text-gray-400 text-sm mb-6">This is exactly how your game will appear in the Games tab</p>
                         
-                        {/* Game Card - Exact copy from frontend games page */}
-                        <div className="relative group hover:scale-[1.02] transition-all duration-300">
-                          <Card
-                            className="relative bg-gradient-to-br from-slate-900/95 via-slate-800/95 to-slate-900/95 backdrop-blur-xl shadow-2xl hover:shadow-purple-500/25 transition-all duration-500 cursor-pointer border border-white/10 overflow-hidden transform hover:scale-105 hover:-translate-y-2 group w-full"
-                            style={{ animationDelay: `0ms` }}
-                          >
-                            {/* Enhanced Glow Effect */}
-                            <div className="absolute inset-0 bg-gradient-to-br from-purple-500/20 via-blue-500/10 to-red-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                            <div className="absolute -inset-1 bg-gradient-to-r from-purple-600/30 via-blue-600/30 to-red-600/30 blur-xl opacity-0 group-hover:opacity-70 transition-opacity duration-500"></div>
-                            
-                            {/* Enhanced Sparkle Effects */}
-                            <div className="absolute top-6 right-6 w-3 h-3 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full animate-ping shadow-lg shadow-yellow-500/50"></div>
-                            <div className="absolute bottom-6 left-6 w-2 h-2 bg-gradient-to-br from-pink-400 to-purple-500 rounded-full animate-ping shadow-lg shadow-pink-500/50" style={{ animationDelay: '1s' }}></div>
-                            <div className="absolute top-1/2 right-8 w-1 h-1 bg-cyan-400 rounded-full animate-ping" style={{ animationDelay: '2s' }}></div>
-                            
-                            {/* Dynamic Border Accent */}
-                            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-purple-500/80 to-blue-600/80 group-hover:h-2 transition-all duration-300"></div>
-                            
-                            <CardContent className="relative p-4 sm:p-6">
-                              {/* Enhanced Responsive Prize Highlight */}
-                              <div className="absolute top-3 right-3 sm:top-4 sm:right-4 z-10">
-                                <div className="bg-gradient-to-r from-purple-500/80 to-blue-600/80 text-white px-2 py-1 sm:px-3 sm:py-2 rounded-lg sm:rounded-xl font-black shadow-2xl flex items-center space-x-1 border border-white/20 backdrop-blur-sm">
-                                  <Trophy className="h-3 w-3 sm:h-4 sm:w-4 animate-pulse flex-shrink-0" />
-                                  <span className="text-xs sm:text-sm md:text-base whitespace-nowrap">${editFormData.prizeValue}</span>
-                                  <Sparkles className="h-2 w-2 sm:h-3 sm:w-3 animate-spin flex-shrink-0" />
+                        {/* Game Card - Exact copy from admin games tab */}
+                        <Card className="bg-black/20 backdrop-blur-sm border border-purple-500/30 hover:border-purple-400/50 transition-all duration-300">
+                          <CardContent className="p-6">
+                            <div className="flex items-center justify-between mb-4">
+                              <div className="flex items-center space-x-3">
+                                <div className="text-3xl">{editFormData.emoji}</div>
+                                <div>
+                                  <h3 className="text-white font-bold">{editFormData.name}</h3>
+                                  <p className="text-gray-400 text-sm font-mono">{editingGame?.code || "GAME-001"}</p>
                                 </div>
                               </div>
-
-                              {/* Enhanced Responsive Game Icon and Info */}
-                              <div className="flex items-start space-x-3 sm:space-x-4 pr-[90px] sm:pr-[110px] md:pr-[120px]">
-                                <div className="relative p-2 sm:p-3 md:p-4 rounded-xl sm:rounded-2xl bg-gradient-to-br from-purple-500/80 to-blue-600/80 shadow-2xl group-hover:scale-110 transition-transform duration-500 flex-shrink-0">
-                                  <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent rounded-xl sm:rounded-2xl"></div>
-                                  <span className="relative text-lg sm:text-xl md:text-2xl">{editFormData.emoji}</span>
-                                </div>
-                                
-                                <div className="flex-1 min-w-0 pt-1">
-                                  <div className="flex flex-col space-y-2 mb-3">
-                                    <h2 className="text-base sm:text-lg md:text-xl font-black text-white tracking-wide leading-tight">{editFormData.name || "Game Name"}</h2>
-                                    <Badge className="bg-blue-500/30 text-white text-xs font-bold px-2 py-1 rounded-full border border-white/20 w-fit">
-                                      {editingGame?.code || "GAME-001"}
-                                    </Badge>
-                                  </div>
-                                  <p className="text-gray-300 text-xs sm:text-sm mb-2 sm:mb-3 leading-relaxed line-clamp-2">{editFormData.description || "Game description will appear here..."}</p>
-                                  
-                                  {/* Status indicators */}
-                                  <div className="flex flex-col space-y-1">
-                                    <div className="flex items-center space-x-2">
-                                      <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse shadow-lg shadow-green-400/50"></div>
-                                      <span className="text-green-400 font-bold text-xs">LIVE</span>
-                                    </div>
-                                    <div className="flex items-center space-x-2">
-                                      <Users className="h-3 w-3 text-blue-400" />
-                                      <span className="text-blue-400 font-bold text-xs">{Math.floor(Math.random() * 50) + 10} playing</span>
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-
-                              {/* Enhanced Responsive Game Progress */}
-                              <div className="mt-4 sm:mt-6 space-y-2 sm:space-y-3">
-                                <div className="flex justify-between items-center">
-                                  <span className="text-xs sm:text-sm font-bold text-white">Game Progress</span>
-                                  <span className="text-xs text-gray-300 font-mono bg-slate-800/50 px-2 py-1 rounded-full border border-white/10">{Math.floor(Number(editFormData.totalNumbers) * 0.3)} / {editFormData.totalNumbers} left</span>
-                                </div>
-                                <div className="relative">
-                                  <Progress value={70} className="h-2 bg-slate-800/50 border border-white/10" />
-                                  <div className="absolute inset-0 bg-gradient-to-r from-purple-500/20 via-blue-500/20 to-red-500/20 rounded-full blur-sm"></div>
-                                </div>
-                                <div className="text-center">
-                                  <span className="text-lg sm:text-xl font-black text-white">70%</span>
-                                  <span className="text-gray-400 ml-2 text-xs sm:text-sm">Complete</span>
-                                </div>
-                              </div>
-
-                              {/* Enhanced Responsive Game Details Grid */}
-                              <div className="mt-4 sm:mt-6 grid grid-cols-2 gap-2 sm:gap-3">
-                                <div className="bg-gradient-to-br from-green-500/20 to-emerald-500/20 p-2 sm:p-3 rounded-lg border border-green-400/30 backdrop-blur-sm">
-                                  <div className="text-xs text-green-300 font-bold uppercase tracking-wider">Free Play Range</div>
-                                  <div className="text-sm sm:text-base font-black text-green-200 mt-1">{Math.ceil(Number(editFormData.totalNumbers) * 0.75)}-{editFormData.totalNumbers}</div>
-                                  <div className="text-xs text-green-400 mt-1">🎁 No cost</div>
-                                </div>
-                                <div className="bg-gradient-to-br from-blue-500/20 to-cyan-500/20 p-2 sm:p-3 rounded-lg border border-blue-400/30 backdrop-blur-sm">
-                                  <div className="text-xs text-blue-300 font-bold uppercase tracking-wider">Paid Range</div>
-                                  <div className="text-sm sm:text-base font-black text-blue-200 mt-1">1-{Math.floor(Number(editFormData.totalNumbers) * 0.75) - 1}</div>
-                                  <div className="text-xs text-blue-400 mt-1">💰 Pay exact</div>
-                                </div>
-                              </div>
-
-                              {/* Enhanced Responsive Action Section */}
-                              <div className="mt-4 sm:mt-6 pt-3 sm:pt-4 border-t border-white/10">
-                                <div className="flex flex-col space-y-2 sm:space-y-3">
-                                  <div className="flex justify-between items-center">
-                                    <div className="text-xs text-gray-400">
-                                      <span className="font-medium">Game ends:</span>
-                                      <div className="text-white font-bold text-xs sm:text-sm">Tomorrow 12:00 PM</div>
-                                    </div>
-                                    <div className="flex items-center space-x-1">
-                                      <div className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse"></div>
-                                      <span className="text-red-400 font-bold text-xs">ENDING SOON</span>
-                                    </div>
-                                  </div>
-                                  <Button size="lg" className="w-full bg-gradient-to-r from-purple-500/80 to-blue-600/80 hover:opacity-90 text-white font-black text-sm sm:text-base px-4 sm:px-6 py-2.5 sm:py-3 shadow-2xl border border-white/20 backdrop-blur-sm group-hover:shadow-purple-500/30 transition-all duration-300">
-                                    <Zap className="h-4 w-4 mr-2 animate-pulse" />
-                                    SPIN TO WIN
-                                    <Crown className="h-4 w-4 ml-2 animate-bounce" />
-                                  </Button>
-                                </div>
-                              </div>
-                            </CardContent>
-                          </Card>
-                        </div>
-
-                        {/* Game Stats Preview */}
-                        <div className="bg-slate-800/50 rounded-xl p-4 border border-slate-600/30 mt-6">
-                          <h4 className="text-white font-medium mb-3">Expected Performance</h4>
-                          <div className="grid grid-cols-2 gap-3 text-sm">
-                            <div className="bg-blue-500/20 p-3 rounded-lg">
-                              <p className="text-blue-300 font-medium">Est. Players</p>
-                              <p className="text-white text-lg font-bold">50-100</p>
+                              <Badge variant="default" className="bg-green-500">
+                                Active
+                              </Badge>
                             </div>
-                            <div className="bg-green-500/20 p-3 rounded-lg">
-                              <p className="text-green-300 font-medium">Revenue Est.</p>
-                              <p className="text-white text-lg font-bold">${Math.round(Number(editFormData.prizeValue) * 50)}</p>
+                            
+                            <div className="space-y-3 mb-4">
+                              <div className="flex justify-between text-sm">
+                                <span className="text-gray-400">Prize:</span>
+                                <span className="text-yellow-400 font-semibold">${editFormData.prizeValue}</span>
+                              </div>
+                              <div className="flex justify-between text-sm">
+                                <span className="text-gray-400">Players:</span>
+                                <span className="text-white">{Math.floor(Math.random() * 50) + 10}</span>
+                              </div>
+                              <div className="flex justify-between text-sm">
+                                <span className="text-gray-400">Numbers Left:</span>
+                                <span className="text-white">{Math.floor(Number(editFormData.totalNumbers) * 0.3)} / {editFormData.totalNumbers}</span>
+                              </div>
+                              <Progress 
+                                value={70} 
+                                className="bg-white/20"
+                              />
+                            </div>
+
+                            <div className="flex space-x-2">
+                              <Button 
+                                size="sm" 
+                                variant="outline" 
+                                className="flex-1 border-purple-500/50 text-white hover:bg-purple-500/20"
+                              >
+                                <Eye className="h-4 w-4 mr-1" />
+                                View
+                              </Button>
+                              <Button 
+                                size="sm" 
+                                variant="outline" 
+                                className="flex-1 border-blue-500/50 text-white hover:bg-blue-500/20"
+                              >
+                                <Edit3 className="h-4 w-4 mr-1" />
+                                Edit
+                              </Button>
+                              <Button 
+                                size="sm" 
+                                variant="outline" 
+                                className="border-red-500/50 text-red-400 hover:bg-red-500/20"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </CardContent>
+                        </Card>
+
+                        {/* Additional Game Details */}
+                        <div className="bg-slate-800/50 rounded-xl p-4 border border-slate-600/30 mt-6">
+                          <h4 className="text-white font-medium mb-3">Game Configuration</h4>
+                          <div className="space-y-2 text-sm">
+                            <div className="flex justify-between">
+                              <span className="text-gray-400">Description:</span>
+                              <span className="text-white text-right flex-1 ml-4 truncate">{editFormData.description || "No description"}</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-gray-400">Total Numbers:</span>
+                              <span className="text-white">{editFormData.totalNumbers}</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-gray-400">Free Play Start:</span>
+                              <span className="text-green-400">{Math.ceil(Number(editFormData.totalNumbers) * 0.75)}</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-gray-400">Free Play End:</span>
+                              <span className="text-green-400">{editFormData.totalNumbers}</span>
                             </div>
                           </div>
                         </div>
