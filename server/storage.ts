@@ -542,9 +542,20 @@ export class DatabaseStorage implements IStorage {
     try {
       const [user] = await db.insert(users).values(insertUser).returning();
       return user;
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error creating user:", error);
-      throw error;
+      
+      // Handle PostgreSQL unique constraint violation
+      if (error.code === '23505' && error.constraint === 'users_email_unique') {
+        throw new Error("Email address is already registered");
+      }
+      
+      // Handle other database errors
+      if (error.code === '23505') {
+        throw new Error("User with this information already exists");
+      }
+      
+      throw new Error("Failed to create user account");
     }
   }
 

@@ -91,12 +91,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
           cardOnFile: user.cardOnFile
         }
       });
-    } catch (error) {
+    } catch (error: any) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ message: "Invalid user data", errors: error.errors });
       }
+      
+      // Handle specific user creation errors
+      if (error.message && error.message.includes("Email address is already registered")) {
+        return res.status(400).json({ message: "Email address is already registered" });
+      }
+      
+      if (error.message && error.message.includes("already exists")) {
+        return res.status(400).json({ message: "User with this information already exists" });
+      }
+      
       console.error("Registration error:", error);
-      res.status(500).json({ message: "Registration failed" });
+      res.status(500).json({ message: "Registration failed. Please try again." });
     }
   });
 
