@@ -506,10 +506,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/admin/games", requireAuth, async (req, res) => {
     try {
-      const gameData = insertGameSchema.parse({
+      // Convert string dates to Date objects if they exist
+      const processedBody = {
         ...req.body,
         createdBy: req.user!.id,
-      });
+        startTime: req.body.startTime ? new Date(req.body.startTime) : new Date(),
+        endTime: req.body.endTime ? new Date(req.body.endTime) : new Date(Date.now() + 24 * 60 * 60 * 1000),
+      };
+      
+      const gameData = insertGameSchema.parse(processedBody);
       const game = await storage.createGame(gameData);
       res.status(201).json(game);
     } catch (error) {
