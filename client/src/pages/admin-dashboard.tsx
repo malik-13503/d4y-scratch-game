@@ -192,22 +192,41 @@ export default function AdminDashboard() {
   const { data: userDetails, isLoading: userDetailsLoading, refetch: refetchUserDetails } = useQuery({
     queryKey: ["/api/admin/users", selectedUser?.id, "details"],
     enabled: !!selectedUser?.id && isUserProfileOpen,
-    refetchInterval: 5000, // Refresh every 5 seconds for real-time updates
+    refetchInterval: isUserProfileOpen ? 5000 : false, // Refresh every 5 seconds for real-time updates
   });
 
   // Fetch user transactions for real-time transaction history
   const { data: userTransactions, refetch: refetchUserTransactions } = useQuery({
     queryKey: ["/api/admin/users", selectedUser?.id, "transactions"],
     enabled: !!selectedUser?.id && isUserProfileOpen,
-    refetchInterval: 5000,
+    refetchInterval: isUserProfileOpen ? 5000 : false,
   });
 
   // Fetch user activity for real-time activity timeline
   const { data: userActivity, refetch: refetchUserActivity } = useQuery({
     queryKey: ["/api/admin/users", selectedUser?.id, "activity"],
     enabled: !!selectedUser?.id && isUserProfileOpen,
-    refetchInterval: 5000,
+    refetchInterval: isUserProfileOpen ? 5000 : false,
   });
+
+  // Debug logging and force refetch when dialog opens
+  useEffect(() => {
+    if (selectedUser && isUserProfileOpen) {
+      console.log("User profile opened for user:", selectedUser.id);
+      console.log("Query conditions:", {
+        selectedUserId: selectedUser?.id,
+        isUserProfileOpen,
+        queryEnabled: !!selectedUser?.id && isUserProfileOpen
+      });
+      
+      // Force refetch all user-specific data when dialog opens
+      setTimeout(() => {
+        refetchUserDetails();
+        refetchUserTransactions();
+        refetchUserActivity();
+      }, 100); // Small delay to ensure queries are set up
+    }
+  }, [selectedUser, isUserProfileOpen]);
 
   // Analytics data
   const { data: analytics, refetch: refetchAnalytics } = useQuery<{
