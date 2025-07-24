@@ -224,8 +224,10 @@ export default function AdminDashboard() {
       return response.json();
     },
     onSuccess: () => {
-      refetchGames();
-      refetchStats();
+      // Invalidate all related queries to force refresh
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/games"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/dashboard/stats"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/games"] });
       setIsCreateGameOpen(false);
       toast({
         title: "Success",
@@ -248,8 +250,10 @@ export default function AdminDashboard() {
       return response.json();
     },
     onSuccess: () => {
-      refetchGames();
-      refetchStats();
+      // Invalidate all related queries to force refresh
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/games"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/dashboard/stats"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/games"] });
       setIsEditGameOpen(false);
       setEditingGame(null);
       toast({

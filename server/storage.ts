@@ -197,6 +197,7 @@ export class DatabaseStorage implements IStorage {
     const [game] = await db.insert(games).values({
       ...insertGame,
       numbersLeft: insertGame.totalNumbers || 125,
+      isActive: true, // Make newly created games active by default
     }).returning();
     return game;
   }
