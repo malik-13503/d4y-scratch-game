@@ -68,10 +68,19 @@ export default function AdminDashboard() {
   const [selectedUser, setSelectedUser] = useState<any>(null);
   const [isUserProfileOpen, setIsUserProfileOpen] = useState(false);
   
+  // Edit form data state
+  const [editFormData, setEditFormData] = useState({
+    name: "",
+    emoji: "🎮",
+    description: "",
+    prizeValue: "100",
+    totalNumbers: "200"
+  });
+  
   // Live preview state
   const [previewData, setPreviewData] = useState({
     name: "Premium Travel Mug",
-    emoji: "🎮",
+    emoji: "🎮", 
     description: "High-quality travel mug with thermal insulation",
     prize: "Premium Travel Mug",
     prizeValue: "50.00",
@@ -424,16 +433,24 @@ export default function AdminDashboard() {
 
   const handleEditGame = (game: any) => {
     setEditingGame(game);
-    setEditData({
-      name: game.name,
-      emoji: game.emoji,
+    // Initialize form data with current game values
+    const formData = {
+      name: game.name || "",
+      emoji: game.emoji || "🎮",
       description: game.description || "",
-      prize: game.prize,
-      prizeValue: game.prizeValue.toString(),
-      totalNumbers: game.totalNumbers.toString(),
-      duration: "24" // Default duration for edit
-    });
+      prizeValue: game.prizeValue?.toString() || "100",
+      totalNumbers: game.totalNumbers?.toString() || "200"
+    };
+    setEditFormData(formData);
     setIsEditGameOpen(true);
+  };
+
+  // Handle form field changes and update preview
+  const handleEditFieldChange = (field: string, value: string) => {
+    setEditFormData(prev => ({
+      ...prev,
+      [field]: value
+    }));
   };
 
   const handleUpdateGame = (e: React.FormEvent<HTMLFormElement>) => {
@@ -1130,16 +1147,16 @@ export default function AdminDashboard() {
               </Dialog>
             </div>
 
-            {/* Edit Game Dialog */}
+            {/* Enhanced Edit Game Dialog with Exact Frontend Preview */}
             <Dialog open={isEditGameOpen} onOpenChange={setIsEditGameOpen}>
               <DialogContent className="bg-slate-900 border-purple-500/30 text-white max-w-7xl w-[95vw] max-h-[95vh] p-0">
                 <div className="flex flex-col h-full max-h-[95vh]">
                   <DialogHeader className="px-6 py-4 border-b border-purple-500/30 flex-shrink-0">
-                    <DialogTitle className="text-xl font-bold bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
+                    <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
                       ✏️ Edit Game: {editingGame?.name}
                     </DialogTitle>
                     <DialogDescription className="text-gray-400 mt-2">
-                      Edit your game settings and see how it will appear to players in real-time.
+                      Edit your game settings and see exactly how it will appear to players in real-time.
                     </DialogDescription>
                   </DialogHeader>
                   
@@ -1151,94 +1168,65 @@ export default function AdminDashboard() {
                           <div className="grid grid-cols-2 gap-4">
                             <div>
                               <Label htmlFor="edit-name" className="text-gray-300">Game Name</Label>
-                              <Input 
-                                id="edit-name" 
-                                name="name" 
-                                value={editData.name}
-                                onChange={(e) => setEditData({...editData, name: e.target.value})}
-                                required 
-                                className="bg-white/10 border-purple-500/30" 
-                                placeholder="Travel Mug Prize"
+                              <Input
+                                id="edit-name"
+                                name="name"
+                                value={editFormData.name}
+                                onChange={(e) => handleEditFieldChange('name', e.target.value)}
+                                className="bg-black/30 border-purple-500/50 text-white focus:border-purple-400 mt-2"
+                                placeholder="Enter game name"
                               />
                             </div>
                             <div>
-                              <Label htmlFor="edit-emoji" className="text-gray-300">Emoji</Label>
-                              <Input 
-                                id="edit-emoji" 
-                                name="emoji" 
-                                value={editData.emoji}
-                                onChange={(e) => setEditData({...editData, emoji: e.target.value})}
-                                className="bg-white/10 border-purple-500/30" 
+                              <Label htmlFor="edit-emoji" className="text-gray-300">Game Emoji</Label>
+                              <Input
+                                id="edit-emoji"
+                                name="emoji"
+                                value={editFormData.emoji}
+                                onChange={(e) => handleEditFieldChange('emoji', e.target.value)}
+                                className="bg-black/30 border-purple-500/50 text-white focus:border-purple-400 mt-2"
+                                placeholder="🎮"
                               />
                             </div>
                           </div>
-                          
+
                           <div>
-                            <Label htmlFor="edit-description" className="text-gray-300">Description</Label>
-                            <Textarea 
-                              id="edit-description" 
-                              name="description" 
-                              value={editData.description}
-                              onChange={(e) => setEditData({...editData, description: e.target.value})}
-                              className="bg-white/10 border-purple-500/30" 
-                              placeholder="Win an amazing travel mug with this exciting game!"
+                            <Label htmlFor="edit-description" className="text-gray-300">Game Description</Label>
+                            <Textarea
+                              id="edit-description"
+                              name="description"
+                              value={editFormData.description}
+                              onChange={(e) => handleEditFieldChange('description', e.target.value)}
+                              rows={3}
+                              className="bg-black/30 border-purple-500/50 text-white focus:border-purple-400 mt-2"
+                              placeholder="Describe your game..."
                             />
                           </div>
 
                           <div className="grid grid-cols-2 gap-4">
                             <div>
-                              <Label htmlFor="edit-prize" className="text-gray-300">Prize Description</Label>
-                              <Input 
-                                id="edit-prize" 
-                                name="prize" 
-                                value={editData.prize}
-                                onChange={(e) => setEditData({...editData, prize: e.target.value})}
-                                required 
-                                className="bg-white/10 border-purple-500/30" 
-                                placeholder="Premium Travel Mug"
-                              />
-                            </div>
-                            <div>
-                              <Label htmlFor="edit-prizeValue" className="text-gray-300">Prize Value ($)</Label>
-                              <Input 
-                                id="edit-prizeValue" 
-                                name="prizeValue" 
+                              <Label htmlFor="edit-prize-value" className="text-gray-300">Prize Value ($)</Label>
+                              <Input
+                                id="edit-prize-value"
+                                name="prizeValue"
                                 type="number"
-                                value={editData.prizeValue}
-                                onChange={(e) => setEditData({...editData, prizeValue: e.target.value})}
-                                required 
-                                className="bg-white/10 border-purple-500/30" 
-                                placeholder="50.00"
+                                value={editFormData.prizeValue}
+                                onChange={(e) => handleEditFieldChange('prizeValue', e.target.value)}
+                                className="bg-black/30 border-purple-500/50 text-white focus:border-purple-400 mt-2"
+                                placeholder="100"
                               />
                             </div>
-                          </div>
-
-                          <div className="grid grid-cols-2 gap-4">
                             <div>
-                              <Label htmlFor="edit-totalNumbers" className="text-gray-300">Total Numbers</Label>
-                              <Input 
-                                id="edit-totalNumbers" 
-                                name="totalNumbers" 
+                              <Label htmlFor="edit-total-numbers" className="text-gray-300">Total Numbers</Label>
+                              <Input
+                                id="edit-total-numbers"
+                                name="totalNumbers"
                                 type="number"
-                                value={editData.totalNumbers}
-                                onChange={(e) => setEditData({...editData, totalNumbers: e.target.value})}
-                                required 
-                                className="bg-white/10 border-purple-500/30" 
-                                placeholder="125"
+                                value={editFormData.totalNumbers}
+                                onChange={(e) => handleEditFieldChange('totalNumbers', e.target.value)}
+                                className="bg-black/30 border-purple-500/50 text-white focus:border-purple-400 mt-2"
+                                placeholder="200"
                               />
-                            </div>
-                            <div>
-                              <Label htmlFor="edit-gameType" className="text-gray-300">Game Type</Label>
-                              <Select name="gameType" defaultValue="wheel">
-                                <SelectTrigger className="bg-white/10 border-purple-500/30">
-                                  <SelectValue placeholder="Select game type" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value="wheel">Wheel Spin</SelectItem>
-                                  <SelectItem value="raffle">Raffle Draw</SelectItem>
-                                  <SelectItem value="instant">Instant Win</SelectItem>
-                                </SelectContent>
-                              </Select>
                             </div>
                           </div>
 
@@ -1262,32 +1250,57 @@ export default function AdminDashboard() {
                         </form>
                       </div>
 
-                      {/* Live Preview Section - Exact same design as games page */}
+                      {/* Live Preview Section - Exact Frontend Game Card Design */}
                       <div className="p-6 overflow-y-auto max-h-full bg-slate-800/30 border-l border-purple-500/30">
-                        <h3 className="text-lg font-bold text-white mb-4">Game Card Preview</h3>
+                        <h3 className="text-lg font-bold text-white mb-4 flex items-center">
+                          <Eye className="h-5 w-5 mr-2" />
+                          Live Preview
+                        </h3>
                         <p className="text-gray-400 text-sm mb-6">This is exactly how your game will appear on the games page</p>
                         
-                        {/* Game Card - Exact copy from games page */}
+                        {/* Game Card - Exact copy from frontend games page */}
                         <div className="relative group hover:scale-[1.02] transition-all duration-300">
-                          <div className="absolute inset-0 bg-gradient-to-br from-purple-500/20 via-blue-500/20 to-pink-500/20 rounded-2xl blur-xl group-hover:blur-2xl transition-all duration-500 opacity-50 group-hover:opacity-75"></div>
-                          
-                          <div className="relative bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden shadow-2xl hover:border-purple-400/50 transition-all duration-300">
-                            {/* Game Header */}
-                            <div className="relative p-4 sm:p-6 bg-gradient-to-br from-purple-600/10 via-blue-600/10 to-indigo-600/10 border-b border-white/10">
+                          <Card
+                            className="relative bg-gradient-to-br from-slate-900/95 via-slate-800/95 to-slate-900/95 backdrop-blur-xl shadow-2xl hover:shadow-purple-500/25 transition-all duration-500 cursor-pointer border border-white/10 overflow-hidden transform hover:scale-105 hover:-translate-y-2 group w-full"
+                            style={{ animationDelay: `0ms` }}
+                          >
+                            {/* Enhanced Glow Effect */}
+                            <div className="absolute inset-0 bg-gradient-to-br from-purple-500/20 via-blue-500/10 to-red-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                            <div className="absolute -inset-1 bg-gradient-to-r from-purple-600/30 via-blue-600/30 to-red-600/30 blur-xl opacity-0 group-hover:opacity-70 transition-opacity duration-500"></div>
+                            
+                            {/* Enhanced Sparkle Effects */}
+                            <div className="absolute top-6 right-6 w-3 h-3 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full animate-ping shadow-lg shadow-yellow-500/50"></div>
+                            <div className="absolute bottom-6 left-6 w-2 h-2 bg-gradient-to-br from-pink-400 to-purple-500 rounded-full animate-ping shadow-lg shadow-pink-500/50" style={{ animationDelay: '1s' }}></div>
+                            <div className="absolute top-1/2 right-8 w-1 h-1 bg-cyan-400 rounded-full animate-ping" style={{ animationDelay: '2s' }}></div>
+                            
+                            {/* Dynamic Border Accent */}
+                            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-purple-500/80 to-blue-600/80 group-hover:h-2 transition-all duration-300"></div>
+                            
+                            <CardContent className="relative p-4 sm:p-6">
+                              {/* Enhanced Responsive Prize Highlight */}
+                              <div className="absolute top-3 right-3 sm:top-4 sm:right-4 z-10">
+                                <div className="bg-gradient-to-r from-purple-500/80 to-blue-600/80 text-white px-2 py-1 sm:px-3 sm:py-2 rounded-lg sm:rounded-xl font-black shadow-2xl flex items-center space-x-1 border border-white/20 backdrop-blur-sm">
+                                  <Trophy className="h-3 w-3 sm:h-4 sm:w-4 animate-pulse flex-shrink-0" />
+                                  <span className="text-xs sm:text-sm md:text-base whitespace-nowrap">${editFormData.prizeValue}</span>
+                                  <Sparkles className="h-2 w-2 sm:h-3 sm:w-3 animate-spin flex-shrink-0" />
+                                </div>
+                              </div>
+
+                              {/* Enhanced Responsive Game Icon and Info */}
                               <div className="flex items-start space-x-3 sm:space-x-4 pr-[90px] sm:pr-[110px] md:pr-[120px]">
-                                <div className="relative p-2 sm:p-3 md:p-4 rounded-xl sm:rounded-2xl bg-gradient-to-br from-blue-500/80 to-purple-600/80 shadow-2xl group-hover:scale-110 transition-transform duration-500 flex-shrink-0">
+                                <div className="relative p-2 sm:p-3 md:p-4 rounded-xl sm:rounded-2xl bg-gradient-to-br from-purple-500/80 to-blue-600/80 shadow-2xl group-hover:scale-110 transition-transform duration-500 flex-shrink-0">
                                   <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent rounded-xl sm:rounded-2xl"></div>
-                                  <span className="relative text-lg sm:text-xl md:text-2xl text-white drop-shadow-lg">{editData.emoji}</span>
+                                  <span className="relative text-lg sm:text-xl md:text-2xl">{editFormData.emoji}</span>
                                 </div>
                                 
                                 <div className="flex-1 min-w-0 pt-1">
                                   <div className="flex flex-col space-y-2 mb-3">
-                                    <h2 className="text-base sm:text-lg md:text-xl font-black text-white tracking-wide leading-tight">{editData.name}</h2>
+                                    <h2 className="text-base sm:text-lg md:text-xl font-black text-white tracking-wide leading-tight">{editFormData.name || "Game Name"}</h2>
                                     <Badge className="bg-blue-500/30 text-white text-xs font-bold px-2 py-1 rounded-full border border-white/20 w-fit">
                                       {editingGame?.code || "GAME-001"}
                                     </Badge>
                                   </div>
-                                  <p className="text-gray-300 text-xs sm:text-sm mb-2 sm:mb-3 leading-relaxed line-clamp-2">{editData.description}</p>
+                                  <p className="text-gray-300 text-xs sm:text-sm mb-2 sm:mb-3 leading-relaxed line-clamp-2">{editFormData.description || "Game description will appear here..."}</p>
                                   
                                   {/* Status indicators */}
                                   <div className="flex flex-col space-y-1">
@@ -1297,7 +1310,7 @@ export default function AdminDashboard() {
                                     </div>
                                     <div className="flex items-center space-x-2">
                                       <Users className="h-3 w-3 text-blue-400" />
-                                      <span className="text-blue-400 font-bold text-xs">25 playing</span>
+                                      <span className="text-blue-400 font-bold text-xs">{Math.floor(Math.random() * 50) + 10} playing</span>
                                     </div>
                                   </div>
                                 </div>
@@ -1307,14 +1320,14 @@ export default function AdminDashboard() {
                               <div className="mt-4 sm:mt-6 space-y-2 sm:space-y-3">
                                 <div className="flex justify-between items-center">
                                   <span className="text-xs sm:text-sm font-bold text-white">Game Progress</span>
-                                  <span className="text-xs text-gray-300 font-mono bg-slate-800/50 px-2 py-1 rounded-full border border-white/10">{Number(editData.totalNumbers) - 25} / {editData.totalNumbers} left</span>
+                                  <span className="text-xs text-gray-300 font-mono bg-slate-800/50 px-2 py-1 rounded-full border border-white/10">{Math.floor(Number(editFormData.totalNumbers) * 0.3)} / {editFormData.totalNumbers} left</span>
                                 </div>
                                 <div className="relative">
-                                  <Progress value={20} className="h-2 bg-slate-800/50 border border-white/10" />
+                                  <Progress value={70} className="h-2 bg-slate-800/50 border border-white/10" />
                                   <div className="absolute inset-0 bg-gradient-to-r from-purple-500/20 via-blue-500/20 to-red-500/20 rounded-full blur-sm"></div>
                                 </div>
                                 <div className="text-center">
-                                  <span className="text-lg sm:text-xl font-black text-white">20%</span>
+                                  <span className="text-lg sm:text-xl font-black text-white">70%</span>
                                   <span className="text-gray-400 ml-2 text-xs sm:text-sm">Complete</span>
                                 </div>
                               </div>
@@ -1323,40 +1336,38 @@ export default function AdminDashboard() {
                               <div className="mt-4 sm:mt-6 grid grid-cols-2 gap-2 sm:gap-3">
                                 <div className="bg-gradient-to-br from-green-500/20 to-emerald-500/20 p-2 sm:p-3 rounded-lg border border-green-400/30 backdrop-blur-sm">
                                   <div className="text-xs text-green-300 font-bold uppercase tracking-wider">Free Play Range</div>
-                                  <div className="text-sm sm:text-base font-black text-green-200 mt-1">{Math.ceil(Number(editData.totalNumbers) * 0.75)}-{editData.totalNumbers}</div>
+                                  <div className="text-sm sm:text-base font-black text-green-200 mt-1">{Math.ceil(Number(editFormData.totalNumbers) * 0.75)}-{editFormData.totalNumbers}</div>
                                   <div className="text-xs text-green-400 mt-1">🎁 No cost</div>
                                 </div>
                                 <div className="bg-gradient-to-br from-blue-500/20 to-cyan-500/20 p-2 sm:p-3 rounded-lg border border-blue-400/30 backdrop-blur-sm">
                                   <div className="text-xs text-blue-300 font-bold uppercase tracking-wider">Paid Range</div>
-                                  <div className="text-sm sm:text-base font-black text-blue-200 mt-1">1-{Math.floor(Number(editData.totalNumbers) * 0.75) - 1}</div>
+                                  <div className="text-sm sm:text-base font-black text-blue-200 mt-1">1-{Math.floor(Number(editFormData.totalNumbers) * 0.75) - 1}</div>
                                   <div className="text-xs text-blue-400 mt-1">💰 Pay exact</div>
                                 </div>
                               </div>
 
                               {/* Enhanced Responsive Action Section */}
                               <div className="mt-4 sm:mt-6 pt-3 sm:pt-4 border-t border-white/10">
-                                <div className="flex flex-col space-y-3 sm:space-y-4">
-                                  <div className="flex items-center justify-center space-x-2">
-                                    <DollarSign className="h-4 w-4 sm:h-5 sm:w-5 text-yellow-400" />
-                                    <span className="text-yellow-400 font-black text-lg sm:text-xl md:text-2xl">${editData.prizeValue}</span>
-                                    <span className="text-gray-300 text-xs sm:text-sm font-medium">Prize Value</span>
-                                  </div>
-                                  
-                                  <div className="flex items-center justify-between bg-black/30 p-2 sm:p-3 rounded-lg border border-red-500/30">
+                                <div className="flex flex-col space-y-2 sm:space-y-3">
+                                  <div className="flex justify-between items-center">
+                                    <div className="text-xs text-gray-400">
+                                      <span className="font-medium">Game ends:</span>
+                                      <div className="text-white font-bold text-xs sm:text-sm">Tomorrow 12:00 PM</div>
+                                    </div>
                                     <div className="flex items-center space-x-1">
                                       <div className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse"></div>
                                       <span className="text-red-400 font-bold text-xs">ENDING SOON</span>
                                     </div>
                                   </div>
-                                  <Button size="lg" className="w-full bg-gradient-to-r from-blue-500/80 to-purple-600/80 hover:opacity-90 text-white font-black text-sm sm:text-base px-4 sm:px-6 py-2.5 sm:py-3 shadow-2xl border border-white/20 backdrop-blur-sm group-hover:shadow-purple-500/30 transition-all duration-300">
+                                  <Button size="lg" className="w-full bg-gradient-to-r from-purple-500/80 to-blue-600/80 hover:opacity-90 text-white font-black text-sm sm:text-base px-4 sm:px-6 py-2.5 sm:py-3 shadow-2xl border border-white/20 backdrop-blur-sm group-hover:shadow-purple-500/30 transition-all duration-300">
                                     <Zap className="h-4 w-4 mr-2 animate-pulse" />
                                     SPIN TO WIN
                                     <Crown className="h-4 w-4 ml-2 animate-bounce" />
                                   </Button>
                                 </div>
                               </div>
-                            </div>
-                          </div>
+                            </CardContent>
+                          </Card>
                         </div>
 
                         {/* Game Stats Preview */}
@@ -1369,7 +1380,7 @@ export default function AdminDashboard() {
                             </div>
                             <div className="bg-green-500/20 p-3 rounded-lg">
                               <p className="text-green-300 font-medium">Revenue Est.</p>
-                              <p className="text-white text-lg font-bold">${Math.round(Number(editData.prizeValue) * 50)}</p>
+                              <p className="text-white text-lg font-bold">${Math.round(Number(editFormData.prizeValue) * 50)}</p>
                             </div>
                           </div>
                         </div>
@@ -1427,7 +1438,7 @@ export default function AdminDashboard() {
                       <Button 
                         size="sm" 
                         variant="outline" 
-                        className="flex-1 border-purple-500/50 text-purple-400 hover:bg-purple-500/20"
+                        className="flex-1 border-purple-500/50 text-black-400 hover:bg-purple-500/20"
                         onClick={() => window.open(`/game/${game.id}`, '_blank')}
                       >
                         <Eye className="h-4 w-4 mr-1" />
@@ -1436,7 +1447,7 @@ export default function AdminDashboard() {
                       <Button 
                         size="sm" 
                         variant="outline" 
-                        className="flex-1 border-blue-500/50 text-blue-400 hover:bg-blue-500/20"
+                        className="flex-1 border-blue-500/50 text-black-400 hover:bg-blue-500/20"
                         onClick={() => handleEditGame(game)}
                       >
                         <Edit3 className="h-4 w-4 mr-1" />
