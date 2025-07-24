@@ -2167,7 +2167,7 @@ export default function AdminDashboard() {
                                         <div className="text-gray-400 text-xs">{activity.description}</div>
                                         {activity.metadata && activity.type === 'game_join' && (
                                           <div className="text-blue-300 text-xs mt-1">
-                                            Amount: ${activity.metadata.amount} • Number: {activity.metadata.number}
+                                            Amount: ${activity.metadata.amount ? activity.metadata.amount.toFixed(2) : '0.00'} • Number: {activity.metadata.number || 'N/A'}
                                           </div>
                                         )}
                                       </div>
@@ -2262,11 +2262,11 @@ export default function AdminDashboard() {
                                     </div>
                                     <div className="text-right">
                                       <div className={`font-medium ${getAmountColor(transaction.status)}`}>
-                                        ${transaction.amount.toFixed(2)}
+                                        ${transaction.amount ? transaction.amount.toFixed(2) : '0.00'}
                                       </div>
                                       <div className="text-gray-400 text-xs capitalize">{transaction.status}</div>
                                       <div className="text-gray-500 text-xs">
-                                        {new Date(transaction.timestamp).toLocaleDateString()}
+                                        {transaction.timestamp ? new Date(transaction.timestamp).toLocaleDateString() : 'N/A'}
                                       </div>
                                     </div>
                                   </div>
