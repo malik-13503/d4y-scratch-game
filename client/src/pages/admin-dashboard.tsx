@@ -63,6 +63,8 @@ export default function AdminDashboard() {
   const [isCreateGameOpen, setIsCreateGameOpen] = useState(false);
   const [isEditGameOpen, setIsEditGameOpen] = useState(false);
   const [editingGame, setEditingGame] = useState<any>(null);
+  const [selectedUser, setSelectedUser] = useState<any>(null);
+  const [isUserProfileOpen, setIsUserProfileOpen] = useState(false);
   
   // Live preview state
   const [previewData, setPreviewData] = useState({
@@ -1413,12 +1415,35 @@ export default function AdminDashboard() {
 
           {/* Users Management Tab */}
           <TabsContent value="users" className="space-y-6">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div>
                 <h2 className="text-2xl font-bold text-white">User Management</h2>
                 <p className="text-gray-400">Monitor and manage registered users</p>
               </div>
-              <div className="flex space-x-2">
+              <div className="flex flex-col sm:flex-row gap-2">
+                <div className="relative">
+                  <Input
+                    placeholder="Search users..."
+                    className="bg-white/5 border-white/20 text-white placeholder-gray-400 pr-10"
+                  />
+                  <div className="absolute inset-y-0 right-0 flex items-center pr-3">
+                    <svg className="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                  </div>
+                </div>
+                <Select defaultValue="all">
+                  <SelectTrigger className="bg-white/5 border-white/20 text-white w-32">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Users</SelectItem>
+                    <SelectItem value="verified">Verified</SelectItem>
+                    <SelectItem value="unverified">Unverified</SelectItem>
+                    <SelectItem value="active">Active</SelectItem>
+                    <SelectItem value="inactive">Inactive</SelectItem>
+                  </SelectContent>
+                </Select>
                 <Button 
                   onClick={() => refetchUsers()}
                   variant="outline" 
@@ -1480,9 +1505,24 @@ export default function AdminDashboard() {
             {/* Users Table */}
             <Card className="bg-black/20 backdrop-blur-sm border border-purple-500/30">
               <CardHeader>
-                <CardTitle className="text-white flex items-center">
-                  <Users className="h-5 w-5 mr-2 text-blue-400" />
-                  User Directory
+                <CardTitle className="text-white flex items-center justify-between">
+                  <div className="flex items-center">
+                    <Users className="h-5 w-5 mr-2 text-blue-400" />
+                    User Directory
+                    <Badge className="ml-3 bg-blue-500/20 text-blue-300 border-blue-500/30">
+                      {users?.length || 0} Total
+                    </Badge>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Button size="sm" variant="outline" className="border-green-500/50 text-green-400 hover:bg-green-500/20">
+                      <Download className="h-4 w-4 mr-2" />
+                      Export CSV
+                    </Button>
+                    <Button size="sm" variant="outline" className="border-purple-500/50 text-purple-400 hover:bg-purple-500/20">
+                      <Target className="h-4 w-4 mr-2" />
+                      Bulk Actions
+                    </Button>
+                  </div>
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -1515,13 +1555,21 @@ export default function AdminDashboard() {
                             </div>
                           </div>
                           <div className="flex space-x-2">
-                            <Button size="sm" variant="outline" className="border-blue-500/50 text-blue-400">
+                            <Button 
+                              size="sm" 
+                              variant="outline" 
+                              className="border-blue-500/50 text-blue-400 hover:bg-blue-500/20"
+                              onClick={() => {
+                                setSelectedUser(user);
+                                setIsUserProfileOpen(true);
+                              }}
+                            >
                               <Eye className="h-4 w-4" />
                             </Button>
-                            <Button size="sm" variant="outline" className="border-yellow-500/50 text-yellow-400">
+                            <Button size="sm" variant="outline" className="border-yellow-500/50 text-yellow-400 hover:bg-yellow-500/20">
                               <Edit3 className="h-4 w-4" />
                             </Button>
-                            <Button size="sm" variant="outline" className="border-red-500/50 text-red-400">
+                            <Button size="sm" variant="outline" className="border-red-500/50 text-red-400 hover:bg-red-500/20">
                               <Ban className="h-4 w-4" />
                             </Button>
                           </div>
@@ -1878,6 +1926,311 @@ export default function AdminDashboard() {
               </Card>
             </div>
           </TabsContent>
+
+          {/* User Profile Dialog */}
+          <Dialog open={isUserProfileOpen} onOpenChange={setIsUserProfileOpen}>
+            <DialogContent className="sm:max-w-[900px] bg-gradient-to-br from-purple-900/95 to-blue-900/95 backdrop-blur-sm border border-purple-500/30 text-white max-h-[90vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
+                  User Profile: {selectedUser?.firstName} {selectedUser?.lastName}
+                </DialogTitle>
+                <DialogDescription className="text-purple-200">
+                  Comprehensive user information and activity management
+                </DialogDescription>
+              </DialogHeader>
+              
+              {selectedUser && (
+                <div className="space-y-6">
+                  {/* User Overview Cards */}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <Card className="bg-gradient-to-br from-blue-600/80 to-blue-700/90 border-0">
+                      <CardContent className="p-4 text-center">
+                        <div className="w-16 h-16 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full flex items-center justify-center mx-auto mb-3">
+                          <User className="h-8 w-8 text-white" />
+                        </div>
+                        <div className="text-lg font-bold text-white">{selectedUser.firstName} {selectedUser.lastName}</div>
+                        <div className="text-blue-200 text-sm">{selectedUser.email}</div>
+                        <div className="text-blue-300 text-xs mt-1">User ID: {selectedUser.id}</div>
+                      </CardContent>
+                    </Card>
+                    
+                    <Card className="bg-gradient-to-br from-green-600/80 to-emerald-700/90 border-0">
+                      <CardContent className="p-4 text-center">
+                        <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-3">
+                          <CheckCircle className="h-6 w-6 text-white" />
+                        </div>
+                        <div className="text-lg font-bold text-white">
+                          {selectedUser.cardOnFile ? "Verified" : "Unverified"}
+                        </div>
+                        <div className="text-green-200 text-sm">Payment Status</div>
+                        <Badge 
+                          className={`mt-2 ${selectedUser.cardOnFile ? "bg-green-500" : "bg-red-500"}`}
+                        >
+                          {selectedUser.cardOnFile ? "Card on File" : "No Payment Method"}
+                        </Badge>
+                      </CardContent>
+                    </Card>
+                    
+                    <Card className="bg-gradient-to-br from-purple-600/80 to-pink-700/90 border-0">
+                      <CardContent className="p-4 text-center">
+                        <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-3">
+                          <Activity className="h-6 w-6 text-white" />
+                        </div>
+                        <div className="text-lg font-bold text-white">
+                          {selectedUser.isActive ? "Active" : "Inactive"}
+                        </div>
+                        <div className="text-purple-200 text-sm">Account Status</div>
+                        <div className="text-purple-300 text-xs mt-1">
+                          Joined: {selectedUser.createdAt ? new Date(selectedUser.createdAt).toLocaleDateString() : 'N/A'}
+                        </div>
+                      </CardContent>  
+                    </Card>
+                  </div>
+
+                  {/* Detailed Information Tabs */}
+                  <Tabs defaultValue="details" className="w-full">
+                    <TabsList className="grid w-full grid-cols-4 bg-black/20">
+                      <TabsTrigger value="details" className="text-white data-[state=active]:bg-purple-600">Details</TabsTrigger>
+                      <TabsTrigger value="activity" className="text-white data-[state=active]:bg-purple-600">Activity</TabsTrigger>
+                      <TabsTrigger value="transactions" className="text-white data-[state=active]:bg-purple-600">Transactions</TabsTrigger>
+                      <TabsTrigger value="settings" className="text-white data-[state=active]:bg-purple-600">Settings</TabsTrigger>
+                    </TabsList>
+                    
+                    <TabsContent value="details" className="space-y-4">
+                      <Card className="bg-black/20 border border-purple-500/30">
+                        <CardHeader>
+                          <CardTitle className="text-white flex items-center">
+                            <Info className="h-5 w-5 mr-2 text-blue-400" />
+                            Personal Information
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label className="text-gray-300">First Name</Label>
+                            <Input 
+                              value={selectedUser.firstName || ''} 
+                              readOnly 
+                              className="bg-white/5 border-white/20 text-white"
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label className="text-gray-300">Last Name</Label>
+                            <Input 
+                              value={selectedUser.lastName || ''} 
+                              readOnly 
+                              className="bg-white/5 border-white/20 text-white"
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label className="text-gray-300">Email Address</Label>
+                            <Input 
+                              value={selectedUser.email || ''} 
+                              readOnly 
+                              className="bg-white/5 border-white/20 text-white"
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label className="text-gray-300">Phone Number</Label>
+                            <Input 
+                              value={selectedUser.phone || 'Not provided'} 
+                              readOnly 
+                              className="bg-white/5 border-white/20 text-white"
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label className="text-gray-300">Square Customer ID</Label>
+                            <Input 
+                              value={selectedUser.squareCustomerId || 'Not assigned'} 
+                              readOnly 
+                              className="bg-white/5 border-white/20 text-white font-mono text-xs"
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label className="text-gray-300">Account Created</Label>
+                            <Input 
+                              value={selectedUser.createdAt ? new Date(selectedUser.createdAt).toLocaleString() : 'Unknown'} 
+                              readOnly 
+                              className="bg-white/5 border-white/20 text-white"
+                            />
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </TabsContent>
+                    
+                    <TabsContent value="activity" className="space-y-4">
+                      <Card className="bg-black/20 border border-purple-500/30">
+                        <CardHeader>
+                          <CardTitle className="text-white flex items-center">
+                            <Activity className="h-5 w-5 mr-2 text-green-400" />
+                            Recent Activity
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="space-y-3">
+                            <div className="flex items-center justify-between p-3 bg-white/5 rounded-lg">
+                              <div className="flex items-center space-x-3">
+                                <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
+                                  <Gamepad2 className="h-4 w-4 text-white" />
+                                </div>
+                                <div>
+                                  <div className="text-white text-sm font-medium">Joined Premium Travel Mug Game</div>
+                                  <div className="text-gray-400 text-xs">Participated in wheel spin</div>
+                                </div>
+                              </div>
+                              <div className="text-gray-400 text-xs">2 hours ago</div>
+                            </div>
+                            
+                            <div className="flex items-center justify-between p-3 bg-white/5 rounded-lg">
+                              <div className="flex items-center space-x-3">
+                                <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
+                                  <DollarSign className="h-4 w-4 text-white" />
+                                </div>
+                                <div>
+                                  <div className="text-white text-sm font-medium">Payment Method Added</div>
+                                  <div className="text-gray-400 text-xs">Card verification completed</div>
+                                </div>
+                              </div>
+                              <div className="text-gray-400 text-xs">1 day ago</div>
+                            </div>
+                            
+                            <div className="flex items-center justify-between p-3 bg-white/5 rounded-lg">
+                              <div className="flex items-center space-x-3">
+                                <div className="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center">
+                                  <User className="h-4 w-4 text-white" />
+                                </div>
+                                <div>
+                                  <div className="text-white text-sm font-medium">Account Created</div>
+                                  <div className="text-gray-400 text-xs">User registration completed</div>
+                                </div>
+                              </div>
+                              <div className="text-gray-400 text-xs">
+                                {selectedUser.createdAt ? new Date(selectedUser.createdAt).toLocaleDateString() : 'Unknown'}
+                              </div>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </TabsContent>
+                    
+                    <TabsContent value="transactions" className="space-y-4">
+                      <Card className="bg-black/20 border border-purple-500/30">
+                        <CardHeader>
+                          <CardTitle className="text-white flex items-center">
+                            <DollarSign className="h-5 w-5 mr-2 text-green-400" />
+                            Transaction History
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="space-y-3">
+                            <div className="flex items-center justify-between p-3 bg-white/5 rounded-lg border border-green-500/20">
+                              <div className="flex items-center space-x-3">
+                                <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
+                                  <CheckCircle className="h-4 w-4 text-white" />
+                                </div>
+                                <div>
+                                  <div className="text-white text-sm font-medium">Game Entry Payment</div>
+                                  <div className="text-gray-400 text-xs">Premium Travel Mug - Number 45</div>
+                                </div>
+                              </div>
+                              <div className="text-right">
+                                <div className="text-green-400 font-medium">$45.00</div>
+                                <div className="text-gray-400 text-xs">Completed</div>
+                              </div>
+                            </div>
+                            
+                            <div className="flex items-center justify-between p-3 bg-white/5 rounded-lg border border-yellow-500/20">
+                              <div className="flex items-center space-x-3">
+                                <div className="w-8 h-8 bg-yellow-500 rounded-full flex items-center justify-center">
+                                  <Clock className="h-4 w-4 text-white" />
+                                </div>
+                                <div>
+                                  <div className="text-white text-sm font-medium">Card Verification</div>
+                                  <div className="text-gray-400 text-xs">Payment method setup</div>
+                                </div>
+                              </div>
+                              <div className="text-right">
+                                <div className="text-yellow-400 font-medium">$1.00</div>
+                                <div className="text-gray-400 text-xs">Authorized</div>
+                              </div>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </TabsContent>
+                    
+                    <TabsContent value="settings" className="space-y-4">
+                      <Card className="bg-black/20 border border-purple-500/30">
+                        <CardHeader>
+                          <CardTitle className="text-white flex items-center">
+                            <Settings className="h-5 w-5 mr-2 text-purple-400" />
+                            Account Management
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                              <Label className="text-gray-300">Account Status</Label>
+                              <Select defaultValue={selectedUser.isActive ? "active" : "inactive"}>
+                                <SelectTrigger className="bg-white/5 border-white/20 text-white">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="active">Active</SelectItem>
+                                  <SelectItem value="inactive">Inactive</SelectItem>
+                                  <SelectItem value="suspended">Suspended</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            
+                            <div className="space-y-2">
+                              <Label className="text-gray-300">User Role</Label>
+                              <Select defaultValue="user">
+                                <SelectTrigger className="bg-white/5 border-white/20 text-white">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="user">Regular User</SelectItem>
+                                  <SelectItem value="vip">VIP User</SelectItem>
+                                  <SelectItem value="premium">Premium User</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                          </div>
+                          
+                          <div className="flex items-center space-x-2">
+                            <Switch id="email-notifications" defaultChecked />
+                            <Label htmlFor="email-notifications" className="text-gray-300">
+                              Email Notifications
+                            </Label>
+                          </div>
+                          
+                          <div className="flex items-center space-x-2">
+                            <Switch id="marketing-emails" />
+                            <Label htmlFor="marketing-emails" className="text-gray-300">
+                              Marketing Emails
+                            </Label>
+                          </div>
+                          
+                          <Separator className="bg-white/20" />
+                          
+                          <div className="flex space-x-2">
+                            <Button className="bg-gradient-to-r from-green-600 to-emerald-600 flex-1">
+                              <CheckCircle className="h-4 w-4 mr-2" />
+                              Save Changes
+                            </Button>
+                            <Button variant="outline" className="border-red-500/50 text-red-400 hover:bg-red-500/20">
+                              <Ban className="h-4 w-4 mr-2" />
+                              Suspend User
+                            </Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </TabsContent>
+                  </Tabs>
+                </div>
+              )}
+            </DialogContent>
+          </Dialog>
 
           {/* Game Edit Dialog */}
           <Dialog open={isEditGameOpen} onOpenChange={setIsEditGameOpen}>
