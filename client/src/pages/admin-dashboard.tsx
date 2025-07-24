@@ -190,21 +190,21 @@ export default function AdminDashboard() {
 
   // Fetch detailed user data when a user is selected for real-time information
   const { data: userDetails, isLoading: userDetailsLoading, refetch: refetchUserDetails } = useQuery({
-    queryKey: ["/api/admin/users", selectedUser?.id, "details"],
+    queryKey: [`/api/admin/users/${selectedUser?.id}/details`],
     enabled: !!selectedUser?.id && isUserProfileOpen,
     refetchInterval: isUserProfileOpen ? 5000 : false, // Refresh every 5 seconds for real-time updates
   });
 
   // Fetch user transactions for real-time transaction history
   const { data: userTransactions, refetch: refetchUserTransactions } = useQuery({
-    queryKey: ["/api/admin/users", selectedUser?.id, "transactions"],
+    queryKey: [`/api/admin/users/${selectedUser?.id}/transactions`],
     enabled: !!selectedUser?.id && isUserProfileOpen,
     refetchInterval: isUserProfileOpen ? 5000 : false,
   });
 
   // Fetch user activity for real-time activity timeline
   const { data: userActivity, refetch: refetchUserActivity } = useQuery({
-    queryKey: ["/api/admin/users", selectedUser?.id, "activity"],
+    queryKey: [`/api/admin/users/${selectedUser?.id}/activity`],
     enabled: !!selectedUser?.id && isUserProfileOpen,
     refetchInterval: isUserProfileOpen ? 5000 : false,
   });
@@ -212,21 +212,44 @@ export default function AdminDashboard() {
   // Debug logging and force refetch when dialog opens
   useEffect(() => {
     if (selectedUser && isUserProfileOpen) {
-      console.log("User profile opened for user:", selectedUser.id);
-      console.log("Query conditions:", {
+      console.log("🔍 User profile opened for user:", selectedUser.id);
+      console.log("📊 Query conditions:", {
         selectedUserId: selectedUser?.id,
         isUserProfileOpen,
-        queryEnabled: !!selectedUser?.id && isUserProfileOpen
+        queryEnabled: !!selectedUser?.id && isUserProfileOpen,
+        detailsQueryKey: `/api/admin/users/${selectedUser.id}/details`,
+        transactionsQueryKey: `/api/admin/users/${selectedUser.id}/transactions`,
+        activityQueryKey: `/api/admin/users/${selectedUser.id}/activity`
       });
       
       // Force refetch all user-specific data when dialog opens
       setTimeout(() => {
+        console.log("🔄 Forcing refetch of user data...");
         refetchUserDetails();
-        refetchUserTransactions();
+        refetchUserTransactions(); 
         refetchUserActivity();
       }, 100); // Small delay to ensure queries are set up
     }
   }, [selectedUser, isUserProfileOpen]);
+
+  // Debug logging for query results
+  useEffect(() => {
+    if (userDetails) {
+      console.log("📋 User Details received:", userDetails);
+    }
+  }, [userDetails]);
+
+  useEffect(() => {
+    if (userTransactions) {
+      console.log("💰 User Transactions received:", userTransactions);
+    }
+  }, [userTransactions]);
+
+  useEffect(() => {
+    if (userActivity) {
+      console.log("⚡ User Activity received:", userActivity);
+    }
+  }, [userActivity]);
 
   // Analytics data
   const { data: analytics, refetch: refetchAnalytics } = useQuery<{
@@ -2001,18 +2024,18 @@ export default function AdminDashboard() {
                         <div className="text-lg font-bold text-white">{selectedUser.firstName} {selectedUser.lastName}</div>
                         <div className="text-blue-200 text-sm">{selectedUser.email}</div>
                         <div className="text-blue-300 text-xs mt-1">User ID: {selectedUser.id}</div>
-                        {userDetails?.stats && (
+                        {userDetails && (userDetails as any)?.stats && (
                           <div className="mt-2 space-y-1">
                             <div className="text-blue-200 text-xs">Status: 
                               <span className={`ml-1 px-2 py-1 rounded-full text-xs ${
-                                userDetails.stats.status === 'online' ? 'bg-green-500/30 text-green-200' :
-                                userDetails.stats.status === 'away' ? 'bg-yellow-500/30 text-yellow-200' :
+                                (userDetails as any).stats.status === 'online' ? 'bg-green-500/30 text-green-200' :
+                                (userDetails as any).stats.status === 'away' ? 'bg-yellow-500/30 text-yellow-200' :
                                 'bg-gray-500/30 text-gray-200'
                               }`}>
-                                {userDetails.stats.status}
+                                {(userDetails as any).stats.status}
                               </span>
                             </div>
-                            <div className="text-blue-300 text-xs">Account Age: {userDetails.stats.accountAge} days</div>
+                            <div className="text-blue-300 text-xs">Account Age: {(userDetails as any).stats.accountAge} days</div>
                           </div>
                         )}
                       </CardContent>
@@ -2032,10 +2055,10 @@ export default function AdminDashboard() {
                         >
                           {selectedUser.cardOnFile ? "Card on File" : "No Payment Method"}
                         </Badge>
-                        {userDetails?.stats && (
+                        {userDetails && (userDetails as any)?.stats && (
                           <div className="mt-2 space-y-1">
-                            <div className="text-green-200 text-xs">Total Spent: ${userDetails.stats.totalSpent}</div>
-                            <div className="text-green-300 text-xs">Win Rate: {userDetails.stats.winRate}%</div>
+                            <div className="text-green-200 text-xs">Total Spent: ${(userDetails as any).stats.totalSpent}</div>
+                            <div className="text-green-300 text-xs">Win Rate: {(userDetails as any).stats.winRate}%</div>
                           </div>
                         )}
                       </CardContent>
@@ -2047,15 +2070,15 @@ export default function AdminDashboard() {
                           <Activity className="h-6 w-6 text-white" />
                         </div>
                         <div className="text-lg font-bold text-white">
-                          {userDetails?.stats?.totalSpins || 0} Spins
+                          {(userDetails as any)?.stats?.totalSpins || 0} Spins
                         </div>
                         <div className="text-purple-200 text-sm">Game Activity</div>
-                        {userDetails?.stats && (
+                        {userDetails && (userDetails as any)?.stats && (
                           <div className="mt-2 space-y-1">
-                            <div className="text-purple-200 text-xs">Favorite: {userDetails.stats.favoriteGame}</div>
+                            <div className="text-purple-200 text-xs">Favorite: {(userDetails as any).stats.favoriteGame}</div>
                             <div className="text-purple-300 text-xs">
-                              Last Active: {userDetails.stats.lastActive ? 
-                                new Date(userDetails.stats.lastActive).toLocaleDateString() : 'N/A'}
+                              Last Active: {(userDetails as any).stats.lastActive ? 
+                                new Date((userDetails as any).stats.lastActive).toLocaleDateString() : 'N/A'}
                             </div>
                           </div>
                         )}
@@ -2155,7 +2178,7 @@ export default function AdminDashboard() {
                         <CardContent>
                           {userActivity ? (
                             <div className="space-y-3">
-                              {userActivity.map((activity: any) => {
+                              {Array.isArray(userActivity) && userActivity.map((activity: any) => {
                                 const getActivityIcon = (type: string) => {
                                   switch (type) {
                                     case 'game_join': return <Gamepad2 className="h-4 w-4 text-white" />;
@@ -2230,7 +2253,7 @@ export default function AdminDashboard() {
                         <CardContent>
                           {userTransactions ? (
                             <div className="space-y-3">
-                              {userTransactions.map((transaction: any) => {
+                              {Array.isArray(userTransactions) && userTransactions.map((transaction: any) => {
                                 const getStatusColor = (status: string) => {
                                   switch (status) {
                                     case 'completed': return 'border-green-500/20 bg-green-500/10';
