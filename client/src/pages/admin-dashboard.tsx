@@ -1447,7 +1447,7 @@ export default function AdminDashboard() {
                 <CardContent className="p-6 text-center relative overflow-hidden">
                   <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent"></div>
                   <div className="relative z-10">
-                    <div className="text-4xl font-bold text-white mb-2 drop-shadow-xl">{users?.filter(u => u.card_on_file).length || 0}</div>
+                    <div className="text-4xl font-bold text-white mb-2 drop-shadow-xl">{users?.filter(u => u.cardOnFile).length || 0}</div>
                     <div className="text-sm text-white/90 font-medium drop-shadow-lg">Verified Users</div>
                     <div className="text-xs text-white/70 mt-1">💳 Currently verified</div>
                   </div>
@@ -1458,7 +1458,7 @@ export default function AdminDashboard() {
                 <CardContent className="p-6 text-center relative overflow-hidden">
                   <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent"></div>
                   <div className="relative z-10">
-                    <div className="text-4xl font-bold text-white mb-2 drop-shadow-xl">{users?.filter(u => u.created_at && new Date(u.created_at) > new Date(Date.now() - 24*60*60*1000)).length || 0}</div>
+                    <div className="text-4xl font-bold text-white mb-2 drop-shadow-xl">{users?.filter(u => u.createdAt && new Date(u.createdAt) > new Date(Date.now() - 24*60*60*1000)).length || 0}</div>
                     <div className="text-sm text-white/90 font-medium drop-shadow-lg">New Today</div>
                     <div className="text-xs text-white/70 mt-1">🔥 Real-time</div>
                   </div>
@@ -1469,7 +1469,7 @@ export default function AdminDashboard() {
                 <CardContent className="p-6 text-center relative overflow-hidden">
                   <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent"></div>
                   <div className="relative z-10">
-                    <div className="text-4xl font-bold text-white mb-2 drop-shadow-xl">{users?.filter(u => u.is_active).length || users?.length || 0}</div>
+                    <div className="text-4xl font-bold text-white mb-2 drop-shadow-xl">{users?.filter(u => u.isActive).length || users?.length || 0}</div>
                     <div className="text-sm text-white/90 font-medium drop-shadow-lg">Active Users</div>
                     <div className="text-xs text-white/70 mt-1">⚡ Total active</div>
                   </div>
@@ -1495,7 +1495,7 @@ export default function AdminDashboard() {
                             <User className="h-5 w-5 text-white" />
                           </div>
                           <div>
-                            <div className="text-white font-medium">{user.first_name} {user.last_name}</div>
+                            <div className="text-white font-medium">{user.firstName} {user.lastName}</div>
                             <div className="text-gray-400 text-sm">{user.email}</div>
                             <div className="text-gray-500 text-xs">ID: {user.id}</div>
                           </div>
@@ -1504,14 +1504,14 @@ export default function AdminDashboard() {
                           <div className="text-right">
                             <div className="flex items-center space-x-2">
                               <Badge 
-                                variant={user.card_on_file ? "default" : "secondary"}
-                                className={user.card_on_file ? "bg-green-500 hover:bg-green-600" : "bg-gray-500 hover:bg-gray-600"}
+                                variant={user.cardOnFile ? "default" : "secondary"}
+                                className={user.cardOnFile ? "bg-green-500 hover:bg-green-600" : "bg-gray-500 hover:bg-gray-600"}
                               >
-                                {user.card_on_file ? "Verified" : "Unverified"}
+                                {user.cardOnFile ? "Verified" : "Unverified"}
                               </Badge>
                             </div>
                             <div className="text-gray-400 text-xs mt-1">
-                              Joined: {user.created_at ? new Date(user.created_at).toLocaleDateString() : 'N/A'}
+                              Joined: {user.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'N/A'}
                             </div>
                           </div>
                           <div className="flex space-x-2">
