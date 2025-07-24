@@ -71,6 +71,10 @@ export interface IStorage {
   getSpinResultsByGameId(gameId: number): Promise<SpinResult[]>;
   getSpinResultsByPlayerId(playerId: number): Promise<SpinResult[]>;
 
+  // User activity methods
+  getUserActivity(userId: number): Promise<any[]>;
+  getUserStats(userId: number): Promise<any>;
+
   // Game logic methods
   spinWheel(gameId: number, playerId: number): Promise<SpinResult>;
   isNumberAvailable(gameId: number, number: number): Promise<boolean>;
@@ -742,6 +746,104 @@ export class DatabaseStorage implements IStorage {
         revenueGrowth: 0,
         gameStats: []
       };
+    }
+  }
+
+  // User activity methods for admin dashboard
+  async getUserActivity(userId: number): Promise<any[]> {
+    try {
+      // Get user's recent transactions and game activity
+      const userTransactions = await db
+        .select({
+          id: transactions.id,
+          gameId: transactions.gameId,
+          amount: transactions.amount,
+          status: transactions.status,
+          createdAt: transactions.createdAt,
+          spunNumber: spinResults.spunNumber,
+          gameName: games.name,
+          prize: games.prize
+        })
+        .from(transactions)
+        .leftJoin(spinResults, eq(transactions.spinResultId, spinResults.id))
+        .leftJoin(games, eq(transactions.gameId, games.id))
+        .where(eq(transactions.userId, userId))
+        .orderBy(desc(transactions.createdAt))
+        .limit(10);
+
+      // Format activity data
+      const activity = userTransactions.map(tx => ({
+        id: tx.id,
+        type: tx.spunNumber ? 'game_spin' : 'payment',
+        title: tx.spunNumber ? `Spun Number ${tx.spunNumber}` : 'Payment Processed',
+        description: tx.gameName ? `Game: ${tx.gameName}` : 'Card verification',
+        amount: tx.amount,
+        status: tx.status,
+        createdAt: tx.createdAt,
+        metadata: {
+          gameId: tx.gameId,
+          spunNumber: tx.spunNumber,
+          prize: tx.prize
+        }
+      }));
+
+      return activity;
+    } catch (error) {
+      console.error("Error getting user activity:", error);
+      return [];
+    }
+  }
+
+  async getUserStats(userId: number): Promise<any> {
+    try {
+      const user = await this.getUser(userId);
+      if (!user) return null;
+
+      // Get transaction stats
+      const transactionStats = await db
+        .select({
+          totalSpent: sql<number>`coalesce(sum(cast(amount as decimal)), 0)`,
+          totalTransactions: sql<number>`count(*)`
+        })
+        .from(transactions)
+        .where(eq(transactions.userId, userId));
+
+      // Get spin stats
+      const spinStats = await db
+        .select({
+          totalSpins: sql<number>`count(*)`
+        })
+        .from(spinResults)
+        .leftJoin(players, eq(spinResults.playerId, players.id))
+        .where(eq(players.userId, userId));
+
+      // Get game participation
+      const gameParticipation = await db
+        .select({
+          gameId: games.id,
+          gameName: games.name
+        })
+        .from(games)
+        .leftJoin(players, eq(games.id, players.gameId))
+        .where(eq(players.userId, userId))
+        .groupBy(games.id, games.name)
+        .limit(1);
+
+      const stats = transactionStats[0];
+      const spins = spinStats[0];
+      
+      return {
+        status: 'active',
+        accountAge: Math.floor((Date.now() - new Date(user.createdAt).getTime()) / (1000 * 60 * 60 * 24)),
+        totalSpent: Number(stats?.totalSpent || 0),
+        totalSpins: Number(spins?.totalSpins || 0),
+        winRate: 0, // TODO: Calculate win rate based on actual wins
+        favoriteGame: gameParticipation[0]?.gameName || 'None',
+        lastActive: user.updatedAt
+      };
+    } catch (error) {
+      console.error("Error getting user stats:", error);
+      return null;
     }
   }
 }
