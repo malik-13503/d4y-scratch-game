@@ -328,6 +328,7 @@ export default function AdminDashboard() {
     const durationHours = parseInt(formData.get("duration") as string) || 24;
     const prizeValue = formData.get("prizeValue") as string;
     
+    const totalNumbers = parseInt(formData.get("totalNumbers") as string) || 125;
     const gameData = {
       name: formData.get("name") as string,
       code: `G${Date.now().toString().slice(-6)}`, // Generate unique code
@@ -336,9 +337,10 @@ export default function AdminDashboard() {
       prize: formData.get("prize") as string,
       prizeValue: prizeValue, // Keep as string for decimal field
       prizeDescription: formData.get("description") as string,
-      totalNumbers: parseInt(formData.get("totalNumbers") as string) || 125,
-      freePlayStart: Math.ceil((parseInt(formData.get("totalNumbers") as string) || 125) * 0.75),
-      freePlayEnd: parseInt(formData.get("totalNumbers") as string) || 125,
+      totalNumbers: totalNumbers,
+      numbersLeft: totalNumbers, // Required field - initially all numbers are available
+      freePlayStart: Math.ceil(totalNumbers * 0.75),
+      freePlayEnd: totalNumbers,
       maxWinners: 1,
       startTime: new Date(), // Start immediately
       endTime: new Date(Date.now() + durationHours * 60 * 60 * 1000),
