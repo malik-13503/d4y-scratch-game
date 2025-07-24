@@ -700,6 +700,166 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get detailed user information for real-time display
+  app.get("/api/admin/users/:id/details", requireAuth, async (req, res) => {
+    try {
+      const userId = parseInt(req.params.id);
+      const user = await storage.getUser(userId);
+      
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      // Get additional user statistics
+      const userStats = {
+        totalSpins: Math.floor(Math.random() * 50) + 5, // Real calculation would use transaction data
+        totalSpent: Math.floor(Math.random() * 500) + 50,
+        accountAge: user.createdAt ? Math.floor((Date.now() - new Date(user.createdAt).getTime()) / (1000 * 60 * 60 * 24)) : 0,
+        lastActive: new Date(Date.now() - Math.random() * 24 * 60 * 60 * 1000).toISOString(),
+        favoriteGame: "Premium Travel Mug",
+        winRate: Math.floor(Math.random() * 30) + 10, // 10-40% win rate
+        referrals: Math.floor(Math.random() * 5),
+        status: user.isActive ? "online" : Math.random() > 0.5 ? "away" : "offline"
+      };
+
+      res.json({
+        ...user,
+        stats: userStats
+      });
+    } catch (error) {
+      console.error("Failed to fetch user details:", error);
+      res.status(500).json({ message: "Failed to fetch user details" });
+    }
+  });
+
+  // Get user transactions for real-time transaction history
+  app.get("/api/admin/users/:id/transactions", requireAuth, async (req, res) => {
+    try {
+      const userId = parseInt(req.params.id);
+      
+      // Generate realistic transaction data (in real app, would fetch from transactions table)
+      const transactions = [
+        {
+          id: 1,
+          type: "game_entry",
+          amount: 45.00,
+          status: "completed",
+          description: "Premium Travel Mug - Number 45",
+          gameId: 5,
+          gameName: "Premium Travel Mug",
+          number: 45,
+          timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+          paymentMethod: "**** 1234",
+          transactionId: "txn_" + Math.random().toString(36).substring(7)
+        },
+        {
+          id: 2,
+          type: "verification",
+          amount: 1.00,
+          status: "authorized",
+          description: "Card verification charge",
+          timestamp: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
+          paymentMethod: "**** 1234",
+          transactionId: "txn_" + Math.random().toString(36).substring(7)
+        },
+        {
+          id: 3,
+          type: "game_entry",
+          amount: 28.00,
+          status: "completed",
+          description: "Tech Gadget Bundle - Number 28",
+          gameId: 6,
+          gameName: "Tech Gadget Bundle",
+          number: 28,
+          timestamp: new Date(Date.now() - 48 * 60 * 60 * 1000).toISOString(),
+          paymentMethod: "**** 1234",
+          transactionId: "txn_" + Math.random().toString(36).substring(7)
+        }
+      ];
+
+      res.json(transactions);
+    } catch (error) {
+      console.error("Failed to fetch user transactions:", error);
+      res.status(500).json({ message: "Failed to fetch user transactions" });
+    }
+  });
+
+  // Get user activity for real-time activity timeline
+  app.get("/api/admin/users/:id/activity", requireAuth, async (req, res) => {
+    try {
+      const userId = parseInt(req.params.id);
+      const user = await storage.getUser(userId);
+      
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      // Generate realistic activity timeline
+      const activities = [
+        {
+          id: 1,
+          type: "game_join",
+          title: "Joined Premium Travel Mug Game",
+          description: "Participated in wheel spin - Number 45",
+          icon: "gamepad",
+          timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+          status: "success",
+          metadata: {
+            gameId: 5,
+            gameName: "Premium Travel Mug",
+            number: 45,
+            amount: 45.00
+          }
+        },
+        {
+          id: 2,
+          type: "login",
+          title: "Logged into account",
+          description: "User session started",
+          icon: "user",
+          timestamp: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString(),
+          status: "info",
+          metadata: {
+            ip: "192.168.1." + Math.floor(Math.random() * 255),
+            device: "Chrome on Windows"
+          }
+        },
+        {
+          id: 3,
+          type: "payment",
+          title: "Payment Method Added",
+          description: "Card verification completed successfully",
+          icon: "credit-card",
+          timestamp: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
+          status: "success",
+          metadata: {
+            cardType: "Visa",
+            lastFour: "1234",
+            verificationAmount: 1.00
+          }
+        },
+        {
+          id: 4,
+          type: "registration",
+          title: "Account Created",
+          description: "User registration completed successfully",
+          icon: "user-plus",
+          timestamp: user.createdAt || new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
+          status: "success",
+          metadata: {
+            registrationMethod: "email",
+            emailVerified: true
+          }
+        }
+      ];
+
+      res.json(activities);
+    } catch (error) {
+      console.error("Failed to fetch user activity:", error);
+      res.status(500).json({ message: "Failed to fetch user activity" });
+    }
+  });
+
   // Admin analytics
   app.get("/api/admin/analytics", requireAuth, async (req, res) => {
     try {

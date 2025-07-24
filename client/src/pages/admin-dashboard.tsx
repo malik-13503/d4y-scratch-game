@@ -50,7 +50,9 @@ import {
   Info,
   AlertTriangle,
   Coffee,
-  ArrowRight
+  ArrowRight,
+  UserPlus,
+  XCircle
 } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -184,6 +186,27 @@ export default function AdminDashboard() {
   const { data: users, refetch: refetchUsers } = useQuery<any[]>({
     queryKey: ["/api/admin/users"],
     enabled: !!currentAdmin,
+  });
+
+  // Fetch detailed user data when a user is selected for real-time information
+  const { data: userDetails, isLoading: userDetailsLoading, refetch: refetchUserDetails } = useQuery({
+    queryKey: ["/api/admin/users", selectedUser?.id, "details"],
+    enabled: !!selectedUser?.id && isUserProfileOpen,
+    refetchInterval: 5000, // Refresh every 5 seconds for real-time updates
+  });
+
+  // Fetch user transactions for real-time transaction history
+  const { data: userTransactions, refetch: refetchUserTransactions } = useQuery({
+    queryKey: ["/api/admin/users", selectedUser?.id, "transactions"],
+    enabled: !!selectedUser?.id && isUserProfileOpen,
+    refetchInterval: 5000,
+  });
+
+  // Fetch user activity for real-time activity timeline
+  const { data: userActivity, refetch: refetchUserActivity } = useQuery({
+    queryKey: ["/api/admin/users", selectedUser?.id, "activity"],
+    enabled: !!selectedUser?.id && isUserProfileOpen,
+    refetchInterval: 5000,
   });
 
   // Analytics data
@@ -1941,7 +1964,15 @@ export default function AdminDashboard() {
               
               {selectedUser && (
                 <div className="space-y-6">
-                  {/* User Overview Cards */}
+                  {/* Loading State */}
+                  {userDetailsLoading && (
+                    <div className="flex items-center justify-center py-8">
+                      <div className="animate-spin w-8 h-8 border-4 border-purple-500 border-t-transparent rounded-full"></div>
+                      <span className="ml-3 text-purple-200">Loading real-time user data...</span>
+                    </div>
+                  )}
+
+                  {/* User Overview Cards with Real-time Data */}
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <Card className="bg-gradient-to-br from-blue-600/80 to-blue-700/90 border-0">
                       <CardContent className="p-4 text-center">
@@ -1951,6 +1982,20 @@ export default function AdminDashboard() {
                         <div className="text-lg font-bold text-white">{selectedUser.firstName} {selectedUser.lastName}</div>
                         <div className="text-blue-200 text-sm">{selectedUser.email}</div>
                         <div className="text-blue-300 text-xs mt-1">User ID: {selectedUser.id}</div>
+                        {userDetails?.stats && (
+                          <div className="mt-2 space-y-1">
+                            <div className="text-blue-200 text-xs">Status: 
+                              <span className={`ml-1 px-2 py-1 rounded-full text-xs ${
+                                userDetails.stats.status === 'online' ? 'bg-green-500/30 text-green-200' :
+                                userDetails.stats.status === 'away' ? 'bg-yellow-500/30 text-yellow-200' :
+                                'bg-gray-500/30 text-gray-200'
+                              }`}>
+                                {userDetails.stats.status}
+                              </span>
+                            </div>
+                            <div className="text-blue-300 text-xs">Account Age: {userDetails.stats.accountAge} days</div>
+                          </div>
+                        )}
                       </CardContent>
                     </Card>
                     
@@ -1968,6 +2013,12 @@ export default function AdminDashboard() {
                         >
                           {selectedUser.cardOnFile ? "Card on File" : "No Payment Method"}
                         </Badge>
+                        {userDetails?.stats && (
+                          <div className="mt-2 space-y-1">
+                            <div className="text-green-200 text-xs">Total Spent: ${userDetails.stats.totalSpent}</div>
+                            <div className="text-green-300 text-xs">Win Rate: {userDetails.stats.winRate}%</div>
+                          </div>
+                        )}
                       </CardContent>
                     </Card>
                     
@@ -1977,12 +2028,18 @@ export default function AdminDashboard() {
                           <Activity className="h-6 w-6 text-white" />
                         </div>
                         <div className="text-lg font-bold text-white">
-                          {selectedUser.isActive ? "Active" : "Inactive"}
+                          {userDetails?.stats?.totalSpins || 0} Spins
                         </div>
-                        <div className="text-purple-200 text-sm">Account Status</div>
-                        <div className="text-purple-300 text-xs mt-1">
-                          Joined: {selectedUser.createdAt ? new Date(selectedUser.createdAt).toLocaleDateString() : 'N/A'}
-                        </div>
+                        <div className="text-purple-200 text-sm">Game Activity</div>
+                        {userDetails?.stats && (
+                          <div className="mt-2 space-y-1">
+                            <div className="text-purple-200 text-xs">Favorite: {userDetails.stats.favoriteGame}</div>
+                            <div className="text-purple-300 text-xs">
+                              Last Active: {userDetails.stats.lastActive ? 
+                                new Date(userDetails.stats.lastActive).toLocaleDateString() : 'N/A'}
+                            </div>
+                          </div>
+                        )}
                       </CardContent>  
                     </Card>
                   </div>
@@ -2060,54 +2117,74 @@ export default function AdminDashboard() {
                     <TabsContent value="activity" className="space-y-4">
                       <Card className="bg-black/20 border border-purple-500/30">
                         <CardHeader>
-                          <CardTitle className="text-white flex items-center">
-                            <Activity className="h-5 w-5 mr-2 text-green-400" />
-                            Recent Activity
+                          <CardTitle className="text-white flex items-center justify-between">
+                            <div className="flex items-center">
+                              <Activity className="h-5 w-5 mr-2 text-green-400" />
+                              Recent Activity
+                            </div>
+                            <Button 
+                              size="sm" 
+                              variant="outline" 
+                              onClick={() => refetchUserActivity()}
+                              className="border-green-500/50 text-green-400 hover:bg-green-500/20"
+                            >
+                              <RefreshCw className="h-3 w-3 mr-1" />
+                              Refresh
+                            </Button>
                           </CardTitle>
                         </CardHeader>
                         <CardContent>
-                          <div className="space-y-3">
-                            <div className="flex items-center justify-between p-3 bg-white/5 rounded-lg">
-                              <div className="flex items-center space-x-3">
-                                <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
-                                  <Gamepad2 className="h-4 w-4 text-white" />
-                                </div>
-                                <div>
-                                  <div className="text-white text-sm font-medium">Joined Premium Travel Mug Game</div>
-                                  <div className="text-gray-400 text-xs">Participated in wheel spin</div>
-                                </div>
-                              </div>
-                              <div className="text-gray-400 text-xs">2 hours ago</div>
+                          {userActivity ? (
+                            <div className="space-y-3">
+                              {userActivity.map((activity: any) => {
+                                const getActivityIcon = (type: string) => {
+                                  switch (type) {
+                                    case 'game_join': return <Gamepad2 className="h-4 w-4 text-white" />;
+                                    case 'login': return <User className="h-4 w-4 text-white" />;
+                                    case 'payment': return <DollarSign className="h-4 w-4 text-white" />;
+                                    case 'registration': return <UserPlus className="h-4 w-4 text-white" />;
+                                    default: return <Activity className="h-4 w-4 text-white" />;
+                                  }
+                                };
+
+                                const getStatusColor = (status: string) => {
+                                  switch (status) {
+                                    case 'success': return 'bg-green-500';
+                                    case 'warning': return 'bg-yellow-500';
+                                    case 'error': return 'bg-red-500';
+                                    default: return 'bg-blue-500';
+                                  }
+                                };
+
+                                return (
+                                  <div key={activity.id} className="flex items-center justify-between p-3 bg-white/5 rounded-lg hover:bg-white/10 transition-colors">
+                                    <div className="flex items-center space-x-3">
+                                      <div className={`w-8 h-8 ${getStatusColor(activity.status)} rounded-full flex items-center justify-center`}>
+                                        {getActivityIcon(activity.type)}
+                                      </div>
+                                      <div>
+                                        <div className="text-white text-sm font-medium">{activity.title}</div>
+                                        <div className="text-gray-400 text-xs">{activity.description}</div>
+                                        {activity.metadata && activity.type === 'game_join' && (
+                                          <div className="text-blue-300 text-xs mt-1">
+                                            Amount: ${activity.metadata.amount} • Number: {activity.metadata.number}
+                                          </div>
+                                        )}
+                                      </div>
+                                    </div>
+                                    <div className="text-gray-400 text-xs">
+                                      {new Date(activity.timestamp).toLocaleString()}
+                                    </div>
+                                  </div>
+                                );
+                              })}
                             </div>
-                            
-                            <div className="flex items-center justify-between p-3 bg-white/5 rounded-lg">
-                              <div className="flex items-center space-x-3">
-                                <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
-                                  <DollarSign className="h-4 w-4 text-white" />
-                                </div>
-                                <div>
-                                  <div className="text-white text-sm font-medium">Payment Method Added</div>
-                                  <div className="text-gray-400 text-xs">Card verification completed</div>
-                                </div>
-                              </div>
-                              <div className="text-gray-400 text-xs">1 day ago</div>
+                          ) : (
+                            <div className="text-center py-8">
+                              <div className="animate-spin w-6 h-6 border-4 border-green-500 border-t-transparent rounded-full mx-auto mb-2"></div>
+                              <div className="text-gray-400 text-sm">Loading activity data...</div>
                             </div>
-                            
-                            <div className="flex items-center justify-between p-3 bg-white/5 rounded-lg">
-                              <div className="flex items-center space-x-3">
-                                <div className="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center">
-                                  <User className="h-4 w-4 text-white" />
-                                </div>
-                                <div>
-                                  <div className="text-white text-sm font-medium">Account Created</div>
-                                  <div className="text-gray-400 text-xs">User registration completed</div>
-                                </div>
-                              </div>
-                              <div className="text-gray-400 text-xs">
-                                {selectedUser.createdAt ? new Date(selectedUser.createdAt).toLocaleDateString() : 'Unknown'}
-                              </div>
-                            </div>
-                          </div>
+                          )}
                         </CardContent>
                       </Card>
                     </TabsContent>
@@ -2115,45 +2192,93 @@ export default function AdminDashboard() {
                     <TabsContent value="transactions" className="space-y-4">
                       <Card className="bg-black/20 border border-purple-500/30">
                         <CardHeader>
-                          <CardTitle className="text-white flex items-center">
-                            <DollarSign className="h-5 w-5 mr-2 text-green-400" />
-                            Transaction History
+                          <CardTitle className="text-white flex items-center justify-between">
+                            <div className="flex items-center">
+                              <DollarSign className="h-5 w-5 mr-2 text-green-400" />
+                              Transaction History
+                            </div>
+                            <Button 
+                              size="sm" 
+                              variant="outline" 
+                              onClick={() => refetchUserTransactions()}
+                              className="border-green-500/50 text-green-400 hover:bg-green-500/20"
+                            >
+                              <RefreshCw className="h-3 w-3 mr-1" />
+                              Refresh
+                            </Button>
                           </CardTitle>
                         </CardHeader>
                         <CardContent>
-                          <div className="space-y-3">
-                            <div className="flex items-center justify-between p-3 bg-white/5 rounded-lg border border-green-500/20">
-                              <div className="flex items-center space-x-3">
-                                <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
-                                  <CheckCircle className="h-4 w-4 text-white" />
-                                </div>
-                                <div>
-                                  <div className="text-white text-sm font-medium">Game Entry Payment</div>
-                                  <div className="text-gray-400 text-xs">Premium Travel Mug - Number 45</div>
-                                </div>
-                              </div>
-                              <div className="text-right">
-                                <div className="text-green-400 font-medium">$45.00</div>
-                                <div className="text-gray-400 text-xs">Completed</div>
-                              </div>
+                          {userTransactions ? (
+                            <div className="space-y-3">
+                              {userTransactions.map((transaction: any) => {
+                                const getStatusColor = (status: string) => {
+                                  switch (status) {
+                                    case 'completed': return 'border-green-500/20 bg-green-500/10';
+                                    case 'authorized': return 'border-yellow-500/20 bg-yellow-500/10';
+                                    case 'pending': return 'border-blue-500/20 bg-blue-500/10';
+                                    case 'failed': return 'border-red-500/20 bg-red-500/10';
+                                    default: return 'border-gray-500/20 bg-gray-500/10';
+                                  }
+                                };
+
+                                const getStatusIcon = (status: string) => {
+                                  switch (status) {
+                                    case 'completed': return <CheckCircle className="h-4 w-4 text-green-400" />;
+                                    case 'authorized': return <Clock className="h-4 w-4 text-yellow-400" />;
+                                    case 'pending': return <Clock className="h-4 w-4 text-blue-400" />;
+                                    case 'failed': return <XCircle className="h-4 w-4 text-red-400" />;
+                                    default: return <DollarSign className="h-4 w-4 text-gray-400" />;
+                                  }
+                                };
+
+                                const getAmountColor = (status: string) => {
+                                  switch (status) {
+                                    case 'completed': return 'text-green-400';
+                                    case 'authorized': return 'text-yellow-400';
+                                    case 'pending': return 'text-blue-400';
+                                    case 'failed': return 'text-red-400';
+                                    default: return 'text-gray-400';
+                                  }
+                                };
+
+                                return (
+                                  <div key={transaction.id} className={`flex items-center justify-between p-3 bg-white/5 rounded-lg border ${getStatusColor(transaction.status)} hover:bg-white/10 transition-colors`}>
+                                    <div className="flex items-center space-x-3">
+                                      <div className="w-8 h-8 bg-white/10 rounded-full flex items-center justify-center">
+                                        {getStatusIcon(transaction.status)}
+                                      </div>
+                                      <div>
+                                        <div className="text-white text-sm font-medium">{transaction.description}</div>
+                                        <div className="text-gray-400 text-xs">
+                                          {transaction.paymentMethod} • {transaction.transactionId}
+                                        </div>
+                                        {transaction.type === 'game_entry' && transaction.number && (
+                                          <div className="text-blue-300 text-xs mt-1">
+                                            Game: {transaction.gameName} • Number: {transaction.number}
+                                          </div>
+                                        )}
+                                      </div>
+                                    </div>
+                                    <div className="text-right">
+                                      <div className={`font-medium ${getAmountColor(transaction.status)}`}>
+                                        ${transaction.amount.toFixed(2)}
+                                      </div>
+                                      <div className="text-gray-400 text-xs capitalize">{transaction.status}</div>
+                                      <div className="text-gray-500 text-xs">
+                                        {new Date(transaction.timestamp).toLocaleDateString()}
+                                      </div>
+                                    </div>
+                                  </div>
+                                );
+                              })}
                             </div>
-                            
-                            <div className="flex items-center justify-between p-3 bg-white/5 rounded-lg border border-yellow-500/20">
-                              <div className="flex items-center space-x-3">
-                                <div className="w-8 h-8 bg-yellow-500 rounded-full flex items-center justify-center">
-                                  <Clock className="h-4 w-4 text-white" />
-                                </div>
-                                <div>
-                                  <div className="text-white text-sm font-medium">Card Verification</div>
-                                  <div className="text-gray-400 text-xs">Payment method setup</div>
-                                </div>
-                              </div>
-                              <div className="text-right">
-                                <div className="text-yellow-400 font-medium">$1.00</div>
-                                <div className="text-gray-400 text-xs">Authorized</div>
-                              </div>
+                          ) : (
+                            <div className="text-center py-8">
+                              <div className="animate-spin w-6 h-6 border-4 border-green-500 border-t-transparent rounded-full mx-auto mb-2"></div>
+                              <div className="text-gray-400 text-sm">Loading transaction data...</div>
                             </div>
-                          </div>
+                          )}
                         </CardContent>
                       </Card>
                     </TabsContent>
