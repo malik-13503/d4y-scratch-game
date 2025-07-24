@@ -1427,10 +1427,6 @@ export default function AdminDashboard() {
                   <RefreshCw className="h-4 w-4 mr-2" />
                   Refresh
                 </Button>
-                <Button className="bg-gradient-to-r from-green-600 to-emerald-600">
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add User
-                </Button>
               </div>
             </div>
 
@@ -1491,46 +1487,48 @@ export default function AdminDashboard() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {users?.map((user) => (
-                    <div key={user.id} className="flex items-center justify-between p-4 bg-white/5 rounded-lg border border-white/10 hover:bg-white/10 transition-colors">
-                      <div className="flex items-center space-x-4">
-                        <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full flex items-center justify-center">
-                          <User className="h-5 w-5 text-white" />
-                        </div>
-                        <div>
-                          <div className="text-white font-medium">{user.firstName} {user.lastName}</div>
-                          <div className="text-gray-400 text-sm">{user.email}</div>
-                          <div className="text-gray-500 text-xs">ID: {user.id}</div>
-                        </div>
-                      </div>
-                      <div className="flex items-center space-x-4">
-                        <div className="text-right">
-                          <div className="flex items-center space-x-2">
-                            <Badge 
-                              variant={user.cardOnFile ? "default" : "secondary"}
-                              className={user.cardOnFile ? "bg-green-500 hover:bg-green-600" : "bg-gray-500 hover:bg-gray-600"}
-                            >
-                              {user.cardOnFile ? "Verified" : "Unverified"}
-                            </Badge>
+                  {users && users.length > 0 ? (
+                    users.map((user) => (
+                      <div key={user.id} className="flex items-center justify-between p-4 bg-white/5 rounded-lg border border-white/10 hover:bg-white/10 transition-colors">
+                        <div className="flex items-center space-x-4">
+                          <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full flex items-center justify-center">
+                            <User className="h-5 w-5 text-white" />
                           </div>
-                          <div className="text-gray-400 text-xs mt-1">
-                            Joined: {user.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'N/A'}
+                          <div>
+                            <div className="text-white font-medium">{user.firstName} {user.lastName}</div>
+                            <div className="text-gray-400 text-sm">{user.email}</div>
+                            <div className="text-gray-500 text-xs">ID: {user.id}</div>
                           </div>
                         </div>
-                        <div className="flex space-x-2">
-                          <Button size="sm" variant="outline" className="border-blue-500/50 text-blue-400">
-                            <Eye className="h-4 w-4" />
-                          </Button>
-                          <Button size="sm" variant="outline" className="border-yellow-500/50 text-yellow-400">
-                            <Edit3 className="h-4 w-4" />
-                          </Button>
-                          <Button size="sm" variant="outline" className="border-red-500/50 text-red-400">
-                            <Ban className="h-4 w-4" />
-                          </Button>
+                        <div className="flex items-center space-x-4">
+                          <div className="text-right">
+                            <div className="flex items-center space-x-2">
+                              <Badge 
+                                variant={user.cardOnFile ? "default" : "secondary"}
+                                className={user.cardOnFile ? "bg-green-500 hover:bg-green-600" : "bg-gray-500 hover:bg-gray-600"}
+                              >
+                                {user.cardOnFile ? "Verified" : "Unverified"}
+                              </Badge>
+                            </div>
+                            <div className="text-gray-400 text-xs mt-1">
+                              Joined: {user.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'N/A'}
+                            </div>
+                          </div>
+                          <div className="flex space-x-2">
+                            <Button size="sm" variant="outline" className="border-blue-500/50 text-blue-400">
+                              <Eye className="h-4 w-4" />
+                            </Button>
+                            <Button size="sm" variant="outline" className="border-yellow-500/50 text-yellow-400">
+                              <Edit3 className="h-4 w-4" />
+                            </Button>
+                            <Button size="sm" variant="outline" className="border-red-500/50 text-red-400">
+                              <Ban className="h-4 w-4" />
+                            </Button>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  )) || (
+                    ))
+                  ) : (
                     <div className="text-center py-8">
                       <div className="text-gray-400">No users found</div>
                       <div className="text-gray-500 text-sm mt-1">Users will appear here once they register</div>

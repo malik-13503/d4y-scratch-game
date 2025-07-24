@@ -40,6 +40,7 @@ export interface IStorage {
 
   // User methods (for game players)
   getUser(id: number): Promise<User | undefined>;
+  getUsers(): Promise<User[]>;
   getUserByEmail(email: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
   updateUser(id: number, updates: Partial<User>): Promise<User | undefined>;
@@ -510,6 +511,16 @@ export class DatabaseStorage implements IStorage {
     } catch (error) {
       console.error("Error getting user:", error);
       return undefined;
+    }
+  }
+
+  async getUsers(): Promise<User[]> {
+    try {
+      const allUsers = await db.select().from(users).orderBy(desc(users.createdAt));
+      return allUsers;
+    } catch (error) {
+      console.error("Error getting users:", error);
+      return [];
     }
   }
 
