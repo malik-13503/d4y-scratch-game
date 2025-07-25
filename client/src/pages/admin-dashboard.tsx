@@ -67,6 +67,8 @@ export default function AdminDashboard() {
   const [editingGame, setEditingGame] = useState<any>(null);
   const [selectedUser, setSelectedUser] = useState<any>(null);
   const [isUserProfileOpen, setIsUserProfileOpen] = useState(false);
+  const [isDeleteGameOpen, setIsDeleteGameOpen] = useState(false);
+  const [gameToDelete, setGameToDelete] = useState<any>(null);
   
   // Edit form data state
   const [editFormData, setEditFormData] = useState({
@@ -451,6 +453,23 @@ export default function AdminDashboard() {
       ...prev,
       [field]: value
     }));
+  };
+
+  // Handle delete game confirmation
+  const handleDeleteGame = (game: any) => {
+    setGameToDelete(game);
+    setIsDeleteGameOpen(true);
+  };
+
+  const confirmDeleteGame = () => {
+    // TODO: Implement actual delete API call
+    toast({
+      title: "Game Deleted",
+      description: `"${gameToDelete?.name}" has been permanently deleted`,
+      variant: "destructive",
+    });
+    setIsDeleteGameOpen(false);
+    setGameToDelete(null);
   };
 
   const handleUpdateGame = (e: React.FormEvent<HTMLFormElement>) => {
@@ -1416,14 +1435,7 @@ export default function AdminDashboard() {
                         size="sm" 
                         variant="outline" 
                         className="border-red-500/50 text-red-400 hover:bg-red-500/20"
-                        onClick={() => {
-                          if (confirm('Are you sure you want to delete this game?')) {
-                            toast({
-                              title: "Game Deleted",
-                              description: "Game has been successfully deleted",
-                            });
-                          }
-                        }}
+                        onClick={() => handleDeleteGame(game)}
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
@@ -2718,6 +2730,80 @@ export default function AdminDashboard() {
           </TabsContent>
         </Tabs>
       </main>
+
+      {/* Eye-catching Delete Game Confirmation Dialog */}
+      <Dialog open={isDeleteGameOpen} onOpenChange={setIsDeleteGameOpen}>
+        <DialogContent className="bg-gradient-to-br from-red-900/95 via-slate-900/95 to-red-900/95 border-red-500/50 text-white max-w-md">
+          <div className="text-center space-y-6">
+            {/* Animated warning icon */}
+            <div className="relative mx-auto w-20 h-20">
+              <div className="absolute inset-0 bg-red-500/20 rounded-full animate-ping"></div>
+              <div className="absolute inset-2 bg-red-500/30 rounded-full animate-ping animation-delay-75"></div>
+              <div className="relative bg-red-500/90 rounded-full w-20 h-20 flex items-center justify-center">
+                <AlertTriangle className="h-10 w-10 text-white animate-bounce" />
+              </div>
+            </div>
+
+            <DialogHeader className="text-center space-y-3">
+              <DialogTitle className="text-2xl font-black bg-gradient-to-r from-red-400 to-orange-400 bg-clip-text text-transparent">
+                🚨 Delete Game?
+              </DialogTitle>
+              <DialogDescription className="text-gray-300 text-base leading-relaxed">
+                You're about to permanently delete{" "}
+                <span className="font-bold text-white bg-red-500/20 px-2 py-1 rounded border border-red-500/30">
+                  "{gameToDelete?.name}"
+                </span>
+              </DialogDescription>
+            </DialogHeader>
+
+            {/* Warning details */}
+            <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-4 space-y-3">
+              <div className="flex items-center space-x-2 text-red-300">
+                <XCircle className="h-4 w-4" />
+                <span className="font-medium">This action cannot be undone</span>
+              </div>
+              <div className="flex items-center space-x-2 text-red-300">
+                <XCircle className="h-4 w-4" />
+                <span className="font-medium">All game data will be lost</span>
+              </div>
+              <div className="flex items-center space-x-2 text-red-300">
+                <XCircle className="h-4 w-4" />
+                <span className="font-medium">Player progress will be deleted</span>
+              </div>
+            </div>
+
+            {/* Game info preview */}
+            <div className="bg-black/30 border border-red-500/20 rounded-lg p-3">
+              <div className="flex items-center space-x-3 text-sm">
+                <span className="text-2xl">{gameToDelete?.emoji}</span>
+                <div className="text-left">
+                  <div className="font-medium text-white">{gameToDelete?.name}</div>
+                  <div className="text-gray-400">{gameToDelete?.code}</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Action buttons */}
+            <div className="flex space-x-3 pt-2">
+              <Button 
+                variant="outline" 
+                onClick={() => setIsDeleteGameOpen(false)}
+                className="flex-1 border-gray-500/50 text-gray-300 hover:bg-gray-700/50 hover:text-white transition-all duration-200"
+              >
+                <ArrowRight className="h-4 w-4 mr-2 rotate-180" />
+                Keep Game
+              </Button>
+              <Button 
+                onClick={confirmDeleteGame}
+                className="flex-1 bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 text-white font-bold shadow-lg hover:shadow-red-500/25 transition-all duration-200"
+              >
+                <Trash2 className="h-4 w-4 mr-2" />
+                Delete Forever
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
