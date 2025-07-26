@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Coffee, Camera, Gift, Trophy, Star, Zap, Crown, Sparkles, Users, Gamepad2, Target, Gem, User, ArrowRight, Clock } from "lucide-react";
+import { Coffee, Camera, Gift, Trophy, Star, Zap, Crown, Sparkles, Users, Gamepad2, Target, Gem, User, ArrowRight } from "lucide-react";
 import type { Game } from "@shared/schema";
 import logoPath from "@assets/logo_1751918412862.png";
 
