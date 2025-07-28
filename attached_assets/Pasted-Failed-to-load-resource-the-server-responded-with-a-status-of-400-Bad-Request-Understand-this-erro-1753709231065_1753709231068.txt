@@ -1,0 +1,34 @@
+Failed to load resource: the server responded with a status of 400 (Bad Request)Understand this error
+hook.js:608 Card setup error: Error: 400: {"message":"Card verification failed"}
+    at throwIfResNotOk (queryClient.ts:11:11)
+    at async apiRequest (queryClient.ts:27:3)
+    at async handleCardSetup (card-setup.tsx:101:24)
+overrideMethod @ hook.js:608Understand this error
+square.js:3 Attempting to tokenize card with Square SDK...
+square.js:3 Square tokenization result: {details: {…}, status: 'OK', token: 'cnon:CA4SEEVHeKviIqhWIVi643zR6N8YASgB'}
+square.js:3 Card tokenized successfully, sending to server...
+square.js:3  POST https://f45475b4-a7c6-4031-bbbd-cffdcb6fa4d5-00-1aqxf2ubqm5iz.janeway.replit.dev/api/card/add 400 (Bad Request)
+(anonymous) @ square.js:3
+apiRequest @ queryClient.ts:20
+handleCardSetup @ card-setup.tsx:101
+await in handleCardSetup
+callCallback2 @ chunk-WERSD76P.js?v=ba8d6cf0:3674
+n @ square.js:3
+invokeGuardedCallbackDev @ chunk-WERSD76P.js?v=ba8d6cf0:3699
+invokeGuardedCallback @ chunk-WERSD76P.js?v=ba8d6cf0:3733
+invokeGuardedCallbackAndCatchFirstError @ chunk-WERSD76P.js?v=ba8d6cf0:3736
+executeDispatch @ chunk-WERSD76P.js?v=ba8d6cf0:7014
+processDispatchQueueItemsInOrder @ chunk-WERSD76P.js?v=ba8d6cf0:7034
+processDispatchQueue @ chunk-WERSD76P.js?v=ba8d6cf0:7043
+dispatchEventsForPlugins @ chunk-WERSD76P.js?v=ba8d6cf0:7051
+(anonymous) @ chunk-WERSD76P.js?v=ba8d6cf0:7174
+batchedUpdates$1 @ chunk-WERSD76P.js?v=ba8d6cf0:18913
+batchedUpdates @ chunk-WERSD76P.js?v=ba8d6cf0:3579
+dispatchEventForPluginEventSystem @ chunk-WERSD76P.js?v=ba8d6cf0:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-WERSD76P.js?v=ba8d6cf0:5478
+dispatchEvent @ chunk-WERSD76P.js?v=ba8d6cf0:5472
+dispatchDiscreteEvent @ chunk-WERSD76P.js?v=ba8d6cf0:5449Understand this error
+square.js:3 Card setup error: Error: 400: {"message":"Card verification failed"}
+    at throwIfResNotOk (queryClient.ts:11:11)
+    at async apiRequest (queryClient.ts:27:3)
+    at async handleCardSetup (card-setup.tsx:101:24)

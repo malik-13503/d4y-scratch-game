@@ -46,6 +46,14 @@ export class SquareService {
     
     if (!response.ok) {
       const error = await response.json();
+      console.error(`Square API Error Details:`, {
+        url: url,
+        method: method,
+        requestBody: body,
+        status: response.status,
+        statusText: response.statusText,
+        errorResponse: error
+      });
       throw new Error(`Square API Error: ${error.message || response.statusText}`);
     }
 
