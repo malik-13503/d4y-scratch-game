@@ -52,7 +52,12 @@ export class SquareService {
         requestBody: body,
         status: response.status,
         statusText: response.statusText,
-        errorResponse: error
+        errorResponse: error,
+        errorDetails: error.errors ? error.errors.map((e: any) => ({ 
+          category: e.category, 
+          code: e.code, 
+          detail: e.detail 
+        })) : 'No error details'
       });
       throw new Error(`Square API Error: ${error.message || response.statusText}`);
     }

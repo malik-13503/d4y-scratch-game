@@ -13,6 +13,7 @@ export const users = pgTable("users", {
   isActive: boolean("is_active").notNull().default(true),
   squareCustomerId: text("square_customer_id").unique(),
   cardOnFile: boolean("card_on_file").notNull().default(false),
+  cardNonce: text("card_nonce"), // Store tokenized card nonce for payments
   cardLast4: text("card_last_4"),
   cardBrand: text("card_brand"),
   totalSpent: decimal("total_spent", { precision: 10, scale: 2 }).notNull().default("0"),
