@@ -8,7 +8,9 @@ export class SquareService {
 
   constructor() {
     // Use production keys if available, otherwise fall back to sandbox
-    const isProduction = process.env.NODE_ENV === "production" || process.env.SQUARE_ENVIRONMENT === "production";
+    const isProduction = process.env.NODE_ENV === "production" || 
+                         process.env.SQUARE_ENVIRONMENT === "production" ||
+                         process.env.VITE_SQUARE_ENVIRONMENT === "production";
     
     this.accessToken = isProduction 
       ? (process.env.SQUARE_ACCESS_TOKEN_PRODUCTION || process.env.SQUARE_ACCESS_TOKEN!)
