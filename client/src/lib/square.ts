@@ -27,14 +27,17 @@ export const initializeSquarePayments = async () => {
   let appId;
   let environment;
   
-  if (import.meta.env.PROD) {
-    // Production Application ID provided by user
+  // Check if we should use production mode
+  const isProduction = import.meta.env.PROD || import.meta.env.VITE_SQUARE_ENVIRONMENT === 'production';
+  
+  if (isProduction) {
+    // Use production Application ID provided by user
     appId = "sq0idp-eEHVCg_ooCtmo7320ezdZw";
     environment = "production";
   } else {
-    // Try to get sandbox Application ID from environment, fallback to production for testing
-    appId = import.meta.env.VITE_SQUARE_APPLICATION_ID || "sq0idp-eEHVCg_ooCtmo7320ezdZw";
-    environment = import.meta.env.VITE_SQUARE_APPLICATION_ID ? "sandbox" : "production";
+    // Use sandbox Application ID if available
+    appId = import.meta.env.VITE_SQUARE_APPLICATION_ID;
+    environment = "sandbox";
   }
     
   if (!appId) {
