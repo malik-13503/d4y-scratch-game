@@ -1223,22 +1223,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
             receiptUrl: null
           };
         } else {
-          // Production payment processing
-          const cards = await squareService.getCustomerCards(user.squareCustomerId || "");
-          if (cards.length === 0) {
-            return res.status(400).json({ message: "No cards on file" });
+          // Production payment processing using stored card nonce
+          if (!user.cardNonce) {
+            return res.status(400).json({ message: "No payment method available" });
           }
-
-          // Use the first card
-          const card = cards[0];
           
-          // Process payment
-          paymentResult = await squareService.chargeCard(
+          // Process payment using the stored tokenized card nonce
+          paymentResult = await squareService.processPayment(
             chargeAmount,
             "USD",
-            card.id!,
-            user.squareCustomerId || ""
+            user.cardNonce,
+            `Spin charge for game ${gameId} - $${chargeAmount}`
           );
+          
+          // Update card details from successful payment response
+          if (paymentResult.cardDetails) {
+            await storage.updateUser(userId, {
+              cardLast4: paymentResult.cardDetails.last4,
+              cardBrand: paymentResult.cardDetails.cardBrand
+            });
+          }
         }
 
         // Record transaction with spin result

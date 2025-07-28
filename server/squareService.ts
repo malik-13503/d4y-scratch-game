@@ -137,6 +137,44 @@ export class SquareService {
     }
   }
 
+  async processPayment(amount: number, currency: string, cardNonce: string, note?: string) {
+    try {
+      const requestBody = {
+        source_id: cardNonce,
+        amount_money: {
+          amount: Math.round(amount * 100), // Convert to cents
+          currency: currency,
+        },
+        idempotency_key: randomUUID(),
+        autocomplete: true,
+        note: note || "Game spin payment",
+      };
+
+      const response = await this.makeRequest("/payments", "POST", requestBody);
+      
+      if (response.payment) {
+        // Extract card details from successful payment
+        const cardDetails = response.payment.card_details?.card || {};
+        
+        return {
+          id: response.payment.id,
+          status: response.payment.status,
+          receiptUrl: response.payment.receipt_url,
+          cardDetails: {
+            last4: cardDetails.last_4,
+            cardBrand: cardDetails.card_brand,
+            cardType: cardDetails.card_type
+          }
+        };
+      } else {
+        throw new Error("Payment failed - no payment object returned");
+      }
+    } catch (error) {
+      console.error("Error processing Square payment with nonce:", error);
+      throw error;
+    }
+  }
+
   async getCustomerCards(customerId: string) {
     try {
       const response = await this.makeRequest(`/cards?customer_id=${customerId}`, "GET");
