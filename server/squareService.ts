@@ -145,35 +145,27 @@ export class SquareService {
 
   async verifyCard(cardNonce: string) {
     try {
-      // Create a $0.01 verification charge that will be immediately refunded
-      const requestBody = {
+      // Instead of processing a payment, we'll verify the card by attempting to create a card on file
+      // This is safer and doesn't trigger payment delays
+      const tempCustomer = await this.createTempCustomer();
+      
+      const cardRequestBody = {
         source_id: cardNonce,
-        amount_money: {
-          amount: 1, // $0.01 in cents
-          currency: "USD",
-        },
         idempotency_key: randomUUID(),
-        autocomplete: true,
-        note: "Card verification - will be refunded",
+        card: {
+          cardholder_name: "Verification Test"
+        }
       };
 
-      const response = await this.makeRequest("/payments", "POST", requestBody);
+      const response = await this.makeRequest(`/customers/${tempCustomer.id}/cards`, "POST", cardRequestBody);
       
-      if (response.payment) {
-        // Immediately refund the verification charge
-        const refundResponse = await this.makeRequest(`/payments/${response.payment.id}/refunds`, "POST", {
-          idempotency_key: randomUUID(),
-          amount_money: {
-            amount: 1,
-            currency: "USD",
-          },
-          reason: "Card verification refund",
-        });
+      if (response.card) {
+        // Clean up the temporary customer
+        await this.makeRequest(`/customers/${tempCustomer.id}`, "DELETE");
         
         return {
           verified: true,
-          payment: response.payment,
-          refund: refundResponse.refund,
+          card: response.card,
         };
       } else {
         return { verified: false };
@@ -181,6 +173,22 @@ export class SquareService {
     } catch (error) {
       console.error("Error verifying card:", error);
       return { verified: false, error: error };
+    }
+  }
+
+  async createTempCustomer() {
+    const requestBody = {
+      given_name: "Temp",
+      family_name: "Verification",
+      email_address: `temp-${randomUUID()}@verification.test`,
+    };
+
+    const response = await this.makeRequest("/customers", "POST", requestBody);
+    
+    if (response.customer) {
+      return response.customer;
+    } else {
+      throw new Error("Failed to create temporary customer");
     }
   }
 

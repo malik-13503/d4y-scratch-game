@@ -1137,20 +1137,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
           return res.status(400).json({ message: "Card verification failed" });
         }
 
-        // Create card on file
-        const card = await squareService.createCard(squareCustomerId || '', cardNonce, cardNonce);
+        // Extract card details from verification result
+        const verifiedCard = verificationResult.card;
         
         // Update user with card info
         await storage.updateUser(userId, {
           cardOnFile: true,
-          cardLast4: card.last4,
-          cardBrand: card.cardBrand
+          cardLast4: verifiedCard.last_4,
+          cardBrand: verifiedCard.card_brand
         });
 
         res.json({ 
           message: "Card added successfully",
-          cardLast4: card.last4,
-          cardBrand: card.cardBrand
+          cardLast4: verifiedCard.last_4,
+          cardBrand: verifiedCard.card_brand
         });
       }
     } catch (error: any) {
