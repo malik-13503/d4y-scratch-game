@@ -1112,8 +1112,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
 
-      // Check if we're in production mode
-      const isProduction = process.env.NODE_ENV === "production" || process.env.SQUARE_ENVIRONMENT === "production";
+      // Check if we're in production mode (matches client environment detection)
+      const isProduction = process.env.SQUARE_ENVIRONMENT === "production";
+      console.log(`Card add endpoint - SQUARE_ENVIRONMENT: ${process.env.SQUARE_ENVIRONMENT}, isProduction: ${isProduction}`);
       
       if (!isProduction) {
         // Sandbox testing - simulate successful card verification
