@@ -93,32 +93,40 @@ export function CardSetup({ onSuccess, user }: CardSetupProps) {
 
   if (user?.cardOnFile) {
     return (
-      <Card className="w-full max-w-md mx-auto">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-green-600">
-            <CheckCircle size={24} />
+      <Card className="w-full max-w-md mx-auto relative overflow-hidden bg-gradient-to-br from-emerald-900/80 to-green-900/80 border-emerald-400/40 backdrop-blur-xl shadow-2xl">
+        <div className="absolute inset-0 bg-gradient-to-br from-emerald-800/20 to-green-800/20 blur-xl"></div>
+        <CardHeader className="relative">
+          <CardTitle className="flex items-center gap-2 text-white font-bold text-xl drop-shadow-lg">
+            <div className="p-2 bg-gradient-to-br from-emerald-500 to-green-600 rounded-xl shadow-lg">
+              <CheckCircle size={20} />
+            </div>
             Payment Method Ready
           </CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="relative">
           <div className="space-y-4">
-            <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+            <div className="p-4 bg-gradient-to-r from-emerald-800/40 to-green-800/40 rounded-xl border border-emerald-500/30">
               <div className="flex items-center gap-3">
-                <CreditCard className="text-green-600" size={20} />
+                <div className="p-2 bg-gradient-to-br from-emerald-500 to-green-600 rounded-lg shadow-lg">
+                  <CreditCard className="text-white" size={20} />
+                </div>
                 <div>
-                  <p className="font-medium text-green-800">
+                  <p className="font-bold text-white text-lg drop-shadow-lg">
                     {user?.cardBrand || 'Card'} ending in {user?.cardLast4 || '****'}
                   </p>
-                  <p className="text-sm text-green-700">
+                  <p className="text-emerald-200 font-medium">
                     Verified and ready for games
                   </p>
+                </div>
+                <div className="ml-auto">
+                  <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
                 </div>
               </div>
             </div>
             
             <Button
               onClick={onSuccess}
-              className="w-full bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700"
+              className="w-full bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 text-white font-bold shadow-lg hover:shadow-xl transition-all duration-300"
             >
               Continue to Games
             </Button>
@@ -129,29 +137,34 @@ export function CardSetup({ onSuccess, user }: CardSetupProps) {
   }
 
   return (
-    <Card className="w-full max-w-md mx-auto">
-      <CardHeader>
-        <CardTitle className="flex items-center justify-between">
+    <Card className="w-full max-w-md mx-auto relative overflow-hidden bg-gradient-to-br from-slate-800/90 to-slate-900/90 border-purple-400/40 backdrop-blur-xl shadow-2xl">
+      <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-blue-500/10 blur-xl"></div>
+      <CardHeader className="relative">
+        <CardTitle className="flex items-center justify-between text-white font-bold text-xl drop-shadow-lg">
           <div className="flex items-center gap-2">
-            <CreditCard size={24} />
+            <div className="p-2 bg-gradient-to-br from-purple-500 to-blue-600 rounded-xl shadow-lg">
+              <CreditCard size={20} />
+            </div>
             Add Payment Method
           </div>
-          <Badge className={`${getEnvironmentBadge().color} text-white text-xs`}>
+          <Badge className={`${getEnvironmentBadge().color} text-white text-xs font-bold shadow-lg`}>
             {getEnvironmentBadge().text}
           </Badge>
         </CardTitle>
-        <p className="text-gray-600">
+        <p className="text-gray-300 font-medium">
           Please add a credit or debit card to continue playing
         </p>
       </CardHeader>
-      <CardContent>
+      <CardContent className="relative">
         <div className="space-y-4">
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+          <div className="p-4 bg-gradient-to-r from-blue-800/40 to-purple-800/40 rounded-xl border border-blue-500/30">
             <div className="flex items-start gap-3">
-              <Shield className="text-blue-600 mt-0.5 flex-shrink-0" size={20} />
-              <div className="text-sm text-blue-800">
-                <p className="font-medium mb-1">Secure Payment Processing</p>
-                <p>
+              <div className="p-2 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg shadow-lg">
+                <Shield className="text-white" size={20} />
+              </div>
+              <div className="text-sm text-gray-200">
+                <p className="font-bold mb-1 text-white drop-shadow-lg">Secure Payment Processing</p>
+                <p className="text-gray-300">
                   Your card information is processed securely through Square 
                   and encrypted for your protection. We never store your 
                   full card details.
@@ -160,13 +173,13 @@ export function CardSetup({ onSuccess, user }: CardSetupProps) {
             </div>
           </div>
 
-          <div className="space-y-2">
-            <h4 className="font-medium text-gray-900">Accepted Cards:</h4>
-            <div className="flex gap-2 text-sm text-gray-600">
-              <span className="bg-gray-100 px-2 py-1 rounded">Visa</span>
-              <span className="bg-gray-100 px-2 py-1 rounded">Mastercard</span>
-              <span className="bg-gray-100 px-2 py-1 rounded">American Express</span>
-              <span className="bg-gray-100 px-2 py-1 rounded">Discover</span>
+          <div className="space-y-3">
+            <h4 className="font-bold text-white text-lg drop-shadow-lg">Accepted Cards:</h4>
+            <div className="flex gap-2 text-sm">
+              <span className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-3 py-2 rounded-lg font-bold shadow-lg">Visa</span>
+              <span className="bg-gradient-to-r from-red-600 to-orange-600 text-white px-3 py-2 rounded-lg font-bold shadow-lg">Mastercard</span>
+              <span className="bg-gradient-to-r from-emerald-600 to-blue-600 text-white px-3 py-2 rounded-lg font-bold shadow-lg">American Express</span>
+              <span className="bg-gradient-to-r from-orange-600 to-red-600 text-white px-3 py-2 rounded-lg font-bold shadow-lg">Discover</span>
             </div>
           </div>
 
@@ -206,9 +219,16 @@ export function CardSetup({ onSuccess, user }: CardSetupProps) {
           <Button
             onClick={handleCardSetup}
             disabled={isLoading}
-            className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+            className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50"
           >
-            {isLoading ? "Adding Card..." : "Add Payment Method"}
+            {isLoading ? (
+              <div className="flex items-center space-x-2">
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                <span>Adding Card...</span>
+              </div>
+            ) : (
+              "Add Payment Method"
+            )}
           </Button>
         </div>
       </CardContent>

@@ -805,48 +805,65 @@ export default function Dashboard() {
                 
                 {/* Enhanced Payment Management Features */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
-                  <Card className="bg-gradient-to-r from-blue-900/40 to-cyan-900/40 border-blue-500/30">
-                    <CardHeader>
-                      <CardTitle className="text-white flex items-center">
-                        <DollarSign className="h-5 w-5 mr-2" />
+                  <Card className="relative overflow-hidden bg-gradient-to-br from-blue-900/70 to-cyan-900/70 border-blue-400/40 backdrop-blur-xl shadow-2xl hover:shadow-blue-500/25 transition-all duration-300">
+                    <div className="absolute inset-0 bg-gradient-to-br from-blue-800/20 to-cyan-800/20 blur-xl"></div>
+                    <CardHeader className="relative">
+                      <CardTitle className="text-white font-bold text-xl flex items-center drop-shadow-lg">
+                        <div className="p-2 bg-gradient-to-br from-blue-500 to-cyan-600 rounded-xl mr-3 shadow-lg">
+                          <DollarSign className="h-6 w-6 text-white" />
+                        </div>
                         Spending Limits
                       </CardTitle>
                     </CardHeader>
-                    <CardContent>
+                    <CardContent className="relative">
                       <div className="space-y-4">
-                        <div className="flex justify-between items-center">
-                          <span className="text-gray-300">Daily Limit</span>
-                          <span className="text-white font-bold">$100</span>
+                        <div className="p-3 bg-gradient-to-r from-blue-800/40 to-cyan-800/40 rounded-xl border border-blue-500/30">
+                          <div className="flex justify-between items-center">
+                            <span className="text-gray-200 font-medium">Daily Limit</span>
+                            <span className="text-white font-bold text-lg drop-shadow-lg">$100</span>
+                          </div>
                         </div>
-                        <div className="flex justify-between items-center">
-                          <span className="text-gray-300">Weekly Limit</span>
-                          <span className="text-white font-bold">$500</span>
+                        <div className="p-3 bg-gradient-to-r from-blue-800/40 to-cyan-800/40 rounded-xl border border-blue-500/30">
+                          <div className="flex justify-between items-center">
+                            <span className="text-gray-200 font-medium">Weekly Limit</span>
+                            <span className="text-white font-bold text-lg drop-shadow-lg">$500</span>
+                          </div>
                         </div>
-                        <Button variant="outline" className="w-full mt-4 border-blue-500 text-blue-300 hover:bg-blue-500/20">
+                        <Button className="w-full mt-4 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white font-bold shadow-lg hover:shadow-xl transition-all duration-300">
                           Modify Limits
                         </Button>
                       </div>
                     </CardContent>
                   </Card>
 
-                  <Card className="bg-gradient-to-r from-purple-900/40 to-pink-900/40 border-purple-500/30">
-                    <CardHeader>
-                      <CardTitle className="text-white flex items-center">
-                        <Activity className="h-5 w-5 mr-2" />
+                  <Card className="relative overflow-hidden bg-gradient-to-br from-purple-900/70 to-pink-900/70 border-purple-400/40 backdrop-blur-xl shadow-2xl hover:shadow-purple-500/25 transition-all duration-300">
+                    <div className="absolute inset-0 bg-gradient-to-br from-purple-800/20 to-pink-800/20 blur-xl"></div>
+                    <CardHeader className="relative">
+                      <CardTitle className="text-white font-bold text-xl flex items-center drop-shadow-lg">
+                        <div className="p-2 bg-gradient-to-br from-purple-500 to-pink-600 rounded-xl mr-3 shadow-lg">
+                          <Activity className="h-6 w-6 text-white" />
+                        </div>
                         Auto-Top Up
                       </CardTitle>
                     </CardHeader>
-                    <CardContent>
+                    <CardContent className="relative">
                       <div className="space-y-4">
-                        <div className="flex justify-between items-center">
-                          <span className="text-gray-300">Auto-reload</span>
-                          <span className="text-green-400 font-bold">Enabled</span>
+                        <div className="p-3 bg-gradient-to-r from-purple-800/40 to-pink-800/40 rounded-xl border border-purple-500/30">
+                          <div className="flex justify-between items-center">
+                            <span className="text-gray-200 font-medium">Auto-reload</span>
+                            <div className="flex items-center space-x-2">
+                              <span className="text-green-400 font-bold text-lg drop-shadow-lg">Enabled</span>
+                              <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
+                            </div>
+                          </div>
                         </div>
-                        <div className="flex justify-between items-center">
-                          <span className="text-gray-300">Reload Amount</span>
-                          <span className="text-white font-bold">$50</span>
+                        <div className="p-3 bg-gradient-to-r from-purple-800/40 to-pink-800/40 rounded-xl border border-purple-500/30">
+                          <div className="flex justify-between items-center">
+                            <span className="text-gray-200 font-medium">Reload Amount</span>
+                            <span className="text-white font-bold text-lg drop-shadow-lg">$50</span>
+                          </div>
                         </div>
-                        <Button variant="outline" className="w-full mt-4 border-purple-500 text-purple-300 hover:bg-purple-500/20">
+                        <Button className="w-full mt-4 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold shadow-lg hover:shadow-xl transition-all duration-300">
                           Manage Auto-Top Up
                         </Button>
                       </div>
