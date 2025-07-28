@@ -84,32 +84,13 @@ export function CardSetup({ onSuccess, user }: CardSetupProps) {
         throw new Error("Card payment form is not properly initialized. Please refresh the page and try again.");
       }
 
-      // Validate card form state before tokenization
-      console.log("Validating card form state...");
-      const formState = await cardRef.current.recalculateState();
-      console.log("Card form state:", formState);
-      
-      if (!formState.canMakePayment) {
-        throw new Error("Please fill in all required card information (card number, expiry date, and CVV).");
-      }
+      // Square SDK is ready for tokenization
+      console.log("Card form is initialized and ready for tokenization");
 
       console.log("Attempting to tokenize card with Square SDK...");
       
-      // Use real Square Web SDK to tokenize card with complete billing information
-      const tokenResult = await cardRef.current.tokenize({
-        includeNetworkTokenization: false, // Disable network tokenization for better compatibility
-        billingContact: {
-          familyName: user?.lastName || 'User',
-          givenName: user?.firstName || 'Test',
-          email: user?.email || 'test@example.com',
-          country: 'US',
-          region: 'CA',
-          city: 'San Francisco',
-          postalCode: '94102',
-          addressLines: ['123 Main Street'],
-          phone: '555-0123'
-        }
-      });
+      // Use real Square Web SDK to tokenize card (simplified approach)
+      const tokenResult = await cardRef.current.tokenize();
       console.log("Square tokenization result:", tokenResult);
       
       if (tokenResult.status !== 'OK') {
