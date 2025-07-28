@@ -35,12 +35,22 @@ export function CardSetup({ onSuccess, user }: CardSetupProps) {
     const initializeCard = async () => {
       try {
         console.log("Initializing Square card with production mode:", isProduction);
+        
+        // Wait a bit for the DOM to be ready
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
         if (cardContainerRef.current) {
+          console.log("Creating Square card payment method...");
           const card = await createCardPaymentMethod();
+          
+          console.log("Attaching card to container...");
           await card.attach(cardContainerRef.current);
+          
           cardRef.current = card;
           setCardInitialized(true);
-          console.log("Square card initialized successfully");
+          console.log("Square card initialized and attached successfully");
+        } else {
+          console.error("Card container ref is not available");
         }
       } catch (error) {
         console.error("Failed to initialize Square card:", error);
@@ -48,31 +58,35 @@ export function CardSetup({ onSuccess, user }: CardSetupProps) {
       }
     };
 
-    // Only initialize in production mode or if we're properly configured
+    // Only initialize in production mode
     if (isProduction) {
-      initializeCard();
+      // Delay initialization to ensure DOM is ready
+      const timer = setTimeout(initializeCard, 200);
+      return () => clearTimeout(timer);
     }
-  }, []);
+  }, [isProduction]);
 
   const handleCardSetup = async () => {
     setIsLoading(true);
 
     try {
-      let cardNonce;
-      
-      if (cardRef.current && cardInitialized) {
-        // Use real Square Web SDK to tokenize card
-        const tokenResult = await cardRef.current.tokenize();
-        
-        if (tokenResult.status === 'OK') {
-          cardNonce = tokenResult.token;
-        } else {
-          throw new Error(`Card tokenization failed: ${tokenResult.errors?.[0]?.detail || 'Unknown error'}`);
-        }
-      } else {
-        // Fallback to sandbox testing
-        cardNonce = "cnon_test_card_nonce_sandbox";
+      if (!cardRef.current || !cardInitialized) {
+        throw new Error("Card payment form is not properly initialized. Please refresh the page and try again.");
       }
+
+      console.log("Attempting to tokenize card with Square SDK...");
+      
+      // Use real Square Web SDK to tokenize card
+      const tokenResult = await cardRef.current.tokenize();
+      console.log("Square tokenization result:", tokenResult);
+      
+      if (tokenResult.status !== 'OK') {
+        const errorMessage = tokenResult.errors?.[0]?.detail || 'Card validation failed';
+        throw new Error(`Please check your card information: ${errorMessage}`);
+      }
+
+      const cardNonce = tokenResult.token;
+      console.log("Card tokenized successfully, sending to server...");
       
       const response = await apiRequest("POST", "/api/card/add", {
         cardNonce: cardNonce
@@ -222,7 +236,7 @@ export function CardSetup({ onSuccess, user }: CardSetupProps) {
 
           <Button
             onClick={handleCardSetup}
-            disabled={isLoading}
+            disabled={isLoading || !cardInitialized}
             className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50"
           >
             {isLoading ? (
@@ -230,6 +244,8 @@ export function CardSetup({ onSuccess, user }: CardSetupProps) {
                 <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                 <span>Adding Card...</span>
               </div>
+            ) : !cardInitialized ? (
+              "Initializing Payment Form..."
             ) : (
               "Add Payment Method"
             )}
