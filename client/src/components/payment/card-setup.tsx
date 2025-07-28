@@ -36,8 +36,12 @@ export function CardSetup({ onSuccess, user }: CardSetupProps) {
       try {
         console.log("Initializing Square card with production mode:", isProduction);
         
-        // Wait a bit for the DOM to be ready
-        await new Promise(resolve => setTimeout(resolve, 100));
+        // Wait for container to be available
+        let attempts = 0;
+        while (!cardContainerRef.current && attempts < 10) {
+          await new Promise(resolve => setTimeout(resolve, 100));
+          attempts++;
+        }
         
         if (cardContainerRef.current) {
           console.log("Creating Square card payment method...");
@@ -50,7 +54,8 @@ export function CardSetup({ onSuccess, user }: CardSetupProps) {
           setCardInitialized(true);
           console.log("Square card initialized and attached successfully");
         } else {
-          console.error("Card container ref is not available");
+          console.error("Card container ref is still not available after waiting");
+          setCardInitialized(false);
         }
       } catch (error) {
         console.error("Failed to initialize Square card:", error);
@@ -58,11 +63,9 @@ export function CardSetup({ onSuccess, user }: CardSetupProps) {
       }
     };
 
-    // Only initialize in production mode
+    // Only initialize in production mode and when component is mounted
     if (isProduction) {
-      // Delay initialization to ensure DOM is ready
-      const timer = setTimeout(initializeCard, 200);
-      return () => clearTimeout(timer);
+      initializeCard();
     }
   }, [isProduction]);
 
@@ -201,13 +204,21 @@ export function CardSetup({ onSuccess, user }: CardSetupProps) {
             </div>
           </div>
 
-          {cardInitialized ? (
+          {isProduction ? (
             <div className="space-y-3">
-              <div className="p-3 bg-gradient-to-r from-green-800/40 to-emerald-800/40 rounded-xl border border-green-500/30">
-                <p className="text-sm text-green-200">
-                  <strong className="text-white">Ready:</strong> Enter your card information below.
-                </p>
-              </div>
+              {cardInitialized ? (
+                <div className="p-3 bg-gradient-to-r from-green-800/40 to-emerald-800/40 rounded-xl border border-green-500/30">
+                  <p className="text-sm text-green-200">
+                    <strong className="text-white">Ready:</strong> Enter your card information below.
+                  </p>
+                </div>
+              ) : (
+                <div className="p-3 bg-gradient-to-r from-blue-800/40 to-purple-800/40 rounded-xl border border-blue-500/30">
+                  <p className="text-sm text-blue-200">
+                    <strong className="text-white">Loading:</strong> Initializing secure payment form...
+                  </p>
+                </div>
+              )}
               
               <div className="space-y-2">
                 <label className="text-sm font-medium text-white">
@@ -218,12 +229,6 @@ export function CardSetup({ onSuccess, user }: CardSetupProps) {
                   className="border border-purple-400/40 rounded-lg p-4 min-h-[120px] bg-white/95"
                 />
               </div>
-            </div>
-          ) : isProduction ? (
-            <div className="p-3 bg-gradient-to-r from-red-800/40 to-orange-800/40 rounded-xl border border-red-500/30">
-              <p className="text-sm text-red-200">
-                <strong className="text-white">Configuration Required:</strong> Square Application ID needed for payment processing.
-              </p>
             </div>
           ) : (
             <div className="p-3 bg-gradient-to-r from-yellow-800/40 to-orange-800/40 rounded-xl border border-yellow-500/30">
