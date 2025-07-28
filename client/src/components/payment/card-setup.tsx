@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -7,6 +7,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { CreditCard, Shield, CheckCircle } from "lucide-react";
 import { ErrorDialog } from "@/components/error-dialog";
 import { getEnvironmentBadge, isProduction } from "@/lib/environment";
+import { createCardPaymentMethod } from "@/lib/square";
 
 interface CardSetupProps {
   onSuccess: () => void;
@@ -24,22 +25,48 @@ export function CardSetup({ onSuccess, user }: CardSetupProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [showErrorDialog, setShowErrorDialog] = useState(false);
   const [dialogError, setDialogError] = useState("");
+  const [cardInitialized, setCardInitialized] = useState(false);
+  const cardContainerRef = useRef<HTMLDivElement>(null);
+  const cardRef = useRef<any>(null);
   const { toast } = useToast();
+
+  // Initialize Square Web SDK
+  useEffect(() => {
+    const initializeCard = async () => {
+      try {
+        // Always try to initialize the card since we have the production ID
+        if (cardContainerRef.current) {
+          const card = await createCardPaymentMethod();
+          await card.attach(cardContainerRef.current);
+          cardRef.current = card;
+          setCardInitialized(true);
+        }
+      } catch (error) {
+        console.error("Failed to initialize Square card:", error);
+        // Card initialization failed, will fallback to sandbox mode
+      }
+    };
+
+    initializeCard();
+  }, []);
 
   const handleCardSetup = async () => {
     setIsLoading(true);
 
     try {
-      // Check if we're in production mode
-      const isProd = isProduction;
-      
       let cardNonce;
-      if (isProd) {
-        // In production, use actual Square Web SDK integration
-        // TODO: Implement Square Web SDK for production
-        throw new Error("Production Square Web SDK integration required");
+      
+      if (cardRef.current && cardInitialized) {
+        // Use real Square Web SDK to tokenize card
+        const tokenResult = await cardRef.current.tokenize();
+        
+        if (tokenResult.status === 'OK') {
+          cardNonce = tokenResult.token;
+        } else {
+          throw new Error(`Card tokenization failed: ${tokenResult.errors?.[0]?.detail || 'Unknown error'}`);
+        }
       } else {
-        // For sandbox testing - using a test card nonce
+        // Fallback to sandbox testing
         cardNonce = "cnon_test_card_nonce_sandbox";
       }
       
@@ -143,7 +170,25 @@ export function CardSetup({ onSuccess, user }: CardSetupProps) {
             </div>
           </div>
 
-          {!isProduction ? (
+          {cardInitialized ? (
+            <div className="space-y-3">
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                <p className="text-sm text-blue-800">
+                  <strong>Ready:</strong> Enter your card information below.
+                </p>
+              </div>
+              
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700">
+                  Card Information
+                </label>
+                <div 
+                  ref={cardContainerRef}
+                  className="border border-gray-300 rounded-lg p-4 min-h-[120px] bg-white"
+                />
+              </div>
+            </div>
+          ) : !isProduction ? (
             <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
               <p className="text-sm text-yellow-800">
                 <strong>Note:</strong> This is a sandbox environment. 
@@ -151,10 +196,9 @@ export function CardSetup({ onSuccess, user }: CardSetupProps) {
               </p>
             </div>
           ) : (
-            <div className="bg-green-50 border border-green-200 rounded-lg p-3">
-              <p className="text-sm text-green-800">
-                <strong>Production:</strong> Ready to process real payments securely.
-                Your actual payment card will be verified and charged.
+            <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+              <p className="text-sm text-red-800">
+                <strong>Configuration Required:</strong> Square Application ID needed for payment processing.
               </p>
             </div>
           )}
