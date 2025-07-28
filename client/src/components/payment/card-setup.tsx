@@ -1,10 +1,12 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { CreditCard, Shield, CheckCircle } from "lucide-react";
 import { ErrorDialog } from "@/components/error-dialog";
+import { getEnvironmentBadge, isProduction } from "@/lib/environment";
 
 interface CardSetupProps {
   onSuccess: () => void;
@@ -29,10 +31,10 @@ export function CardSetup({ onSuccess, user }: CardSetupProps) {
 
     try {
       // Check if we're in production mode
-      const isProduction = import.meta.env.PROD;
+      const isProd = isProduction;
       
       let cardNonce;
-      if (isProduction) {
+      if (isProd) {
         // In production, use actual Square Web SDK integration
         // TODO: Implement Square Web SDK for production
         throw new Error("Production Square Web SDK integration required");
@@ -102,9 +104,14 @@ export function CardSetup({ onSuccess, user }: CardSetupProps) {
   return (
     <Card className="w-full max-w-md mx-auto">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <CreditCard size={24} />
-          Add Payment Method
+        <CardTitle className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <CreditCard size={24} />
+            Add Payment Method
+          </div>
+          <Badge className={`${getEnvironmentBadge().color} text-white text-xs`}>
+            {getEnvironmentBadge().text}
+          </Badge>
         </CardTitle>
         <p className="text-gray-600">
           Please add a credit or debit card to continue playing
@@ -136,12 +143,21 @@ export function CardSetup({ onSuccess, user }: CardSetupProps) {
             </div>
           </div>
 
-          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
-            <p className="text-sm text-yellow-800">
-              <strong>Note:</strong> This is a sandbox environment. 
-              Use test card: 4111 1111 1111 1111
-            </p>
-          </div>
+          {!isProduction ? (
+            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+              <p className="text-sm text-yellow-800">
+                <strong>Note:</strong> This is a sandbox environment. 
+                Use test card: 4111 1111 1111 1111
+              </p>
+            </div>
+          ) : (
+            <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+              <p className="text-sm text-green-800">
+                <strong>Production:</strong> Ready to process real payments securely.
+                Your actual payment card will be verified and charged.
+              </p>
+            </div>
+          )}
 
           <Button
             onClick={handleCardSetup}
