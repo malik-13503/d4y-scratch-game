@@ -1136,7 +1136,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         try {
           // Test card with minimal charge to verify it works
           const testResult = await squareService.processPayment(
-            0.50, // 50 cents test charge
+            0.01, // 1 cent test charge
             "USD",
             cardNonce,
             "Card verification - Hit the Road Jackpot"
@@ -1153,7 +1153,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           });
 
           res.json({ 
-            message: "Card verified successfully with $0.50 test charge",
+            message: "Card verified successfully with $0.01 test charge",
             cardLast4: testResult.cardDetails?.last4 || 'XXXX',
             cardBrand: testResult.cardDetails?.cardBrand || 'CARD'
           });
