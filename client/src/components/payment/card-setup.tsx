@@ -86,8 +86,20 @@ export function CardSetup({ onSuccess, user }: CardSetupProps) {
 
       console.log("Attempting to tokenize card with Square SDK...");
       
-      // Use real Square Web SDK to tokenize card
-      const tokenResult = await cardRef.current.tokenize();
+      // Use real Square Web SDK to tokenize card with billing information
+      const tokenResult = await cardRef.current.tokenize({
+        includeNetworkTokenization: true,
+        billingContact: {
+          familyName: 'Test',
+          givenName: 'User',
+          email: user?.email || 'test@example.com',
+          country: 'US',
+          region: 'CA',
+          city: 'San Francisco',
+          postalCode: '94102',
+          addressLines: ['123 Main Street']
+        }
+      });
       console.log("Square tokenization result:", tokenResult);
       
       if (tokenResult.status !== 'OK') {
@@ -96,7 +108,7 @@ export function CardSetup({ onSuccess, user }: CardSetupProps) {
       }
 
       const cardNonce = tokenResult.token;
-      console.log("Card tokenized successfully, sending to server...");
+      console.log("Card tokenized successfully with billing info, sending to server...");
       
       const response = await apiRequest("POST", "/api/card/add", {
         cardNonce: cardNonce

@@ -148,6 +148,15 @@ export class SquareService {
         idempotency_key: randomUUID(),
         autocomplete: true,
         note: note || "Game spin payment",
+        accept_partial_authorization: false,
+        buyer_email_address: "player@hittheroadjackpot.com",
+        billing_address: {
+          address_line_1: "123 Main Street",
+          locality: "San Francisco",
+          administrative_district_level_1: "CA",
+          postal_code: "94102",
+          country: "US"
+        }
       };
 
       const response = await this.makeRequest("/payments", "POST", requestBody);
@@ -169,9 +178,17 @@ export class SquareService {
       } else {
         throw new Error("Payment failed - no payment object returned");
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error processing Square payment with nonce:", error);
-      throw error;
+      
+      // Check if it's a card verification issue
+      if (error.message && error.message.includes('CVV_FAILURE')) {
+        throw new Error("Card verification failed. Please ensure CVV is correct and try again.");
+      } else if (error.message && error.message.includes('GENERIC_DECLINE')) {
+        throw new Error("Payment was declined by your bank. Please check your card details or try another card.");
+      }
+      
+      throw new Error("Payment processing failed. Please try again or contact support.");
     }
   }
 

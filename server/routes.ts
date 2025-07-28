@@ -1130,23 +1130,50 @@ export async function registerRoutes(app: Express): Promise<Server> {
           cardBrand: 'VISA'
         });
       } else {
-        // Production flow - store the tokenized card nonce for later payment processing
-        // Since Square SDK successfully tokenized the card, we know it's valid
-        console.log("Card tokenization successful, storing tokenized card for payments");
+        // Production flow - verify card immediately with test transaction
+        console.log("Production mode: Testing card with verification payment...");
         
-        // Store the card nonce securely for actual payment processing during spins
-        await storage.updateUser(userId, {
-          cardOnFile: true,
-          cardNonce: cardNonce, // Store the tokenized card nonce
-          cardLast4: 'XXXX', // Will be updated during first successful payment
-          cardBrand: 'CARD'  // Will be updated during first successful payment
-        });
+        try {
+          // Test card with minimal charge to verify it works
+          const testResult = await squareService.processPayment(
+            0.50, // 50 cents test charge
+            "USD",
+            cardNonce,
+            "Card verification - Hit the Road Jackpot"
+          );
+          
+          console.log("Card verification successful:", testResult);
+          
+          // Store the verified card information
+          await storage.updateUser(userId, {
+            cardOnFile: true,
+            cardNonce: cardNonce,
+            cardLast4: testResult.cardDetails?.last4 || 'XXXX',
+            cardBrand: testResult.cardDetails?.cardBrand || 'CARD'
+          });
 
-        res.json({ 
-          message: "Card added successfully",
-          cardLast4: 'XXXX',
-          cardBrand: 'CARD'
-        });
+          res.json({ 
+            message: "Card verified successfully with $0.50 test charge",
+            cardLast4: testResult.cardDetails?.last4 || 'XXXX',
+            cardBrand: testResult.cardDetails?.cardBrand || 'CARD'
+          });
+          
+        } catch (error: any) {
+          console.error("Card verification failed:", error);
+          
+          // Still store the card nonce for future attempts
+          await storage.updateUser(userId, {
+            cardOnFile: false,
+            cardNonce: cardNonce,
+            cardLast4: 'XXXX',
+            cardBrand: 'UNVERIFIED'
+          });
+          
+          res.status(400).json({ 
+            message: "Card verification failed. Please check your card details and try again.",
+            error: error.message 
+          });
+        }
       }
     } catch (error: any) {
       console.error("Add card error:", error);
