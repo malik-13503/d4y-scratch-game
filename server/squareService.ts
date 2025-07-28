@@ -7,11 +7,19 @@ export class SquareService {
   private apiBaseUrl: string;
 
   constructor() {
-    this.accessToken = process.env.SQUARE_ACCESS_TOKEN!;
-    this.environment = process.env.SQUARE_ENVIRONMENT || "sandbox";
+    // Use production keys if available, otherwise fall back to sandbox
+    const isProduction = process.env.NODE_ENV === "production" || process.env.SQUARE_ENVIRONMENT === "production";
+    
+    this.accessToken = isProduction 
+      ? (process.env.SQUARE_ACCESS_TOKEN_PRODUCTION || process.env.SQUARE_ACCESS_TOKEN!)
+      : process.env.SQUARE_ACCESS_TOKEN!;
+    
+    this.environment = isProduction ? "production" : "sandbox";
     this.apiBaseUrl = this.environment === "production" 
       ? "https://connect.squareup.com/v2" 
       : "https://connect.squareupsandbox.com/v2";
+    
+    console.log(`Square Service initialized in ${this.environment} mode`);
   }
 
   private async makeRequest(endpoint: string, method: string = "GET", body?: any) {

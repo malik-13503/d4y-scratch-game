@@ -809,9 +809,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             gameId: null,
             spunNumber: null,
             amount: 0,
-            prize: null,
-            registrationMethod: "email",
-            emailVerified: true
+            prize: null
           }
         });
       }
@@ -1114,10 +1112,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
 
-      // For sandbox testing, we'll simulate a successful card setup
-      // In production, this would use real Square Web SDK integration
-      if (process.env.SQUARE_ENVIRONMENT === 'sandbox') {
-        // Simulate successful card verification for testing
+      // Check if we're in production mode
+      const isProduction = process.env.NODE_ENV === "production" || process.env.SQUARE_ENVIRONMENT === "production";
+      
+      if (!isProduction) {
+        // Sandbox testing - simulate successful card verification
         await storage.updateUser(userId, {
           cardOnFile: true,
           cardLast4: '4242',
@@ -1178,9 +1177,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "User not found" });
       }
 
+      // Check if we're in production mode
+      const isProduction = process.env.NODE_ENV === "production" || process.env.SQUARE_ENVIRONMENT === "production";
+      
       // For sandbox environment, bypass card check as we simulate card setup
-      if (process.env.SQUARE_ENVIRONMENT === 'sandbox') {
-        // Continue with spin logic
+      if (!isProduction) {
+        // Continue with spin logic for sandbox
       } else if (!user.cardOnFile) {
         return res.status(400).json({ message: "No card on file" });
       }
@@ -1216,7 +1218,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         let paymentResult = null;
         
         // For sandbox environment, simulate payment processing
-        if (process.env.SQUARE_ENVIRONMENT === 'sandbox') {
+        if (!isProduction) {
           // Simulate successful payment for testing
           console.log(`Simulated charge of $${chargeAmount} for user ${userId}`);
           paymentResult = {

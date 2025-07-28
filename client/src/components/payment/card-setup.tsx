@@ -28,12 +28,21 @@ export function CardSetup({ onSuccess, user }: CardSetupProps) {
     setIsLoading(true);
 
     try {
-      // For sandbox testing - using a test card nonce
-      // In production, this would use Square Web SDK to get real card nonce
-      const testCardNonce = "cnon_test_card_nonce_sandbox";
+      // Check if we're in production mode
+      const isProduction = import.meta.env.PROD;
+      
+      let cardNonce;
+      if (isProduction) {
+        // In production, use actual Square Web SDK integration
+        // TODO: Implement Square Web SDK for production
+        throw new Error("Production Square Web SDK integration required");
+      } else {
+        // For sandbox testing - using a test card nonce
+        cardNonce = "cnon_test_card_nonce_sandbox";
+      }
       
       const response = await apiRequest("POST", "/api/card/add", {
-        cardNonce: testCardNonce
+        cardNonce: cardNonce
       });
       
       const result = await response.json();
