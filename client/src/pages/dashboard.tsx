@@ -27,7 +27,8 @@ import {
   Hash,
   ChevronRight,
   Settings,
-  Gauge
+  Gauge,
+  Crown
 } from "lucide-react";
 import logoPath from "@assets/logo_1751918412862.png";
 
