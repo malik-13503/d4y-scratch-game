@@ -4,8 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import { CreditCard, Shield, CheckCircle } from "lucide-react";
-import { ErrorDialog } from "@/components/error-dialog";
+import { CreditCard, Shield, CheckCircle, AlertCircle } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { getEnvironmentBadge, isProduction } from "@/lib/environment";
 import { createCardPaymentMethod } from "@/lib/square";
 
@@ -103,8 +103,15 @@ export function CardSetup({ onSuccess, user }: CardSetupProps) {
       console.log("Square tokenization result:", tokenResult);
       
       if (tokenResult.status !== 'OK') {
-        const errorMessage = tokenResult.errors?.[0]?.detail || 'Card validation failed';
-        throw new Error(`Please check your card information: ${errorMessage}`);
+        console.error("Square tokenization failed:", tokenResult);
+        let errorMessage = 'Card validation failed';
+        
+        if (tokenResult.errors && tokenResult.errors.length > 0) {
+          const errors = tokenResult.errors.map((err: any) => err.detail || err.message).join(', ');
+          errorMessage = errors;
+        }
+        
+        throw new Error(`Card validation failed: ${errorMessage}. Please check all card details including expiry date and CVV.`);
       }
 
       const cardNonce = tokenResult.token;
@@ -276,6 +283,49 @@ export function CardSetup({ onSuccess, user }: CardSetupProps) {
           </Button>
         </div>
       </CardContent>
+
+      {/* Error Dialog */}
+      <Dialog open={showErrorDialog} onOpenChange={setShowErrorDialog}>
+        <DialogContent className="sm:max-w-md bg-gradient-to-br from-red-900/90 to-red-800/90 border-red-400/40 text-white">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-red-200">
+              <AlertCircle className="h-5 w-5" />
+              Payment Setup Failed
+            </DialogTitle>
+            <DialogDescription className="text-red-300">
+              We couldn't verify your payment method.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            <div className="p-4 bg-red-800/50 rounded-lg border border-red-600/30">
+              <p className="text-sm text-red-100 font-medium">
+                {dialogError}
+              </p>
+            </div>
+            
+            <div className="space-y-2">
+              <p className="text-sm font-medium text-red-200">Common solutions:</p>
+              <ul className="text-sm text-red-300 space-y-1 ml-4">
+                <li>• Check that all card details are correct</li>
+                <li>• Verify the expiry date is in MM/YY format</li>
+                <li>• Ensure the CVV matches your card</li>
+                <li>• Try using a different card</li>
+                <li>• Contact your bank to verify the card is active</li>
+              </ul>
+            </div>
+          </div>
+          
+          <div className="flex justify-end gap-2 pt-4">
+            <Button
+              onClick={() => setShowErrorDialog(false)}
+              className="bg-red-600 hover:bg-red-700 text-white"
+            >
+              Try Again
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 }
