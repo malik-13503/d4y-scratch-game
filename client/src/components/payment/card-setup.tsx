@@ -34,20 +34,24 @@ export function CardSetup({ onSuccess, user }: CardSetupProps) {
   useEffect(() => {
     const initializeCard = async () => {
       try {
-        // Always try to initialize the card since we have the production ID
+        console.log("Initializing Square card with production mode:", isProduction);
         if (cardContainerRef.current) {
           const card = await createCardPaymentMethod();
           await card.attach(cardContainerRef.current);
           cardRef.current = card;
           setCardInitialized(true);
+          console.log("Square card initialized successfully");
         }
       } catch (error) {
         console.error("Failed to initialize Square card:", error);
-        // Card initialization failed, will fallback to sandbox mode
+        setCardInitialized(false);
       }
     };
 
-    initializeCard();
+    // Only initialize in production mode or if we're properly configured
+    if (isProduction) {
+      initializeCard();
+    }
   }, []);
 
   const handleCardSetup = async () => {
@@ -185,33 +189,33 @@ export function CardSetup({ onSuccess, user }: CardSetupProps) {
 
           {cardInitialized ? (
             <div className="space-y-3">
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                <p className="text-sm text-blue-800">
-                  <strong>Ready:</strong> Enter your card information below.
+              <div className="p-3 bg-gradient-to-r from-green-800/40 to-emerald-800/40 rounded-xl border border-green-500/30">
+                <p className="text-sm text-green-200">
+                  <strong className="text-white">Ready:</strong> Enter your card information below.
                 </p>
               </div>
               
               <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700">
+                <label className="text-sm font-medium text-white">
                   Card Information
                 </label>
                 <div 
                   ref={cardContainerRef}
-                  className="border border-gray-300 rounded-lg p-4 min-h-[120px] bg-white"
+                  className="border border-purple-400/40 rounded-lg p-4 min-h-[120px] bg-white/95"
                 />
               </div>
             </div>
-          ) : !isProduction ? (
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
-              <p className="text-sm text-yellow-800">
-                <strong>Note:</strong> This is a sandbox environment. 
-                Use test card: 4111 1111 1111 1111
+          ) : isProduction ? (
+            <div className="p-3 bg-gradient-to-r from-red-800/40 to-orange-800/40 rounded-xl border border-red-500/30">
+              <p className="text-sm text-red-200">
+                <strong className="text-white">Configuration Required:</strong> Square Application ID needed for payment processing.
               </p>
             </div>
           ) : (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-3">
-              <p className="text-sm text-red-800">
-                <strong>Configuration Required:</strong> Square Application ID needed for payment processing.
+            <div className="p-3 bg-gradient-to-r from-yellow-800/40 to-orange-800/40 rounded-xl border border-yellow-500/30">
+              <p className="text-sm text-yellow-200">
+                <strong className="text-white">Note:</strong> This is a sandbox environment. 
+                Use test card: 4111 1111 1111 1111
               </p>
             </div>
           )}
