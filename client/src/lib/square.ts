@@ -54,33 +54,21 @@ export const createCardPaymentMethod = async () => {
   const card = await payments.card({
     style: {
       '.input-container': {
-        borderColor: '#D1D5DB',
-        borderRadius: '8px',
-        padding: '12px 16px',
-        backgroundColor: '#FFFFFF',
-        boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)',
+        borderColor: '#E5E7EB',
+        borderRadius: '6px',
       },
       '.input-container.is-focus': {
-        borderColor: '#6366F1',
-        boxShadow: '0 0 0 3px rgba(99, 102, 241, 0.1)',
+        borderColor: '#3B82F6',
       },
       '.input-container.is-error': {
         borderColor: '#EF4444',
-        boxShadow: '0 0 0 3px rgba(239, 68, 68, 0.1)',
       },
       '.message-text': {
         color: '#EF4444',
-        fontSize: '14px',
-        marginTop: '4px',
       },
       'input': {
         fontSize: '16px',
         fontFamily: 'Arial, sans-serif',
-        color: '#1F2937',
-        lineHeight: '1.5',
-      },
-      '::placeholder': {
-        color: '#9CA3AF',
       }
     }
   });

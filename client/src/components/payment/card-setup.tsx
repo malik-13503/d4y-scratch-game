@@ -51,11 +51,8 @@ export function CardSetup({ onSuccess, user }: CardSetupProps) {
           console.log("Creating Square card payment method...");
           const card = await createCardPaymentMethod();
           
-          // Ensure container is properly styled for Square SDK
-          const container = cardContainerRef.current;
-          console.log("Attaching card to container...", container);
-          
-          await card.attach(container);
+          console.log("Attaching card to container...", cardContainerRef.current);
+          await card.attach(cardContainerRef.current);
           
           cardRef.current = card;
           setCardInitialized(true);
@@ -230,27 +227,14 @@ export function CardSetup({ onSuccess, user }: CardSetupProps) {
                 </div>
               )}
               
-              <div className="space-y-3">
+              <div className="space-y-2">
                 <label className="text-sm font-medium text-white">
                   Card Information
                 </label>
-                <div className="relative">
-                  <div 
-                    ref={cardContainerRef}
-                    className="border border-gray-300 rounded-lg p-0 min-h-[50px] bg-white shadow-sm transition-all duration-200 hover:border-gray-400 focus-within:border-indigo-500 focus-within:ring-2 focus-within:ring-indigo-200"
-                  />
-                  {!cardInitialized && (
-                    <div className="absolute inset-0 flex items-center justify-center bg-white rounded-lg">
-                      <div className="flex items-center space-x-2 text-gray-500">
-                        <div className="animate-spin w-4 h-4 border-2 border-indigo-500 border-t-transparent rounded-full"></div>
-                        <span className="text-sm">Loading secure form...</span>
-                      </div>
-                    </div>
-                  )}
-                </div>
-                <p className="text-xs text-gray-300">
-                  Your payment information is encrypted and secure
-                </p>
+                <div 
+                  ref={cardContainerRef}
+                  className="border border-purple-400/40 rounded-lg p-4 min-h-[120px] bg-white/95"
+                />
               </div>
             </div>
           ) : (
