@@ -68,7 +68,7 @@ export const createCardPaymentMethod = async () => {
       },
       'input': {
         fontSize: '16px',
-        fontFamily: 'system-ui, sans-serif',
+        fontFamily: 'Arial, sans-serif',
       }
     }
   });

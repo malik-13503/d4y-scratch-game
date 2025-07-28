@@ -36,25 +36,29 @@ export function CardSetup({ onSuccess, user }: CardSetupProps) {
       try {
         console.log("Initializing Square card with production mode:", isProduction);
         
-        // Wait for container to be available
+        // Wait for container to be available with more robust checking
         let attempts = 0;
-        while (!cardContainerRef.current && attempts < 10) {
-          await new Promise(resolve => setTimeout(resolve, 100));
+        while (attempts < 20) {
+          if (cardContainerRef.current && document.contains(cardContainerRef.current)) {
+            console.log("Container found, proceeding with Square initialization...");
+            break;
+          }
+          await new Promise(resolve => setTimeout(resolve, 150));
           attempts++;
         }
         
-        if (cardContainerRef.current) {
+        if (cardContainerRef.current && document.contains(cardContainerRef.current)) {
           console.log("Creating Square card payment method...");
           const card = await createCardPaymentMethod();
           
-          console.log("Attaching card to container...");
+          console.log("Attaching card to container...", cardContainerRef.current);
           await card.attach(cardContainerRef.current);
           
           cardRef.current = card;
           setCardInitialized(true);
           console.log("Square card initialized and attached successfully");
         } else {
-          console.error("Card container ref is still not available after waiting");
+          console.error("Card container is not available in DOM after waiting");
           setCardInitialized(false);
         }
       } catch (error) {
@@ -63,9 +67,12 @@ export function CardSetup({ onSuccess, user }: CardSetupProps) {
       }
     };
 
-    // Only initialize in production mode and when component is mounted
+    // Only initialize in production mode
     if (isProduction) {
-      initializeCard();
+      // Use requestAnimationFrame to ensure DOM is fully rendered
+      requestAnimationFrame(() => {
+        setTimeout(initializeCard, 100);
+      });
     }
   }, [isProduction]);
 
