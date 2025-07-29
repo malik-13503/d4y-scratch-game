@@ -5,27 +5,9 @@ import { apiRequest } from '@/lib/queryClient';
 
 export function useAuthPersistence() {
   const [isInitialized, setIsInitialized] = useState(false);
-  const [sessionRestored, setSessionRestored] = useState(false);
   
   // Get initial auth from localStorage
   const storedAuth = getAuthFromStorage();
-  
-  // Session restoration mutation
-  const restoreSessionMutation = useMutation({
-    mutationFn: async ({ userId, email }: { userId: number; email: string }) => {
-      const response = await apiRequest("POST", "/api/restore-session", { userId, email });
-      return response.json();
-    },
-    onSuccess: (data) => {
-      console.log("Session restored successfully:", data.user.email);
-      saveAuthToStorage(data.user);
-      setSessionRestored(true);
-    },
-    onError: (error) => {
-      console.error("Session restoration failed:", error);
-      clearAuthFromStorage();
-    }
-  });
   
   // Try to get user from server
   const { data: serverUser, isLoading: serverLoading, error, refetch } = useQuery({
@@ -39,32 +21,25 @@ export function useAuthPersistence() {
     if (serverUser) {
       console.log("Received user from server, saving to localStorage");
       saveAuthToStorage(serverUser);
+      setIsInitialized(true);
     }
-    // If server returns 401 but we have localStorage auth, try to re-establish session
-    else if (error && storedAuth && isStoredAuthValid && !sessionRestored && !restoreSessionMutation.isPending) {
-      console.log("Server session lost, attempting to restore from localStorage auth");
-      restoreSessionMutation.mutate({
-        userId: storedAuth.user!.id,
-        email: storedAuth.user!.email
-      });
+    // If server returns 401 but we have valid localStorage auth, redirect to login
+    else if (error && storedAuth && isStoredAuthValid) {
+      console.log("Server session lost but localStorage is valid. User needs to re-authenticate.");
+      // Keep localStorage for now but user will need to login again
+      setIsInitialized(true);
     }
-    // Only clear localStorage if error persists and stored auth is old
+    // Clear expired localStorage auth
     else if (error && storedAuth && !isStoredAuthValid) {
       console.log("Stored auth is expired, clearing localStorage");
       clearAuthFromStorage();
-    }
-    
-    if (!isInitialized) {
       setIsInitialized(true);
     }
-  }, [serverUser, error, storedAuth, isInitialized, sessionRestored, restoreSessionMutation]);
-
-  // Refetch user data after successful session restoration
-  useEffect(() => {
-    if (sessionRestored) {
-      refetch();
+    // No server user and no stored auth
+    else if (!serverUser && !storedAuth) {
+      setIsInitialized(true);
     }
-  }, [sessionRestored, refetch]);
+  }, [serverUser, error, storedAuth]);
 
   // Check if localStorage auth is still valid (within 7 days)
   const isStoredAuthValid = storedAuth && storedAuth.timestamp && 
@@ -76,10 +51,10 @@ export function useAuthPersistence() {
     }
   }, [isStoredAuthValid, storedAuth]);
 
-  // Determine authentication state
-  const isAuthenticated = !!(serverUser || (isStoredAuthValid && !error));
-  const user = serverUser || (isStoredAuthValid ? storedAuth.user : null);
-  const isLoading = !isInitialized || (serverLoading && !isStoredAuthValid);
+  // Determine authentication state - only trust server user, not localStorage
+  const isAuthenticated = !!serverUser;
+  const user = serverUser;
+  const isLoading = !isInitialized || serverLoading;
 
   return {
     user,
