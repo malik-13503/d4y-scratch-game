@@ -44,6 +44,7 @@ export interface IStorage {
   getUserByEmail(email: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
   updateUser(id: number, updates: Partial<User>): Promise<User | undefined>;
+  deleteUser(id: number): Promise<boolean>;
 
   // Transaction methods
   createTransaction(transaction: InsertTransaction): Promise<Transaction>;
@@ -670,29 +671,29 @@ export class DatabaseStorage implements IStorage {
     try {
       // Get basic counts
       const totalUsers = await db.select({ count: sql<number>`count(*)` }).from(users);
-      const totalGames = await db.select({ count: sql<number>`count(*)` }).from(this.games);
-      const totalTransactions = await db.select({ count: sql<number>`count(*)` }).from(this.transactions);
+      const totalGames = await db.select({ count: sql<number>`count(*)` }).from(games);
+      const totalTransactions = await db.select({ count: sql<number>`count(*)` }).from(transactions);
       const totalSpins = totalTransactions[0]?.count || 0;
       
       // Calculate total revenue
       const revenueResult = await db.select({ 
         total: sql<number>`coalesce(sum(cast(amount as decimal)), 0)` 
-      }).from(this.transactions);
+      }).from(transactions);
       const totalRevenue = Number(revenueResult[0]?.total || 0);
 
       // Get game-specific stats
       const gameStats = await db.select({
-        gameId: this.games.id,
-        name: this.games.name,
-        emoji: this.games.emoji,
-        totalPlayers: sql<number>`count(distinct ${this.players.id})`,
-        spins: sql<number>`count(${this.transactions.id})`,
-        revenue: sql<number>`coalesce(sum(cast(${this.transactions.amount} as decimal)), 0)`
+        gameId: games.id,
+        name: games.name,
+        emoji: games.emoji,
+        totalPlayers: sql<number>`count(distinct ${players.id})`,
+        spins: sql<number>`count(${transactions.id})`,
+        revenue: sql<number>`coalesce(sum(cast(${transactions.amount} as decimal)), 0)`
       })
-      .from(this.games)
-      .leftJoin(this.players, eq(this.games.id, this.players.gameId))
-      .leftJoin(this.transactions, eq(this.games.id, this.transactions.gameId))
-      .groupBy(this.games.id, this.games.name, this.games.emoji);
+      .from(games)
+      .leftJoin(players, eq(games.id, players.gameId))
+      .leftJoin(transactions, eq(games.id, transactions.gameId))
+      .groupBy(games.id, games.name, games.emoji);
 
       // Calculate today's metrics
       const today = new Date();
@@ -701,7 +702,7 @@ export class DatabaseStorage implements IStorage {
       const todayRevenue = await db.select({ 
         total: sql<number>`coalesce(sum(cast(amount as decimal)), 0)` 
       })
-      .from(this.transactions)
+      .from(transactions)
       .where(sql`created_at >= ${today}`);
 
       const todayUsers = await db.select({ count: sql<number>`count(*)` })
@@ -715,13 +716,13 @@ export class DatabaseStorage implements IStorage {
       const weeklyRevenue = await db.select({ 
         total: sql<number>`coalesce(sum(cast(amount as decimal)), 0)` 
       })
-      .from(this.transactions)
+      .from(transactions)
       .where(sql`created_at >= ${weekAgo}`);
 
       const monthlyRevenue = await db.select({ 
         total: sql<number>`coalesce(sum(cast(amount as decimal)), 0)` 
       })
-      .from(this.transactions)
+      .from(transactions)
       .where(sql`created_at >= ${monthAgo}`);
 
       const weeklyUsers = await db.select({ count: sql<number>`count(*)` })
@@ -855,6 +856,31 @@ export class DatabaseStorage implements IStorage {
     } catch (error) {
       console.error("Error getting user stats:", error);
       return null;
+    }
+  }
+
+  async deleteUser(id: number): Promise<boolean> {
+    try {
+      // Delete related records first (transactions, players, spin results)
+      // Delete spin results through players
+      await db.delete(spinResults)
+        .where(
+          sql`player_id IN (SELECT id FROM ${players} WHERE user_id = ${id})`
+        );
+      
+      // Delete players
+      await db.delete(players).where(eq(players.userId, id));
+      
+      // Delete transactions
+      await db.delete(transactions).where(eq(transactions.userId, id));
+      
+      // Finally delete the user
+      const result = await db.delete(users).where(eq(users.id, id));
+      
+      return true;
+    } catch (error) {
+      console.error("Error deleting user:", error);
+      return false;
     }
   }
 }

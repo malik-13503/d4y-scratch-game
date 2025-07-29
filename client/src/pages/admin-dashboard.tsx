@@ -69,6 +69,7 @@ import {
 } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { DeleteUserDialog } from "@/components/delete-user-dialog";
 import logoPath from "@assets/logo_1751918412862.png";
 
 export default function AdminDashboard() {
@@ -82,6 +83,8 @@ export default function AdminDashboard() {
   const [isUserProfileOpen, setIsUserProfileOpen] = useState(false);
   const [isDeleteGameOpen, setIsDeleteGameOpen] = useState(false);
   const [gameToDelete, setGameToDelete] = useState<any>(null);
+  const [isDeleteUserOpen, setIsDeleteUserOpen] = useState(false);
+  const [userToDelete, setUserToDelete] = useState<any>(null);
 
   // Edit form data state
   const [editFormData, setEditFormData] = useState({
@@ -402,6 +405,33 @@ export default function AdminDashboard() {
     },
   });
 
+  // Delete user mutation
+  const deleteUserMutation = useMutation({
+    mutationFn: async (userId: number) => {
+      const response = await apiRequest("DELETE", `/api/admin/users/${userId}`);
+      return response.json();
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
+      queryClient.invalidateQueries({
+        queryKey: ["/api/admin/dashboard/stats"],
+      });
+      setIsDeleteUserOpen(false);
+      setUserToDelete(null);
+      toast({
+        title: "User Deleted",
+        description: `${data.deletedUser?.email} has been permanently removed from the system`,
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Delete Failed",
+        description: error.message || "Failed to delete user",
+        variant: "destructive",
+      });
+    },
+  });
+
   // Real-time stats simulation
   useEffect(() => {
     const interval = setInterval(() => {
@@ -538,6 +568,17 @@ export default function AdminDashboard() {
     };
 
     updateGameMutation.mutate({ id: editingGame.id, gameData });
+  };
+
+  const handleDeleteUser = (user: any) => {
+    setUserToDelete(user);
+    setIsDeleteUserOpen(true);
+  };
+
+  const confirmDeleteUser = () => {
+    if (userToDelete) {
+      deleteUserMutation.mutate(userToDelete.id);
+    }
   };
 
   return (
@@ -2185,8 +2226,9 @@ export default function AdminDashboard() {
                               size="sm"
                               variant="outline"
                               className="border-red-500/50 text-red-400 hover:bg-red-500/20"
+                              onClick={() => handleDeleteUser(user)}
                             >
-                              <Ban className="h-4 w-4" />
+                              <Trash2 className="h-4 w-4" />
                             </Button>
                           </div>
                         </div>
@@ -3720,6 +3762,15 @@ export default function AdminDashboard() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Delete User Dialog */}
+      <DeleteUserDialog
+        isOpen={isDeleteUserOpen}
+        onClose={() => setIsDeleteUserOpen(false)}
+        onConfirm={confirmDeleteUser}
+        user={userToDelete}
+        isDeleting={deleteUserMutation.isPending}
+      />
     </div>
   );
 }
