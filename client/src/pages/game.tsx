@@ -23,7 +23,7 @@ import {
   Gift,
   Sparkles,
 } from "lucide-react";
-import { formatTimeRemaining } from "@/lib/utils";
+import { formatTimeRemaining, formatCountdownObject } from "@/lib/utils";
 import { useCountdown } from "@/hooks/useCountdown";
 import type { Game } from "@shared/schema";
 
@@ -331,7 +331,7 @@ export default function GamePage() {
                       Time Left
                     </p>
                     <p className="text-white text-sm sm:text-lg font-black font-mono">
-                      {useCountdown(new Date(game.endTime))}
+                      {formatCountdownObject(useCountdown(new Date(game.endTime)))}
                     </p>
                   </div>
                 </div>

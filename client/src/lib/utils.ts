@@ -27,6 +27,22 @@ export function formatTimeRemaining(endTime: string | Date): string {
   }
 }
 
+export function formatCountdownObject(countdown: { days: number; hours: number; minutes: number; seconds: number; isExpired: boolean }): string {
+  if (countdown.isExpired) {
+    return "Game ended";
+  }
+
+  if (countdown.days > 0) {
+    return `${countdown.days}d ${countdown.hours}h`;
+  } else if (countdown.hours > 0) {
+    return `${countdown.hours}h ${countdown.minutes}m`;
+  } else if (countdown.minutes > 0) {
+    return `${countdown.minutes}m ${countdown.seconds}s`;
+  } else {
+    return `${countdown.seconds}s`;
+  }
+}
+
 export function generateGameCode(): string {
   const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
   const numbers = '0123456789';

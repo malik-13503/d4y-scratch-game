@@ -36,8 +36,8 @@ export function DeleteUserDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="bg-gradient-to-br from-slate-900 via-red-900/20 to-slate-900 border-2 border-red-500/30 text-white max-w-md mx-auto">
-        <div className="absolute inset-0 bg-gradient-to-r from-red-500/10 via-orange-500/10 to-red-500/10 animate-pulse rounded-lg"></div>
+      <DialogContent className="bg-gradient-to-br from-slate-800 via-slate-900 to-black border-2 border-red-500/50 text-white max-w-md mx-auto shadow-2xl">
+        <div className="absolute inset-0 bg-gradient-to-r from-red-500/20 via-orange-500/20 to-red-500/20 rounded-lg"></div>
         
         <DialogHeader className="relative text-center pb-4">
           <div className="mx-auto mb-4 flex items-center justify-center">
@@ -59,7 +59,7 @@ export function DeleteUserDialog({
 
         <div className="relative space-y-4">
           {/* User Information Card */}
-          <div className="bg-black/40 backdrop-blur-sm border border-red-500/30 rounded-lg p-4">
+          <div className="bg-slate-800/80 backdrop-blur-sm border border-red-500/40 rounded-lg p-4">
             <div className="flex items-center space-x-3 mb-3">
               <div className="w-10 h-10 bg-gradient-to-r from-red-500 to-orange-500 rounded-full flex items-center justify-center">
                 <User className="h-5 w-5 text-white" />
@@ -99,7 +99,7 @@ export function DeleteUserDialog({
           </div>
 
           {/* Warning Information */}
-          <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-4">
+          <div className="bg-red-900/30 border border-red-500/40 rounded-lg p-4">
             <div className="flex items-start space-x-3">
               <Trash2 className="h-5 w-5 text-red-400 mt-0.5 flex-shrink-0" />
               <div className="text-sm text-red-200">
