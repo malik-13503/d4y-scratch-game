@@ -174,20 +174,7 @@ export function ImprovedLoginForm({ onSuccess }: ImprovedLoginFormProps) {
           </p>
         </div>
 
-        {/* Demo Credentials (for testing) */}
-        <div className="mt-6 p-4 bg-slate-800/30 rounded-xl border border-white/10">
-          <p className="text-xs text-gray-400 text-center mb-2">Demo Credentials (for testing):</p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
-            <div className="text-center">
-              <span className="text-gray-300">Email:</span>
-              <div className="font-mono text-purple-300">demo@example.com</div>
-            </div>
-            <div className="text-center">
-              <span className="text-gray-300">Password:</span>
-              <div className="font-mono text-purple-300">demo123</div>
-            </div>
-          </div>
-        </div>
+
       </form>
     </div>
   );
