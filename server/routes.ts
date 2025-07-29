@@ -210,6 +210,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   });
 
+  // Session restoration endpoint for localStorage auth
+  app.post("/api/restore-session", async (req, res) => {
+    try {
+      const { userId, email } = req.body;
+      const clientIP = req.ip || req.connection.remoteAddress || req.socket.remoteAddress;
+      
+      if (!userId || !email) {
+        return res.status(400).json({ message: "Missing user data" });
+      }
+
+      // Verify user exists and email matches
+      const user = await storage.getUser(userId);
+      if (!user || user.email !== email) {
+        console.log("Invalid session restoration attempt for userId:", userId, "email:", email, "IP:", clientIP);
+        return res.status(401).json({ message: "Invalid session data" });
+      }
+
+      // Restore session
+      (req.session as any).userId = user.id;
+      (req.session as any).loginIP = clientIP;
+      (req.session as any).lastAccess = new Date();
+      
+      console.log("Session restored for user:", user.email, "from IP:", clientIP);
+
+      res.json({
+        message: "Session restored successfully",
+        user: {
+          id: user.id,
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          cardOnFile: user.cardOnFile
+        }
+      });
+    } catch (error) {
+      console.error("Session restoration error:", error);
+      res.status(500).json({ message: "Session restoration failed" });
+    }
+  });
+
   // Public routes - Get all active games
   app.get("/api/games", async (req, res) => {
     try {
