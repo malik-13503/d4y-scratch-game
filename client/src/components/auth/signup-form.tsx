@@ -6,15 +6,17 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { saveAuthToStorage } from "@/lib/auth";
-import { AlertCircle, User, Mail, Phone, Lock } from "lucide-react";
+import { AlertCircle, User, Mail, Phone, Lock, Eye, EyeOff } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ErrorDialog } from "@/components/error-dialog";
+import { EmailErrorDialog } from "@/components/email-error-dialog";
 
 interface SignupFormProps {
   onSuccess: () => void;
+  onSwitchToLogin: () => void;
 }
 
-export function SignupForm({ onSuccess }: SignupFormProps) {
+export function SignupForm({ onSuccess, onSwitchToLogin }: SignupFormProps) {
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -29,6 +31,7 @@ export function SignupForm({ onSuccess }: SignupFormProps) {
   const [error, setError] = useState("");
   const [showErrorDialog, setShowErrorDialog] = useState(false);
   const [dialogError, setDialogError] = useState("");
+  const [showEmailErrorDialog, setShowEmailErrorDialog] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const { toast } = useToast();
@@ -109,8 +112,14 @@ export function SignupForm({ onSuccess }: SignupFormProps) {
       setError("Account created! Please use the Login tab to access your account.");
     } catch (error: any) {
       const errorMessage = error.message || "Registration failed";
-      setDialogError(errorMessage);
-      setShowErrorDialog(true);
+      
+      // Check if it's the "Email already registered" error
+      if (errorMessage.includes("Email already registered")) {
+        setShowEmailErrorDialog(true);
+      } else {
+        setDialogError(errorMessage);
+        setShowErrorDialog(true);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -327,6 +336,14 @@ export function SignupForm({ onSuccess }: SignupFormProps) {
           setError("");
           setDialogError("");
         }}
+      />
+
+      {/* Email Error Dialog */}
+      <EmailErrorDialog
+        open={showEmailErrorDialog}
+        onClose={() => setShowEmailErrorDialog(false)}
+        onSwitchToLogin={onSwitchToLogin}
+        email={formData.email}
       />
     </form>
   );

@@ -13,6 +13,7 @@ type FlowStep = "auth" | "card-setup" | "complete";
 
 export default function WelcomePage() {
   const [currentStep, setCurrentStep] = useState<FlowStep>("auth");
+  const [activeTab, setActiveTab] = useState("signup");
   const [, setLocation] = useLocation();
 
   // Get the game ID from URL query parameters
@@ -92,7 +93,7 @@ export default function WelcomePage() {
 
         <div className="flex flex-col items-center justify-center">
           {currentStep === "auth" && (
-            <Tabs defaultValue="signup" className="w-full max-w-md">
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full max-w-md">
               <TabsList className="grid w-full grid-cols-2 bg-slate-800/80 border-2 border-white/20 rounded-2xl p-2 backdrop-blur-sm">
                 <TabsTrigger 
                   value="signup"
@@ -109,7 +110,10 @@ export default function WelcomePage() {
               </TabsList>
 
               <TabsContent value="signup">
-                <SignupForm onSuccess={handleAuthSuccess} />
+                <SignupForm 
+                  onSuccess={handleAuthSuccess} 
+                  onSwitchToLogin={() => setActiveTab("login")}
+                />
               </TabsContent>
 
               <TabsContent value="login">

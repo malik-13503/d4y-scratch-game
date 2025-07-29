@@ -29,6 +29,7 @@ type FlowStep = "auth" | "card-setup" | "complete";
 export default function AuthLandingPage() {
   const [currentStep, setCurrentStep] = useState<FlowStep>("auth");
   const [authType, setAuthType] = useState<"login" | "signup">("login");
+  const [activeTab, setActiveTab] = useState("signup");
   const [, setLocation] = useLocation();
 
   const {
