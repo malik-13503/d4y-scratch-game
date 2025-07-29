@@ -96,7 +96,7 @@ export default function HowToPlay() {
                   <Gift className="h-5 w-5 mr-2 text-green-400" />
                   <h3 className="font-semibold text-green-300">Free Play Zone</h3>
                 </div>
-                <p className="text-sm text-gray-200">Numbers 151-200: Completely free - no charge!</p>
+                <p className="text-sm text-gray-200">Higher numbers: Completely free - no charge!</p>
               </div>
             </div>
           </CardContent>

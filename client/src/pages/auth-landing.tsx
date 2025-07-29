@@ -340,7 +340,7 @@ export default function AuthLandingPage() {
                             Spin to Win
                           </h3>
                           <p className="text-gray-300 text-lg font-medium">
-                            Numbers 1-200, pay what you land on
+                            Spin the wheel, pay what you land on
                           </p>
                         </div>
                       </div>
@@ -352,7 +352,7 @@ export default function AuthLandingPage() {
                               Free Play Zone
                             </div>
                             <div className="text-green-100 text-base">
-                              Numbers 151-200
+                              Higher Numbers
                             </div>
                           </div>
                         </div>
@@ -363,7 +363,7 @@ export default function AuthLandingPage() {
                               Paid Range
                             </div>
                             <div className="text-blue-100 text-base">
-                              Numbers 1-150
+                              Lower Numbers
                             </div>
                           </div>
                         </div>

@@ -100,6 +100,12 @@ This is a real-time prize game web application that allows users to participate 
 
 ## Changelog
 
+- January 29, 2025: **GAME RANGE FLEXIBILITY UPDATE** - Made game descriptions generic to support variable number ranges
+  - **Dynamic Range Support**: Updated all references from "1-200" to generic "Spin the wheel, pay what you land on"
+  - **Flexible Free Play**: Changed "Numbers 151-200" to "Higher Numbers" to accommodate games with different ranges
+  - **Adaptable Paid Range**: Updated "Numbers 1-150" to "Lower Numbers" for variable game configurations
+  - **Multi-Page Consistency**: Updated auth landing, how-to-play, and prize-rules pages with generic language
+  - **Future-Proof Design**: Games can now have ranges like 1-50, 1-85, 1-75 without UI text conflicts
 - January 29, 2025: **PRODUCTION DEPLOYMENT PREPARATION** - Removed admin demo credentials for secure production deployment
   - **Admin Security Enhancement**: Removed "admin@example.com / admin123" default credentials from admin login page
   - **Production Ready Admin**: Admin login now requires proper credentials without exposed demo information

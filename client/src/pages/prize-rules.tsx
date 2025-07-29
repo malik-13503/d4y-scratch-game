@@ -112,7 +112,7 @@ export default function PrizeRules() {
                 <div className="space-y-3">
                   <div className="flex justify-between items-center">
                     <span className="text-white/80">Number Range:</span>
-                    <Badge variant="secondary" className="bg-green-600/20 text-green-300">151 - 200</Badge>
+                    <Badge variant="secondary" className="bg-green-600/20 text-green-300">Higher Numbers</Badge>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-white/80">Cost:</span>
