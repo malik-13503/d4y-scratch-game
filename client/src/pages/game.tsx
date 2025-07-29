@@ -23,7 +23,8 @@ import {
   Gift,
   Sparkles,
 } from "lucide-react";
-import { formatTimeRemaining, useCountdown } from "@/lib/utils";
+import { formatTimeRemaining } from "@/lib/utils";
+import { useCountdown } from "@/hooks/useCountdown";
 import type { Game } from "@shared/schema";
 
 export default function GamePage() {

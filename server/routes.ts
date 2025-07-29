@@ -9,6 +9,7 @@ import {
 } from "@shared/schema";
 import { z } from "zod";
 import { squareService } from "./squareService";
+import { emailService } from "./emailService";
 import session from "express-session";
 import connectPgSimple from "connect-pg-simple";
 
@@ -80,6 +81,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       (req.session as any).lastAccess = new Date();
       
       console.log("New user registered and logged in:", user.email, "from IP:", clientIP);
+
+      // Send welcome email
+      try {
+        await emailService.sendWelcomeEmail(user.email, user.firstName);
+        console.log("Welcome email sent successfully to:", user.email);
+      } catch (emailError) {
+        console.error("Failed to send welcome email:", emailError);
+        // Continue with registration even if email fails
+      }
 
       res.status(201).json({
         message: "Registration successful",
@@ -1201,6 +1211,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
           cardBrand: 'VISA'
         });
 
+        // Send card setup confirmation email for sandbox
+        try {
+          await emailService.sendCardSetupConfirmation(user.email, user.firstName, '4242', 'VISA');
+          console.log("Card setup confirmation email sent to:", user.email);
+        } catch (emailError) {
+          console.error("Failed to send card setup confirmation email:", emailError);
+          // Continue even if email fails
+        }
+
         res.json({ 
           message: "Card added successfully",
           cardLast4: '4242',
@@ -1222,17 +1241,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
           console.log("Card verification successful:", testResult);
           
           // Store the verified card information
+          const cardLast4 = testResult.cardDetails?.last4 || 'XXXX';
+          const cardBrand = testResult.cardDetails?.cardBrand || 'CARD';
+          
           await storage.updateUser(userId, {
             cardOnFile: true,
             cardNonce: cardNonce,
-            cardLast4: testResult.cardDetails?.last4 || 'XXXX',
-            cardBrand: testResult.cardDetails?.cardBrand || 'CARD'
+            cardLast4: cardLast4,
+            cardBrand: cardBrand
           });
+
+          // Send card setup confirmation email
+          try {
+            await emailService.sendCardSetupConfirmation(user.email, user.firstName, cardLast4, cardBrand);
+            console.log("Card setup confirmation email sent to:", user.email);
+          } catch (emailError) {
+            console.error("Failed to send card setup confirmation email:", emailError);
+            // Continue even if email fails
+          }
 
           res.json({ 
             message: "Card verified successfully with $0.01 test charge",
-            cardLast4: testResult.cardDetails?.last4 || 'XXXX',
-            cardBrand: testResult.cardDetails?.cardBrand || 'CARD'
+            cardLast4: cardLast4,
+            cardBrand: cardBrand
           });
           
         } catch (error: any) {
@@ -1350,7 +1381,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
 
         // Record transaction with spin result
-        await storage.createTransaction({
+        const transaction = await storage.createTransaction({
           userId: userId,
           gameId: gameId,
           spinResultId: spinResult.id,
@@ -1369,6 +1400,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
           totalSpent: (parseFloat(user.totalSpent) + chargeAmount).toString(),
           gamesPlayed: user.gamesPlayed + 1
         });
+
+        // Send payment receipt email
+        try {
+          await emailService.sendPaymentReceipt(
+            user.email, 
+            user.firstName, 
+            chargeAmount.toString(),
+            spinResult.spunNumber,
+            paymentResult.id
+          );
+          console.log("Payment receipt email sent to:", user.email);
+        } catch (emailError) {
+          console.error("Failed to send payment receipt email:", emailError);
+          // Continue even if email fails
+        }
       }
 
       res.json({

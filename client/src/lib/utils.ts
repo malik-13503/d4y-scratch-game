@@ -1,22 +1,30 @@
 import { type ClassValue, clsx } from "clsx"
 import { twMerge } from "tailwind-merge"
-import { useState, useEffect } from "react"
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-export function formatTimeRemaining(endTime: Date): string {
-  const now = new Date();
-  const diff = endTime.getTime() - now.getTime();
-  
-  if (diff <= 0) return "00:00:00";
-  
-  const hours = Math.floor(diff / (1000 * 60 * 60));
-  const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-  const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-  
-  return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+export function formatTimeRemaining(endTime: string | Date): string {
+  const now = new Date().getTime();
+  const end = typeof endTime === 'string' ? new Date(endTime).getTime() : endTime.getTime();
+  const difference = end - now;
+
+  if (difference <= 0) {
+    return "Game ended";
+  }
+
+  const days = Math.floor(difference / (1000 * 60 * 60 * 24));
+  const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+  const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
+
+  if (days > 0) {
+    return `${days}d ${hours}h`;
+  } else if (hours > 0) {
+    return `${hours}h ${minutes}m`;
+  } else {
+    return `${minutes}m`;
+  }
 }
 
 export function generateGameCode(): string {
@@ -30,19 +38,4 @@ export function generateGameCode(): string {
   ).join('');
   
   return `${prefix}.${suffix}`;
-}
-
-// Create a live countdown component hook
-export function useCountdown(endTime: Date) {
-  const [timeLeft, setTimeLeft] = useState(formatTimeRemaining(endTime));
-  
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setTimeLeft(formatTimeRemaining(endTime));
-    }, 1000);
-    
-    return () => clearInterval(timer);
-  }, [endTime]);
-  
-  return timeLeft;
 }
