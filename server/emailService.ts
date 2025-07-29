@@ -5,7 +5,7 @@ if (!process.env.RESEND_API_KEY) {
 }
 
 const resend = new Resend(process.env.RESEND_API_KEY);
-const FROM_EMAIL = 'admin@hittheroadjackpot.com';
+const FROM_EMAIL = 'Hit The Road Jackpot <admin@hittheroadjackpot.com>';
 
 export interface EmailService {
   sendWelcomeEmail(userEmail: string, userName: string): Promise<void>;
@@ -19,7 +19,7 @@ class ResendEmailService implements EmailService {
       await resend.emails.send({
         from: FROM_EMAIL,
         to: userEmail,
-        subject: '🎉 Welcome to Hit the Road Jackpot!',
+        subject: '🎉 Welcome to Hit The Road Jackpot - Start Your Gaming Adventure!',
         html: this.getWelcomeEmailTemplate(userName),
       });
       console.log(`Welcome email sent to ${userEmail}`);
@@ -34,7 +34,7 @@ class ResendEmailService implements EmailService {
       await resend.emails.send({
         from: FROM_EMAIL,
         to: userEmail,
-        subject: '✅ Payment Method Successfully Added',
+        subject: '✅ Payment Card Successfully Added - Ready to Play!',
         html: this.getCardSetupTemplate(userName, cardLast4, cardBrand),
       });
       console.log(`Card setup confirmation sent to ${userEmail}`);
@@ -49,7 +49,7 @@ class ResendEmailService implements EmailService {
       await resend.emails.send({
         from: FROM_EMAIL,
         to: userEmail,
-        subject: '🎯 Payment Receipt - Hit the Road Jackpot',
+        subject: '🎯 Game Spin Receipt - Your Lucky Number Awaits!',
         html: this.getPaymentReceiptTemplate(userName, amount, gameNumber, transactionId),
       });
       console.log(`Payment receipt sent to ${userEmail}`);
@@ -85,14 +85,14 @@ class ResendEmailService implements EmailService {
 <body>
   <div class="container">
     <div class="header">
-      <h1>🎯 Hit the Road Jackpot</h1>
+      <h1>🎯 Hit The Road Jackpot</h1>
       <p style="color: rgba(255,255,255,0.9); margin: 10px 0 0 0; font-size: 16px;">Welcome to the Ultimate Gaming Experience!</p>
     </div>
     
     <div class="content">
       <div class="welcome-message">
         <h2 style="color: #1e293b; margin-top: 0;">Welcome, ${userName}! 🎉</h2>
-        <p>Congratulations on joining Hit the Road Jackpot! You're now part of an exclusive community where excitement meets opportunity.</p>
+        <p>Congratulations on joining Hit The Road Jackpot! You're now part of an exclusive community where excitement meets opportunity.</p>
       </div>
       
       <div class="features">
@@ -125,9 +125,9 @@ class ResendEmailService implements EmailService {
     </div>
     
     <div class="footer">
-      <p><strong>Hit the Road Jackpot Team</strong></p>
+      <p><strong>Hit The Road Jackpot Team</strong></p>
       <p>Questions? Reply to this email or contact us at admin@hittheroadjackpot.com</p>
-      <p style="margin-top: 20px; color: #94a3b8; font-size: 12px;">This email was sent because you created an account with Hit the Road Jackpot.</p>
+      <p style="margin-top: 20px; color: #94a3b8; font-size: 12px;">This email was sent because you created an account with Hit The Road Jackpot.</p>
     </div>
   </div>
 </body>
@@ -157,8 +157,8 @@ class ResendEmailService implements EmailService {
 <body>
   <div class="container">
     <div class="header">
-      <h1>💳 Payment Method Confirmed</h1>
-      <p style="color: rgba(255,255,255,0.9); margin: 10px 0 0 0; font-size: 16px;">Your card is ready for secure transactions</p>
+      <h1>💳 Hit The Road Jackpot</h1>
+      <p style="color: rgba(255,255,255,0.9); margin: 10px 0 0 0; font-size: 16px;">Payment Method Successfully Added!</p>
     </div>
     
     <div class="content">
@@ -189,7 +189,7 @@ class ResendEmailService implements EmailService {
     </div>
     
     <div class="footer">
-      <p><strong>Hit the Road Jackpot Team</strong></p>
+      <p><strong>Hit The Road Jackpot Team</strong></p>
       <p>Need help? Contact us at admin@hittheroadjackpot.com</p>
       <p style="margin-top: 20px; color: #94a3b8; font-size: 12px;">Your payment information is encrypted and secure. We never store your full card details.</p>
     </div>
@@ -230,8 +230,8 @@ class ResendEmailService implements EmailService {
 <body>
   <div class="container">
     <div class="header">
-      <h1>🎯 Payment Receipt</h1>
-      <p style="color: rgba(255,255,255,0.9); margin: 10px 0 0 0; font-size: 16px;">Thank you for playing!</p>
+      <h1>🎯 Hit The Road Jackpot</h1>
+      <p style="color: rgba(255,255,255,0.9); margin: 10px 0 0 0; font-size: 16px;">Game Spin Receipt - Thank You for Playing!</p>
     </div>
     
     <div class="content">
@@ -281,7 +281,7 @@ class ResendEmailService implements EmailService {
     </div>
     
     <div class="footer">
-      <p><strong>Hit the Road Jackpot Team</strong></p>
+      <p><strong>Hit The Road Jackpot Team</strong></p>
       <p>Questions about this transaction? Contact us at admin@hittheroadjackpot.com</p>
       <p style="margin-top: 20px; color: #94a3b8; font-size: 12px;">This is an automated receipt. All payments are processed securely through Square.</p>
     </div>
