@@ -23,6 +23,7 @@ export function SignupForm({ onSuccess }: SignupFormProps) {
     password: "",
     confirmPassword: "",
   });
+  const [acceptTerms, setAcceptTerms] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [error, setError] = useState("");
@@ -46,6 +47,14 @@ export function SignupForm({ onSuccess }: SignupFormProps) {
     setIsLoading(true);
     setError("");
 
+    // Enhanced email validation
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
+    if (!emailRegex.test(formData.email)) {
+      setError("Please enter a valid Gmail address (e.g., user@gmail.com)");
+      setIsLoading(false);
+      return;
+    }
+
     // Validate passwords match
     if (formData.password !== formData.confirmPassword) {
       setError("Passwords do not match");
@@ -59,24 +68,45 @@ export function SignupForm({ onSuccess }: SignupFormProps) {
       return;
     }
 
+    // Validate required fields
+    if (!formData.firstName || !formData.lastName || !formData.phone) {
+      setError("All fields are required");
+      setIsLoading(false);
+      return;
+    }
+
+    // Validate terms acceptance
+    if (!acceptTerms) {
+      setError("Please accept the Terms & Conditions and Privacy Policy");
+      setIsLoading(false);
+      return;
+    }
+
     try {
       const { confirmPassword, ...registrationData } = formData;
       const response = await apiRequest("POST", "/api/register", registrationData);
       const result = await response.json();
       
-      // Save user to localStorage for persistence
-      if (result.user) {
-        saveAuthToStorage(result.user);
-      }
-      
-      // Beautiful success popup
+      // DO NOT save to localStorage or call onSuccess yet
+      // User needs to complete card setup and then login
       toast({
-        title: "🎉 Welcome to Hit The Road Jackpot!",
-        description: "Your account has been created successfully!",
+        title: "🎉 Account Created Successfully!",
+        description: "Please login with your credentials to continue",
         className: "bg-gradient-to-r from-green-500 to-emerald-600 text-white border-green-400",
       });
       
-      onSuccess();
+      // Reset form and show success message
+      setFormData({
+        firstName: "",
+        lastName: "",
+        email: "",
+        phone: "",
+        password: "",
+        confirmPassword: "",
+      });
+      
+      // Show message to login
+      setError("Account created! Please use the Login tab to access your account.");
     } catch (error: any) {
       const errorMessage = error.message || "Registration failed";
       setDialogError(errorMessage);
@@ -240,11 +270,32 @@ export function SignupForm({ onSuccess }: SignupFormProps) {
         </div>
       </div>
 
+      {/* Terms and Conditions Checkbox */}
+      <div className="flex items-start space-x-3 p-4 bg-slate-800/50 rounded-xl border border-white/20 backdrop-blur-sm">
+        <input
+          type="checkbox"
+          id="acceptTerms"
+          checked={acceptTerms}
+          onChange={(e) => setAcceptTerms(e.target.checked)}
+          className="mt-1 w-4 h-4 text-purple-600 bg-slate-700 border-gray-300 rounded focus:ring-purple-500 focus:ring-2"
+        />
+        <label htmlFor="acceptTerms" className="text-sm text-gray-300 leading-tight">
+          I agree to the{" "}
+          <a href="/terms" target="_blank" className="text-purple-400 hover:text-purple-300 underline">
+            Terms & Conditions
+          </a>{" "}
+          and{" "}
+          <a href="/privacy" target="_blank" className="text-purple-400 hover:text-purple-300 underline">
+            Privacy Policy
+          </a>
+        </label>
+      </div>
+
       <div className="relative mt-6">
         <div className="absolute -inset-1 bg-gradient-to-r from-purple-500/50 to-blue-500/50 blur-lg rounded-2xl opacity-75"></div>
         <Button
           type="submit"
-          disabled={isLoading || !formData.email || !formData.firstName || !formData.lastName || !formData.password || !formData.confirmPassword}
+          disabled={isLoading || !formData.email || !formData.firstName || !formData.lastName || !formData.password || !formData.confirmPassword || !acceptTerms}
           className="relative w-full bg-gradient-to-r from-purple-600 via-blue-600 to-cyan-600 hover:from-purple-700 hover:via-blue-700 hover:to-cyan-700 disabled:from-gray-600 disabled:via-gray-700 disabled:to-gray-800 text-white font-black py-3 sm:py-4 lg:py-5 px-4 sm:px-6 lg:px-8 rounded-xl shadow-2xl transform hover:scale-105 disabled:hover:scale-100 transition-all duration-300 text-xs sm:text-sm md:text-base lg:text-lg border-2 border-white/20 min-h-[48px] sm:min-h-[56px] md:min-h-[64px] lg:min-h-[72px] flex items-center justify-center touch-manipulation active:scale-95"
         >
           {isLoading ? (

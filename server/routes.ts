@@ -153,13 +153,50 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!email || !password) {
         return res.status(400).json({ message: "Email and password are required" });
       }
+
+      // Demo credentials check
+      if (email === "demo@example.com" && password === "demo123") {
+        // Find or create demo user
+        let user = await storage.getUserByEmail(email);
+        if (!user) {
+          user = await storage.createUser({
+            firstName: "Demo",
+            lastName: "User",
+            email: "demo@example.com",
+            phone: "555-0123",
+            password: "demo123"
+          });
+        }
+        
+        // Store user ID and IP in session for tracking
+        const clientIP = req.ip || req.connection.remoteAddress || req.socket.remoteAddress;
+        (req.session as any).userId = user.id;
+        (req.session as any).loginIP = clientIP;
+        (req.session as any).lastAccess = new Date();
+        
+        console.log("Demo user logged in:", user.email, "from IP:", clientIP);
+        
+        return res.json({
+          message: "Login successful",
+          user: {
+            id: user.id,
+            email: user.email,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            cardOnFile: user.cardOnFile
+          }
+        });
+      }
       
       const user = await storage.getUserByEmail(email);
       if (!user) {
         return res.status(401).json({ message: "Invalid credentials" });
       }
-      
-      // For now, just verify the email exists (password verification would go here)
+
+      // Basic password check (match stored password exactly)
+      if (user.password !== password) {
+        return res.status(401).json({ message: "Invalid credentials" });
+      }
       // Store user ID and IP in session for tracking
       const clientIP = req.ip || req.connection.remoteAddress || req.socket.remoteAddress;
       (req.session as any).userId = user.id;

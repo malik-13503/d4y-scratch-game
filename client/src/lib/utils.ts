@@ -1,5 +1,6 @@
 import { type ClassValue, clsx } from "clsx"
 import { twMerge } from "tailwind-merge"
+import { useState, useEffect } from "react"
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -29,4 +30,19 @@ export function generateGameCode(): string {
   ).join('');
   
   return `${prefix}.${suffix}`;
+}
+
+// Create a live countdown component hook
+export function useCountdown(endTime: Date) {
+  const [timeLeft, setTimeLeft] = useState(formatTimeRemaining(endTime));
+  
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setTimeLeft(formatTimeRemaining(endTime));
+    }, 1000);
+    
+    return () => clearInterval(timer);
+  }, [endTime]);
+  
+  return timeLeft;
 }

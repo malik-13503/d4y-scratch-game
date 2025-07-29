@@ -28,7 +28,8 @@ import {
   ChevronRight,
   Settings,
   Gauge,
-  Crown
+  Crown,
+  Shield
 } from "lucide-react";
 import logoPath from "@assets/logo_1751918412862.png";
 
@@ -803,72 +804,22 @@ export default function Dashboard() {
                   </div>
                 )}
                 
-                {/* Enhanced Payment Management Features */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
-                  <Card className="relative overflow-hidden bg-gradient-to-br from-blue-900/70 to-cyan-900/70 border-blue-400/40 backdrop-blur-xl shadow-2xl hover:shadow-blue-500/25 transition-all duration-300">
-                    <div className="absolute inset-0 bg-gradient-to-br from-blue-800/20 to-cyan-800/20 blur-xl"></div>
-                    <CardHeader className="relative">
-                      <CardTitle className="text-white font-bold text-xl flex items-center drop-shadow-lg">
-                        <div className="p-2 bg-gradient-to-br from-blue-500 to-cyan-600 rounded-xl mr-3 shadow-lg">
-                          <DollarSign className="h-6 w-6 text-white" />
-                        </div>
-                        Spending Limits
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="relative">
-                      <div className="space-y-4">
-                        <div className="p-3 bg-gradient-to-r from-blue-800/40 to-cyan-800/40 rounded-xl border border-blue-500/30">
-                          <div className="flex justify-between items-center">
-                            <span className="text-gray-200 font-medium">Daily Limit</span>
-                            <span className="text-white font-bold text-lg drop-shadow-lg">$100</span>
-                          </div>
-                        </div>
-                        <div className="p-3 bg-gradient-to-r from-blue-800/40 to-cyan-800/40 rounded-xl border border-blue-500/30">
-                          <div className="flex justify-between items-center">
-                            <span className="text-gray-200 font-medium">Weekly Limit</span>
-                            <span className="text-white font-bold text-lg drop-shadow-lg">$500</span>
-                          </div>
-                        </div>
-                        <Button className="w-full mt-4 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white font-bold shadow-lg hover:shadow-xl transition-all duration-300">
-                          Modify Limits
-                        </Button>
+                {/* Security Information */}
+                <div className="mt-8">
+                  <div className="p-4 sm:p-6 bg-gradient-to-r from-slate-700/50 to-slate-800/50 rounded-xl border border-slate-600/30">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-3 sm:space-y-0 sm:space-x-4">
+                      <div className="p-2 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl shadow-lg flex-shrink-0">
+                        <Shield className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
                       </div>
-                    </CardContent>
-                  </Card>
-
-                  <Card className="relative overflow-hidden bg-gradient-to-br from-purple-900/70 to-pink-900/70 border-purple-400/40 backdrop-blur-xl shadow-2xl hover:shadow-purple-500/25 transition-all duration-300">
-                    <div className="absolute inset-0 bg-gradient-to-br from-purple-800/20 to-pink-800/20 blur-xl"></div>
-                    <CardHeader className="relative">
-                      <CardTitle className="text-white font-bold text-xl flex items-center drop-shadow-lg">
-                        <div className="p-2 bg-gradient-to-br from-purple-500 to-pink-600 rounded-xl mr-3 shadow-lg">
-                          <Activity className="h-6 w-6 text-white" />
-                        </div>
-                        Auto-Top Up
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="relative">
-                      <div className="space-y-4">
-                        <div className="p-3 bg-gradient-to-r from-purple-800/40 to-pink-800/40 rounded-xl border border-purple-500/30">
-                          <div className="flex justify-between items-center">
-                            <span className="text-gray-200 font-medium">Auto-reload</span>
-                            <div className="flex items-center space-x-2">
-                              <span className="text-green-400 font-bold text-lg drop-shadow-lg">Enabled</span>
-                              <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="p-3 bg-gradient-to-r from-purple-800/40 to-pink-800/40 rounded-xl border border-purple-500/30">
-                          <div className="flex justify-between items-center">
-                            <span className="text-gray-200 font-medium">Reload Amount</span>
-                            <span className="text-white font-bold text-lg drop-shadow-lg">$50</span>
-                          </div>
-                        </div>
-                        <Button className="w-full mt-4 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold shadow-lg hover:shadow-xl transition-all duration-300">
-                          Manage Auto-Top Up
-                        </Button>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="text-white font-bold text-lg mb-1">Secure Payment Processing</h3>
+                        <p className="text-gray-300 text-sm">
+                          All transactions are processed securely through Square's encrypted payment system. 
+                          Your card information is protected with industry-standard security measures.
+                        </p>
                       </div>
-                    </CardContent>
-                  </Card>
+                    </div>
+                  </div>
                 </div>
               </CardContent>
             </Card>

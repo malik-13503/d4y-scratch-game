@@ -23,7 +23,7 @@ import {
   Gift,
   Sparkles,
 } from "lucide-react";
-import { formatTimeRemaining } from "@/lib/utils";
+import { formatTimeRemaining, useCountdown } from "@/lib/utils";
 import type { Game } from "@shared/schema";
 
 export default function GamePage() {
@@ -110,7 +110,7 @@ export default function GamePage() {
     }
 
     // Check if user has payment method
-    if (!user.cardOnFile) {
+    if (!(user as any)?.cardOnFile) {
       setShowPaymentPopup(true);
       return;
     }
@@ -330,7 +330,7 @@ export default function GamePage() {
                       Time Left
                     </p>
                     <p className="text-white text-sm sm:text-lg font-black font-mono">
-                      {formatTimeRemaining(new Date(game.endTime))}
+                      {useCountdown(new Date(game.endTime))}
                     </p>
                   </div>
                 </div>
@@ -435,14 +435,14 @@ export default function GamePage() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                {recentNumbers.length === 0 ? (
+                {!Array.isArray(recentNumbers) || recentNumbers.length === 0 ? (
                   <div className="text-center py-8">
                     <div className="text-gray-400 text-sm mb-2">No recent numbers yet</div>
                     <div className="text-gray-500 text-xs">Be the first to spin!</div>
                   </div>
                 ) : (
                   <div className="grid grid-cols-3 gap-3">
-                    {recentNumbers.map((entry: any, index: number) => (
+                    {(recentNumbers as any[]).map((entry: any, index: number) => (
                       <div
                         key={index}
                         className="aspect-square bg-gradient-to-br from-purple-600/30 to-blue-600/30 rounded-xl flex items-center justify-center border border-purple-500/30"
