@@ -71,6 +71,9 @@ export default function GamePage() {
     enabled: !!gameId,
   });
 
+  // Always call useCountdown hook consistently, even if game is not loaded yet
+  const countdown = useCountdown(game?.endTime ? new Date(game.endTime) : new Date());
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
@@ -331,7 +334,7 @@ export default function GamePage() {
                       Time Left
                     </p>
                     <p className="text-white text-sm sm:text-lg font-black font-mono">
-                      {formatCountdownObject(useCountdown(new Date(game.endTime)))}
+                      {formatCountdownObject(countdown)}
                     </p>
                   </div>
                 </div>
