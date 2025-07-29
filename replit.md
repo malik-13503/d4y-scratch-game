@@ -100,6 +100,12 @@ This is a real-time prize game web application that allows users to participate 
 
 ## Changelog
 
+- January 29, 2025: **USER FLOW ENHANCEMENT COMPLETE** - Improved signup and login flow based on user requirements
+  - **Signup Flow Change**: After signup, users see a beautiful success popup instead of automatic dashboard redirect
+  - **Login Destination Update**: Users now redirect to games page after login instead of user dashboard
+  - **Beautiful Signup Success Popup**: Created animated confirmation dialog with "Login Now" option and celebration effects
+  - **Professional UX**: Popup includes user's name, animated icons, gradient backgrounds, and clear next steps
+  - **Clean Separation**: Signup creates account without auto-login, requiring manual login for better security flow
 - January 29, 2025: **EMAIL BRANDING ENHANCEMENT COMPLETE** - Updated all email templates with proper Hit The Road Jackpot branding
   - **Professional Sender Identity**: Changed FROM_EMAIL from "admin" to "Hit The Road Jackpot <admin@hittheroadjackpot.com>"
   - **Enhanced Email Subjects**: Updated all email subjects to be more descriptive and engaging:

@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { ImprovedSignupForm } from "@/components/auth/improved-signup-form";
 import { ImprovedLoginForm } from "@/components/auth/improved-login-form";
+import { SignupSuccessPopup } from "@/components/auth/signup-success-popup";
 import { CardSetup } from "@/components/payment/card-setup";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -30,6 +31,8 @@ export default function AuthLandingPage() {
   const [currentStep, setCurrentStep] = useState<FlowStep>("auth");
   const [authType, setAuthType] = useState<"login" | "signup">("login");
   const [activeTab, setActiveTab] = useState("signup");
+  const [showSignupPopup, setShowSignupPopup] = useState(false);
+  const [signupUserName, setSignupUserName] = useState("");
   const [, setLocation] = useLocation();
 
   const {
@@ -44,14 +47,19 @@ export default function AuthLandingPage() {
   const handleAuthSuccess = (type: "login" | "signup") => {
     refetch();
     setAuthType(type);
-    // Always require payment setup for new signups
-    // For login, check if user has payment method
-    if (type === "signup") {
-      setCurrentStep("card-setup");
-    } else {
-      // For login, we'll let the redirect logic handle payment check
-      setTimeout(() => refetch(), 100);
-    }
+    // For login, we'll let the redirect logic handle payment check
+    setTimeout(() => refetch(), 100);
+  };
+
+  const handleSignupSuccess = (userName: string) => {
+    // Show popup instead of redirecting
+    setSignupUserName(userName);
+    setShowSignupPopup(true);
+  };
+
+  const handleLoginFromPopup = () => {
+    setShowSignupPopup(false);
+    setActiveTab("login");
   };
 
   const handleCardSetupSuccess = () => {
@@ -229,7 +237,7 @@ export default function AuthLandingPage() {
 
                         <TabsContent value="signup" className="mt-6">
                           <ImprovedSignupForm
-                            onSuccess={() => handleAuthSuccess("signup")}
+                            onSuccess={handleSignupSuccess}
                           />
                         </TabsContent>
 
@@ -466,6 +474,14 @@ export default function AuthLandingPage() {
           </div>
         </div>
       </div>
+
+      {/* Signup Success Popup */}
+      <SignupSuccessPopup
+        isOpen={showSignupPopup}
+        onClose={() => setShowSignupPopup(false)}
+        onLoginNow={handleLoginFromPopup}
+        userName={signupUserName}
+      />
     </div>
   );
 }

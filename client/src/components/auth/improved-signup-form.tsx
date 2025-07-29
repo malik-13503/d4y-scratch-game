@@ -9,7 +9,7 @@ import { AlertCircle, User, Mail, Phone, Lock, Eye, EyeOff } from "lucide-react"
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface ImprovedSignupFormProps {
-  onSuccess: () => void;
+  onSuccess: (userName: string) => void;
 }
 
 export function ImprovedSignupForm({ onSuccess }: ImprovedSignupFormProps) {
@@ -68,17 +68,17 @@ export function ImprovedSignupForm({ onSuccess }: ImprovedSignupFormProps) {
       const response = await apiRequest("POST", "/api/register", registrationData);
       const result = await response.json();
       
-      if (result.user) {
-        saveAuthToStorage(result.user);
-      }
+      // Don't save auth to storage immediately - let user login manually
       
       toast({
-        title: "Welcome to Hit The Road Jackpot!",
-        description: "Your account has been created successfully!",
+        title: "Account Created Successfully!",
+        description: "Welcome to Hit The Road Jackpot! Please log in to continue.",
         className: "bg-gradient-to-r from-green-500 to-emerald-600 text-white border-green-400",
       });
       
-      onSuccess();
+      // Pass user's first name to show in popup
+      const userName = formData.firstName || formData.email.split('@')[0];
+      onSuccess(userName);
     } catch (error: any) {
       setError(error.message || "Registration failed. Please try again.");
     } finally {

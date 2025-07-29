@@ -30,7 +30,7 @@ import NotFound from "@/pages/not-found";
 
 function Router() {
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState<any>(null);
   
   const { data: serverUser, isLoading: serverLoading, error } = useQuery({
     queryKey: ["/api/user"],
@@ -97,7 +97,7 @@ function Router() {
       {/* Authentication required routes */}
       {isAuthenticated ? (
         <>
-          <Route path="/" component={Dashboard} />
+          <Route path="/" component={Home} />
           <Route path="/games" component={Home} />
           <Route path="/game/:id" component={GamePage} />
           <Route path="/dashboard" component={Dashboard} />
