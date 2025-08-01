@@ -135,17 +135,24 @@ export default function HowToPlay() {
               },
               {
                 step: 4,
+                title: "No Purchase Necessary Option",
+                description: "Can't afford to play? Use the 'No Purchase Entry' button for a free chance to win!",
+                icon: <Gift className="h-8 w-8 text-emerald-400" />,
+                tip: "One free entry per game - no payment required"
+              },
+              {
+                step: 5,
                 title: "Wait for Result",
                 description: "Watch the wheel slow down and stop. A result popup will appear 1 second after it stops.",
                 icon: <Clock className="h-8 w-8 text-yellow-400" />,
                 tip: "The wheel will stop exactly on the number you'll receive"
               },
               {
-                step: 5,
+                step: 6,
                 title: "Check Your Result",
                 description: "See your number and whether you landed in the free play zone or need to pay.",
                 icon: <Trophy className="h-8 w-8 text-orange-400" />,
-                tip: "Free play numbers (151-200) cost nothing!"
+                tip: "Higher numbers are completely free!"
               }
             ].map((item, index) => (
               <div key={index} className="flex items-start space-x-4 p-4 bg-black/20 rounded-lg">
