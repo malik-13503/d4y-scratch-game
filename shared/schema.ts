@@ -10,6 +10,7 @@ export const users = pgTable("users", {
   lastName: text("last_name").notNull(),
   phone: text("phone"),
   password: text("password").notNull(),
+  state: text("state"), // For state-based legal compliance
   isActive: boolean("is_active").notNull().default(true),
   squareCustomerId: text("square_customer_id").unique(),
   cardOnFile: boolean("card_on_file").notNull().default(false),
@@ -20,6 +21,9 @@ export const users = pgTable("users", {
   totalWon: decimal("total_won", { precision: 10, scale: 2 }).notNull().default("0"),
   gamesPlayed: integer("games_played").notNull().default(0),
   gamesWon: integer("games_won").notNull().default(0),
+  // Legal compliance fields
+  acceptedTermsAt: timestamp("accepted_terms_at"),
+  optOutPublicity: boolean("opt_out_publicity").notNull().default(false), // TN residents can opt out
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
@@ -114,6 +118,17 @@ export const players = pgTable("players", {
   ipAddress: text("ip_address"),
   userAgent: text("user_agent"),
   joinedAt: timestamp("joined_at").notNull().defaultNow(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+// Legal compliance logs for record keeping
+export const complianceLogs = pgTable("compliance_logs", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  gameId: integer("game_id"),
+  logType: text("log_type").notNull(), // 'winner_selection', 'entry_record', 'tax_document'
+  details: json("details").notNull(),
+  retentionUntil: timestamp("retention_until").notNull(), // 2-4 years from creation
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 

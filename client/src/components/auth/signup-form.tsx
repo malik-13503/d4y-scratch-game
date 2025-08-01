@@ -6,7 +6,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { saveAuthToStorage } from "@/lib/auth";
-import { AlertCircle, User, Mail, Phone, Lock, Eye, EyeOff } from "lucide-react";
+import { AlertCircle, User, Mail, Phone, Lock, Eye, EyeOff, MapPin } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ErrorDialog } from "@/components/error-dialog";
 import { EmailErrorDialog } from "@/components/email-error-dialog";
@@ -24,8 +26,10 @@ export function SignupForm({ onSuccess, onSwitchToLogin }: SignupFormProps) {
     phone: "",
     password: "",
     confirmPassword: "",
+    state: "",
   });
   const [acceptTerms, setAcceptTerms] = useState(false);
+  const [optOutPublicity, setOptOutPublicity] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [error, setError] = useState("");
@@ -72,8 +76,16 @@ export function SignupForm({ onSuccess, onSwitchToLogin }: SignupFormProps) {
     }
 
     // Validate required fields
-    if (!formData.firstName || !formData.lastName || !formData.phone) {
-      setError("All fields are required");
+    if (!formData.firstName || !formData.lastName || !formData.phone || !formData.state) {
+      setError("All fields are required including state");
+      setIsLoading(false);
+      return;
+    }
+
+    // Check for excluded states
+    const excludedStates = ['NY', 'FL', 'RI', 'HI'];
+    if (excludedStates.includes(formData.state)) {
+      setError(`Sorry, residents of ${formData.state} are not eligible to participate in paid games due to state regulations.`);
       setIsLoading(false);
       return;
     }
@@ -87,7 +99,12 @@ export function SignupForm({ onSuccess, onSwitchToLogin }: SignupFormProps) {
 
     try {
       const { confirmPassword, ...registrationData } = formData;
-      const response = await apiRequest("POST", "/api/register", registrationData);
+      const fullRegistrationData = {
+        ...registrationData,
+        optOutPublicity,
+        acceptedTermsAt: new Date().toISOString(),
+      };
+      const response = await apiRequest("POST", "/api/register", fullRegistrationData);
       const result = await response.json();
       
       // DO NOT save to localStorage or call onSuccess yet
@@ -106,7 +123,9 @@ export function SignupForm({ onSuccess, onSwitchToLogin }: SignupFormProps) {
         phone: "",
         password: "",
         confirmPassword: "",
+        state: "",
       });
+      setOptOutPublicity(false);
       
       // Show message to login
       setError("Account created! Please use the Login tab to access your account.");
@@ -223,6 +242,78 @@ export function SignupForm({ onSuccess, onSwitchToLogin }: SignupFormProps) {
           <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 to-blue-500/10 rounded-xl pointer-events-none"></div>
         </div>
       </div>
+      
+      {/* State Selection Field */}
+      <div className="space-y-2">
+        <Label htmlFor="state" className="text-white font-medium text-sm">State *</Label>
+        <div className="relative">
+          <div className="absolute left-3 top-1/2 transform -translate-y-1/2 z-10">
+            <MapPin className="h-4 w-4 text-gray-400" />
+          </div>
+          <Select value={formData.state} onValueChange={(value) => setFormData({...formData, state: value})}>
+            <SelectTrigger className="bg-slate-800/50 border-2 border-white/20 text-white focus:border-purple-500 focus:ring-purple-500 rounded-xl py-3 pl-10 pr-4 text-base sm:text-lg backdrop-blur-sm transition-all duration-300 w-full">
+              <SelectValue placeholder="Select your state" />
+            </SelectTrigger>
+            <SelectContent className="bg-slate-800 border-purple-500/30 text-white max-h-48">
+              <SelectItem value="AL">Alabama</SelectItem>
+              <SelectItem value="AK">Alaska</SelectItem>
+              <SelectItem value="AZ">Arizona</SelectItem>
+              <SelectItem value="AR">Arkansas</SelectItem>
+              <SelectItem value="CA">California</SelectItem>
+              <SelectItem value="CO">Colorado</SelectItem>
+              <SelectItem value="CT">Connecticut</SelectItem>
+              <SelectItem value="DE">Delaware</SelectItem>
+              <SelectItem value="GA">Georgia</SelectItem>
+              <SelectItem value="ID">Idaho</SelectItem>
+              <SelectItem value="IL">Illinois</SelectItem>
+              <SelectItem value="IN">Indiana</SelectItem>
+              <SelectItem value="IA">Iowa</SelectItem>
+              <SelectItem value="KS">Kansas</SelectItem>
+              <SelectItem value="KY">Kentucky</SelectItem>
+              <SelectItem value="LA">Louisiana</SelectItem>
+              <SelectItem value="ME">Maine</SelectItem>
+              <SelectItem value="MD">Maryland</SelectItem>
+              <SelectItem value="MA">Massachusetts</SelectItem>
+              <SelectItem value="MI">Michigan</SelectItem>
+              <SelectItem value="MN">Minnesota</SelectItem>
+              <SelectItem value="MS">Mississippi</SelectItem>
+              <SelectItem value="MO">Missouri</SelectItem>
+              <SelectItem value="MT">Montana</SelectItem>
+              <SelectItem value="NE">Nebraska</SelectItem>
+              <SelectItem value="NV">Nevada</SelectItem>
+              <SelectItem value="NH">New Hampshire</SelectItem>
+              <SelectItem value="NJ">New Jersey</SelectItem>
+              <SelectItem value="NM">New Mexico</SelectItem>
+              <SelectItem value="NC">North Carolina</SelectItem>
+              <SelectItem value="ND">North Dakota</SelectItem>
+              <SelectItem value="OH">Ohio</SelectItem>
+              <SelectItem value="OK">Oklahoma</SelectItem>
+              <SelectItem value="OR">Oregon</SelectItem>
+              <SelectItem value="PA">Pennsylvania</SelectItem>
+              <SelectItem value="SC">South Carolina</SelectItem>
+              <SelectItem value="SD">South Dakota</SelectItem>
+              <SelectItem value="TN">Tennessee</SelectItem>
+              <SelectItem value="TX">Texas</SelectItem>
+              <SelectItem value="UT">Utah</SelectItem>
+              <SelectItem value="VT">Vermont</SelectItem>
+              <SelectItem value="VA">Virginia</SelectItem>
+              <SelectItem value="WA">Washington</SelectItem>
+              <SelectItem value="WV">West Virginia</SelectItem>
+              <SelectItem value="WI">Wisconsin</SelectItem>
+              <SelectItem value="WY">Wyoming</SelectItem>
+              <SelectItem value="DC">Washington DC</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        {formData.state && ['NY', 'FL', 'RI', 'HI'].includes(formData.state) && (
+          <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-lg backdrop-blur-sm">
+            <p className="text-red-200 text-sm font-medium">
+              ⚠️ Sorry, residents of {formData.state} cannot participate in paid games due to state regulations. 
+              You may still use free entry options where available.
+            </p>
+          </div>
+        )}
+      </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-2">
@@ -278,6 +369,28 @@ export function SignupForm({ onSuccess, onSwitchToLogin }: SignupFormProps) {
           </div>
         </div>
       </div>
+
+      {/* Tennessee Publicity Rights Opt-out */}
+      {formData.state === 'TN' && (
+        <div className="p-4 bg-blue-500/10 border border-blue-500/30 rounded-xl backdrop-blur-sm">
+          <div className="flex items-start space-x-3">
+            <Checkbox
+              id="optOutPublicity"
+              checked={optOutPublicity}
+              onCheckedChange={(checked) => setOptOutPublicity(checked === true)}
+              className="border-blue-400/60 data-[state=checked]:bg-blue-500 data-[state=checked]:border-blue-500 mt-1"
+            />
+            <div className="flex-1">
+              <label htmlFor="optOutPublicity" className="text-blue-200 text-sm font-medium cursor-pointer">
+                Tennessee Residents: Opt out of publicity rights
+              </label>
+              <p className="text-blue-300/80 text-xs mt-1">
+                As a Tennessee resident, you can choose to opt out of any publicity, advertising, or promotional use of your name, likeness, or prize information.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Terms and Conditions Checkbox */}
       <div className="flex items-start space-x-3 p-4 bg-slate-800/50 rounded-xl border border-white/20 backdrop-blur-sm">

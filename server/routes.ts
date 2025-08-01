@@ -5,13 +5,15 @@ import { setupAuth, requireAuth } from "./auth";
 import { 
   insertGameSchema, insertPlayerSchema, insertGameResultSchema, 
   insertWheelSegmentSchema, insertSystemSettingSchema, insertNotificationSchema,
-  insertUserSchema, insertTransactionSchema
+  insertUserSchema, insertTransactionSchema, complianceLogs, users
 } from "@shared/schema";
 import { z } from "zod";
 import { squareService } from "./squareService";
 import { emailService } from "./emailService";
 import session from "express-session";
 import connectPgSimple from "connect-pg-simple";
+import { db } from "./db";
+import { eq, desc } from "drizzle-orm";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Setup authentication
@@ -50,6 +52,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userData = insertUserSchema.parse(req.body);
       
+      // Check state exclusions - NY, FL, RI, HI residents cannot participate in paid entry
+      const excludedStates = ['NY', 'FL', 'RI', 'HI'];
+      if (excludedStates.includes(userData.state)) {
+        return res.status(400).json({ 
+          message: `Registration not available in ${userData.state}. Please see our official rules for more information.`,
+          stateExcluded: true
+        });
+      }
+
       const existingUser = await storage.getUserByEmail(userData.email);
       if (existingUser) {
         return res.status(400).json({ message: "Email already registered" });
@@ -73,6 +84,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
         ...userData,
         squareCustomerId
       });
+
+      // Create compliance log for new user registration
+      await storage.createComplianceLog(
+        user.id,
+        null,
+        'user_registration',
+        {
+          email: userData.email,
+          state: userData.state,
+          acceptedTermsAt: userData.acceptedTermsAt,
+          optOutPublicity: userData.optOutPublicity,
+          ipAddress: req.ip || req.connection.remoteAddress
+        }
+      );
       
       // Store user ID and IP in session for tracking
       const clientIP = req.ip || req.connection.remoteAddress || req.socket.remoteAddress;
@@ -1477,6 +1502,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       res.json({ message: "Logged out successfully" });
     });
+  });
+
+  // Admin endpoint to view compliance logs (protected by admin auth)
+  app.get("/admin/compliance-logs", requireAuth, async (req, res) => {
+    try {
+      const page = parseInt(req.query.page as string) || 1;
+      const limit = parseInt(req.query.limit as string) || 50;
+      const offset = (page - 1) * limit;
+
+      const logs = await db
+        .select({
+          id: complianceLogs.id,
+          userId: complianceLogs.userId,
+          gameId: complianceLogs.gameId,
+          logType: complianceLogs.logType,
+          details: complianceLogs.details,
+          createdAt: complianceLogs.createdAt,
+          retentionUntil: complianceLogs.retentionUntil,
+          userEmail: users.email,
+          userState: users.state
+        })
+        .from(complianceLogs)
+        .leftJoin(users, eq(complianceLogs.userId, users.id))
+        .orderBy(desc(complianceLogs.createdAt))
+        .limit(limit)
+        .offset(offset);
+
+      res.json({
+        logs,
+        page,
+        limit,
+        total: logs.length
+      });
+    } catch (error) {
+      console.error("Error fetching compliance logs:", error);
+      res.status(500).json({ message: "Failed to fetch compliance logs" });
+    }
   });
 
   const httpServer = createServer(app);

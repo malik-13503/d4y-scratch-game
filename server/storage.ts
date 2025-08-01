@@ -1,6 +1,6 @@
 import { 
   games, players, gameResults, adminUsers, wheelSegments, systemSettings, adminSessions, notifications, spinResults,
-  users, transactions, userSessions,
+  users, transactions, userSessions, complianceLogs,
   type Game, type InsertGame, type Player, type InsertPlayer, type GameResult, type InsertGameResult, 
   type AdminUser, type InsertAdminUser, type WheelSegment, type InsertWheelSegment,
   type SystemSetting, type InsertSystemSetting, type InsertNotification, type Notification,
@@ -71,6 +71,9 @@ export interface IStorage {
   createSpinResult(spinResult: InsertSpinResult): Promise<SpinResult>;
   getSpinResultsByGameId(gameId: number): Promise<SpinResult[]>;
   getSpinResultsByPlayerId(playerId: number): Promise<SpinResult[]>;
+
+  // Legal compliance methods
+  createComplianceLog(userId: number, gameId: number | null, logType: string, details: any): Promise<void>;
 
   // User activity methods
   getUserActivity(userId: number): Promise<any[]>;
@@ -424,6 +427,20 @@ export class DatabaseStorage implements IStorage {
         totalSpent: newTotalSpent.toString(),
         freeSpins: isFreePlay ? (player.freeSpins || 0) + 1 : player.freeSpins,
       });
+
+      // Create compliance log for spin result (using the same player object)
+      await this.createComplianceLog(
+        player.userId,
+        gameId,
+        'spin_result',
+        {
+          spunNumber,
+          isFreePlay,
+          amountCharged,
+          timestamp: new Date().toISOString(),
+          gameTitle: game.name
+        }
+      );
     }
 
     // Update game numbers left
@@ -500,6 +517,25 @@ export class DatabaseStorage implements IStorage {
 
       // Update winner status
       await this.updatePlayer(winningSpinResult.playerId, { isWinner: true });
+
+      // Create compliance log for winner selection
+      const winner = await this.getPlayer(winningSpinResult.playerId);
+      if (winner) {
+        await this.createComplianceLog(
+          winner.userId,
+          gameId,
+          'winner_selection',
+          {
+            winningNumber,
+            totalParticipants: new Set(spinResults.map(spin => spin.playerId)).size,
+            totalSpins: spinResults.length,
+            selectionMethod: 'random_draw_from_claimed_numbers',
+            timestamp: new Date().toISOString(),
+            gameTitle: game.name,
+            prizeValue: game.prizeValue
+          }
+        );
+      }
 
       console.log(`Game ${gameId} completed. Winner: Player ${winningSpinResult.playerId} with number ${winningNumber}`);
     } catch (error) {
@@ -856,6 +892,26 @@ export class DatabaseStorage implements IStorage {
     } catch (error) {
       console.error("Error getting user stats:", error);
       return null;
+    }
+  }
+
+  // Legal compliance logging
+  async createComplianceLog(userId: number, gameId: number | null, logType: string, details: any): Promise<void> {
+    try {
+      // Set retention period to 4 years from now
+      const retentionUntil = new Date();
+      retentionUntil.setFullYear(retentionUntil.getFullYear() + 4);
+
+      await db.insert(complianceLogs).values({
+        userId,
+        gameId,
+        logType,
+        details,
+        retentionUntil,
+      });
+    } catch (error) {
+      console.error("Error creating compliance log:", error);
+      throw error;
     }
   }
 
