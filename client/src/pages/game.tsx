@@ -72,7 +72,9 @@ export default function GamePage() {
   });
 
   // Always call useCountdown hook consistently, even if game is not loaded yet
-  const countdown = useCountdown(game?.endTime ? new Date(game.endTime) : new Date());
+  const countdown = useCountdown(
+    game?.endTime ? new Date(game.endTime) : new Date(),
+  );
 
   if (isLoading) {
     return (
@@ -441,22 +443,28 @@ export default function GamePage() {
               <CardContent>
                 {!Array.isArray(recentNumbers) || recentNumbers.length === 0 ? (
                   <div className="text-center py-8">
-                    <div className="text-gray-400 text-sm mb-2">No recent numbers yet</div>
-                    <div className="text-gray-500 text-xs">Be the first to spin!</div>
+                    <div className="text-gray-400 text-sm mb-2">
+                      No recent numbers yet
+                    </div>
+                    <div className="text-gray-500 text-xs">
+                      Be the first to spin!
+                    </div>
                   </div>
                 ) : (
                   <div className="grid grid-cols-3 gap-3">
-                    {(recentNumbers as any[]).map((entry: any, index: number) => (
-                      <div
-                        key={index}
-                        className="aspect-square bg-gradient-to-br from-purple-600/30 to-blue-600/30 rounded-xl flex items-center justify-center border border-purple-500/30"
-                        title={`Spun ${new Date(entry.timestamp).toLocaleTimeString()}`}
-                      >
-                        <span className="text-white font-bold text-lg">
-                          {entry.number}
-                        </span>
-                      </div>
-                    ))}
+                    {(recentNumbers as any[]).map(
+                      (entry: any, index: number) => (
+                        <div
+                          key={index}
+                          className="aspect-square bg-gradient-to-br from-purple-600/30 to-blue-600/30 rounded-xl flex items-center justify-center border border-purple-500/30"
+                          title={`Spun ${new Date(entry.timestamp).toLocaleTimeString()}`}
+                        >
+                          <span className="text-white font-bold text-lg">
+                            {entry.number}
+                          </span>
+                        </div>
+                      ),
+                    )}
                   </div>
                 )}
               </CardContent>
@@ -495,13 +503,13 @@ export default function GamePage() {
                   </div>
                   <p>No Purchase Necessary - Use free entry option!</p>
                 </div>
-                
+
                 <div className="pt-3 border-t border-white/10">
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    className="w-full border-green-500/30 text-green-300 hover:bg-green-500/20"
-                    onClick={() => window.open('/how-to-play', '_blank')}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full bg-black-900 border-green-500/30 text-green-300"
+                    onClick={() => window.open("/how-to-play", "_blank")}
                   >
                     View Full Instructions
                   </Button>
