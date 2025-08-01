@@ -489,6 +489,23 @@ export default function GamePage() {
                   </div>
                   <p>Win prizes based on your result!</p>
                 </div>
+                <div className="flex items-start space-x-2">
+                  <div className="w-5 h-5 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <span className="text-white text-xs font-bold">4</span>
+                  </div>
+                  <p>No Purchase Necessary - Use free entry option!</p>
+                </div>
+                
+                <div className="pt-3 border-t border-white/10">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="w-full border-green-500/30 text-green-300 hover:bg-green-500/20"
+                    onClick={() => window.open('/how-to-play', '_blank')}
+                  >
+                    View Full Instructions
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           </div>

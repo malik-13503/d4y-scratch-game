@@ -58,6 +58,12 @@ Preferred communication style: Simple, everyday language.
 
 ## Changelog
 
+- January 29, 2025: **GAME INSTRUCTIONS ENHANCEMENT** - Added in-game how-to-play instructions with no purchase option
+  - **Game Page Instructions**: Added 4-step how-to-play guide directly on the game page sidebar
+  - **No Purchase Visibility**: Step 4 highlights "No Purchase Necessary - Use free entry option!" prominently
+  - **Full Instructions Link**: Added "View Full Instructions" button linking to complete how-to-play page
+  - **Visual Design**: Used green highlighting for the no purchase option to make it stand out
+  - **User Experience**: Players can now see instructions without leaving the game page
 - January 29, 2025: **OFFICIAL RULES INTEGRATION COMPLETE** - Added comprehensive official rules documentation
   - **Official Rules Page**: Created detailed official rules page with all legal requirements from provided PDF
   - **State Exclusions**: Clearly documented excluded states (NY, FL, RI, HI) with specific prize thresholds
