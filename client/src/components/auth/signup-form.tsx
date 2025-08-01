@@ -292,10 +292,12 @@ export function SignupForm({ onSuccess, onSwitchToLogin }: SignupFormProps) {
           I agree to the{" "}
           <a href="/terms" target="_blank" className="text-purple-400 hover:text-purple-300 underline">
             Terms & Conditions
-          </a>{" "}
-          and{" "}
+          </a>,{" "}
           <a href="/privacy" target="_blank" className="text-purple-400 hover:text-purple-300 underline">
             Privacy Policy
+          </a>, and{" "}
+          <a href="/official-rules" target="_blank" className="text-purple-400 hover:text-purple-300 underline">
+            Official Rules
           </a>
         </label>
       </div>

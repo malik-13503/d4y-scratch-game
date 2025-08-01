@@ -305,7 +305,7 @@ export default function Home() {
                       <div className="flex-1 min-w-0 pt-1">
                         <div className="flex flex-col space-y-2 mb-3">
                           <h2 className="text-base sm:text-lg md:text-xl font-black text-white tracking-wide leading-tight">{game.name}</h2>
-                          <Badge className={`${colors.bg} text-white text-xs font-bold px-2 py-1 rounded-full border border-white/20 w-fit`}>
+                          <Badge className={`${colors.bgColor} text-white text-xs font-bold px-2 py-1 rounded-full border border-white/20 w-fit`}>
                             {game.code}
                           </Badge>
                         </div>
@@ -468,6 +468,16 @@ export default function Home() {
                   <li>
                     <Link href="/terms" className="hover:text-white transition-colors">
                       Terms & Conditions
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/privacy" className="hover:text-white transition-colors">
+                      Privacy Policy
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/official-rules" className="hover:text-white transition-colors">
+                      Official Rules
                     </Link>
                   </li>
                 </ul>

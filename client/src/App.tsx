@@ -16,6 +16,7 @@ import PrizeRules from "@/pages/prize-rules";
 import Contact from "@/pages/contact";
 import Terms from "@/pages/terms";
 import Privacy from "@/pages/privacy";
+import OfficialRules from "@/pages/official-rules";
 import GameInfo from "@/pages/game-info";
 import InstantPlay from "@/pages/instant-play";
 import RealPrizes from "@/pages/real-prizes";
@@ -128,6 +129,7 @@ function Router() {
       <Route path="/contact" component={Contact} />
       <Route path="/terms" component={Terms} />
       <Route path="/privacy" component={Privacy} />
+      <Route path="/official-rules" component={OfficialRules} />
       <Route path="/game-info" component={GameInfo} />
       <Route path="/instant-play" component={InstantPlay} />
       <Route path="/real-prizes" component={RealPrizes} />
