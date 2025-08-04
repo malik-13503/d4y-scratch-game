@@ -387,6 +387,7 @@ export default function GamePage() {
                     disabled={isSpinning}
                     totalNumbers={game?.totalNumbers || 200}
                     onInitiateSpin={handleInitiateSpin}
+                    availableNumbers={(availableNumbers as any)?.availableNumbers || []}
                   />
                 </div>
               </CardContent>
