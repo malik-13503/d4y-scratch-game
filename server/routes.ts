@@ -1370,8 +1370,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Game not found or inactive" });
       }
 
-      // Create or get player (getPlayer expects playerId, not userId)
-      let player = await storage.getPlayerByUserId(userId);
+      // Create or get player
+      let player = await storage.getPlayer(userId);
       if (!player) {
         player = await storage.createPlayer({
           userId: userId,
