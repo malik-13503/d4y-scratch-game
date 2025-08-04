@@ -189,7 +189,7 @@ export const ProfessionalWheel = forwardRef<
     }, 200); // Wait for rotation reset
   };
 
-  // Dynamic number radius based on segment count
+  // Enhanced dynamic number radius with better positioning
   const [numberRadius, setNumberRadius] = useState(140);
 
   useEffect(() => {
@@ -197,23 +197,25 @@ export const ProfessionalWheel = forwardRef<
       const width = window.innerWidth;
       const segmentCount = wheelNumbers.length;
       
-      // Adjust radius based on screen size and segment count
+      // Base radius calculation with better responsive scaling
       let baseRadius;
       if (width >= 1200) {
-        baseRadius = 180;
+        baseRadius = 190;
       } else if (width >= 1024) {
-        baseRadius = 160;
+        baseRadius = 170;
       } else if (width >= 768) {
-        baseRadius = 130;
+        baseRadius = 140;
       } else {
-        baseRadius = 110;
+        baseRadius = 120;
       }
       
-      // Reduce radius if there are many segments to prevent overlap
-      if (segmentCount > 50) {
-        baseRadius *= 0.9;
+      // More aggressive radius reduction for better number visibility with many segments
+      if (segmentCount > 150) {
+        baseRadius *= 0.65; // Much smaller for 150+ segments
       } else if (segmentCount > 100) {
-        baseRadius *= 0.8;
+        baseRadius *= 0.75; // Smaller for 100+ segments
+      } else if (segmentCount > 50) {
+        baseRadius *= 0.85; // Slightly smaller for 50+ segments
       }
       
       setNumberRadius(baseRadius);
@@ -265,9 +267,9 @@ export const ProfessionalWheel = forwardRef<
                           background: `linear-gradient(135deg, ${color}, ${color}dd)`,
                         }}
                       >
-                        {/* Number display - counter-rotates to stay readable */}
+                        {/* Enhanced Number display - optimized for visibility */}
                         <div
-                          className="wheel-prize-number text-white font-bold text-xs sm:text-sm md:text-base flex items-center justify-center"
+                          className="wheel-prize-number text-white font-black select-none pointer-events-none"
                           style={{
                             position: 'absolute',
                             left: '50%',
@@ -276,17 +278,21 @@ export const ProfessionalWheel = forwardRef<
                             transition: isSpinning
                               ? `transform 8.0s cubic-bezier(0.25, 0.1, 0.25, 1.0)`
                               : "none",
-                            width: wheelNumbers.length > 50 ? '24px' : '32px',
-                            height: wheelNumbers.length > 50 ? '24px' : '32px',
-                            fontSize: wheelNumbers.length > 100 ? '10px' : wheelNumbers.length > 50 ? '12px' : '14px',
+                            width: wheelNumbers.length > 100 ? '20px' : wheelNumbers.length > 50 ? '26px' : '36px',
+                            height: wheelNumbers.length > 100 ? '20px' : wheelNumbers.length > 50 ? '26px' : '36px',
+                            fontSize: wheelNumbers.length > 100 ? '8px' : wheelNumbers.length > 50 ? '11px' : '16px',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            textShadow: '2px 2px 4px rgba(0,0,0,0.9)',
-                            backgroundColor: 'rgba(0,0,0,0.4)',
+                            textShadow: '0 0 8px rgba(0,0,0,1), 2px 2px 4px rgba(0,0,0,0.9), -1px -1px 2px rgba(0,0,0,0.8)',
+                            backgroundColor: 'rgba(0,0,0,0.7)',
                             borderRadius: '50%',
-                            border: '1px solid rgba(255,255,255,0.3)',
-                            zIndex: 15
+                            border: '2px solid rgba(255,255,255,0.9)',
+                            boxShadow: '0 0 12px rgba(255,255,255,0.3), inset 0 0 8px rgba(255,255,255,0.2)',
+                            zIndex: 15,
+                            fontWeight: '900',
+                            letterSpacing: '-0.5px',
+                            lineHeight: '1'
                           }}
                         >
                           {wheelNumbers[index]}
@@ -343,10 +349,23 @@ export const ProfessionalWheel = forwardRef<
         )}
       </Button>
 
-      {/* Segments Info */}
-      <div className="text-center text-sm text-gray-600 dark:text-gray-400">
-        <p>Wheel has {wheelNumbers.length} segments</p>
-        <p>Available numbers: {availableNumbers.length}</p>
+      {/* Enhanced Segments Info */}
+      <div className="text-center text-sm bg-black/20 backdrop-blur-sm rounded-lg p-3 border border-purple-500/30">
+        <div className="flex justify-center space-x-6 text-white/80">
+          <div className="flex items-center space-x-2">
+            <div className="w-3 h-3 rounded-full bg-gradient-to-r from-purple-400 to-blue-400"></div>
+            <span className="font-medium">{wheelNumbers.length} Segments</span>
+          </div>
+          <div className="flex items-center space-x-2">
+            <div className="w-3 h-3 rounded-full bg-gradient-to-r from-green-400 to-emerald-400"></div>
+            <span className="font-medium">{availableNumbers.length} Available</span>
+          </div>
+        </div>
+        {wheelNumbers.length > 100 && (
+          <p className="text-xs text-purple-300 mt-2">
+            High-density wheel mode active for optimal visibility
+          </p>
+        )}
       </div>
 
       {/* Result Modal */}
