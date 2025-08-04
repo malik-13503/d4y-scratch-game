@@ -7,7 +7,7 @@ import {
   type SpinResult, type InsertSpinResult, type User, type InsertUser, type Transaction, type InsertTransaction
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, desc, sql, and, isNotNull } from "drizzle-orm";
+import { eq, desc, sql, and, isNotNull, count, sum, not, inArray, isNull, gte } from "drizzle-orm";
 import session from "express-session";
 import MemoryStore from "memorystore";
 import { hashPassword } from "./utils"; // Import hashPassword
@@ -234,6 +234,11 @@ export class DatabaseStorage implements IStorage {
     return player || undefined;
   }
 
+  async getPlayerByUserId(userId: number): Promise<Player | undefined> {
+    const [player] = await db.select().from(players).where(eq(players.userId, userId)).orderBy(desc(players.createdAt));
+    return player || undefined;
+  }
+
   async createPlayer(insertPlayer: InsertPlayer): Promise<Player> {
     const [player] = await db.insert(players).values(insertPlayer).returning();
     return player;
@@ -428,19 +433,23 @@ export class DatabaseStorage implements IStorage {
         freeSpins: isFreePlay ? (player.freeSpins || 0) + 1 : player.freeSpins,
       });
 
-      // Create compliance log for spin result (using the same player object)
-      await this.createComplianceLog(
-        player.userId,
-        gameId,
-        'spin_result',
-        {
-          spunNumber,
-          isFreePlay,
-          amountCharged,
-          timestamp: new Date().toISOString(),
-          gameTitle: game.name
-        }
-      );
+      // Create compliance log for spin result (ensuring userId is valid)
+      if (player.userId) {
+        await this.createComplianceLog(
+          player.userId,
+          gameId,
+          'spin_result',
+          {
+            spunNumber,
+            isFreePlay,
+            amountCharged,
+            timestamp: new Date().toISOString(),
+            gameTitle: game.name
+          }
+        );
+      } else {
+        console.warn('Player has no userId, skipping compliance log');
+      }
     }
 
     // Update game numbers left

@@ -267,31 +267,32 @@ export const ProfessionalWheel = forwardRef<
                           background: `linear-gradient(135deg, ${color}, ${color}dd)`,
                         }}
                       >
-                        {/* Enhanced Number display - optimized for visibility */}
+                        {/* Perfectly positioned numbers within segments */}
                         <div
                           className="wheel-prize-number text-white font-black select-none pointer-events-none"
                           style={{
                             position: 'absolute',
                             left: '50%',
                             top: '50%',
-                            transform: `translate(-50%, -50%) translate(${Math.cos(((angle + segmentAngle / 2 - 90) * Math.PI) / 180) * numberRadius}px, ${Math.sin(((angle + segmentAngle / 2 - 90) * Math.PI) / 180) * numberRadius}px) rotate(${-rotation}deg)`,
+                            // Position number at 75% of the way from center to edge, perfectly centered in segment
+                            transform: `translate(-50%, -50%) translate(${Math.cos(((angle + segmentAngle / 2 - 90) * Math.PI) / 180) * (numberRadius * 0.75)}px, ${Math.sin(((angle + segmentAngle / 2 - 90) * Math.PI) / 180) * (numberRadius * 0.75)}px) rotate(${-rotation}deg)`,
                             transition: isSpinning
                               ? `transform 8.0s cubic-bezier(0.25, 0.1, 0.25, 1.0)`
                               : "none",
-                            width: wheelNumbers.length > 100 ? '20px' : wheelNumbers.length > 50 ? '26px' : '36px',
-                            height: wheelNumbers.length > 100 ? '20px' : wheelNumbers.length > 50 ? '26px' : '36px',
-                            fontSize: wheelNumbers.length > 100 ? '8px' : wheelNumbers.length > 50 ? '11px' : '16px',
+                            width: wheelNumbers.length > 150 ? '18px' : wheelNumbers.length > 100 ? '22px' : wheelNumbers.length > 50 ? '28px' : '36px',
+                            height: wheelNumbers.length > 150 ? '18px' : wheelNumbers.length > 100 ? '22px' : wheelNumbers.length > 50 ? '28px' : '36px',
+                            fontSize: wheelNumbers.length > 150 ? '7px' : wheelNumbers.length > 100 ? '9px' : wheelNumbers.length > 50 ? '12px' : '16px',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            textShadow: '0 0 8px rgba(0,0,0,1), 2px 2px 4px rgba(0,0,0,0.9), -1px -1px 2px rgba(0,0,0,0.8)',
-                            backgroundColor: 'rgba(0,0,0,0.7)',
+                            textShadow: '0 0 10px rgba(0,0,0,1), 2px 2px 6px rgba(0,0,0,0.9), -2px -2px 4px rgba(0,0,0,0.8)',
+                            backgroundColor: 'rgba(0,0,0,0.8)',
                             borderRadius: '50%',
-                            border: '2px solid rgba(255,255,255,0.9)',
-                            boxShadow: '0 0 12px rgba(255,255,255,0.3), inset 0 0 8px rgba(255,255,255,0.2)',
-                            zIndex: 15,
+                            border: '2px solid rgba(255,255,255,0.95)',
+                            boxShadow: '0 0 15px rgba(255,255,255,0.4), inset 0 0 10px rgba(255,255,255,0.25)',
+                            zIndex: 20,
                             fontWeight: '900',
-                            letterSpacing: '-0.5px',
+                            letterSpacing: '-0.3px',
                             lineHeight: '1'
                           }}
                         >
