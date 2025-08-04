@@ -13,7 +13,8 @@ interface DisclaimerPopupProps {
   isOpen: boolean;
   onClose: () => void;
   onConfirm: () => void;
-  gameTitle: string;
+  gameTitle?: string;
+  isFreePlay?: boolean;
 }
 
 export function DisclaimerPopup({
@@ -21,6 +22,7 @@ export function DisclaimerPopup({
   onClose,
   onConfirm,
   gameTitle,
+  isFreePlay = false,
 }: DisclaimerPopupProps) {
   const [isLoading, setIsLoading] = useState(false);
 
@@ -39,17 +41,20 @@ export function DisclaimerPopup({
         <DialogHeader className="text-center">
           <div className="mx-auto mb-4 text-4xl">🎯</div>
           <DialogTitle className="text-2xl font-bold text-white">
-            Play Responsibly!
+            {isFreePlay ? "Free Play Demo!" : "Play Responsibly!"}
           </DialogTitle>
           <DialogDescription className="text-gray-300 text-base leading-relaxed mt-4">
-            Just a heads up — once you spin the wheel, your card will be
-            instantly charged based on your pull. There are no refunds, so spin
-            wisely and have fun!
+            {isFreePlay
+              ? "This is a free demonstration spin. No payment will be charged and this spin does not count towards the actual game. Enjoy trying out the wheel mechanics!"
+              : "Just a heads up — once you spin the wheel, your card will be instantly charged based on your pull. There are no refunds, so spin wisely and have fun!"
+            }
           </DialogDescription>
           <div className="mt-4 p-4 bg-slate-700/50 rounded-lg border border-slate-600">
             <p className="text-sm text-gray-400">
-              By continuing, you agree to these terms for{" "}
-              <strong className="text-white">{gameTitle}</strong>
+              {isFreePlay
+                ? "This is for demonstration purposes only. No actual game participation or prizes are involved."
+                : `By continuing, you agree to these terms${gameTitle ? ` for ${gameTitle}` : ""}`
+              }
             </p>
           </div>
         </DialogHeader>

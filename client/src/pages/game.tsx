@@ -37,6 +37,8 @@ export default function GamePage() {
   const [showPaymentPopup, setShowPaymentPopup] = useState(false);
   const [isSpinning, setIsSpinning] = useState(false);
   const [playerCount, setPlayerCount] = useState(1);
+  const [hasUsedFreePlay, setHasUsedFreePlay] = useState(false);
+  const [isFreePlay, setIsFreePlay] = useState(false);
   const wheelRef = useRef<{ triggerSpin: () => Promise<void> }>(null);
 
   // Simulate real-time player count updates
@@ -122,6 +124,17 @@ export default function GamePage() {
     }
 
     // User is authenticated and has payment method - proceed with game
+    setIsFreePlay(false);
+    setShowDisclaimer(true);
+  };
+
+  const handleFreePlay = () => {
+    if (hasUsedFreePlay) {
+      return; // Already used free play
+    }
+
+    setIsFreePlay(true);
+    setHasUsedFreePlay(true);
     setShowDisclaimer(true);
   };
 
@@ -143,6 +156,22 @@ export default function GamePage() {
     if (!game) throw new Error("Game not found");
 
     console.log("🎯 Starting API call for game spin...");
+
+    // For free play, generate a random number from free play range
+    if (isFreePlay) {
+      const freePlayNumbers = [];
+      for (let i = game.freePlayStart; i <= game.freePlayEnd; i++) {
+        freePlayNumbers.push(i);
+      }
+      const randomFreeNumber = freePlayNumbers[Math.floor(Math.random() * freePlayNumbers.length)];
+      
+      console.log("🎯 Free play spin - generated number:", randomFreeNumber);
+      setLastResult(randomFreeNumber);
+      setShowConfetti(true);
+      setTimeout(() => setShowConfetti(false), 5000);
+      
+      return randomFreeNumber;
+    }
 
     try {
       const response = await fetch("/api/spin", {
@@ -380,7 +409,7 @@ export default function GamePage() {
                 </p>
               </CardHeader>
               <CardContent className="p-2 sm:p-4 lg:p-8">
-                <div className="text-center">
+                <div className="text-center space-y-4 sm:space-y-6">
                   <ProfessionalWheel
                     ref={wheelRef}
                     onSpin={handleSpin}
@@ -388,6 +417,40 @@ export default function GamePage() {
                     totalNumbers={game?.totalNumbers || 200}
                     onInitiateSpin={handleInitiateSpin}
                   />
+                  
+                  {/* Free Play Button */}
+                  {!hasUsedFreePlay && (
+                    <div className="bg-gradient-to-r from-green-500/20 to-emerald-500/20 backdrop-blur-xl rounded-xl border border-green-400/40 shadow-2xl p-4 sm:p-6">
+                      <div className="flex flex-col items-center space-y-3">
+                        <div className="flex items-center space-x-2">
+                          <Gift className="h-5 w-5 text-green-400" />
+                          <span className="text-green-300 font-bold text-sm uppercase tracking-wide">
+                            Free Play Available
+                          </span>
+                        </div>
+                        <p className="text-white text-sm sm:text-base text-center">
+                          Try your luck with one free spin - no payment required!
+                        </p>
+                        <Button
+                          onClick={handleFreePlay}
+                          disabled={isSpinning}
+                          className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-bold px-6 py-3 rounded-xl shadow-lg transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                        >
+                          <Sparkles className="h-4 w-4 mr-2" />
+                          {isSpinning ? "Spinning..." : "Free Play Spin"}
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {hasUsedFreePlay && (
+                    <div className="bg-gradient-to-r from-gray-500/20 to-slate-500/20 backdrop-blur-xl rounded-xl border border-gray-400/40 shadow-2xl p-4">
+                      <div className="flex items-center justify-center space-x-2 text-gray-400">
+                        <Gift className="h-4 w-4" />
+                        <span className="text-sm">Free play used - Join the game to continue playing!</span>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -526,6 +589,7 @@ export default function GamePage() {
         onClose={() => setShowDisclaimer(false)}
         onConfirm={handleConfirmSpin}
         gameTitle={game.name}
+        isFreePlay={isFreePlay}
       />
 
       {/* Auth Required Popup */}
