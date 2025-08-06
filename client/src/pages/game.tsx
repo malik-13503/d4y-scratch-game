@@ -50,6 +50,11 @@ export default function GamePage() {
     return () => clearInterval(interval);
   }, []);
 
+  const { data: game, isLoading } = useQuery<Game>({
+    queryKey: [`/api/games/${id}`],
+    enabled: !!id,
+  });
+
   // Check if user has already used free play when game loads
   useEffect(() => {
     const checkFreePlayStatus = async () => {
@@ -69,11 +74,6 @@ export default function GamePage() {
 
     checkFreePlayStatus();
   }, [game?.id]);
-
-  const { data: game, isLoading } = useQuery<Game>({
-    queryKey: [`/api/games/${id}`],
-    enabled: !!id,
-  });
 
   const { data: user } = useQuery({
     queryKey: ["/api/user"],
