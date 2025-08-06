@@ -632,18 +632,27 @@ export default function GamePage() {
                 <div className="pt-3 border-t border-white/10 space-y-3">
                   <div className="text-xs text-gray-400">
                     <div className="flex items-center justify-between">
-                      <span>Wheel Segments:</span>
-                      <span className="text-purple-300 font-bold">
-                        {Math.min(game?.totalNumbers || 0, 50)} / 50 max
+                      <span>Active Segments:</span>
+                      <span className="text-green-300 font-bold">
+                        {Math.min((availableNumbers as number[])?.length || 0, 50)} / 50 max
                       </span>
                     </div>
                     <div className="w-full bg-gray-700 rounded-full h-1.5 mt-1">
                       <div 
-                        className="bg-gradient-to-r from-purple-500 to-blue-500 h-1.5 rounded-full transition-all duration-300"
+                        className="bg-gradient-to-r from-green-500 to-blue-500 h-1.5 rounded-full transition-all duration-300"
                         style={{ 
-                          width: `${Math.min((game?.totalNumbers || 0) / 50 * 100, 100)}%` 
+                          width: `${Math.min((((availableNumbers as number[])?.length || 0) / 50) * 100, 100)}%` 
                         }}
                       ></div>
+                    </div>
+                    <div className="text-center mt-1">
+                      <span className="text-xs text-gray-500">
+                        {game && availableNumbers ? (
+                          game.totalNumbers <= 50 
+                            ? `${game.totalNumbers - (availableNumbers as number[]).length} numbers claimed`
+                            : `${game.totalNumbers - (availableNumbers as number[]).length} of ${game.totalNumbers} claimed`
+                        ) : ''}
+                      </span>
                     </div>
                   </div>
                   <Button

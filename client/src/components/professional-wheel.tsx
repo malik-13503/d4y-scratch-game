@@ -54,13 +54,13 @@ export const ProfessionalWheel = forwardRef<
   ];
 
   // Generate wheel numbers from available numbers for real-time updates
-  const generateWheelNumbers = () => {
+  const generateWheelNumbers = (): number[] => {
     const maxSegments = 50;
-    const segments = Math.min(maxSegments, totalNumbers);
-    const numbers = [];
+    const numbers: number[] = [];
     
     if (availableNumbers.length === 0) {
       // Fallback to static generation if no available numbers yet
+      const segments = Math.min(maxSegments, totalNumbers);
       for (let i = 0; i < segments; i++) {
         const number = Math.floor((totalNumbers / segments) * i) + 1;
         numbers.push(Math.min(number, totalNumbers));
@@ -68,19 +68,32 @@ export const ProfessionalWheel = forwardRef<
       return numbers;
     }
     
-    // Use available numbers to populate wheel segments (up to 50 segments)
-    const availableCount = Math.min(availableNumbers.length, maxSegments);
-    for (let i = 0; i < availableCount; i++) {
-      numbers.push(availableNumbers[i]);
-    }
+    // NEW LOGIC: Handle different scenarios based on total numbers and claimed numbers
+    const claimedCount = totalNumbers - availableNumbers.length;
     
-    // If we have fewer available numbers than desired segments, pad with remaining
-    while (numbers.length < Math.min(segments, maxSegments) && availableNumbers.length > numbers.length) {
-      const remainingIndex: number = numbers.length;
-      if (remainingIndex < availableNumbers.length) {
-        numbers.push(availableNumbers[remainingIndex]);
+    if (totalNumbers <= maxSegments) {
+      // For games with ≤50 numbers: show all available numbers (removes segments as claimed)
+      return [...availableNumbers].slice(0, maxSegments);
+    } else {
+      // For games with >50 numbers: show 50 segments until 20+ are claimed
+      if (claimedCount <= 20) {
+        // Show exactly 50 segments from available numbers (evenly distributed)
+        const step = Math.max(1, Math.floor(availableNumbers.length / maxSegments));
+        for (let i = 0; i < maxSegments && i * step < availableNumbers.length; i++) {
+          numbers.push(availableNumbers[i * step]);
+        }
+        // Fill remaining slots if needed
+        while (numbers.length < maxSegments && numbers.length < availableNumbers.length) {
+          const remaining = availableNumbers.filter(num => !numbers.includes(num));
+          if (remaining.length > 0) {
+            numbers.push(remaining[0]);
+          } else {
+            break;
+          }
+        }
       } else {
-        break;
+        // After 20+ claimed: start removing segments, show only available numbers
+        return [...availableNumbers].slice(0, maxSegments);
       }
     }
     
