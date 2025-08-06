@@ -36,6 +36,7 @@ export const ProfessionalWheel = forwardRef<
   const [isFreePlay, setIsFreePlay] = useState(false);
   const [amountCharged, setAmountCharged] = useState<number>(0);
   const [availableNumbers, setAvailableNumbers] = useState<number[]>([]);
+  const [paymentFailed, setPaymentFailed] = useState(false);
 
   // Expose the handleSpin function for external triggers
   useImperativeHandle(ref, () => ({
@@ -195,6 +196,7 @@ export const ProfessionalWheel = forwardRef<
     setIsSpinning(true);
     setResult(null);
     setShowResultModal(false);
+    setPaymentFailed(false);
 
     // Step 2: Freeze current wheel numbers during the entire spin
     const frozenWheelNumbers = [...wheelNumbers];
@@ -223,6 +225,7 @@ export const ProfessionalWheel = forwardRef<
       } catch (apiError) {
         console.error("🚨 API call failed:", apiError);
         apiCallSuccessful = false;
+        setPaymentFailed(true);
 
         // Even if API fails, we need to complete the wheel animation
         // Use a random fallback from available numbers to ensure wheel doesn't hang
@@ -650,7 +653,7 @@ export const ProfessionalWheel = forwardRef<
               {/* Result */}
               <div className="space-y-3">
                 <h2 className="text-3xl font-bold bg-gradient-to-r from-yellow-300 via-orange-400 to-red-400 bg-clip-text text-transparent">
-                  {isFreePlay ? "🎁 FREE PLAY!" : "✨ NUMBER CLAIMED!"}
+                  {paymentFailed ? "❌ PAYMENT FAILED!" : isFreePlay ? "🎁 FREE PLAY!" : "✨ NUMBER CLAIMED!"}
                 </h2>
                 <div className="text-7xl font-black bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 bg-clip-text text-transparent animate-pulse">
                   {result}
@@ -662,7 +665,21 @@ export const ProfessionalWheel = forwardRef<
 
               {/* Payment info */}
               <div className="bg-black/30 backdrop-blur-sm rounded-lg p-6 border border-white/20">
-                {isFreePlay ? (
+                {paymentFailed ? (
+                  <div className="text-center space-y-3">
+                    <div className="text-2xl font-bold text-red-300">
+                      ❌ PAYMENT FAILED
+                    </div>
+                    <p className="text-red-200 text-sm">
+                      Your payment account doesn't have sufficient funds to claim number {result}
+                    </p>
+                    <div className="bg-red-500/20 rounded-lg p-3 mt-3">
+                      <p className="text-red-100 text-sm font-semibold">
+                        💰 Please try again to top up your balance and play again
+                      </p>
+                    </div>
+                  </div>
+                ) : isFreePlay ? (
                   <div className="text-center space-y-3">
                     <div className="text-2xl font-bold text-green-300">
                       🎉 FREE PLAY - $0.00
