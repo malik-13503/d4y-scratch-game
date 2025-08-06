@@ -45,14 +45,14 @@ export function DisclaimerPopup({
           </DialogTitle>
           <DialogDescription className="text-gray-300 text-base leading-relaxed mt-4">
             {isFreePlay
-              ? "This is a free demonstration spin. No payment will be charged and this spin does not count towards the actual game. Enjoy trying out the wheel mechanics!"
+              ? "Try your luck with one free spin! This lets you experience the game mechanics and see how the wheel works. Your result will be from the higher number range where you won't be charged anything."
               : "Just a heads up — once you spin the wheel, your card will be instantly charged based on your pull. There are no refunds, so spin wisely and have fun!"
             }
           </DialogDescription>
           <div className="mt-4 p-4 bg-slate-700/50 rounded-lg border border-slate-600">
             <p className="text-sm text-gray-400">
               {isFreePlay
-                ? "This is for demonstration purposes only. No actual game participation or prizes are involved."
+                ? "After your free spin, sign up to play for real prizes! No purchase necessary - free entry options available."
                 : `By continuing, you agree to these terms${gameTitle ? ` for ${gameTitle}` : ""}`
               }
             </p>
@@ -72,7 +72,11 @@ export function DisclaimerPopup({
             type="button"
             onClick={handleConfirm}
             disabled={isLoading}
-            className="w-full sm:w-auto bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold"
+            className={`w-full sm:w-auto ${
+              isFreePlay 
+                ? 'bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700' 
+                : 'bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700'
+            } text-white font-semibold`}
           >
             {isLoading ? (
               <div className="flex items-center gap-2">
@@ -80,7 +84,7 @@ export function DisclaimerPopup({
                 Starting Game...
               </div>
             ) : (
-              "Let's Play!"
+              isFreePlay ? "Try Free Spin!" : "Let's Play!"
             )}
           </Button>
         </DialogFooter>
