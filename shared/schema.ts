@@ -86,6 +86,7 @@ export const games = pgTable("games", {
   isActive: boolean("is_active").notNull().default(false),
   isScheduled: boolean("is_scheduled").notNull().default(false),
   emoji: text("emoji").notNull().default("🎮"),
+  prizeImageUrl: text("prize_image_url"), // New field for real prize images
   backgroundImage: text("background_image"),
   createdBy: integer("created_by").notNull(),
   createdAt: timestamp("created_at").notNull().defaultNow(),

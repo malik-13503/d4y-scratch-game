@@ -104,7 +104,12 @@ export default function AdminDashboard() {
     prizeValue: "50.00",
     totalNumbers: "125",
     duration: "24",
+    prizeImageUrl: "", // Add prize image URL
   });
+
+  // Prize image upload state
+  const [prizeImageFile, setPrizeImageFile] = useState<File | null>(null);
+  const [prizeImagePreview, setPrizeImagePreview] = useState<string>("");
 
   // Edit data state for editing existing games
   const [editData, setEditData] = useState({
@@ -405,6 +410,35 @@ export default function AdminDashboard() {
     },
   });
 
+  // Delete game mutation
+  const deleteGameMutation = useMutation({
+    mutationFn: async (gameId: number) => {
+      const response = await apiRequest("DELETE", `/api/admin/games/${gameId}`);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/games"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/games"] });
+      queryClient.invalidateQueries({
+        queryKey: ["/api/admin/dashboard/stats"],
+      });
+      setIsDeleteGameOpen(false);
+      setGameToDelete(null);
+      toast({
+        title: "Game Deleted",
+        description: `"${gameToDelete?.name}" has been permanently deleted`,
+        variant: "destructive",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Delete Failed",
+        description: error.message || "Failed to delete game",
+        variant: "destructive",
+      });
+    },
+  });
+
   // Delete user mutation
   const deleteUserMutation = useMutation({
     mutationFn: async (userId: number) => {
@@ -478,30 +512,40 @@ export default function AdminDashboard() {
     );
   }
 
-  const handleCreateGame = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleCreateGame = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
 
     const durationHours = parseInt(formData.get("duration") as string) || 24;
     const prizeValue = formData.get("prizeValue") as string;
+    const totalNumbers = parseInt(formData.get("totalNumbers") as string) || 125;
 
-    const totalNumbers =
-      parseInt(formData.get("totalNumbers") as string) || 125;
+    // Handle image upload if provided
+    let prizeImageUrl = "";
+    if (prizeImageFile) {
+      // Convert image to base64 for storage (demo purposes)
+      // In production, upload to cloud storage like AWS S3
+      prizeImageUrl = await new Promise<string>((resolve) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.readAsDataURL(prizeImageFile);
+      });
+    }
 
     const gameData = {
       name: formData.get("name") as string,
-      code: `G${Date.now().toString().slice(-6)}`, // Generate unique code
+      code: `G${Date.now().toString().slice(-6)}`,
       description: formData.get("description") as string,
       gameType: (formData.get("gameType") as string) || "wheel_spin",
       prize: formData.get("prize") as string,
-      prizeValue: prizeValue, // Keep as string for decimal field
+      prizeValue: prizeValue,
       prizeDescription: formData.get("description") as string,
+      prizeImageUrl: prizeImageUrl, // Add the uploaded image
       totalNumbers: totalNumbers,
-      numbersLeft: totalNumbers, // Required field - initially all numbers are available
+      numbersLeft: totalNumbers,
       freePlayStart: Math.ceil(totalNumbers * 0.75),
       freePlayEnd: totalNumbers,
       maxWinners: 1,
-      // Let server handle date creation
       isScheduled: false,
       emoji: (formData.get("emoji") as string) || "🎮",
     };
@@ -538,14 +582,9 @@ export default function AdminDashboard() {
   };
 
   const confirmDeleteGame = () => {
-    // TODO: Implement actual delete API call
-    toast({
-      title: "Game Deleted",
-      description: `"${gameToDelete?.name}" has been permanently deleted`,
-      variant: "destructive",
-    });
-    setIsDeleteGameOpen(false);
-    setGameToDelete(null);
+    if (gameToDelete) {
+      deleteGameMutation.mutate(gameToDelete.id);
+    }
   };
 
   const handleUpdateGame = (e: React.FormEvent<HTMLFormElement>) => {
@@ -1291,6 +1330,69 @@ export default function AdminDashboard() {
                               </div>
                             </div>
 
+                            {/* Prize Image Upload Section */}
+                            <div className="space-y-3">
+                              <Label className="text-gray-300">Prize Image</Label>
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                  <input
+                                    type="file"
+                                    id="prizeImage"
+                                    accept="image/*"
+                                    onChange={(e) => {
+                                      const file = e.target.files?.[0];
+                                      if (file) {
+                                        setPrizeImageFile(file);
+                                        const reader = new FileReader();
+                                        reader.onload = () => {
+                                          setPrizeImagePreview(reader.result as string);
+                                        };
+                                        reader.readAsDataURL(file);
+                                      }
+                                    }}
+                                    className="hidden"
+                                  />
+                                  <Label
+                                    htmlFor="prizeImage"
+                                    className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-purple-500/50 rounded-lg cursor-pointer bg-white/5 hover:bg-white/10 transition-colors"
+                                  >
+                                    {prizeImagePreview ? (
+                                      <img
+                                        src={prizeImagePreview}
+                                        alt="Prize preview"
+                                        className="w-full h-full object-cover rounded-lg"
+                                      />
+                                    ) : (
+                                      <div className="text-center">
+                                        <svg
+                                          className="w-8 h-8 mx-auto text-purple-400"
+                                          fill="none"
+                                          stroke="currentColor"
+                                          viewBox="0 0 24 24"
+                                        >
+                                          <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            strokeWidth={2}
+                                            d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                                          />
+                                        </svg>
+                                        <p className="text-purple-300 text-sm">Upload Prize Image</p>
+                                        <p className="text-gray-400 text-xs">PNG, JPG up to 2MB</p>
+                                      </div>
+                                    )}
+                                  </Label>
+                                </div>
+                                <div className="flex items-center justify-center">
+                                  <div className="text-center text-gray-400">
+                                    <p className="text-sm font-medium">OR</p>
+                                    <p className="text-xs">Use emoji instead</p>
+                                    <div className="text-3xl mt-2">{previewData.emoji}</div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+
                             <div className="grid grid-cols-3 gap-4">
                               <div>
                                 <Label
@@ -1423,9 +1525,17 @@ export default function AdminDashboard() {
                               <div className="flex items-start space-x-3 sm:space-x-4 pr-[90px] sm:pr-[110px] md:pr-[120px]">
                                 <div className="relative p-2 sm:p-3 md:p-4 rounded-xl sm:rounded-2xl bg-gradient-to-br from-blue-500/80 to-purple-600/80 shadow-2xl group-hover:scale-110 transition-transform duration-500 flex-shrink-0">
                                   <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent rounded-xl sm:rounded-2xl"></div>
-                                  <span className="relative text-lg sm:text-xl md:text-2xl text-white drop-shadow-lg">
-                                    {previewData.emoji}
-                                  </span>
+                                  {prizeImagePreview ? (
+                                    <img
+                                      src={prizeImagePreview}
+                                      alt="Prize"
+                                      className="relative w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 object-cover rounded-lg"
+                                    />
+                                  ) : (
+                                    <span className="relative text-lg sm:text-xl md:text-2xl text-white drop-shadow-lg">
+                                      {previewData.emoji}
+                                    </span>
+                                  )}
                                 </div>
 
                                 <div className="flex-1 min-w-0 pt-1">
