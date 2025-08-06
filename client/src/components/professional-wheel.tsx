@@ -286,10 +286,15 @@ export const ProfessionalWheel = forwardRef<
   };
 
   const [numberRadius, setNumberRadius] = useState(110);
+  const [isMobile, setIsMobile] = useState(false);
+  const [screenWidth, setScreenWidth] = useState(0);
 
   useEffect(() => {
     const updateRadius = () => {
       const width = window.innerWidth;
+      setScreenWidth(width);
+      setIsMobile(width < 768);
+      
       if (width >= 1200) {
         setNumberRadius(180); // For lg and xl screens
       } else if (width >= 1024) {
@@ -368,36 +373,58 @@ export const ProfessionalWheel = forwardRef<
                             transition: isSpinning
                               ? `transform 8.0s cubic-bezier(0.25, 0.1, 0.25, 1.0)`
                               : "none",
-                            // Mobile-first responsive sizing
-                            width: window.innerWidth < 768 
-                              ? (segmentCount > 36 ? '16px' : segmentCount > 24 ? '18px' : '20px')
-                              : (segmentCount > 36 ? '20px' : segmentCount > 24 ? '24px' : '28px'),
-                            height: window.innerWidth < 768 
-                              ? (segmentCount > 36 ? '16px' : segmentCount > 24 ? '18px' : '20px')
-                              : (segmentCount > 36 ? '20px' : segmentCount > 24 ? '24px' : '28px'),
+                            // Responsive sizing with better logic for 3-digit numbers
+                            width: (() => {
+                              const is3Digit = number >= 100;
+                              if (isMobile) {
+                                if (is3Digit) return segmentCount > 40 ? '22px' : segmentCount > 30 ? '24px' : '26px';
+                                return segmentCount > 40 ? '18px' : segmentCount > 30 ? '20px' : '22px';
+                              } else {
+                                if (is3Digit) return segmentCount > 40 ? '28px' : segmentCount > 30 ? '30px' : '32px';
+                                return segmentCount > 40 ? '24px' : segmentCount > 30 ? '26px' : '28px';
+                              }
+                            })(),
+                            height: (() => {
+                              const is3Digit = number >= 100;
+                              if (isMobile) {
+                                if (is3Digit) return segmentCount > 40 ? '22px' : segmentCount > 30 ? '24px' : '26px';
+                                return segmentCount > 40 ? '18px' : segmentCount > 30 ? '20px' : '22px';
+                              } else {
+                                if (is3Digit) return segmentCount > 40 ? '28px' : segmentCount > 30 ? '30px' : '32px';
+                                return segmentCount > 40 ? '24px' : segmentCount > 30 ? '26px' : '28px';
+                              }
+                            })(),
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            textShadow: '1px 1px 3px rgba(0,0,0,0.9)',
-                            backgroundColor: isAvailable ? 'rgba(0,0,0,0.5)' : 'rgba(0,0,0,0.7)',
+                            textShadow: '2px 2px 4px rgba(0,0,0,0.9)',
+                            backgroundColor: isAvailable ? 'rgba(0,0,0,0.7)' : 'rgba(0,0,0,0.8)',
                             borderRadius: '50%',
                             border: isAvailable 
-                              ? '0.5px solid rgba(255,255,255,0.4)' 
-                              : '0.5px solid rgba(156,163,175,0.6)',
+                              ? '1px solid rgba(255,255,255,0.5)' 
+                              : '1px solid rgba(156,163,175,0.7)',
                             zIndex: 15,
-                            // Improved mobile font sizing
-                            fontSize: window.innerWidth < 768 
-                              ? (segmentCount > 40 ? '7px' : segmentCount > 30 ? '8px' : '9px')
-                              : (segmentCount > 40 ? '9px' : segmentCount > 30 ? '10px' : segmentCount > 24 ? '11px' : '12px'),
-                            fontWeight: '700',
+                            // Enhanced font sizing for 3-digit numbers
+                            fontSize: (() => {
+                              const is3Digit = number >= 100;
+                              if (isMobile) {
+                                if (is3Digit) return segmentCount > 40 ? '8px' : segmentCount > 30 ? '9px' : '10px';
+                                return segmentCount > 40 ? '9px' : segmentCount > 30 ? '10px' : '11px';
+                              } else {
+                                if (is3Digit) return segmentCount > 40 ? '10px' : segmentCount > 30 ? '11px' : '12px';
+                                return segmentCount > 40 ? '11px' : segmentCount > 30 ? '12px' : '13px';
+                              }
+                            })(),
+                            fontWeight: '800',
                             lineHeight: '1',
+                            letterSpacing: number >= 100 ? '-0.5px' : '0',
                           }}
                         >
                           {isAvailable ? number : (
                             <span style={{ textDecoration: 'line-through' }}>{number}</span>
                           )}
                         </div>
-                        {/* Claimed indicator overlay - smaller for mobile */}
+                        {/* Claimed indicator overlay - responsive for mobile */}
                         {!isAvailable && (
                           <div
                             className="absolute"
@@ -407,18 +434,20 @@ export const ProfessionalWheel = forwardRef<
                               top: '50%',
                               transform: `translate(-50%, -50%) translate(${Math.cos(((angle + 360 / segmentCount / 2 - 90) * Math.PI) / 180) * numberRadius}px, ${Math.sin(((angle + 360 / segmentCount / 2 - 90) * Math.PI) / 180) * numberRadius}px) rotate(${-rotation}deg)`,
                               transition: isSpinning ? `transform 8.0s cubic-bezier(0.25, 0.1, 0.25, 1.0)` : "none",
-                              width: window.innerWidth < 768 ? '12px' : '14px',
-                              height: window.innerWidth < 768 ? '12px' : '14px',
-                              backgroundColor: 'rgba(239, 68, 68, 0.9)',
+                              width: isMobile ? '14px' : '16px',
+                              height: isMobile ? '14px' : '16px',
+                              backgroundColor: 'rgba(239, 68, 68, 0.95)',
                               borderRadius: '50%',
                               zIndex: 20,
-                              marginTop: window.innerWidth < 768 ? '-16px' : '-18px',
-                              fontSize: window.innerWidth < 768 ? '7px' : '8px',
+                              marginTop: isMobile ? '-18px' : '-20px',
+                              fontSize: isMobile ? '8px' : '9px',
                               color: 'white',
                               display: 'flex',
                               alignItems: 'center',
                               justifyContent: 'center',
                               fontWeight: 'bold',
+                              border: '1px solid rgba(255,255,255,0.8)',
+                              textShadow: '1px 1px 2px rgba(0,0,0,0.8)',
                             }}
                           >
                             ✗
