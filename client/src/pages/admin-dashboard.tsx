@@ -607,22 +607,34 @@ export default function AdminDashboard() {
     }
   };
 
-  const handleUpdateGame = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleUpdateGame = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
+
+    const totalNumbers = parseInt(formData.get("totalNumbers") as string) || 125;
+    const prizeValue = parseFloat(formData.get("prizeValue") as string) || 100;
+
+    // Handle prize image upload if there's a new file
+    let prizeImageUrl = editingGame.prizeImageUrl || ""; // Keep existing image by default
+    if (editPrizeImageFile) {
+      prizeImageUrl = await new Promise<string>((resolve) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.readAsDataURL(editPrizeImageFile);
+      });
+    }
 
     const gameData = {
       name: formData.get("name") as string,
       description: formData.get("description") as string,
       prize: formData.get("prize") as string,
-      prizeValue: formData.get("prizeValue") as string, // Keep as string for decimal field
+      prizeValue: prizeValue,
       prizeDescription: formData.get("description") as string,
-      totalNumbers: parseInt(formData.get("totalNumbers") as string) || 125,
-      freePlayStart: Math.ceil(
-        (parseInt(formData.get("totalNumbers") as string) || 125) * 0.75,
-      ),
-      freePlayEnd: parseInt(formData.get("totalNumbers") as string) || 125,
-      gameType: (formData.get("gameType") as string) || "wheel_spin",
+      prizeImageUrl: prizeImageUrl, // Include the image data
+      totalNumbers: totalNumbers,
+      freePlayStart: Math.ceil(totalNumbers * 0.75),
+      freePlayEnd: totalNumbers,
+      gameType: "wheel_spin",
       emoji: (formData.get("emoji") as string) || "🎮",
     };
 
