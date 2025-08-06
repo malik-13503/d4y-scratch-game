@@ -225,8 +225,15 @@ export const ProfessionalWheel = forwardRef<
         apiCallSuccessful = false;
 
         // Even if API fails, we need to complete the wheel animation
-        // Use a fallback result to ensure wheel doesn't hang
-        spinResult = 1; // Safe fallback - always free
+        // Use a random fallback from available numbers to ensure wheel doesn't hang
+        if (availableNumbers.length > 0) {
+          const randomIndex = Math.floor(Math.random() * availableNumbers.length);
+          spinResult = availableNumbers[randomIndex];
+        } else {
+          // If no available numbers, use a random number from total range
+          spinResult = Math.floor(Math.random() * totalNumbers) + 1;
+        }
+        console.log("🎯 Using fallback random result:", spinResult);
       }
 
       // Step 5: Calculate precise landing position using FROZEN wheel numbers
