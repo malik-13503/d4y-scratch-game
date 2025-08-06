@@ -270,18 +270,19 @@ export function ImprovedSignupForm({ onSuccess, onSwitchToLogin }: ImprovedSignu
           </div>
         </div>
 
-        {/* Age Verification Checkbox - Required for Legal Compliance */}
-        <div className="flex items-start space-x-3 p-4 bg-orange-900/20 rounded-xl border-2 border-orange-500/40 backdrop-blur-sm">
+        {/* Age Verification - Friendly Design */}
+        <div className="flex items-start space-x-3 p-4 bg-gradient-to-r from-purple-500/10 to-blue-500/10 rounded-xl border border-white/20 backdrop-blur-sm">
           <input
             type="checkbox"
             id="ageConfirmed"
             checked={ageConfirmed}
             onChange={(e) => setAgeConfirmed(e.target.checked)}
-            className="mt-1 w-5 h-5 text-orange-600 bg-slate-700 border-orange-400 rounded focus:ring-orange-500 focus:ring-2"
+            className="mt-1 w-4 h-4 text-purple-600 bg-slate-700/50 border-gray-400 rounded focus:ring-purple-500 focus:ring-2"
             required
           />
-          <label htmlFor="ageConfirmed" className="text-sm text-orange-100 leading-tight font-medium cursor-pointer">
-            🔞 I confirm that I am 18 years of age or older (Required)
+          <label htmlFor="ageConfirmed" className="text-sm text-gray-200 leading-relaxed cursor-pointer">
+            ✨ I confirm that I am 18 years of age or older
+            <span className="block text-xs text-gray-400 mt-1">Required to participate in prize games</span>
           </label>
         </div>
 
