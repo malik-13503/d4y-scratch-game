@@ -1,6 +1,17 @@
-import { useState, useRef, useEffect, forwardRef, useImperativeHandle } from "react";
+import {
+  useState,
+  useRef,
+  useEffect,
+  forwardRef,
+  useImperativeHandle,
+} from "react";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import { Gift, DollarSign, Sparkles, Play } from "lucide-react";
 import { Confetti } from "./confetti";
 import { WheelPointer } from "./wheel-pointer";
@@ -57,7 +68,7 @@ export const ProfessionalWheel = forwardRef<
   const generateWheelNumbers = (): number[] => {
     const maxSegments = 50;
     const numbers: number[] = [];
-    
+
     if (availableNumbers.length === 0) {
       // Fallback to static generation if no available numbers yet
       const segments = Math.min(maxSegments, totalNumbers);
@@ -67,10 +78,10 @@ export const ProfessionalWheel = forwardRef<
       }
       return numbers;
     }
-    
+
     // NEW LOGIC: Handle different scenarios based on total numbers and claimed numbers
     const claimedCount = totalNumbers - availableNumbers.length;
-    
+
     if (totalNumbers <= maxSegments) {
       // For games with ≤50 numbers: show all available numbers (removes segments as claimed)
       return [...availableNumbers].slice(0, maxSegments);
@@ -78,13 +89,25 @@ export const ProfessionalWheel = forwardRef<
       // For games with >50 numbers: show 50 segments until 20+ are claimed
       if (claimedCount <= 20) {
         // Show exactly 50 segments from available numbers (evenly distributed)
-        const step = Math.max(1, Math.floor(availableNumbers.length / maxSegments));
-        for (let i = 0; i < maxSegments && i * step < availableNumbers.length; i++) {
+        const step = Math.max(
+          1,
+          Math.floor(availableNumbers.length / maxSegments),
+        );
+        for (
+          let i = 0;
+          i < maxSegments && i * step < availableNumbers.length;
+          i++
+        ) {
           numbers.push(availableNumbers[i * step]);
         }
         // Fill remaining slots if needed
-        while (numbers.length < maxSegments && numbers.length < availableNumbers.length) {
-          const remaining = availableNumbers.filter(num => !numbers.includes(num));
+        while (
+          numbers.length < maxSegments &&
+          numbers.length < availableNumbers.length
+        ) {
+          const remaining = availableNumbers.filter(
+            (num) => !numbers.includes(num),
+          );
           if (remaining.length > 0) {
             numbers.push(remaining[0]);
           } else {
@@ -96,7 +119,7 @@ export const ProfessionalWheel = forwardRef<
         return [...availableNumbers].slice(0, maxSegments);
       }
     }
-    
+
     return numbers;
   };
 
@@ -106,7 +129,7 @@ export const ProfessionalWheel = forwardRef<
   const fetchAvailableNumbers = async (gameId: number) => {
     try {
       const response = await fetch(`/api/games/${gameId}/available-numbers`, {
-        credentials: 'include'
+        credentials: "include",
       });
       if (response.ok) {
         const data = await response.json();
@@ -114,7 +137,7 @@ export const ProfessionalWheel = forwardRef<
         return data.availableNumbers;
       }
     } catch (error) {
-      console.error('Failed to fetch available numbers:', error);
+      console.error("Failed to fetch available numbers:", error);
     }
     return [];
   };
@@ -124,7 +147,7 @@ export const ProfessionalWheel = forwardRef<
     // Extract gameId from URL if available
     const path = window.location.pathname;
     const gameIdMatch = path.match(/\/game\/(\d+)/);
-    
+
     if (gameIdMatch) {
       const gameId = parseInt(gameIdMatch[1]);
       fetchAvailableNumbers(gameId).then(() => {
@@ -147,17 +170,18 @@ export const ProfessionalWheel = forwardRef<
   useEffect(() => {
     const path = window.location.pathname;
     const gameIdMatch = path.match(/\/game\/(\d+)/);
-    
+
     if (gameIdMatch) {
       const gameId = parseInt(gameIdMatch[1]);
-      
+
       // Refresh every 10 seconds to keep wheel updated when other players spin
       const interval = setInterval(() => {
-        if (!isSpinning) { // Only refresh when not actively spinning
+        if (!isSpinning) {
+          // Only refresh when not actively spinning
           fetchAvailableNumbers(gameId);
         }
       }, 10000);
-      
+
       return () => clearInterval(interval);
     }
   }, [isSpinning]);
@@ -166,22 +190,22 @@ export const ProfessionalWheel = forwardRef<
     if (isSpinning || disabled) return;
 
     console.log("🎯 Starting spin sequence...");
-    
+
     // Step 1: Lock the wheel state and prepare for spinning
     setIsSpinning(true);
     setResult(null);
     setShowResultModal(false);
-    
+
     // Step 2: Freeze current wheel numbers during the entire spin
     const frozenWheelNumbers = [...wheelNumbers];
-    
+
     // Step 3: Force complete rotation reset to ensure clean starting position
     setRotation(0);
-    
+
     // Force a DOM reflow to ensure rotation reset is applied
     if (wheelRef.current) {
-      wheelRef.current.style.transform = 'rotate(0deg)';
-      wheelRef.current.style.transition = 'none';
+      wheelRef.current.style.transform = "rotate(0deg)";
+      wheelRef.current.style.transition = "none";
       wheelRef.current.offsetHeight; // Force reflow
     }
 
@@ -196,11 +220,10 @@ export const ProfessionalWheel = forwardRef<
         spinResult = await onSpin();
         apiCallSuccessful = true;
         console.log("🎯 API call successful, result:", spinResult);
-
       } catch (apiError) {
         console.error("🚨 API call failed:", apiError);
         apiCallSuccessful = false;
-        
+
         // Even if API fails, we need to complete the wheel animation
         // Use a fallback result to ensure wheel doesn't hang
         spinResult = 1; // Safe fallback - always free
@@ -208,8 +231,10 @@ export const ProfessionalWheel = forwardRef<
 
       // Step 5: Calculate precise landing position using FROZEN wheel numbers
       const segmentAngle = 360 / frozenWheelNumbers.length;
-      let targetSegmentIndex = frozenWheelNumbers.findIndex(num => num === spinResult);
-      
+      let targetSegmentIndex = frozenWheelNumbers.findIndex(
+        (num) => num === spinResult,
+      );
+
       if (targetSegmentIndex === -1 && frozenWheelNumbers.length < 50) {
         // If exact number not found and we have space, add it to the wheel
         frozenWheelNumbers.push(spinResult);
@@ -217,7 +242,9 @@ export const ProfessionalWheel = forwardRef<
         setWheelNumbers([...frozenWheelNumbers]);
       } else if (targetSegmentIndex === -1) {
         // If wheel is full (50 segments), replace a random segment
-        targetSegmentIndex = Math.floor(Math.random() * frozenWheelNumbers.length);
+        targetSegmentIndex = Math.floor(
+          Math.random() * frozenWheelNumbers.length,
+        );
         frozenWheelNumbers[targetSegmentIndex] = spinResult;
         setWheelNumbers([...frozenWheelNumbers]);
       }
@@ -229,10 +256,11 @@ export const ProfessionalWheel = forwardRef<
 
       // Step 7: Start the 8-second spinning animation with proper timing
       setRotation(finalRotation);
-      
+
       // Ensure transition is properly applied
       if (wheelRef.current) {
-        wheelRef.current.style.transition = 'transform 8.0s cubic-bezier(0.25, 0.1, 0.25, 1.0)';
+        wheelRef.current.style.transition =
+          "transform 8.0s cubic-bezier(0.25, 0.1, 0.25, 1.0)";
         wheelRef.current.style.transform = `rotate(${finalRotation}deg)`;
       }
       console.log("🎯 8-second wheel animation started - will land on:", {
@@ -240,31 +268,33 @@ export const ProfessionalWheel = forwardRef<
         targetSegmentIndex,
         frozenNumbers: frozenWheelNumbers,
         finalRotation,
-        apiCallSuccessful
+        apiCallSuccessful,
       });
 
       // Step 8: Complete the spin sequence after EXACTLY 8 seconds from animation start
       setTimeout(async () => {
         console.log("🎯 8-second spin completed, showing result...");
-        
+
         // Set final result
         setResult(spinResult);
         const isFree = spinResult >= freePlayStart;
         setIsFreePlay(isFree);
         setAmountCharged(isFree ? 0 : spinResult);
-        
+
         // Show result modal immediately after wheel stops
         setTimeout(() => {
           setShowResultModal(true);
           if (!apiCallSuccessful) {
-            console.error("⚠️ Spin completed with API failure - showing error in modal");
+            console.error(
+              "⚠️ Spin completed with API failure - showing error in modal",
+            );
           }
         }, 200);
-        
+
         // Only after modal is shown, release the spinning state and refresh numbers
         setTimeout(async () => {
           setIsSpinning(false);
-          
+
           // Refresh available numbers ONLY after everything is complete
           if (apiCallSuccessful) {
             const path = window.location.pathname;
@@ -274,15 +304,11 @@ export const ProfessionalWheel = forwardRef<
               await fetchAvailableNumbers(gameId);
             }
           }
-          
+
           console.log("🎯 Spin sequence fully completed");
         }, 1000);
-        
       }, 8000); // Exactly 8 seconds for animation completion
-      
     }, 200); // Wait 200ms for rotation reset to fully take effect
-
-
   };
 
   const [numberRadius, setNumberRadius] = useState(110);
@@ -294,7 +320,7 @@ export const ProfessionalWheel = forwardRef<
       const width = window.innerWidth;
       setScreenWidth(width);
       setIsMobile(width < 768);
-      
+
       if (width >= 1200) {
         setNumberRadius(180); // For lg and xl screens
       } else if (width >= 1024) {
@@ -338,145 +364,207 @@ export const ProfessionalWheel = forwardRef<
                         "inset 0 0 30px rgba(0, 0, 0, 0.4), 0 0 40px rgba(255, 215, 0, 0.3)",
                     }}
                   >
-                  {/* Wheel Segments - up to 50 segments */}
-                  {wheelNumbers.map((number, index) => {
-                    const segmentCount = wheelNumbers.length;
-                    const angle = (360 / segmentCount) * index;
-                    const nextAngle = (360 / segmentCount) * (index + 1);
-                    const colorIndex = index % segmentColors.length;
-                    const color = segmentColors[colorIndex];
-                    const isAvailable = availableNumbers.includes(number);
+                    {/* Wheel Segments - up to 50 segments */}
+                    {wheelNumbers.map((number, index) => {
+                      const segmentCount = wheelNumbers.length;
+                      const angle = (360 / segmentCount) * index;
+                      const nextAngle = (360 / segmentCount) * (index + 1);
+                      const colorIndex = index % segmentColors.length;
+                      const color = segmentColors[colorIndex];
+                      const isAvailable = availableNumbers.includes(number);
 
-                    return (
-                      <div
-                        key={index}
-                        className="absolute inset-0 z-10"
-                        style={{
-                          clipPath: `polygon(50% 50%, ${50 + 65 * Math.cos(((angle - 90) * Math.PI) / 180)}% ${50 + 65 * Math.sin(((angle - 90) * Math.PI) / 180)}%, ${50 + 65 * Math.cos(((nextAngle - 90) * Math.PI) / 180)}% ${50 + 65 * Math.sin(((nextAngle - 90) * Math.PI) / 180)}%)`,
-                          background: isAvailable 
-                            ? `linear-gradient(135deg, ${color}, ${color}dd)`
-                            : `linear-gradient(135deg, #6B7280, #374151)`, // Gray for claimed numbers
-                          opacity: isAvailable ? 1 : 0.6,
-                        }}
-                      >
-                        {/* Always upright number - counter-rotates exactly to stay readable */}
+                      return (
                         <div
-                          id={`wheel-number-${index}`}
-                          className={`wheel-prize-number font-bold flex items-center justify-center ${
-                            isAvailable ? 'text-white' : 'text-gray-400'
-                          }`}
+                          key={index}
+                          className="absolute inset-0 z-10"
                           style={{
-                            position: 'absolute',
-                            left: '50%',
-                            top: '50%',
-                            transform: `translate(-50%, -50%) translate(${Math.cos(((angle + 360 / segmentCount / 2 - 90) * Math.PI) / 180) * (numberRadius * 0.8)}px, ${Math.sin(((angle + 360 / segmentCount / 2 - 90) * Math.PI) / 180) * (numberRadius * 0.8)}px) rotate(${-rotation}deg)`,
-                            transition: isSpinning
-                              ? `transform 8.0s cubic-bezier(0.25, 0.1, 0.25, 1.0)`
-                              : "none",
-                            // Smaller black circles for better visibility
-                            width: (() => {
-                              const is3Digit = number >= 100;
-                              if (isMobile) {
-                                if (is3Digit) return segmentCount > 40 ? '18px' : segmentCount > 30 ? '20px' : '22px';
-                                return segmentCount > 40 ? '15px' : segmentCount > 30 ? '17px' : '19px';
-                              } else {
-                                if (is3Digit) return segmentCount > 40 ? '24px' : segmentCount > 30 ? '26px' : '28px';
-                                return segmentCount > 40 ? '20px' : segmentCount > 30 ? '22px' : '24px';
-                              }
-                            })(),
-                            height: (() => {
-                              const is3Digit = number >= 100;
-                              if (isMobile) {
-                                if (is3Digit) return segmentCount > 40 ? '18px' : segmentCount > 30 ? '20px' : '22px';
-                                return segmentCount > 40 ? '15px' : segmentCount > 30 ? '17px' : '19px';
-                              } else {
-                                if (is3Digit) return segmentCount > 40 ? '24px' : segmentCount > 30 ? '26px' : '28px';
-                                return segmentCount > 40 ? '20px' : segmentCount > 30 ? '22px' : '24px';
-                              }
-                            })(),
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            textShadow: '2px 2px 4px rgba(0,0,0,0.9)',
-                            backgroundColor: isAvailable ? 'rgba(0,0,0,0.7)' : 'rgba(0,0,0,0.8)',
-                            borderRadius: '50%',
-                            border: isAvailable 
-                              ? '1px solid rgba(255,255,255,0.5)' 
-                              : '1px solid rgba(156,163,175,0.7)',
-                            zIndex: 15,
-                            // Enhanced font sizing for 3-digit numbers
-                            fontSize: (() => {
-                              const is3Digit = number >= 100;
-                              if (isMobile) {
-                                if (is3Digit) return segmentCount > 40 ? '8px' : segmentCount > 30 ? '9px' : '10px';
-                                return segmentCount > 40 ? '9px' : segmentCount > 30 ? '10px' : '11px';
-                              } else {
-                                if (is3Digit) return segmentCount > 40 ? '10px' : segmentCount > 30 ? '11px' : '12px';
-                                return segmentCount > 40 ? '11px' : segmentCount > 30 ? '12px' : '13px';
-                              }
-                            })(),
-                            fontWeight: '800',
-                            lineHeight: '1',
-                            letterSpacing: number >= 100 ? '-0.5px' : '0',
+                            clipPath: `polygon(50% 50%, ${50 + 65 * Math.cos(((angle - 90) * Math.PI) / 180)}% ${50 + 65 * Math.sin(((angle - 90) * Math.PI) / 180)}%, ${50 + 65 * Math.cos(((nextAngle - 90) * Math.PI) / 180)}% ${50 + 65 * Math.sin(((nextAngle - 90) * Math.PI) / 180)}%)`,
+                            background: isAvailable
+                              ? `linear-gradient(135deg, ${color}, ${color}dd)`
+                              : `linear-gradient(135deg, #6B7280, #374151)`, // Gray for claimed numbers
+                            opacity: isAvailable ? 1 : 0.6,
                           }}
                         >
-                          {isAvailable ? number : (
-                            <span style={{ textDecoration: 'line-through' }}>{number}</span>
-                          )}
-                        </div>
-                        {/* Claimed indicator overlay - responsive for mobile */}
-                        {!isAvailable && (
+                          {/* Always upright number - counter-rotates exactly to stay readable */}
                           <div
-                            className="absolute"
+                            id={`wheel-number-${index}`}
+                            className={`wheel-prize-number font-bold flex items-center justify-center ${
+                              isAvailable ? "text-white" : "text-gray-400"
+                            }`}
                             style={{
-                              position: 'absolute',
-                              left: '50%',
-                              top: '50%',
-                              transform: `translate(-50%, -50%) translate(${Math.cos(((angle + 360 / segmentCount / 2 - 90) * Math.PI) / 180) * (numberRadius * 0.8)}px, ${Math.sin(((angle + 360 / segmentCount / 2 - 90) * Math.PI) / 180) * (numberRadius * 0.8)}px) rotate(${-rotation}deg)`,
-                              transition: isSpinning ? `transform 8.0s cubic-bezier(0.25, 0.1, 0.25, 1.0)` : "none",
-                              width: isMobile ? '14px' : '16px',
-                              height: isMobile ? '14px' : '16px',
-                              backgroundColor: 'rgba(239, 68, 68, 0.95)',
-                              borderRadius: '50%',
-                              zIndex: 20,
-                              marginTop: isMobile ? '-18px' : '-20px',
-                              fontSize: isMobile ? '8px' : '9px',
-                              color: 'white',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              fontWeight: 'bold',
-                              border: '1px solid rgba(255,255,255,0.8)',
-                              textShadow: '1px 1px 2px rgba(0,0,0,0.8)',
+                              position: "absolute",
+                              left: "50%",
+                              top: "50%",
+                              transform: `translate(-50%, -50%) translate(${Math.cos(((angle + 360 / segmentCount / 2 - 90) * Math.PI) / 180) * (numberRadius * 1.15)}px, ${Math.sin(((angle + 360 / segmentCount / 2 - 90) * Math.PI) / 180) * (numberRadius * 1.15)}px) rotate(${-rotation}deg)`,
+                              transition: isSpinning
+                                ? `transform 8.0s cubic-bezier(0.25, 0.1, 0.25, 1.0)`
+                                : "none",
+                              // Smaller black circles for better visibility
+                              width: (() => {
+                                const is3Digit = number >= 100;
+                                if (isMobile) {
+                                  if (is3Digit)
+                                    return segmentCount > 40
+                                      ? "18px"
+                                      : segmentCount > 30
+                                        ? "20px"
+                                        : "22px";
+                                  return segmentCount > 40
+                                    ? "15px"
+                                    : segmentCount > 30
+                                      ? "17px"
+                                      : "19px";
+                                } else {
+                                  if (is3Digit)
+                                    return segmentCount > 40
+                                      ? "24px"
+                                      : segmentCount > 30
+                                        ? "26px"
+                                        : "28px";
+                                  return segmentCount > 40
+                                    ? "20px"
+                                    : segmentCount > 30
+                                      ? "22px"
+                                      : "24px";
+                                }
+                              })(),
+                              height: (() => {
+                                const is3Digit = number >= 100;
+                                if (isMobile) {
+                                  if (is3Digit)
+                                    return segmentCount > 40
+                                      ? "18px"
+                                      : segmentCount > 30
+                                        ? "20px"
+                                        : "22px";
+                                  return segmentCount > 40
+                                    ? "15px"
+                                    : segmentCount > 30
+                                      ? "17px"
+                                      : "19px";
+                                } else {
+                                  if (is3Digit)
+                                    return segmentCount > 40
+                                      ? "24px"
+                                      : segmentCount > 30
+                                        ? "26px"
+                                        : "28px";
+                                  return segmentCount > 40
+                                    ? "20px"
+                                    : segmentCount > 30
+                                      ? "22px"
+                                      : "24px";
+                                }
+                              })(),
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              textShadow: "2px 2px 4px rgba(0,0,0,0.9)",
+                              backgroundColor: isAvailable
+                                ? "rgba(0,0,0,0.7)"
+                                : "rgba(0,0,0,0.8)",
+                              borderRadius: "50%",
+                              border: isAvailable
+                                ? "1px solid rgba(255,255,255,0.5)"
+                                : "1px solid rgba(156,163,175,0.7)",
+                              zIndex: 15,
+                              // Enhanced font sizing for 3-digit numbers
+                              fontSize: (() => {
+                                const is3Digit = number >= 100;
+                                if (isMobile) {
+                                  if (is3Digit)
+                                    return segmentCount > 40
+                                      ? "8px"
+                                      : segmentCount > 30
+                                        ? "9px"
+                                        : "10px";
+                                  return segmentCount > 40
+                                    ? "9px"
+                                    : segmentCount > 30
+                                      ? "10px"
+                                      : "11px";
+                                } else {
+                                  if (is3Digit)
+                                    return segmentCount > 40
+                                      ? "10px"
+                                      : segmentCount > 30
+                                        ? "11px"
+                                        : "12px";
+                                  return segmentCount > 40
+                                    ? "11px"
+                                    : segmentCount > 30
+                                      ? "12px"
+                                      : "13px";
+                                }
+                              })(),
+                              fontWeight: "800",
+                              lineHeight: "1",
+                              letterSpacing: number >= 100 ? "-0.5px" : "0",
                             }}
                           >
-                            ✗
+                            {isAvailable ? (
+                              number
+                            ) : (
+                              <span style={{ textDecoration: "line-through" }}>
+                                {number}
+                              </span>
+                            )}
                           </div>
-                        )}
-                      </div>
-                    );
-                  })}
+                          {/* Claimed indicator overlay - responsive for mobile */}
+                          {!isAvailable && (
+                            <div
+                              className="absolute"
+                              style={{
+                                position: "absolute",
+                                left: "50%",
+                                top: "50%",
+                                transform: `translate(-50%, -50%) translate(${Math.cos(((angle + 360 / segmentCount / 2 - 90) * Math.PI) / 180) * (numberRadius * 0.8)}px, ${Math.sin(((angle + 360 / segmentCount / 2 - 90) * Math.PI) / 180) * (numberRadius * 0.8)}px) rotate(${-rotation}deg)`,
+                                transition: isSpinning
+                                  ? `transform 8.0s cubic-bezier(0.25, 0.1, 0.25, 1.0)`
+                                  : "none",
+                                width: isMobile ? "14px" : "16px",
+                                height: isMobile ? "14px" : "16px",
+                                backgroundColor: "rgba(239, 68, 68, 0.95)",
+                                borderRadius: "50%",
+                                zIndex: 20,
+                                marginTop: isMobile ? "-18px" : "-20px",
+                                fontSize: isMobile ? "8px" : "9px",
+                                color: "white",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                fontWeight: "bold",
+                                border: "1px solid rgba(255,255,255,0.8)",
+                                textShadow: "1px 1px 2px rgba(0,0,0,0.8)",
+                              }}
+                            >
+                              ✗
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
 
-                  {/* Outer ring decoration - static but eye-catching */}
-                  <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-32 h-32 sm:w-40 sm:h-40 md:w-44 md:h-44 lg:w-48 lg:h-48 bg-gradient-to-br from-yellow-400 via-orange-500 to-red-600 rounded-full border-3 sm:border-4 border-white shadow-2xl z-20"></div>
+                    {/* Outer ring decoration - static but eye-catching */}
+                    <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-32 h-32 sm:w-40 sm:h-40 md:w-44 md:h-44 lg:w-48 lg:h-48 bg-gradient-to-br from-yellow-400 via-orange-500 to-red-600 rounded-full border-3 sm:border-4 border-white shadow-2xl z-20"></div>
 
-                  {/* Middle ring - static with enhanced glow */}
-                  <div
-                    className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-20 h-20 sm:w-36 sm:h-36 md:w-40 md:h-40 lg:w-44 lg:h-44 bg-gradient-to-br from-purple-600 via-blue-600 to-cyan-500 rounded-full border-3 border-white shadow-xl z-30"
-                    style={{
-                      boxShadow:
-                        "0 0 30px rgba(147, 51, 234, 0.6), inset 0 0 15px rgba(255, 255, 255, 0.3)",
-                    }}
-                  ></div>
-
+                    {/* Middle ring - static with enhanced glow */}
+                    <div
+                      className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-20 h-20 sm:w-36 sm:h-36 md:w-40 md:h-40 lg:w-44 lg:h-44 bg-gradient-to-br from-purple-600 via-blue-600 to-cyan-500 rounded-full border-3 border-white shadow-xl z-30"
+                      style={{
+                        boxShadow:
+                          "0 0 30px rgba(147, 51, 234, 0.6), inset 0 0 15px rgba(255, 255, 255, 0.3)",
+                      }}
+                    ></div>
                   </div>
-                  
+
                   {/* Center hub with brand logo - COMPLETELY STATIC - Outside spinning wheel */}
-                  <div 
+                  <div
                     className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-16 h-16 sm:w-32 sm:h-32 md:w-36 md:h-36 lg:w-40 lg:h-40 bg-gradient-to-br from-slate-900 to-slate-700 rounded-full border-3 sm:border-4 border-yellow-300 shadow-2xl flex items-center justify-center overflow-hidden z-50"
                     style={{
                       // NEVER MOVES - positioned outside the rotating wheel div
-                      boxShadow: "0 0 30px rgba(234, 179, 8, 0.6), inset 0 0 15px rgba(255, 255, 255, 0.3)"
+                      boxShadow:
+                        "0 0 30px rgba(234, 179, 8, 0.6), inset 0 0 15px rgba(255, 255, 255, 0.3)",
                     }}
                   >
                     <div className="w-12 h-12 sm:w-28 sm:h-28 md:w-32 md:h-32 lg:w-36 lg:h-36 bg-black rounded-full border-2 border-orange-400 flex items-center justify-center p-2">
@@ -499,7 +587,11 @@ export const ProfessionalWheel = forwardRef<
         onClick={onInitiateSpin || handleSpin}
         disabled={isSpinning || disabled}
         className="w-full max-w-xs bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-white font-bold py-3 sm:py-4 px-6 sm:px-8 rounded-xl text-base sm:text-lg shadow-lg transition-all duration-300 disabled:opacity-50 touch-manipulation focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:ring-offset-2"
-        aria-label={isSpinning ? "Wheel is spinning, please wait" : "Spin the wheel to play"}
+        aria-label={
+          isSpinning
+            ? "Wheel is spinning, please wait"
+            : "Spin the wheel to play"
+        }
       >
         {isSpinning ? (
           <div className="flex items-center justify-center space-x-2">
@@ -523,12 +615,11 @@ export const ProfessionalWheel = forwardRef<
             {isFreePlay ? "Free Play Result" : "Spin Result"}
           </DialogTitle>
           <DialogDescription className="sr-only">
-            {isFreePlay 
+            {isFreePlay
               ? `You got number ${result} as a free play - no charge!`
-              : `You got number ${result} and were charged $${amountCharged.toFixed(2)}`
-            }
+              : `You got number ${result} and were charged $${amountCharged.toFixed(2)}`}
           </DialogDescription>
-          
+
           <div className="relative p-6 text-center">
             {/* Confetti - only when modal is visible */}
             <Confetti active={showResultModal} duration={3000} />
