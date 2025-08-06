@@ -54,7 +54,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Check state exclusions - NY, FL, RI, HI residents cannot participate in paid entry
       const excludedStates = ['NY', 'FL', 'RI', 'HI'];
-      if (excludedStates.includes(userData.state)) {
+      if (userData.state && excludedStates.includes(userData.state)) {
         return res.status(400).json({ 
           message: `Registration not available in ${userData.state}. Please see our official rules for more information.`,
           stateExcluded: true
@@ -1333,6 +1333,135 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error: any) {
       console.error("Add card error:", error);
       res.status(400).json({ message: "Failed to add card", error: error.message });
+    }
+  });
+
+  // Check free play status endpoint
+  app.get("/api/games/:gameId/free-play-status", async (req, res) => {
+    try {
+      const { gameId } = req.params;
+      const ipAddress = req.ip || (req.connection as any)?.remoteAddress || 'unknown';
+
+      if (!gameId) {
+        return res.status(400).json({ message: "Game ID is required" });
+      }
+
+      const hasUsed = await storage.hasUsedFreePlay(ipAddress, parseInt(gameId));
+      
+      res.json({
+        hasUsedFreePlay: hasUsed,
+        canUseFreePlay: !hasUsed
+      });
+    } catch (error: any) {
+      console.error("Free play status check error:", error);
+      res.status(500).json({ 
+        message: "Failed to check free play status", 
+        error: error.message 
+      });
+    }
+  });
+
+  // Free play spin endpoint (one-time per IP address per game)
+  app.post("/api/free-spin", async (req, res) => {
+    try {
+      const { gameId } = req.body;
+      const ipAddress = req.ip || (req.connection as any)?.remoteAddress || 'unknown';
+
+      if (!gameId) {
+        return res.status(400).json({ message: "Game ID is required" });
+      }
+
+      // Check if this IP has already used free play for this game
+      const hasUsed = await storage.hasUsedFreePlay(ipAddress, gameId);
+      if (hasUsed) {
+        return res.status(400).json({ 
+          message: "Free play already used", 
+          code: "FREE_PLAY_EXHAUSTED",
+          description: "You have already used your free play for this game. Sign up to continue playing!" 
+        });
+      }
+
+      // Get the game to ensure it exists and is active
+      const game = await storage.getGame(gameId);
+      if (!game || !game.isActive) {
+        return res.status(404).json({ message: "Game not found or inactive" });
+      }
+
+      // Get available numbers from free play range only
+      const freePlayStart = game.freePlayStart || 151;
+      const freePlayEnd = game.freePlayEnd || 200;
+      const availableNumbers = await storage.getAvailableNumbers(gameId);
+      const freePlayNumbers = availableNumbers.filter(num => 
+        num >= freePlayStart && num <= freePlayEnd
+      );
+
+      if (freePlayNumbers.length === 0) {
+        return res.status(400).json({ message: "No free play numbers available" });
+      }
+
+      // Create a temporary guest player for this free spin
+      const guestPlayer = await storage.createPlayer({
+        gameId,
+        userId: 0, // Guest player (using 0 instead of null)
+        playerName: "Guest Player",
+        ownedNumbers: [],
+        totalSpent: "0",
+        freeSpins: 1,
+        referralCount: 0,
+        ipAddress: ipAddress,
+        userAgent: req.headers['user-agent'] || "",
+        createdAt: new Date()
+      });
+
+      // Perform the spin with only free play numbers
+      const randomIndex = Math.floor(Math.random() * freePlayNumbers.length);
+      const spunNumber = freePlayNumbers[randomIndex];
+
+      // Create spin result
+      const spinResult = await storage.createSpinResult({
+        gameId,
+        playerId: guestPlayer.id,
+        spunNumber,
+        isFreePlay: true,
+        amountCharged: "0",
+      });
+
+      // Update game numbers left
+      await storage.updateGame(gameId, {
+        numbersLeft: game.numbersLeft - 1,
+      });
+
+      // Record free play usage to prevent abuse
+      await storage.recordFreePlayUsage(ipAddress, gameId);
+
+      // Log for compliance (anonymous entry)
+      await storage.createComplianceLog(
+        null, // No user ID for free play
+        gameId,
+        'free_spin_result',
+        {
+          ipAddress,
+          spunNumber,
+          timestamp: new Date().toISOString(),
+          gameTitle: game.name
+        }
+      );
+
+      res.json({
+        success: true,
+        result: {
+          number: spunNumber,
+          isFreePlay: true,
+          amountCharged: "0",
+          message: `Congratulations! You landed on ${spunNumber} - This was a FREE demo spin!`
+        }
+      });
+    } catch (error: any) {
+      console.error("Free spin error:", error);
+      res.status(400).json({ 
+        message: "Free spin failed", 
+        error: error.message || "Unknown error" 
+      });
     }
   });
 

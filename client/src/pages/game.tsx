@@ -39,6 +39,7 @@ export default function GamePage() {
   const [playerCount, setPlayerCount] = useState(1);
   const [hasUsedFreePlay, setHasUsedFreePlay] = useState(false);
   const [isFreePlay, setIsFreePlay] = useState(false);
+  const [freePlayMessage, setFreePlayMessage] = useState<string | null>(null);
   const wheelRef = useRef<{ triggerSpin: () => Promise<void> }>(null);
 
   // Simulate real-time player count updates
@@ -48,6 +49,26 @@ export default function GamePage() {
     }, 5000);
     return () => clearInterval(interval);
   }, []);
+
+  // Check if user has already used free play when game loads
+  useEffect(() => {
+    const checkFreePlayStatus = async () => {
+      if (!game?.id) return;
+      
+      try {
+        const response = await fetch(`/api/games/${game.id}/free-play-status`);
+        
+        if (response.ok) {
+          const data = await response.json();
+          setHasUsedFreePlay(data.hasUsedFreePlay);
+        }
+      } catch (error) {
+        console.log("Free play status check failed, assuming available");
+      }
+    };
+
+    checkFreePlayStatus();
+  }, [game?.id]);
 
   const { data: game, isLoading } = useQuery<Game>({
     queryKey: [`/api/games/${id}`],
@@ -157,20 +178,43 @@ export default function GamePage() {
 
     console.log("🎯 Starting API call for game spin...");
 
-    // For free play, generate a random number from free play range
+    // For free play, use the dedicated free play API endpoint
     if (isFreePlay) {
-      const freePlayNumbers = [];
-      for (let i = game.freePlayStart; i <= game.freePlayEnd; i++) {
-        freePlayNumbers.push(i);
+      try {
+        const response = await fetch("/api/free-spin", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            gameId: game.id,
+          }),
+        });
+
+        const data = await response.json();
+        
+        if (!response.ok) {
+          if (data.code === 'FREE_PLAY_EXHAUSTED') {
+            setHasUsedFreePlay(true);
+            throw new Error(data.description || "Free play already used for this game");
+          }
+          throw new Error(data.message || "Free spin failed");
+        }
+
+        console.log("🎯 Free play spin result:", data.result.number);
+        setLastResult(data.result.number);
+        setShowConfetti(true);
+        setFreePlayMessage(data.result.message);
+        setTimeout(() => {
+          setShowConfetti(false);
+          setFreePlayMessage(null);
+        }, 8000);
+        
+        return data.result.number;
+      } catch (error) {
+        console.error("Free play spin error:", error);
+        throw error;
       }
-      const randomFreeNumber = freePlayNumbers[Math.floor(Math.random() * freePlayNumbers.length)];
-      
-      console.log("🎯 Free play spin - generated number:", randomFreeNumber);
-      setLastResult(randomFreeNumber);
-      setShowConfetti(true);
-      setTimeout(() => setShowConfetti(false), 5000);
-      
-      return randomFreeNumber;
     }
 
     try {
@@ -448,6 +492,24 @@ export default function GamePage() {
                       <div className="flex items-center justify-center space-x-2 text-gray-400">
                         <Gift className="h-4 w-4" />
                         <span className="text-sm">Free play used - Join the game to continue playing!</span>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Free Play Result Display */}
+                  {freePlayMessage && (
+                    <div className="bg-gradient-to-r from-green-500/20 to-emerald-500/20 backdrop-blur-xl rounded-xl border border-green-400/40 shadow-2xl p-4 sm:p-6 animate-pulse">
+                      <div className="text-center space-y-2">
+                        <div className="text-2xl">🎉</div>
+                        <p className="text-green-300 font-bold text-lg">
+                          Free Play Complete!
+                        </p>
+                        <p className="text-white text-sm">
+                          {freePlayMessage}
+                        </p>
+                        <p className="text-green-400 text-xs">
+                          Sign up to play for real prizes!
+                        </p>
                       </div>
                     </div>
                   )}

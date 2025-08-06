@@ -1,10 +1,11 @@
 import { 
   games, players, gameResults, adminUsers, wheelSegments, systemSettings, adminSessions, notifications, spinResults,
-  users, transactions, userSessions, complianceLogs,
+  users, transactions, userSessions, complianceLogs, freePlayUsage,
   type Game, type InsertGame, type Player, type InsertPlayer, type GameResult, type InsertGameResult, 
   type AdminUser, type InsertAdminUser, type WheelSegment, type InsertWheelSegment,
   type SystemSetting, type InsertSystemSetting, type InsertNotification, type Notification,
-  type SpinResult, type InsertSpinResult, type User, type InsertUser, type Transaction, type InsertTransaction
+  type SpinResult, type InsertSpinResult, type User, type InsertUser, type Transaction, type InsertTransaction,
+  type FreePlayUsage, type InsertFreePlayUsage
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, sql, and, isNotNull } from "drizzle-orm";
@@ -73,7 +74,11 @@ export interface IStorage {
   getSpinResultsByPlayerId(playerId: number): Promise<SpinResult[]>;
 
   // Legal compliance methods
-  createComplianceLog(userId: number, gameId: number | null, logType: string, details: any): Promise<void>;
+  createComplianceLog(userId: number | null, gameId: number | null, logType: string, details: any): Promise<void>;
+  
+  // Free play tracking
+  hasUsedFreePlay(ipAddress: string, gameId: number): Promise<boolean>;
+  recordFreePlayUsage(ipAddress: string, gameId: number): Promise<void>;
 
   // User activity methods
   getUserActivity(userId: number): Promise<any[]>;
@@ -428,19 +433,21 @@ export class DatabaseStorage implements IStorage {
         freeSpins: isFreePlay ? (player.freeSpins || 0) + 1 : player.freeSpins,
       });
 
-      // Create compliance log for spin result (using the same player object)
-      await this.createComplianceLog(
-        player.userId,
-        gameId,
-        'spin_result',
-        {
-          spunNumber,
-          isFreePlay,
-          amountCharged,
-          timestamp: new Date().toISOString(),
-          gameTitle: game.name
-        }
-      );
+      // Create compliance log for spin result (only if user is authenticated)
+      if (player.userId) {
+        await this.createComplianceLog(
+          player.userId,
+          gameId,
+          'spin_result',
+          {
+            spunNumber,
+            isFreePlay,
+            amountCharged,
+            timestamp: new Date().toISOString(),
+            gameTitle: game.name
+          }
+        );
+      }
     }
 
     // Update game numbers left
@@ -896,7 +903,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Legal compliance logging
-  async createComplianceLog(userId: number, gameId: number | null, logType: string, details: any): Promise<void> {
+  async createComplianceLog(userId: number | null, gameId: number | null, logType: string, details: any): Promise<void> {
     try {
       // Set retention period to 4 years from now
       const retentionUntil = new Date();
@@ -937,6 +944,38 @@ export class DatabaseStorage implements IStorage {
     } catch (error) {
       console.error("Error deleting user:", error);
       return false;
+    }
+  }
+
+  // Free play tracking methods
+  async hasUsedFreePlay(ipAddress: string, gameId: number): Promise<boolean> {
+    try {
+      const usage = await db.select()
+        .from(freePlayUsage)
+        .where(
+          and(
+            eq(freePlayUsage.ipAddress, ipAddress),
+            eq(freePlayUsage.gameId, gameId)
+          )
+        )
+        .limit(1);
+      
+      return usage.length > 0;
+    } catch (error) {
+      console.error("Error checking free play usage:", error);
+      return false; // On error, allow free play to avoid blocking users
+    }
+  }
+
+  async recordFreePlayUsage(ipAddress: string, gameId: number): Promise<void> {
+    try {
+      await db.insert(freePlayUsage).values({
+        ipAddress,
+        gameId,
+      });
+    } catch (error) {
+      console.error("Error recording free play usage:", error);
+      throw error;
     }
   }
 }

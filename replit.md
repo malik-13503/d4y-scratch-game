@@ -65,12 +65,18 @@ Preferred communication style: Simple, everyday language.
   - **Segment Progress Bar**: Added visual progress indicator showing current segments vs 50 maximum
   - **Dynamic Segment Sizing**: Automatically adjusts segment and text size based on number of segments (smaller for 36+ segments)
   - **Real-time Availability**: Wheel segments update in real-time to show which numbers are still available vs claimed
-- February 6, 2025: **FREE PLAY FEATURE COMPLETE** - Added one-time free play functionality to game page
-  - **Free Play Button**: Added attractive green-themed free play button below the wheel for unauthenticated users
-  - **One-time Use**: Button disappears after use and shows encouraging message to join the actual game
-  - **Free Play Logic**: Generates random numbers from free play range without payment or authentication
+- February 6, 2025: **FREE PLAY FEATURE COMPLETE** - Added comprehensive one-time free play system to game page
+  - **Database Tracking**: Added `freePlayUsage` table to track IP-based one-time usage per game with secure backend validation
+  - **Free Play API**: Implemented dedicated `/api/free-spin` endpoint and `/api/games/:gameId/free-play-status` for status checking
+  - **IP-Based Tracking**: Prevents abuse by limiting one free play per IP address per game using database storage
+  - **Guest Player Support**: Creates temporary guest players for free play spins with proper compliance logging
+  - **Free Play Button**: Added attractive green-themed free play button that appears only when available
+  - **Status Management**: Button automatically disappears after use with encouraging message to join the actual game
+  - **Real-time Integration**: Free play spins use actual game mechanics and update available numbers in real-time
+  - **Visual Feedback**: Shows free play result with celebration animation and encouragement to sign up
   - **Disclaimer Updates**: Updated disclaimer popup to show different messaging for free play vs paid spins
-  - **No Registration Required**: Users can try the game once for free without creating an account
+  - **Anonymous Logging**: Compliance logs support anonymous free play entries for legal tracking
+  - **Production Ready**: Complete backend/frontend integration with proper error handling and user experience
 - January 29, 2025: **GAME INSTRUCTIONS ENHANCEMENT** - Added in-game how-to-play instructions with no purchase option
   - **Game Page Instructions**: Added 4-step how-to-play guide directly on the game page sidebar
   - **No Purchase Visibility**: Step 4 highlights "No Purchase Necessary - Use free entry option!" prominently

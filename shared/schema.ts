@@ -124,12 +124,20 @@ export const players = pgTable("players", {
 // Legal compliance logs for record keeping
 export const complianceLogs = pgTable("compliance_logs", {
   id: serial("id").primaryKey(),
-  userId: integer("user_id").notNull(),
+  userId: integer("user_id"), // Allow null for anonymous free plays
   gameId: integer("game_id"),
   logType: text("log_type").notNull(), // 'winner_selection', 'entry_record', 'tax_document'
   details: json("details").notNull(),
   retentionUntil: timestamp("retention_until").notNull(), // 2-4 years from creation
   createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+// Track free play usage by IP address to prevent abuse
+export const freePlayUsage = pgTable("free_play_usage", {
+  id: serial("id").primaryKey(),
+  ipAddress: text("ip_address").notNull(),
+  gameId: integer("game_id").notNull().references(() => games.id),
+  usedAt: timestamp("used_at").notNull().defaultNow(),
 });
 
 // Game results with enhanced tracking
@@ -239,6 +247,10 @@ export const insertSpinResultSchema = createInsertSchema(spinResults).omit({
 
 // Type exports
 export type InsertAdminUser = z.infer<typeof insertAdminUserSchema>;
+
+// Free play usage types
+export type FreePlayUsage = typeof freePlayUsage.$inferSelect;
+export type InsertFreePlayUsage = typeof freePlayUsage.$inferInsert;
 export type AdminUser = typeof adminUsers.$inferSelect;
 export type InsertGame = z.infer<typeof insertGameSchema>;
 export type Game = typeof games.$inferSelect;
