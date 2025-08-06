@@ -7,12 +7,14 @@ import { apiRequest } from "@/lib/queryClient";
 import { saveAuthToStorage } from "@/lib/auth";
 import { AlertCircle, User, Mail, Phone, Lock, Eye, EyeOff } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { EmailAlreadyExistsPopup } from "@/components/email-already-exists-popup";
 
 interface ImprovedSignupFormProps {
   onSuccess: (userName: string) => void;
+  onSwitchToLogin?: () => void;
 }
 
-export function ImprovedSignupForm({ onSuccess }: ImprovedSignupFormProps) {
+export function ImprovedSignupForm({ onSuccess, onSwitchToLogin }: ImprovedSignupFormProps) {
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -21,8 +23,10 @@ export function ImprovedSignupForm({ onSuccess }: ImprovedSignupFormProps) {
     password: "",
     confirmPassword: "",
   });
+  const [ageConfirmed, setAgeConfirmed] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [showEmailExistsPopup, setShowEmailExistsPopup] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const { toast } = useToast();
@@ -63,6 +67,13 @@ export function ImprovedSignupForm({ onSuccess }: ImprovedSignupFormProps) {
       }
     }
 
+    // Validate age confirmation
+    if (!ageConfirmed) {
+      setError("You must be 18 years or older to participate");
+      setIsLoading(false);
+      return;
+    }
+
     try {
       const { confirmPassword, ...registrationData } = formData;
       const response = await apiRequest("POST", "/api/register", registrationData);
@@ -80,7 +91,14 @@ export function ImprovedSignupForm({ onSuccess }: ImprovedSignupFormProps) {
       const userName = formData.firstName || formData.email.split('@')[0];
       onSuccess(userName);
     } catch (error: any) {
-      setError(error.message || "Registration failed. Please try again.");
+      const errorMessage = error.message || "Registration failed. Please try again.";
+      
+      // Check if it's the "Email already registered" error
+      if (errorMessage.includes("Email already registered")) {
+        setShowEmailExistsPopup(true);
+      } else {
+        setError(errorMessage);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -252,11 +270,26 @@ export function ImprovedSignupForm({ onSuccess }: ImprovedSignupFormProps) {
           </div>
         </div>
 
+        {/* Age Verification Checkbox - Required for Legal Compliance */}
+        <div className="flex items-start space-x-3 p-4 bg-orange-900/20 rounded-xl border-2 border-orange-500/40 backdrop-blur-sm">
+          <input
+            type="checkbox"
+            id="ageConfirmed"
+            checked={ageConfirmed}
+            onChange={(e) => setAgeConfirmed(e.target.checked)}
+            className="mt-1 w-5 h-5 text-orange-600 bg-slate-700 border-orange-400 rounded focus:ring-orange-500 focus:ring-2"
+            required
+          />
+          <label htmlFor="ageConfirmed" className="text-sm text-orange-100 leading-tight font-medium cursor-pointer">
+            🔞 I confirm that I am 18 years of age or older (Required)
+          </label>
+        </div>
+
         {/* Submit Button */}
         <div className="pt-2">
           <Button
             type="submit"
-            disabled={isLoading}
+            disabled={isLoading || !ageConfirmed}
             className="w-full bg-gradient-to-r from-purple-600 via-blue-600 to-purple-600 hover:from-purple-700 hover:via-blue-700 hover:to-purple-700 text-white font-bold py-4 text-base sm:text-lg rounded-xl shadow-xl ring-2 ring-purple-400/30 hover:ring-purple-400/50 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isLoading ? (
@@ -283,6 +316,14 @@ export function ImprovedSignupForm({ onSuccess }: ImprovedSignupFormProps) {
             </a>
           </p>
         </div>
+
+        {/* Email Already Exists Popup */}
+        <EmailAlreadyExistsPopup
+          isOpen={showEmailExistsPopup}
+          onClose={() => setShowEmailExistsPopup(false)}
+          onSwitchToLogin={onSwitchToLogin || (() => {})}
+          email={formData.email}
+        />
       </form>
     </div>
   );

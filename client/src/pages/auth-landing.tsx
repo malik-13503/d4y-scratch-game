@@ -238,6 +238,7 @@ export default function AuthLandingPage() {
                         <TabsContent value="signup" className="mt-6">
                           <ImprovedSignupForm
                             onSuccess={handleSignupSuccess}
+                            onSwitchToLogin={() => setActiveTab("login")}
                           />
                         </TabsContent>
 
