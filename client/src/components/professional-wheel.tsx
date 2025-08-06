@@ -369,29 +369,29 @@ export const ProfessionalWheel = forwardRef<
                             position: 'absolute',
                             left: '50%',
                             top: '50%',
-                            transform: `translate(-50%, -50%) translate(${Math.cos(((angle + 360 / segmentCount / 2 - 90) * Math.PI) / 180) * numberRadius}px, ${Math.sin(((angle + 360 / segmentCount / 2 - 90) * Math.PI) / 180) * numberRadius}px) rotate(${-rotation}deg)`,
+                            transform: `translate(-50%, -50%) translate(${Math.cos(((angle + 360 / segmentCount / 2 - 90) * Math.PI) / 180) * (numberRadius * 0.8)}px, ${Math.sin(((angle + 360 / segmentCount / 2 - 90) * Math.PI) / 180) * (numberRadius * 0.8)}px) rotate(${-rotation}deg)`,
                             transition: isSpinning
                               ? `transform 8.0s cubic-bezier(0.25, 0.1, 0.25, 1.0)`
                               : "none",
-                            // Responsive sizing with better logic for 3-digit numbers
+                            // Smaller black circles for better visibility
                             width: (() => {
                               const is3Digit = number >= 100;
                               if (isMobile) {
-                                if (is3Digit) return segmentCount > 40 ? '22px' : segmentCount > 30 ? '24px' : '26px';
-                                return segmentCount > 40 ? '18px' : segmentCount > 30 ? '20px' : '22px';
+                                if (is3Digit) return segmentCount > 40 ? '18px' : segmentCount > 30 ? '20px' : '22px';
+                                return segmentCount > 40 ? '15px' : segmentCount > 30 ? '17px' : '19px';
                               } else {
-                                if (is3Digit) return segmentCount > 40 ? '28px' : segmentCount > 30 ? '30px' : '32px';
-                                return segmentCount > 40 ? '24px' : segmentCount > 30 ? '26px' : '28px';
+                                if (is3Digit) return segmentCount > 40 ? '24px' : segmentCount > 30 ? '26px' : '28px';
+                                return segmentCount > 40 ? '20px' : segmentCount > 30 ? '22px' : '24px';
                               }
                             })(),
                             height: (() => {
                               const is3Digit = number >= 100;
                               if (isMobile) {
-                                if (is3Digit) return segmentCount > 40 ? '22px' : segmentCount > 30 ? '24px' : '26px';
-                                return segmentCount > 40 ? '18px' : segmentCount > 30 ? '20px' : '22px';
+                                if (is3Digit) return segmentCount > 40 ? '18px' : segmentCount > 30 ? '20px' : '22px';
+                                return segmentCount > 40 ? '15px' : segmentCount > 30 ? '17px' : '19px';
                               } else {
-                                if (is3Digit) return segmentCount > 40 ? '28px' : segmentCount > 30 ? '30px' : '32px';
-                                return segmentCount > 40 ? '24px' : segmentCount > 30 ? '26px' : '28px';
+                                if (is3Digit) return segmentCount > 40 ? '24px' : segmentCount > 30 ? '26px' : '28px';
+                                return segmentCount > 40 ? '20px' : segmentCount > 30 ? '22px' : '24px';
                               }
                             })(),
                             display: 'flex',
@@ -432,7 +432,7 @@ export const ProfessionalWheel = forwardRef<
                               position: 'absolute',
                               left: '50%',
                               top: '50%',
-                              transform: `translate(-50%, -50%) translate(${Math.cos(((angle + 360 / segmentCount / 2 - 90) * Math.PI) / 180) * numberRadius}px, ${Math.sin(((angle + 360 / segmentCount / 2 - 90) * Math.PI) / 180) * numberRadius}px) rotate(${-rotation}deg)`,
+                              transform: `translate(-50%, -50%) translate(${Math.cos(((angle + 360 / segmentCount / 2 - 90) * Math.PI) / 180) * (numberRadius * 0.8)}px, ${Math.sin(((angle + 360 / segmentCount / 2 - 90) * Math.PI) / 180) * (numberRadius * 0.8)}px) rotate(${-rotation}deg)`,
                               transition: isSpinning ? `transform 8.0s cubic-bezier(0.25, 0.1, 0.25, 1.0)` : "none",
                               width: isMobile ? '14px' : '16px',
                               height: isMobile ? '14px' : '16px',
