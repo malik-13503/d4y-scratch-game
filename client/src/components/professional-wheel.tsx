@@ -295,9 +295,9 @@ export const ProfessionalWheel = forwardRef<
       } else if (width >= 1024) {
         setNumberRadius(160); // For md screens
       } else if (width >= 768) {
-        setNumberRadius(130); // For sm screens
+        setNumberRadius(120); // For sm screens
       } else {
-        setNumberRadius(110); // For mobile
+        setNumberRadius(95); // Reduced for mobile - better spacing
       }
     };
 
@@ -357,7 +357,7 @@ export const ProfessionalWheel = forwardRef<
                         {/* Always upright number - counter-rotates exactly to stay readable */}
                         <div
                           id={`wheel-number-${index}`}
-                          className={`wheel-prize-number font-bold text-xs sm:text-sm md:text-base flex items-center justify-center ${
+                          className={`wheel-prize-number font-bold flex items-center justify-center ${
                             isAvailable ? 'text-white' : 'text-gray-400'
                           }`}
                           style={{
@@ -368,26 +368,36 @@ export const ProfessionalWheel = forwardRef<
                             transition: isSpinning
                               ? `transform 8.0s cubic-bezier(0.25, 0.1, 0.25, 1.0)`
                               : "none",
-                            width: segmentCount > 24 ? '24px' : '32px',
-                            height: segmentCount > 24 ? '24px' : '32px',
+                            // Mobile-first responsive sizing
+                            width: window.innerWidth < 768 
+                              ? (segmentCount > 36 ? '16px' : segmentCount > 24 ? '18px' : '20px')
+                              : (segmentCount > 36 ? '20px' : segmentCount > 24 ? '24px' : '28px'),
+                            height: window.innerWidth < 768 
+                              ? (segmentCount > 36 ? '16px' : segmentCount > 24 ? '18px' : '20px')
+                              : (segmentCount > 36 ? '20px' : segmentCount > 24 ? '24px' : '28px'),
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            textShadow: '2px 2px 4px rgba(0,0,0,0.9)',
-                            backgroundColor: isAvailable ? 'rgba(0,0,0,0.4)' : 'rgba(0,0,0,0.6)',
+                            textShadow: '1px 1px 3px rgba(0,0,0,0.9)',
+                            backgroundColor: isAvailable ? 'rgba(0,0,0,0.5)' : 'rgba(0,0,0,0.7)',
                             borderRadius: '50%',
                             border: isAvailable 
-                              ? '1px solid rgba(255,255,255,0.3)' 
-                              : '1px solid rgba(156,163,175,0.5)',
+                              ? '0.5px solid rgba(255,255,255,0.4)' 
+                              : '0.5px solid rgba(156,163,175,0.6)',
                             zIndex: 15,
-                            fontSize: segmentCount > 36 ? '10px' : segmentCount > 24 ? '12px' : '14px',
+                            // Improved mobile font sizing
+                            fontSize: window.innerWidth < 768 
+                              ? (segmentCount > 40 ? '7px' : segmentCount > 30 ? '8px' : '9px')
+                              : (segmentCount > 40 ? '9px' : segmentCount > 30 ? '10px' : segmentCount > 24 ? '11px' : '12px'),
+                            fontWeight: '700',
+                            lineHeight: '1',
                           }}
                         >
                           {isAvailable ? number : (
                             <span style={{ textDecoration: 'line-through' }}>{number}</span>
                           )}
                         </div>
-                        {/* Claimed indicator overlay */}
+                        {/* Claimed indicator overlay - smaller for mobile */}
                         {!isAvailable && (
                           <div
                             className="absolute"
@@ -397,17 +407,18 @@ export const ProfessionalWheel = forwardRef<
                               top: '50%',
                               transform: `translate(-50%, -50%) translate(${Math.cos(((angle + 360 / segmentCount / 2 - 90) * Math.PI) / 180) * numberRadius}px, ${Math.sin(((angle + 360 / segmentCount / 2 - 90) * Math.PI) / 180) * numberRadius}px) rotate(${-rotation}deg)`,
                               transition: isSpinning ? `transform 8.0s cubic-bezier(0.25, 0.1, 0.25, 1.0)` : "none",
-                              width: '16px',
-                              height: '16px',
-                              backgroundColor: 'rgba(239, 68, 68, 0.8)',
+                              width: window.innerWidth < 768 ? '12px' : '14px',
+                              height: window.innerWidth < 768 ? '12px' : '14px',
+                              backgroundColor: 'rgba(239, 68, 68, 0.9)',
                               borderRadius: '50%',
                               zIndex: 20,
-                              marginTop: '-20px',
-                              fontSize: '10px',
+                              marginTop: window.innerWidth < 768 ? '-16px' : '-18px',
+                              fontSize: window.innerWidth < 768 ? '7px' : '8px',
                               color: 'white',
                               display: 'flex',
                               alignItems: 'center',
                               justifyContent: 'center',
+                              fontWeight: 'bold',
                             }}
                           >
                             ✗
