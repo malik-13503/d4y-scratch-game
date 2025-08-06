@@ -55,31 +55,32 @@ export const ProfessionalWheel = forwardRef<
 
   // Generate wheel numbers from available numbers for real-time updates
   const generateWheelNumbers = () => {
-    const segments = 12;
+    const maxSegments = 50;
+    const segments = Math.min(maxSegments, totalNumbers);
     const numbers = [];
     
     if (availableNumbers.length === 0) {
       // Fallback to static generation if no available numbers yet
       for (let i = 0; i < segments; i++) {
-        const number =
-          Math.floor((totalNumbers / segments) * i) +
-          Math.floor(totalNumbers / segments / 2) +
-          1;
+        const number = Math.floor((totalNumbers / segments) * i) + 1;
         numbers.push(Math.min(number, totalNumbers));
       }
       return numbers;
     }
     
-    // Use available numbers to populate wheel segments
-    for (let i = 0; i < segments; i++) {
-      if (i < availableNumbers.length) {
-        // Distribute available numbers across segments
-        const index = Math.floor((availableNumbers.length / segments) * i);
-        numbers.push(availableNumbers[index]);
+    // Use available numbers to populate wheel segments (up to 50 segments)
+    const availableCount = Math.min(availableNumbers.length, maxSegments);
+    for (let i = 0; i < availableCount; i++) {
+      numbers.push(availableNumbers[i]);
+    }
+    
+    // If we have fewer available numbers than desired segments, pad with remaining
+    while (numbers.length < Math.min(segments, maxSegments) && availableNumbers.length > numbers.length) {
+      const remainingIndex: number = numbers.length;
+      if (remainingIndex < availableNumbers.length) {
+        numbers.push(availableNumbers[remainingIndex]);
       } else {
-        // If we have fewer available numbers than segments, reuse some
-        const index = i % availableNumbers.length;
-        numbers.push(availableNumbers[index]);
+        break;
       }
     }
     
@@ -196,11 +197,15 @@ export const ProfessionalWheel = forwardRef<
       const segmentAngle = 360 / frozenWheelNumbers.length;
       let targetSegmentIndex = frozenWheelNumbers.findIndex(num => num === spinResult);
       
-      if (targetSegmentIndex === -1) {
-        // If exact number not found, temporarily place it in a segment
+      if (targetSegmentIndex === -1 && frozenWheelNumbers.length < 50) {
+        // If exact number not found and we have space, add it to the wheel
+        frozenWheelNumbers.push(spinResult);
+        targetSegmentIndex = frozenWheelNumbers.length - 1;
+        setWheelNumbers([...frozenWheelNumbers]);
+      } else if (targetSegmentIndex === -1) {
+        // If wheel is full (50 segments), replace a random segment
         targetSegmentIndex = Math.floor(Math.random() * frozenWheelNumbers.length);
         frozenWheelNumbers[targetSegmentIndex] = spinResult;
-        // Update wheel numbers ONLY with the result number for landing
         setWheelNumbers([...frozenWheelNumbers]);
       }
 
@@ -315,11 +320,14 @@ export const ProfessionalWheel = forwardRef<
                         "inset 0 0 30px rgba(0, 0, 0, 0.4), 0 0 40px rgba(255, 215, 0, 0.3)",
                     }}
                   >
-                  {/* Wheel Segments */}
-                  {segmentColors.map((color, index) => {
-                    const angle = (360 / segmentColors.length) * index;
-                    const nextAngle =
-                      (360 / segmentColors.length) * (index + 1);
+                  {/* Wheel Segments - up to 50 segments */}
+                  {wheelNumbers.map((number, index) => {
+                    const segmentCount = wheelNumbers.length;
+                    const angle = (360 / segmentCount) * index;
+                    const nextAngle = (360 / segmentCount) * (index + 1);
+                    const colorIndex = index % segmentColors.length;
+                    const color = segmentColors[colorIndex];
+                    const isAvailable = availableNumbers.includes(number);
 
                     return (
                       <div
@@ -327,35 +335,71 @@ export const ProfessionalWheel = forwardRef<
                         className="absolute inset-0 z-10"
                         style={{
                           clipPath: `polygon(50% 50%, ${50 + 65 * Math.cos(((angle - 90) * Math.PI) / 180)}% ${50 + 65 * Math.sin(((angle - 90) * Math.PI) / 180)}%, ${50 + 65 * Math.cos(((nextAngle - 90) * Math.PI) / 180)}% ${50 + 65 * Math.sin(((nextAngle - 90) * Math.PI) / 180)}%)`,
-                          background: `linear-gradient(135deg, ${color}, ${color}dd)`,
+                          background: isAvailable 
+                            ? `linear-gradient(135deg, ${color}, ${color}dd)`
+                            : `linear-gradient(135deg, #6B7280, #374151)`, // Gray for claimed numbers
+                          opacity: isAvailable ? 1 : 0.6,
                         }}
                       >
                         {/* Always upright number - counter-rotates exactly to stay readable */}
                         <div
                           id={`wheel-number-${index}`}
-                          className="wheel-prize-number text-white font-bold text-xs sm:text-sm md:text-base flex items-center justify-center"
+                          className={`wheel-prize-number font-bold text-xs sm:text-sm md:text-base flex items-center justify-center ${
+                            isAvailable ? 'text-white' : 'text-gray-400'
+                          }`}
                           style={{
                             position: 'absolute',
                             left: '50%',
                             top: '50%',
-                            transform: `translate(-50%, -50%) translate(${Math.cos(((angle + 360 / segmentColors.length / 2 - 90) * Math.PI) / 180) * numberRadius}px, ${Math.sin(((angle + 360 / segmentColors.length / 2 - 90) * Math.PI) / 180) * numberRadius}px) rotate(${-rotation}deg)`,
+                            transform: `translate(-50%, -50%) translate(${Math.cos(((angle + 360 / segmentCount / 2 - 90) * Math.PI) / 180) * numberRadius}px, ${Math.sin(((angle + 360 / segmentCount / 2 - 90) * Math.PI) / 180) * numberRadius}px) rotate(${-rotation}deg)`,
                             transition: isSpinning
                               ? `transform 8.0s cubic-bezier(0.25, 0.1, 0.25, 1.0)`
                               : "none",
-                            width: '32px',
-                            height: '32px',
+                            width: segmentCount > 24 ? '24px' : '32px',
+                            height: segmentCount > 24 ? '24px' : '32px',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
                             textShadow: '2px 2px 4px rgba(0,0,0,0.9)',
-                            backgroundColor: 'rgba(0,0,0,0.4)',
+                            backgroundColor: isAvailable ? 'rgba(0,0,0,0.4)' : 'rgba(0,0,0,0.6)',
                             borderRadius: '50%',
-                            border: '1px solid rgba(255,255,255,0.3)',
-                            zIndex: 15
+                            border: isAvailable 
+                              ? '1px solid rgba(255,255,255,0.3)' 
+                              : '1px solid rgba(156,163,175,0.5)',
+                            zIndex: 15,
+                            fontSize: segmentCount > 36 ? '10px' : segmentCount > 24 ? '12px' : '14px',
                           }}
                         >
-                          {wheelNumbers[index]}
+                          {isAvailable ? number : (
+                            <span style={{ textDecoration: 'line-through' }}>{number}</span>
+                          )}
                         </div>
+                        {/* Claimed indicator overlay */}
+                        {!isAvailable && (
+                          <div
+                            className="absolute"
+                            style={{
+                              position: 'absolute',
+                              left: '50%',
+                              top: '50%',
+                              transform: `translate(-50%, -50%) translate(${Math.cos(((angle + 360 / segmentCount / 2 - 90) * Math.PI) / 180) * numberRadius}px, ${Math.sin(((angle + 360 / segmentCount / 2 - 90) * Math.PI) / 180) * numberRadius}px) rotate(${-rotation}deg)`,
+                              transition: isSpinning ? `transform 8.0s cubic-bezier(0.25, 0.1, 0.25, 1.0)` : "none",
+                              width: '16px',
+                              height: '16px',
+                              backgroundColor: 'rgba(239, 68, 68, 0.8)',
+                              borderRadius: '50%',
+                              zIndex: 20,
+                              marginTop: '-20px',
+                              fontSize: '10px',
+                              color: 'white',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                            }}
+                          >
+                            ✗
+                          </div>
+                        )}
                       </div>
                     );
                   })}

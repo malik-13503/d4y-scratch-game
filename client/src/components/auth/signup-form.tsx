@@ -29,6 +29,7 @@ export function SignupForm({ onSuccess, onSwitchToLogin }: SignupFormProps) {
     state: "",
   });
   const [acceptTerms, setAcceptTerms] = useState(false);
+  const [ageConfirmed, setAgeConfirmed] = useState(false);
   const [optOutPublicity, setOptOutPublicity] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
@@ -86,6 +87,13 @@ export function SignupForm({ onSuccess, onSwitchToLogin }: SignupFormProps) {
     const excludedStates = ['NY', 'FL', 'RI', 'HI'];
     if (excludedStates.includes(formData.state)) {
       setError(`Sorry, residents of ${formData.state} are not eligible to participate in paid games due to state regulations.`);
+      setIsLoading(false);
+      return;
+    }
+
+    // Validate age confirmation
+    if (!ageConfirmed) {
+      setError("You must be 18 years or older to participate");
       setIsLoading(false);
       return;
     }
@@ -391,6 +399,20 @@ export function SignupForm({ onSuccess, onSwitchToLogin }: SignupFormProps) {
           </div>
         </div>
       )}
+
+      {/* Age Verification Checkbox */}
+      <div className="flex items-start space-x-3 p-4 bg-slate-800/50 rounded-xl border border-white/20 backdrop-blur-sm">
+        <input
+          type="checkbox"
+          id="ageConfirmed"
+          checked={ageConfirmed}
+          onChange={(e) => setAgeConfirmed(e.target.checked)}
+          className="mt-1 w-4 h-4 text-purple-600 bg-slate-700 border-gray-300 rounded focus:ring-purple-500 focus:ring-2"
+        />
+        <label htmlFor="ageConfirmed" className="text-sm text-gray-300 leading-tight">
+          I confirm that I am 18 years of age or older
+        </label>
+      </div>
 
       {/* Terms and Conditions Checkbox */}
       <div className="flex items-start space-x-3 p-4 bg-slate-800/50 rounded-xl border border-white/20 backdrop-blur-sm">

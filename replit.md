@@ -58,6 +58,19 @@ Preferred communication style: Simple, everyday language.
 
 ## Changelog
 
+- February 6, 2025: **AGE VERIFICATION & WHEEL SEGMENTS UPDATE** - Added mandatory age verification and implemented 50-segment wheel limit
+  - **Age Verification Checkbox**: Added required 18+ age confirmation checkbox to signup form with validation
+  - **Maximum 50 Wheel Segments**: Implemented visual wheel segment limit with maximum 50 segments displayed
+  - **Claimed Number Indicators**: Added visual indicators for claimed numbers (grayed out, strikethrough, red X overlay)
+  - **Segment Progress Bar**: Added visual progress indicator showing current segments vs 50 maximum
+  - **Dynamic Segment Sizing**: Automatically adjusts segment and text size based on number of segments (smaller for 36+ segments)
+  - **Real-time Availability**: Wheel segments update in real-time to show which numbers are still available vs claimed
+- February 6, 2025: **FREE PLAY FEATURE COMPLETE** - Added one-time free play functionality to game page
+  - **Free Play Button**: Added attractive green-themed free play button below the wheel for unauthenticated users
+  - **One-time Use**: Button disappears after use and shows encouraging message to join the actual game
+  - **Free Play Logic**: Generates random numbers from free play range without payment or authentication
+  - **Disclaimer Updates**: Updated disclaimer popup to show different messaging for free play vs paid spins
+  - **No Registration Required**: Users can try the game once for free without creating an account
 - January 29, 2025: **GAME INSTRUCTIONS ENHANCEMENT** - Added in-game how-to-play instructions with no purchase option
   - **Game Page Instructions**: Added 4-step how-to-play guide directly on the game page sidebar
   - **No Purchase Visibility**: Step 4 highlights "No Purchase Necessary - Use free entry option!" prominently

@@ -567,7 +567,23 @@ export default function GamePage() {
                   <p>No Purchase Necessary - Use free entry option!</p>
                 </div>
 
-                <div className="pt-3 border-t border-white/10">
+                <div className="pt-3 border-t border-white/10 space-y-3">
+                  <div className="text-xs text-gray-400">
+                    <div className="flex items-center justify-between">
+                      <span>Wheel Segments:</span>
+                      <span className="text-purple-300 font-bold">
+                        {Math.min(game?.totalNumbers || 0, 50)} / 50 max
+                      </span>
+                    </div>
+                    <div className="w-full bg-gray-700 rounded-full h-1.5 mt-1">
+                      <div 
+                        className="bg-gradient-to-r from-purple-500 to-blue-500 h-1.5 rounded-full transition-all duration-300"
+                        style={{ 
+                          width: `${Math.min((game?.totalNumbers || 0) / 50 * 100, 100)}%` 
+                        }}
+                      ></div>
+                    </div>
+                  </div>
                   <Button
                     variant="outline"
                     size="sm"
