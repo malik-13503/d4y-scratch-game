@@ -225,7 +225,7 @@ export const ProfessionalWheel = forwardRef<
       } catch (apiError) {
         console.error("🚨 API call failed:", apiError);
         apiCallSuccessful = false;
-        setPaymentFailed(true);
+        // DON'T set payment failed here - wait until wheel stops completely
 
         // Even if API fails, we need to complete the wheel animation
         // Use a random fallback from available numbers to ensure wheel doesn't hang
@@ -290,6 +290,12 @@ export const ProfessionalWheel = forwardRef<
         const isFree = spinResult >= freePlayStart;
         setIsFreePlay(isFree);
         setAmountCharged(isFree ? 0 : spinResult);
+
+        // Set payment failure state ONLY after wheel stops completely
+        if (!apiCallSuccessful) {
+          setPaymentFailed(true);
+          console.log("🚨 Setting payment failed state after wheel stopped");
+        }
 
         // Show result modal immediately after wheel stops
         setTimeout(() => {
