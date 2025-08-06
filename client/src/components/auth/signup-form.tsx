@@ -12,6 +12,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ErrorDialog } from "@/components/error-dialog";
 import { EmailErrorDialog } from "@/components/email-error-dialog";
+import { EmailAlreadyExistsPopup } from "@/components/email-already-exists-popup";
 
 interface SignupFormProps {
   onSuccess: () => void;
@@ -37,6 +38,7 @@ export function SignupForm({ onSuccess, onSwitchToLogin }: SignupFormProps) {
   const [showErrorDialog, setShowErrorDialog] = useState(false);
   const [dialogError, setDialogError] = useState("");
   const [showEmailErrorDialog, setShowEmailErrorDialog] = useState(false);
+  const [showEmailExistsPopup, setShowEmailExistsPopup] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const { toast } = useToast();
@@ -133,6 +135,8 @@ export function SignupForm({ onSuccess, onSwitchToLogin }: SignupFormProps) {
         confirmPassword: "",
         state: "",
       });
+      setAcceptTerms(false);
+      setAgeConfirmed(false);
       setOptOutPublicity(false);
       
       // Show message to login
@@ -142,7 +146,7 @@ export function SignupForm({ onSuccess, onSwitchToLogin }: SignupFormProps) {
       
       // Check if it's the "Email already registered" error
       if (errorMessage.includes("Email already registered")) {
-        setShowEmailErrorDialog(true);
+        setShowEmailExistsPopup(true);
       } else {
         setDialogError(errorMessage);
         setShowErrorDialog(true);
@@ -400,17 +404,18 @@ export function SignupForm({ onSuccess, onSwitchToLogin }: SignupFormProps) {
         </div>
       )}
 
-      {/* Age Verification Checkbox */}
-      <div className="flex items-start space-x-3 p-4 bg-slate-800/50 rounded-xl border border-white/20 backdrop-blur-sm">
+      {/* Age Verification Checkbox - Required for Legal Compliance */}
+      <div className="flex items-start space-x-3 p-4 bg-orange-900/20 rounded-xl border-2 border-orange-500/40 backdrop-blur-sm">
         <input
           type="checkbox"
           id="ageConfirmed"
           checked={ageConfirmed}
           onChange={(e) => setAgeConfirmed(e.target.checked)}
-          className="mt-1 w-4 h-4 text-purple-600 bg-slate-700 border-gray-300 rounded focus:ring-purple-500 focus:ring-2"
+          className="mt-1 w-5 h-5 text-orange-600 bg-slate-700 border-orange-400 rounded focus:ring-orange-500 focus:ring-2"
+          required
         />
-        <label htmlFor="ageConfirmed" className="text-sm text-gray-300 leading-tight">
-          I confirm that I am 18 years of age or older
+        <label htmlFor="ageConfirmed" className="text-sm text-orange-100 leading-tight font-medium cursor-pointer">
+          🔞 I confirm that I am 18 years of age or older (Required)
         </label>
       </div>
 
@@ -441,7 +446,7 @@ export function SignupForm({ onSuccess, onSwitchToLogin }: SignupFormProps) {
         <div className="absolute -inset-1 bg-gradient-to-r from-purple-500/50 to-blue-500/50 blur-lg rounded-2xl opacity-75"></div>
         <Button
           type="submit"
-          disabled={isLoading || !formData.email || !formData.firstName || !formData.lastName || !formData.password || !formData.confirmPassword || !acceptTerms}
+          disabled={isLoading || !formData.email || !formData.firstName || !formData.lastName || !formData.password || !formData.confirmPassword || !acceptTerms || !ageConfirmed}
           className="relative w-full bg-gradient-to-r from-purple-600 via-blue-600 to-cyan-600 hover:from-purple-700 hover:via-blue-700 hover:to-cyan-700 disabled:from-gray-600 disabled:via-gray-700 disabled:to-gray-800 text-white font-black py-3 sm:py-4 lg:py-5 px-4 sm:px-6 lg:px-8 rounded-xl shadow-2xl transform hover:scale-105 disabled:hover:scale-100 transition-all duration-300 text-xs sm:text-sm md:text-base lg:text-lg border-2 border-white/20 min-h-[48px] sm:min-h-[56px] md:min-h-[64px] lg:min-h-[72px] flex items-center justify-center touch-manipulation active:scale-95"
         >
           {isLoading ? (
@@ -479,6 +484,14 @@ export function SignupForm({ onSuccess, onSwitchToLogin }: SignupFormProps) {
       <EmailErrorDialog
         open={showEmailErrorDialog}
         onClose={() => setShowEmailErrorDialog(false)}
+        onSwitchToLogin={onSwitchToLogin}
+        email={formData.email}
+      />
+
+      {/* Email Already Exists Popup */}
+      <EmailAlreadyExistsPopup
+        isOpen={showEmailExistsPopup}
+        onClose={() => setShowEmailExistsPopup(false)}
         onSwitchToLogin={onSwitchToLogin}
         email={formData.email}
       />
