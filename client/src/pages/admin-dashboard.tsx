@@ -559,6 +559,7 @@ export default function AdminDashboard() {
   };
 
   const handleEditGame = (game: any) => {
+    console.log("🎮 Edit game clicked for:", game);
     setEditingGame(game);
     // Initialize form data with current game values
     const formData = {
@@ -571,6 +572,7 @@ export default function AdminDashboard() {
       duration: "24",
       prizeImageUrl: game.prizeImageUrl || "",
     };
+    console.log("📝 Setting edit form data:", formData);
     setEditFormData(formData);
     setEditData(formData);
     // Set image preview if existing
@@ -580,6 +582,7 @@ export default function AdminDashboard() {
       setEditPrizeImagePreview("");
     }
     setEditPrizeImageFile(null);
+    console.log("🔓 Opening edit dialog...");
     setIsEditGameOpen(true);
   };
 
