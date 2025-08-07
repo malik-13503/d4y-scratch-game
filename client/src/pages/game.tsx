@@ -333,8 +333,7 @@ export default function GamePage() {
                         <img 
                           src={game.prizeImageUrl} 
                           alt={game.name}
-                          className="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 xl:w-16 xl:h-16 object-cover object-center rounded-lg relative z-10 drop-shadow-lg"
-                          style={{ width: '100%', height: '100%' }}
+                          className="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 xl:w-16 xl:h-16 object-contain object-center rounded-lg relative z-10 drop-shadow-lg"
                         />
                       ) : (
                         <span className="text-xl sm:text-2xl lg:text-3xl xl:text-4xl relative z-10 drop-shadow-lg">

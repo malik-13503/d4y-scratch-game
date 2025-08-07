@@ -303,8 +303,7 @@ export default function Home() {
                           <img 
                             src={game.prizeImageUrl} 
                             alt={game.name}
-                            className="relative h-5 w-5 sm:h-6 sm:w-6 md:h-8 md:w-8 object-cover object-center rounded drop-shadow-lg"
-                            style={{ width: '100%', height: '100%' }}
+                            className="relative h-5 w-5 sm:h-6 sm:w-6 md:h-8 md:w-8 object-contain object-center rounded drop-shadow-lg"
                           />
                         ) : (
                           <Icon className="relative h-5 w-5 sm:h-6 sm:w-6 md:h-8 md:w-8 text-white drop-shadow-lg" />
