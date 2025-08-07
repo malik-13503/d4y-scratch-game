@@ -239,7 +239,7 @@ export default function Home() {
             <div className="bg-gradient-to-r from-purple-500/20 to-pink-500/20 backdrop-blur-sm border border-purple-400/40 rounded-xl px-6 py-3">
               <div className="flex items-center space-x-2">
                 <Crown className="h-5 w-5 text-purple-400" />
-                <span className="text-purple-300 font-bold">FREE SPINS</span>
+                <span className="text-purple-300 font-bold">NO PURCHASE NECESSARY</span>
               </div>
             </div>
           </div>
@@ -256,10 +256,7 @@ export default function Home() {
               const progress = ((game.totalNumbers - game.numbersLeft) / game.totalNumbers) * 100;
               const colors = getGameColors(index);
               
-              // Calculate free play range (last 25% of numbers)
-              const freePlayStart = Math.floor(game.totalNumbers * 0.75) + 1;
-              const freePlayRange = `${freePlayStart}-${game.totalNumbers}`;
-              const paidRange = `1-${freePlayStart - 1}`;
+              // Removed automatic free play logic - all numbers require payment
               
               // Format time remaining
               const timeRemaining = new Date(game.endTime) > new Date() 
@@ -350,16 +347,11 @@ export default function Home() {
                     </div>
 
                     {/* Enhanced Responsive Game Details Grid */}
-                    <div className="mt-4 sm:mt-6 grid grid-cols-2 gap-2 sm:gap-3">
-                      <div className="bg-gradient-to-br from-green-500/20 to-emerald-500/20 p-2 sm:p-3 rounded-lg border border-green-400/30 backdrop-blur-sm">
-                        <div className="text-xs text-green-300 font-bold uppercase tracking-wider">Free Play Range</div>
-                        <div className="text-sm sm:text-base font-black text-green-200 mt-1">{freePlayRange}</div>
-                        <div className="text-xs text-green-400 mt-1">🎁 No cost</div>
-                      </div>
+                    <div className="mt-4 sm:mt-6 grid grid-cols-1 gap-2 sm:gap-3">
                       <div className="bg-gradient-to-br from-blue-500/20 to-cyan-500/20 p-2 sm:p-3 rounded-lg border border-blue-400/30 backdrop-blur-sm">
-                        <div className="text-xs text-blue-300 font-bold uppercase tracking-wider">Paid Range</div>
-                        <div className="text-sm sm:text-base font-black text-blue-200 mt-1">{paidRange}</div>
-                        <div className="text-xs text-blue-400 mt-1">💰 Pay exact</div>
+                        <div className="text-xs text-blue-300 font-bold uppercase tracking-wider">Game Info</div>
+                        <div className="text-sm sm:text-base font-black text-blue-200 mt-1">Spin the wheel, pay what you land on</div>
+                        <div className="text-xs text-blue-400 mt-1">💰 No Purchase Necessary: One free entry per game</div>
                       </div>
                     </div>
 
@@ -443,7 +435,7 @@ export default function Home() {
                   <li className="flex items-center space-x-2">
                     <Crown className="h-4 w-4 text-purple-400" />
                     <Link href="/free-spins" className="hover:text-white transition-colors">
-                      Free Spins
+                      No Purchase Necessary
                     </Link>
                   </li>
                   <li className="flex items-center space-x-2">

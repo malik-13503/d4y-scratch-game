@@ -58,6 +58,14 @@ Preferred communication style: Simple, everyday language.
 
 ## Changelog
 
+- February 7, 2025: **AUTOMATIC FREE PLAY LOGIC REMOVED** - Completely removed automatic "high number = free play" system per user requirements
+  - **Backend Logic Removed**: Eliminated automatic free play determination based on freePlayStart/freePlayEnd ranges in storage.ts
+  - **Wheel Component Updated**: Removed freePlayStart calculations and automatic free play assignment in professional-wheel.tsx
+  - **UI Text Updates**: Changed all "Free Spin/Free Play" references to "No Purchase Necessary: You get one free spin per game to enter this game"
+  - **Home Page Simplified**: Removed free play range display grid, now shows single game info panel with compliance messaging
+  - **Routes Updated**: Modified /api/free-spin endpoint to work with any available numbers instead of specific ranges
+  - **All Spins Paid**: Now all wheel spins require payment unless specifically designated as free entry (removed automatic logic)
+  - **Compliance Ready**: Updated all user-facing text to meet legal compliance requirements
 - February 6, 2025: **ENHANCED EDIT GAME DIALOG COMPLETE** - Implemented comprehensive edit game interface matching create game form
   - **Full Edit Interface**: Complete edit dialog with same comprehensive form as create game (name, emoji, description, prize, value, image upload, total numbers, duration)
   - **Real-time Live Preview**: Updates as you type showing exact admin games tab card design with proper data binding

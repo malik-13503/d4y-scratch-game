@@ -41,18 +41,18 @@ export function DisclaimerPopup({
         <DialogHeader className="text-center">
           <div className="mx-auto mb-4 text-4xl">🎯</div>
           <DialogTitle className="text-2xl font-bold text-white">
-            {isFreePlay ? "Free Play Demo!" : "Play Responsibly!"}
+            {isFreePlay ? "No Purchase Necessary!" : "Play Responsibly!"}
           </DialogTitle>
           <DialogDescription className="text-gray-300 text-base leading-relaxed mt-4">
             {isFreePlay
-              ? "Try your luck with one free spin! This lets you experience the game mechanics and see how the wheel works. Your result will be from the higher number range where you won't be charged anything."
+              ? "You get one free spin per game to enter this game. This lets you experience the game mechanics and see how the wheel works without any charge."
               : "Just a heads up — once you spin the wheel, your card will be instantly charged based on your pull. There are no refunds, so spin wisely and have fun!"
             }
           </DialogDescription>
           <div className="mt-4 p-4 bg-slate-700/50 rounded-lg border border-slate-600">
             <p className="text-sm text-gray-400">
               {isFreePlay
-                ? "After your free spin, sign up to play for real prizes! No purchase necessary - free entry options available."
+                ? "After your entry, sign up to play for real prizes! No purchase necessary - you get one free spin per game to enter this game."
                 : `By continuing, you agree to these terms${gameTitle ? ` for ${gameTitle}` : ""}`
               }
             </p>
@@ -84,7 +84,7 @@ export function DisclaimerPopup({
                 Starting Game...
               </div>
             ) : (
-              isFreePlay ? "Try Free Spin!" : "Let's Play!"
+              isFreePlay ? "Use Free Entry!" : "Let's Play!"
             )}
           </Button>
         </DialogFooter>

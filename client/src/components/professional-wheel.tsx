@@ -47,7 +47,7 @@ export const ProfessionalWheel = forwardRef<
 
   const wheelRef = useRef<HTMLDivElement>(null);
 
-  const freePlayStart = Math.floor(totalNumbers * 0.75) + 1;
+  // Removed automatic free play logic - all spins are paid unless manually designated
 
   // Vibrant logo-inspired segment colors
   const segmentColors = [
@@ -287,9 +287,9 @@ export const ProfessionalWheel = forwardRef<
 
         // Set final result
         setResult(spinResult);
-        const isFree = spinResult >= freePlayStart;
+        const isFree = false; // Removed automatic free play logic
         setIsFreePlay(isFree);
-        setAmountCharged(isFree ? 0 : spinResult);
+        setAmountCharged(spinResult); // All spins require payment
 
         // Set payment failure state ONLY after wheel stops completely
         if (!apiCallSuccessful) {
@@ -688,15 +688,14 @@ export const ProfessionalWheel = forwardRef<
                 ) : isFreePlay ? (
                   <div className="text-center space-y-3">
                     <div className="text-2xl font-bold text-green-300">
-                      🎉 FREE PLAY - $0.00
+                      🎉 No Purchase Necessary - $0.00
                     </div>
                     <p className="text-green-200 text-sm">
-                      Lucky you! This number is in the free play range (#
-                      {freePlayStart}-{totalNumbers})
+                      You get one free spin per game to enter this game
                     </p>
                     <div className="bg-green-500/20 rounded-lg p-3 mt-3">
                       <p className="text-green-100 text-sm font-semibold">
-                        🎁 No charge for this spin!
+                        🎁 No charge for this entry!
                       </p>
                     </div>
                   </div>

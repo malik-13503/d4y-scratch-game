@@ -408,9 +408,9 @@ export class DatabaseStorage implements IStorage {
     const randomIndex = Math.floor(Math.random() * availableNumbers.length);
     const spunNumber = availableNumbers[randomIndex];
 
-    // Determine if it's a free play based on the free play range
-    const isFreePlay = spunNumber >= game.freePlayStart && spunNumber <= game.freePlayEnd;
-    const amountCharged = isFreePlay ? "0" : spunNumber.toString();
+    // Removed automatic free play logic - all spins are paid unless manually designated
+    const isFreePlay = false; // All spins require payment
+    const amountCharged = spunNumber.toString();
 
     // Create spin result
     const spinResult = await this.createSpinResult({

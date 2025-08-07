@@ -1117,8 +1117,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const totalSpins = transactions.length;
       const totalSpent = transactions.reduce((sum, t) => sum + parseFloat(t.amount.toString()), 0);
       
-      // Free spins are spins that cost $0
-      const freeSpins = transactions.filter(t => {
+      // No purchase necessary entries are spins that cost $0
+      const noPurchaseEntries = transactions.filter(t => {
         const amount = parseFloat(t.amount.toString());
         return amount === 0;
       }).length;
@@ -1132,7 +1132,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({
         totalSpins,
         totalWins: lowNumberHits, // Rename for clarity - these are low numbers (1-50)
-        freeSpins,
+        freeSpins: noPurchaseEntries,
         totalSpent: parseFloat(totalSpent.toFixed(2))
       });
     } catch (error) {
@@ -1387,16 +1387,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Game not found or inactive" });
       }
 
-      // Get available numbers from free play range only
-      const freePlayStart = game.freePlayStart || 151;
-      const freePlayEnd = game.freePlayEnd || 200;
+      // Get available numbers (removed automatic free play range logic)
       const availableNumbers = await storage.getAvailableNumbers(gameId);
-      const freePlayNumbers = availableNumbers.filter(num => 
-        num >= freePlayStart && num <= freePlayEnd
-      );
 
-      if (freePlayNumbers.length === 0) {
-        return res.status(400).json({ message: "No free play numbers available" });
+      if (availableNumbers.length === 0) {
+        return res.status(400).json({ message: "No numbers available in this game" });
       }
 
       // Create a temporary guest player for this free spin
@@ -1413,9 +1408,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         createdAt: new Date()
       });
 
-      // Perform the spin with only free play numbers
-      const randomIndex = Math.floor(Math.random() * freePlayNumbers.length);
-      const spunNumber = freePlayNumbers[randomIndex];
+      // Perform the spin with any available numbers
+      const randomIndex = Math.floor(Math.random() * availableNumbers.length);
+      const spunNumber = availableNumbers[randomIndex];
 
       // Create spin result
       const spinResult = await storage.createSpinResult({
@@ -1453,7 +1448,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           number: spunNumber,
           isFreePlay: true,
           amountCharged: "0",
-          message: `Congratulations! You landed on ${spunNumber} - This was a FREE demo spin!`
+          message: `Congratulations! You landed on ${spunNumber} - No Purchase Necessary: You get one free spin per game to enter this game!`
         }
       });
     } catch (error: any) {
