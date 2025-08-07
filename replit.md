@@ -58,6 +58,14 @@ Preferred communication style: Simple, everyday language.
 
 ## Changelog
 
+- February 7, 2025: **MANUAL FREE PLAY CONTROLS COMPLETE** - Added comprehensive manual free play number controls to admin dashboard
+  - **Free Play Range Interface**: Added intuitive start/end number inputs in create game dialog for precise free play control
+  - **Live Preview Integration**: Real-time display of selected free play range (e.g., "151-200") as admins type
+  - **Database Integration**: Properly saves freePlayStart and freePlayEnd values to existing database structure
+  - **Default Logic Maintained**: Backward-compatible with existing games while enabling manual override capability
+  - **Green-Themed UI**: Professional green-highlighted section distinguishing free play controls from paid number settings
+  - **Form Validation**: Number inputs with proper min values, placeholders, and user guidance text
+  - **Admin Control**: Complete manual override of automatic free play assignments - admins can now set any range they want
 - February 7, 2025: **AUTOMATIC FREE PLAY LOGIC REMOVED** - Completely removed automatic "high number = free play" system per user requirements
   - **Backend Logic Removed**: Eliminated automatic free play determination based on freePlayStart/freePlayEnd ranges in storage.ts
   - **Wheel Component Updated**: Removed freePlayStart calculations and automatic free play assignment in professional-wheel.tsx

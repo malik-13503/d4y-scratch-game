@@ -105,6 +105,8 @@ export default function AdminDashboard() {
     totalNumbers: "125",
     duration: "24",
     prizeImageUrl: "", // Add prize image URL
+    freePlayStart: "151", // Free play range start
+    freePlayEnd: "200", // Free play range end
   });
 
   // Prize image upload state
@@ -548,8 +550,8 @@ export default function AdminDashboard() {
       prizeImageUrl: prizeImageUrl, // Add the uploaded image
       totalNumbers: totalNumbers,
       numbersLeft: totalNumbers,
-      freePlayStart: Math.ceil(totalNumbers * 0.75),
-      freePlayEnd: totalNumbers,
+      freePlayStart: parseInt(formData.get("freePlayStart") as string) || Math.ceil(totalNumbers * 0.75),
+      freePlayEnd: parseInt(formData.get("freePlayEnd") as string) || totalNumbers,
       maxWinners: 1,
       isScheduled: false,
       emoji: (formData.get("emoji") as string) || "🎮",
@@ -1495,14 +1497,67 @@ export default function AdminDashboard() {
                               </div>
                             </div>
 
-                            <div className="flex items-center space-x-2 p-4 bg-purple-500/20 rounded-lg border border-purple-500/30">
-                              <Switch id="isFreePlay" name="isFreePlay" />
-                              <Label
-                                htmlFor="isFreePlay"
-                                className="text-purple-200 font-medium"
-                              >
-                                Free Play Game
+                            {/* Free Play Range Control */}
+                            <div className="space-y-3">
+                              <Label className="text-gray-300 flex items-center">
+                                <Crown className="h-4 w-4 mr-2 text-yellow-400" />
+                                Free Play Range (Optional)
                               </Label>
+                              <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-4 space-y-3">
+                                <div className="grid grid-cols-2 gap-3">
+                                  <div>
+                                    <Label htmlFor="freePlayStart" className="text-green-300 text-sm">
+                                      Start Number
+                                    </Label>
+                                    <Input
+                                      id="freePlayStart"
+                                      name="freePlayStart"
+                                      type="number"
+                                      min="1"
+                                      value={previewData.freePlayStart}
+                                      onChange={(e) =>
+                                        setPreviewData({
+                                          ...previewData,
+                                          freePlayStart: e.target.value,
+                                        })
+                                      }
+                                      placeholder="151"
+                                      className="bg-white/10 border-green-500/30"
+                                    />
+                                  </div>
+                                  <div>
+                                    <Label htmlFor="freePlayEnd" className="text-green-300 text-sm">
+                                      End Number
+                                    </Label>
+                                    <Input
+                                      id="freePlayEnd"
+                                      name="freePlayEnd"
+                                      type="number"
+                                      min="1"
+                                      value={previewData.freePlayEnd}
+                                      onChange={(e) =>
+                                        setPreviewData({
+                                          ...previewData,
+                                          freePlayEnd: e.target.value,
+                                        })
+                                      }
+                                      placeholder="200"
+                                      className="bg-white/10 border-green-500/30"
+                                    />
+                                  </div>
+                                </div>
+                                <div className="flex items-center justify-between text-sm">
+                                  <span className="text-green-300 font-medium">Free Range:</span>
+                                  <span className="text-white bg-green-500/20 px-2 py-1 rounded">
+                                    {previewData.freePlayStart && previewData.freePlayEnd 
+                                      ? `${previewData.freePlayStart}-${previewData.freePlayEnd}` 
+                                      : "Not specified (all paid)"}
+                                  </span>
+                                </div>
+                                <p className="text-green-300 text-xs">
+                                  💡 Numbers in this range require no purchase. Leave empty to make all numbers paid.
+                                </p>
+                              </div>
                             </div>
 
                             <Button
