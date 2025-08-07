@@ -299,7 +299,15 @@ export default function Home() {
                     <div className="flex items-start space-x-3 sm:space-x-4 pr-[90px] sm:pr-[110px] md:pr-[120px]">
                       <div className={`relative p-2 sm:p-3 md:p-4 rounded-xl sm:rounded-2xl bg-gradient-to-br ${colors.color} shadow-2xl group-hover:scale-110 transition-transform duration-500 flex-shrink-0`}>
                         <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent rounded-xl sm:rounded-2xl"></div>
-                        <Icon className="relative h-5 w-5 sm:h-6 sm:w-6 md:h-8 md:w-8 text-white drop-shadow-lg" />
+                        {game.prizeImageUrl ? (
+                          <img 
+                            src={game.prizeImageUrl} 
+                            alt={game.name}
+                            className="relative h-5 w-5 sm:h-6 sm:w-6 md:h-8 md:w-8 object-cover rounded drop-shadow-lg"
+                          />
+                        ) : (
+                          <Icon className="relative h-5 w-5 sm:h-6 sm:w-6 md:h-8 md:w-8 text-white drop-shadow-lg" />
+                        )}
                       </div>
                       
                       <div className="flex-1 min-w-0 pt-1">

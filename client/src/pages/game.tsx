@@ -329,9 +329,17 @@ export default function GamePage() {
                   <div className="relative flex-shrink-0">
                     <div className="p-2 sm:p-3 lg:p-4 bg-gradient-to-br from-red-500 via-pink-500 to-purple-600 rounded-xl sm:rounded-2xl shadow-2xl relative overflow-hidden">
                       <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent"></div>
-                      <span className="text-xl sm:text-2xl lg:text-3xl xl:text-4xl relative z-10 drop-shadow-lg">
-                        {game.emoji}
-                      </span>
+                      {game.prizeImageUrl ? (
+                        <img 
+                          src={game.prizeImageUrl} 
+                          alt={game.name}
+                          className="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 xl:w-16 xl:h-16 object-cover rounded-lg relative z-10 drop-shadow-lg"
+                        />
+                      ) : (
+                        <span className="text-xl sm:text-2xl lg:text-3xl xl:text-4xl relative z-10 drop-shadow-lg">
+                          {game.emoji}
+                        </span>
+                      )}
                     </div>
                     <div className="absolute -inset-1 sm:-inset-2 bg-gradient-to-br from-red-400/30 to-purple-400/30 rounded-2xl sm:rounded-3xl blur-xl -z-10"></div>
                   </div>
