@@ -78,7 +78,8 @@ export const games = pgTable("games", {
   totalNumbers: integer("total_numbers").notNull().default(200),
   numbersLeft: integer("numbers_left").notNull(),
   freePlayStart: integer("free_play_start").notNull().default(151), // Free play numbers start
-  freePlayEnd: integer("free_play_end").notNull().default(200), // Free play numbers end
+  freePlayEnd: integer("free_play_end").notNull().default(200), // Free play numbers end  
+
   maxParticipants: integer("max_participants"),
   maxWinners: integer("max_winners").notNull().default(1),
   startTime: timestamp("start_time").notNull(),

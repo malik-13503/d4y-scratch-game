@@ -105,8 +105,8 @@ export default function AdminDashboard() {
     totalNumbers: "125",
     duration: "24",
     prizeImageUrl: "", // Add prize image URL
-    freePlayStart: "151", // Free play range start
-    freePlayEnd: "200", // Free play range end
+    freePlayEnabled: false, // Free play toggle
+    freePlayNumbers: "", // Individual free play numbers (e.g., "1,5,10,25,50")
   });
 
   // Prize image upload state
@@ -550,8 +550,8 @@ export default function AdminDashboard() {
       prizeImageUrl: prizeImageUrl, // Add the uploaded image
       totalNumbers: totalNumbers,
       numbersLeft: totalNumbers,
-      freePlayStart: parseInt(formData.get("freePlayStart") as string) || Math.ceil(totalNumbers * 0.75),
-      freePlayEnd: parseInt(formData.get("freePlayEnd") as string) || totalNumbers,
+      freePlayStart: previewData.freePlayEnabled && previewData.freePlayNumbers ? 1 : Math.ceil(totalNumbers * 0.75),
+      freePlayEnd: previewData.freePlayEnabled && previewData.freePlayNumbers ? totalNumbers : totalNumbers,
       maxWinners: 1,
       isScheduled: false,
       emoji: (formData.get("emoji") as string) || "🎮",
@@ -1497,67 +1497,76 @@ export default function AdminDashboard() {
                               </div>
                             </div>
 
-                            {/* Free Play Range Control */}
+                            {/* Free Play Control */}
                             <div className="space-y-3">
-                              <Label className="text-gray-300 flex items-center">
-                                <Crown className="h-4 w-4 mr-2 text-yellow-400" />
-                                Free Play Range (Optional)
-                              </Label>
-                              <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-4 space-y-3">
-                                <div className="grid grid-cols-2 gap-3">
-                                  <div>
-                                    <Label htmlFor="freePlayStart" className="text-green-300 text-sm">
-                                      Start Number
-                                    </Label>
-                                    <Input
-                                      id="freePlayStart"
-                                      name="freePlayStart"
-                                      type="number"
-                                      min="1"
-                                      value={previewData.freePlayStart}
-                                      onChange={(e) =>
-                                        setPreviewData({
-                                          ...previewData,
-                                          freePlayStart: e.target.value,
-                                        })
-                                      }
-                                      placeholder="151"
-                                      className="bg-white/10 border-green-500/30"
+                              <div className="flex items-center justify-between">
+                                <Label className="text-gray-300 flex items-center">
+                                  <Crown className="h-4 w-4 mr-2 text-yellow-400" />
+                                  Free Play Numbers
+                                </Label>
+                                <div className="flex items-center space-x-2">
+                                  <span className="text-sm text-gray-400">Off</span>
+                                  <button
+                                    type="button"
+                                    onClick={() =>
+                                      setPreviewData({
+                                        ...previewData,
+                                        freePlayEnabled: !previewData.freePlayEnabled,
+                                      })
+                                    }
+                                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 ${
+                                      previewData.freePlayEnabled ? 'bg-green-500' : 'bg-gray-600'
+                                    }`}
+                                  >
+                                    <span
+                                      className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                                        previewData.freePlayEnabled ? 'translate-x-6' : 'translate-x-1'
+                                      }`}
                                     />
-                                  </div>
-                                  <div>
-                                    <Label htmlFor="freePlayEnd" className="text-green-300 text-sm">
-                                      End Number
-                                    </Label>
-                                    <Input
-                                      id="freePlayEnd"
-                                      name="freePlayEnd"
-                                      type="number"
-                                      min="1"
-                                      value={previewData.freePlayEnd}
-                                      onChange={(e) =>
-                                        setPreviewData({
-                                          ...previewData,
-                                          freePlayEnd: e.target.value,
-                                        })
-                                      }
-                                      placeholder="200"
-                                      className="bg-white/10 border-green-500/30"
-                                    />
-                                  </div>
+                                  </button>
+                                  <span className="text-sm text-gray-400">On</span>
                                 </div>
-                                <div className="flex items-center justify-between text-sm">
-                                  <span className="text-green-300 font-medium">Free Range:</span>
-                                  <span className="text-white bg-green-500/20 px-2 py-1 rounded">
-                                    {previewData.freePlayStart && previewData.freePlayEnd 
-                                      ? `${previewData.freePlayStart}-${previewData.freePlayEnd}` 
-                                      : "Not specified (all paid)"}
-                                  </span>
-                                </div>
-                                <p className="text-green-300 text-xs">
-                                  💡 Numbers in this range require no purchase. Leave empty to make all numbers paid.
-                                </p>
                               </div>
+                              
+                              {previewData.freePlayEnabled && (
+                                <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-4 space-y-3">
+                                  <div>
+                                    <Label htmlFor="freePlayNumbers" className="text-green-300 text-sm">
+                                      Free Play Numbers
+                                    </Label>
+                                    <Input
+                                      id="freePlayNumbers"
+                                      name="freePlayNumbers"
+                                      value={previewData.freePlayNumbers}
+                                      onChange={(e) =>
+                                        setPreviewData({
+                                          ...previewData,
+                                          freePlayNumbers: e.target.value,
+                                        })
+                                      }
+                                      placeholder="e.g., 1,5,10,25,50,75,100"
+                                      className="bg-white/10 border-green-500/30"
+                                    />
+                                    <p className="text-green-300 text-xs mt-2">
+                                      💡 Enter specific numbers separated by commas that require no purchase
+                                    </p>
+                                  </div>
+                                  <div className="flex items-center justify-between text-sm">
+                                    <span className="text-green-300 font-medium">Free Numbers:</span>
+                                    <span className="text-white bg-green-500/20 px-2 py-1 rounded">
+                                      {previewData.freePlayNumbers || "None specified"}
+                                    </span>
+                                  </div>
+                                </div>
+                              )}
+                              
+                              {!previewData.freePlayEnabled && (
+                                <div className="bg-gray-500/10 border border-gray-500/30 rounded-lg p-3">
+                                  <p className="text-gray-400 text-sm">
+                                    All numbers require payment when free play is disabled
+                                  </p>
+                                </div>
+                              )}
                             </div>
 
                             <Button
@@ -1688,33 +1697,32 @@ export default function AdminDashboard() {
                               </div>
 
                               {/* Enhanced Responsive Game Details Grid */}
-                              <div className="mt-4 sm:mt-6 grid grid-cols-2 gap-2 sm:gap-3">
-                                <div className="bg-gradient-to-br from-green-500/20 to-emerald-500/20 p-2 sm:p-3 rounded-lg border border-green-400/30 backdrop-blur-sm">
-                                  <div className="text-xs text-green-300 font-bold uppercase tracking-wider">
-                                    Free Play Range
+                              <div className="mt-4 sm:mt-6 grid grid-cols-1 gap-2 sm:gap-3">
+                                {previewData.freePlayEnabled && previewData.freePlayNumbers && (
+                                  <div className="bg-gradient-to-br from-green-500/20 to-emerald-500/20 p-2 sm:p-3 rounded-lg border border-green-400/30 backdrop-blur-sm">
+                                    <div className="text-xs text-green-300 font-bold uppercase tracking-wider">
+                                      Free Play Numbers
+                                    </div>
+                                    <div className="text-sm sm:text-base font-black text-green-200 mt-1">
+                                      {previewData.freePlayNumbers}
+                                    </div>
+                                    <div className="text-xs text-green-400 mt-1">
+                                      🎁 No cost required
+                                    </div>
                                   </div>
-                                  <div className="text-sm sm:text-base font-black text-green-200 mt-1">
-                                    {Math.ceil(
-                                      Number(previewData.totalNumbers) * 0.75,
-                                    )}
-                                    -{previewData.totalNumbers}
-                                  </div>
-                                  <div className="text-xs text-green-400 mt-1">
-                                    🎁 No cost
-                                  </div>
-                                </div>
+                                )}
                                 <div className="bg-gradient-to-br from-blue-500/20 to-cyan-500/20 p-2 sm:p-3 rounded-lg border border-blue-400/30 backdrop-blur-sm">
                                   <div className="text-xs text-blue-300 font-bold uppercase tracking-wider">
-                                    Paid Range
+                                    {previewData.freePlayEnabled && previewData.freePlayNumbers ? "Paid Numbers" : "All Numbers"}
                                   </div>
                                   <div className="text-sm sm:text-base font-black text-blue-200 mt-1">
-                                    1-
-                                    {Math.floor(
-                                      Number(previewData.totalNumbers) * 0.75,
-                                    ) - 1}
+                                    {previewData.freePlayEnabled && previewData.freePlayNumbers 
+                                      ? `1-${previewData.totalNumbers} (except free numbers)`
+                                      : `1-${previewData.totalNumbers}`
+                                    }
                                   </div>
                                   <div className="text-xs text-blue-400 mt-1">
-                                    💰 Pay exact
+                                    💰 Pay exact amount
                                   </div>
                                 </div>
                               </div>

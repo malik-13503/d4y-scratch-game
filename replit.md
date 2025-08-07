@@ -58,14 +58,15 @@ Preferred communication style: Simple, everyday language.
 
 ## Changelog
 
-- February 7, 2025: **MANUAL FREE PLAY CONTROLS COMPLETE** - Added comprehensive manual free play number controls to admin dashboard
-  - **Free Play Range Interface**: Added intuitive start/end number inputs in create game dialog for precise free play control
-  - **Live Preview Integration**: Real-time display of selected free play range (e.g., "151-200") as admins type
-  - **Database Integration**: Properly saves freePlayStart and freePlayEnd values to existing database structure
-  - **Default Logic Maintained**: Backward-compatible with existing games while enabling manual override capability
-  - **Green-Themed UI**: Professional green-highlighted section distinguishing free play controls from paid number settings
-  - **Form Validation**: Number inputs with proper min values, placeholders, and user guidance text
-  - **Admin Control**: Complete manual override of automatic free play assignments - admins can now set any range they want
+- February 7, 2025: **ADVANCED FREE PLAY CONTROLS COMPLETE** - Added sophisticated on/off toggle with individual number controls
+  - **Professional Toggle Switch**: Clean on/off toggle with green activation, smooth animations, and clear Off/On labels  
+  - **Individual Number Input**: When enabled, admins can specify exact numbers (e.g., "1,5,10,25,50") instead of ranges
+  - **Conditional Live Preview**: Free play section only appears when toggle is ON and numbers are specified
+  - **All Numbers Paid Mode**: When toggle is OFF, preview shows "All Numbers" without any free play mentions
+  - **Smart Text Display**: Dynamic preview text changes based on toggle state for clean user experience
+  - **Backward Compatible**: Uses existing freePlayStart/freePlayEnd database structure with intelligent conversion
+  - **Real-time Updates**: Live preview changes instantly as admins toggle or type numbers
+  - **Complete Admin Control**: Full manual override - toggle off for all paid numbers, or specify exact free numbers
 - February 7, 2025: **AUTOMATIC FREE PLAY LOGIC REMOVED** - Completely removed automatic "high number = free play" system per user requirements
   - **Backend Logic Removed**: Eliminated automatic free play determination based on freePlayStart/freePlayEnd ranges in storage.ts
   - **Wheel Component Updated**: Removed freePlayStart calculations and automatic free play assignment in professional-wheel.tsx
