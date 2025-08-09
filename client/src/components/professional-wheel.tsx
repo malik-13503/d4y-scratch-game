@@ -72,13 +72,11 @@ export const ProfessionalWheel = forwardRef<
 
     if (availableNumbers.length === 0) {
       // Fallback to static generation if no available numbers yet
-      console.log("🎯 No available numbers, generating fallback wheel with", totalNumbers, "total numbers");
       const segments = Math.min(maxSegments, totalNumbers);
       for (let i = 0; i < segments; i++) {
         const number = Math.floor((totalNumbers / segments) * i) + 1;
         numbers.push(Math.min(number, totalNumbers));
       }
-      console.log("🎯 Generated fallback numbers:", numbers);
       return numbers;
     }
 
@@ -131,37 +129,18 @@ export const ProfessionalWheel = forwardRef<
   // Fetch available numbers from API
   const fetchAvailableNumbers = async (gameId: number) => {
     try {
-      console.log("🎯 Fetching available numbers for game:", gameId);
       const response = await fetch(`/api/games/${gameId}/available-numbers`, {
         credentials: "include",
       });
-      console.log("🎯 Available numbers API response status:", response.status);
       if (response.ok) {
         const data = await response.json();
-        console.log("🎯 Available numbers data:", data);
         setAvailableNumbers(data.availableNumbers);
         return data.availableNumbers;
-      } else {
-        console.log("🎯 API failed, using fallback: generate all numbers 1 to", totalNumbers);
-        // If API fails, generate a full range as fallback
-        const fallbackNumbers = [];
-        for (let i = 1; i <= totalNumbers; i++) {
-          fallbackNumbers.push(i);
-        }
-        setAvailableNumbers(fallbackNumbers);
-        return fallbackNumbers;
       }
     } catch (error) {
-      console.error("🚨 Failed to fetch available numbers:", error);
-      console.log("🎯 Using emergency fallback: generate all numbers 1 to", totalNumbers);
-      // Emergency fallback - generate full range
-      const fallbackNumbers = [];
-      for (let i = 1; i <= totalNumbers; i++) {
-        fallbackNumbers.push(i);
-      }
-      setAvailableNumbers(fallbackNumbers);
-      return fallbackNumbers;
+      console.error("Failed to fetch available numbers:", error);
     }
+    return [];
   };
 
   // Initialize wheel numbers and fetch available numbers
@@ -170,27 +149,14 @@ export const ProfessionalWheel = forwardRef<
     const path = window.location.pathname;
     const gameIdMatch = path.match(/\/game\/(\d+)/);
 
-    console.log("🎯 Initializing wheel - path:", path, "totalNumbers:", totalNumbers);
-
     if (gameIdMatch) {
       const gameId = parseInt(gameIdMatch[1]);
-      console.log("🎯 Found gameId:", gameId, "- fetching available numbers");
       fetchAvailableNumbers(gameId).then(() => {
-        const newNumbers = generateWheelNumbers();
-        console.log("🎯 Setting initial wheel numbers:", newNumbers);
-        setWheelNumbers(newNumbers);
+        setWheelNumbers(generateWheelNumbers());
       });
     } else {
-      // Fallback for non-game pages - generate emergency fallback
-      console.log("🎯 No gameId found - using emergency fallback");
-      const fallbackNumbers = [];
-      const segments = Math.min(50, totalNumbers);
-      for (let i = 0; i < segments; i++) {
-        const number = Math.floor((totalNumbers / segments) * i) + 1;
-        fallbackNumbers.push(Math.min(number, totalNumbers));
-      }
-      console.log("🎯 Emergency fallback numbers:", fallbackNumbers);
-      setWheelNumbers(fallbackNumbers);
+      // Fallback for non-game pages
+      setWheelNumbers(generateWheelNumbers());
     }
   }, [totalNumbers]);
 

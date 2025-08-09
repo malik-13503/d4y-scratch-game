@@ -95,67 +95,6 @@ export default function AdminDashboard() {
     totalNumbers: "200",
   });
 
-  // Admin credential management handler
-  const handleUpdateAdminCredentials = async () => {
-    try {
-      const email = (document.getElementById("new-admin-email") as HTMLInputElement)?.value;
-      const password = (document.getElementById("new-admin-password") as HTMLInputElement)?.value;
-      const confirmPassword = (document.getElementById("confirm-admin-password") as HTMLInputElement)?.value;
-
-      if (!email || !password || !confirmPassword) {
-        toast({
-          title: "Missing Information",
-          description: "Please fill in all fields",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      if (password !== confirmPassword) {
-        toast({
-          title: "Password Mismatch",
-          description: "Passwords do not match",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      if (password.length < 8) {
-        toast({
-          title: "Invalid Password",
-          description: "Password must be at least 8 characters long",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      const response = await apiRequest("POST", "/api/admin/update-credentials", {
-        email,
-        password,
-        confirmPassword,
-      });
-
-      toast({
-        title: "Credentials Updated",
-        description: "Admin credentials updated successfully. You will be logged out.",
-        variant: "default",
-      });
-
-      // Redirect to admin login after a short delay
-      setTimeout(() => {
-        window.location.href = "/admin";
-      }, 2000);
-
-    } catch (error) {
-      console.error("Admin credential update failed:", error);
-      toast({
-        title: "Update Failed",
-        description: "Failed to update admin credentials. Please try again.",
-        variant: "destructive",
-      });
-    }
-  };
-
   // Live preview state
   const [previewData, setPreviewData] = useState({
     name: "Premium Travel Mug",
@@ -3925,62 +3864,6 @@ export default function AdminDashboard() {
                     <Label htmlFor="maintenance-mode" className="text-gray-300">
                       Maintenance Mode
                     </Label>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="bg-black/20 backdrop-blur-sm border border-purple-500/30">
-                <CardHeader>
-                  <CardTitle className="text-white flex items-center">
-                    <Lock className="h-5 w-5 mr-2 text-red-400" />
-                    Admin Credentials
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-2">
-                    <Label className="text-gray-300">Current Admin Email</Label>
-                    <Input
-                      value="admin@hittheroad.com"
-                      readOnly
-                      className="bg-white/5 border-white/20 text-white"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="text-gray-300">New Admin Email</Label>
-                    <Input
-                      id="new-admin-email"
-                      type="email"
-                      placeholder="Enter new admin email"
-                      className="bg-white/10 border-purple-500/30 text-white"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="text-gray-300">New Password</Label>
-                    <Input
-                      id="new-admin-password"
-                      type="password"
-                      placeholder="Enter new password (min 8 characters)"
-                      className="bg-white/10 border-purple-500/30 text-white"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="text-gray-300">Confirm New Password</Label>
-                    <Input
-                      id="confirm-admin-password"
-                      type="password"
-                      placeholder="Confirm new password"
-                      className="bg-white/10 border-purple-500/30 text-white"
-                    />
-                  </div>
-                  <Button 
-                    onClick={handleUpdateAdminCredentials}
-                    className="w-full bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700"
-                  >
-                    <Shield className="h-4 w-4 mr-2" />
-                    Update Admin Credentials
-                  </Button>
-                  <div className="text-xs text-gray-400 mt-2">
-                    ⚠️ Changing credentials will log you out and require re-authentication
                   </div>
                 </CardContent>
               </Card>
