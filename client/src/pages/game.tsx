@@ -129,7 +129,65 @@ export default function GamePage() {
     );
   }
 
+  // Check if game has ended
+  const isGameEnded = game.endTime && new Date() > new Date(game.endTime);
+  
+  // Check if all numbers are taken
+  const areAllNumbersTaken = availableNumbers?.availableNumbers?.length === 0;
+
+  if (isGameEnded) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-6xl mb-4">⏰</div>
+          <h2 className="text-2xl font-bold text-white mb-2">Game Has Ended</h2>
+          <p className="text-gray-400 mb-6">
+            This game ended on {new Date(game.endTime).toLocaleDateString()}. No more spins are allowed.
+          </p>
+          <Button
+            onClick={() => setLocation("/")}
+            className="bg-purple-600 hover:bg-purple-700"
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Games
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  if (areAllNumbersTaken) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-6xl mb-4">🎯</div>
+          <h2 className="text-2xl font-bold text-white mb-2">All Numbers Taken!</h2>
+          <p className="text-gray-400 mb-6">
+            All numbers in this game have been claimed. The game is complete!
+          </p>
+          <Button
+            onClick={() => setLocation("/")}
+            className="bg-purple-600 hover:bg-purple-700"
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Games
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   const handleInitiateSpin = () => {
+    // Check if game has ended
+    if (isGameEnded) {
+      return;
+    }
+
+    // Check if all numbers are taken
+    if (areAllNumbersTaken) {
+      return;
+    }
+
     // Check if user is authenticated
     if (!user) {
       setShowAuthPopup(true);
@@ -148,6 +206,16 @@ export default function GamePage() {
   };
 
   const handleFreePlay = () => {
+    // Check if game has ended
+    if (isGameEnded) {
+      return;
+    }
+
+    // Check if all numbers are taken
+    if (areAllNumbersTaken) {
+      return;
+    }
+
     if (hasUsedFreePlay) {
       return; // Already used free play
     }
