@@ -94,10 +94,8 @@ export default function GamePage() {
     enabled: !!gameId,
   });
 
-  // Always call useCountdown hook consistently, even if game is not loaded yet
-  const countdown = useCountdown(
-    game?.endTime ? new Date(game.endTime) : new Date(),
-  );
+  // Always call useCountdown hook consistently with stable value
+  const countdown = useCountdown(game?.endTime || new Date().toISOString());
 
   if (isLoading) {
     return (

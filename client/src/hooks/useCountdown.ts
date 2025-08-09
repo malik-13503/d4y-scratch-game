@@ -53,7 +53,17 @@ export function useCountdown(targetDate: string | Date) {
     // Set up interval
     const interval = setInterval(() => {
       const newTimeLeft = calculateTimeLeft();
-      setTimeLeft(newTimeLeft);
+      setTimeLeft(prev => {
+        // Only update if values actually changed to prevent unnecessary re-renders
+        if (prev.days !== newTimeLeft.days || 
+            prev.hours !== newTimeLeft.hours || 
+            prev.minutes !== newTimeLeft.minutes || 
+            prev.seconds !== newTimeLeft.seconds ||
+            prev.isExpired !== newTimeLeft.isExpired) {
+          return newTimeLeft;
+        }
+        return prev;
+      });
       
       // Clear interval if expired
       if (newTimeLeft.isExpired) {
@@ -62,7 +72,7 @@ export function useCountdown(targetDate: string | Date) {
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [targetDate]); // Only depend on targetDate string/Date
+  }, []); // Empty dependency array - interval will use the latest targetTimeRef.current
 
   return timeLeft;
 }

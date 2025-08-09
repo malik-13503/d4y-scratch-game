@@ -1,0 +1,21 @@
+9chunk-WERSD76P.js?v=87dfb8f5:521 Warning: Maximum update depth exceeded. This can happen when a component calls setState inside useEffect, but useEffect either doesn't have a dependency array, or one of the dependencies changes on every render.
+    at GamePage (https://f45475b4-a7c6-4031-bbbd-cffdcb6fa4d5-00-1aqxf2ubqm5iz.janeway.replit.dev/src/pages/game.tsx:45:18)
+    at Route (https://f45475b4-a7c6-4031-bbbd-cffdcb6fa4d5-00-1aqxf2ubqm5iz.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=87dfb8f5:323:16)
+    at Switch (https://f45475b4-a7c6-4031-bbbd-cffdcb6fa4d5-00-1aqxf2ubqm5iz.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=87dfb8f5:379:17)
+    at Router (https://f45475b4-a7c6-4031-bbbd-cffdcb6fa4d5-00-1aqxf2ubqm5iz.janeway.replit.dev/src/App.tsx?v=7-bFmOWVy1gWdfb0kv-ot:50:47)
+    at div
+    at Provider (https://f45475b4-a7c6-4031-bbbd-cffdcb6fa4d5-00-1aqxf2ubqm5iz.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-PLT6GTVM.js?v=87dfb8f5:38:15)
+    at TooltipProvider (https://f45475b4-a7c6-4031-bbbd-cffdcb6fa4d5-00-1aqxf2ubqm5iz.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=87dfb8f5:61:5)
+    at QueryClientProvider (https://f45475b4-a7c6-4031-bbbd-cffdcb6fa4d5-00-1aqxf2ubqm5iz.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=87dfb8f5:2805:3)
+    at App
+printWarning @ chunk-WERSD76P.js?v=87dfb8f5:521Understand this error
+23useCountdown.ts:51 Warning: Maximum update depth exceeded. This can happen when a component calls setState inside useEffect, but useEffect either doesn't have a dependency array, or one of the dependencies changes on every render.
+    at GamePage (https://f45475b4-a7c6-4031-bbbd-cffdcb6fa4d5-00-1aqxf2ubqm5iz.janeway.replit.dev/src/pages/game.tsx:45:18)
+    at Route (https://f45475b4-a7c6-4031-bbbd-cffdcb6fa4d5-00-1aqxf2ubqm5iz.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=87dfb8f5:323:16)
+    at Switch (https://f45475b4-a7c6-4031-bbbd-cffdcb6fa4d5-00-1aqxf2ubqm5iz.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=87dfb8f5:379:17)
+    at Router (https://f45475b4-a7c6-4031-bbbd-cffdcb6fa4d5-00-1aqxf2ubqm5iz.janeway.replit.dev/src/App.tsx?v=7-bFmOWVy1gWdfb0kv-ot:50:47)
+    at div
+    at Provider (https://f45475b4-a7c6-4031-bbbd-cffdcb6fa4d5-00-1aqxf2ubqm5iz.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-PLT6GTVM.js?v=87dfb8f5:38:15)
+    at TooltipProvider (https://f45475b4-a7c6-4031-bbbd-cffdcb6fa4d5-00-1aqxf2ubqm5iz.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=87dfb8f5:61:5)
+    at QueryClientProvider (https://f45475b4-a7c6-4031-bbbd-cffdcb6fa4d5-00-1aqxf2ubqm5iz.janeway.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=87dfb8f5:2805:3)
+    at App
