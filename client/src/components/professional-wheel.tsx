@@ -68,6 +68,7 @@ export const ProfessionalWheel = forwardRef<
   // Generate wheel numbers from available numbers for real-time updates
   const generateWheelNumbers = (): number[] => {
     const maxSegments = 50;
+    const minSegments = 8; // Always show at least 8 segments for visual appeal
     const numbers: number[] = [];
 
     if (availableNumbers.length === 0) {
@@ -77,6 +78,26 @@ export const ProfessionalWheel = forwardRef<
         const number = Math.floor((totalNumbers / segments) * i) + 1;
         numbers.push(Math.min(number, totalNumbers));
       }
+      return numbers;
+    }
+
+    // Special case: When very few numbers are left (≤8), fill wheel with some claimed numbers for context
+    if (availableNumbers.length <= minSegments) {
+      // Add all available numbers first
+      numbers.push(...availableNumbers);
+      
+      // Fill the rest with recently claimed numbers to reach minSegments for visual appeal
+      const neededSegments = minSegments - availableNumbers.length;
+      const claimedNumbers: number[] = [];
+      
+      // Generate some recently claimed numbers for context
+      for (let i = 1; i <= totalNumbers && claimedNumbers.length < neededSegments; i++) {
+        if (!availableNumbers.includes(i)) {
+          claimedNumbers.push(i);
+        }
+      }
+      
+      numbers.push(...claimedNumbers.slice(0, neededSegments));
       return numbers;
     }
 
