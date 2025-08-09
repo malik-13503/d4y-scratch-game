@@ -1628,6 +1628,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   });
 
+  // Admin credential management
+  app.post("/api/admin/update-credentials", requireAuth, async (req, res) => {
+    try {
+      const { email, password, confirmPassword } = req.body;
+      
+      if (!email || !password || !confirmPassword) {
+        return res.status(400).json({ message: "All fields are required" });
+      }
+      
+      if (password !== confirmPassword) {
+        return res.status(400).json({ message: "Passwords do not match" });
+      }
+      
+      if (password.length < 8) {
+        return res.status(400).json({ message: "Password must be at least 8 characters long" });
+      }
+      
+      // Update admin credentials in storage
+      const updated = await storage.updateAdminCredentials(email, password);
+      
+      if (!updated) {
+        return res.status(500).json({ message: "Failed to update credentials" });
+      }
+      
+      // Destroy current session to force re-login
+      req.session.destroy((err) => {
+        if (err) {
+          console.error("Session destruction error:", err);
+          return res.status(500).json({ message: "Credential update failed" });
+        }
+        res.clearCookie("connect.sid");
+        res.json({ 
+          message: "Admin credentials updated successfully. Please log in again.",
+          requireReauth: true
+        });
+      });
+    } catch (error) {
+      console.error("Admin credential update error:", error);
+      res.status(500).json({ message: "Failed to update credentials" });
+    }
+  });
+
   // Admin endpoint to view compliance logs (protected by admin auth)
   app.get("/admin/compliance-logs", requireAuth, async (req, res) => {
     try {

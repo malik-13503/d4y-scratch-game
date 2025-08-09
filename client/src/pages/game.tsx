@@ -470,39 +470,78 @@ export default function GamePage() {
                     onInitiateSpin={handleInitiateSpin}
                   />
                   
-                  {/* Free Play Button */}
-                  {!hasUsedFreePlay && (
-                    <div className="bg-gradient-to-r from-green-500/20 to-emerald-500/20 backdrop-blur-xl rounded-xl border border-green-400/40 shadow-2xl p-4 sm:p-6">
-                      <div className="flex flex-col items-center space-y-3">
-                        <div className="flex items-center space-x-2">
-                          <Gift className="h-5 w-5 text-green-400" />
-                          <span className="text-green-300 font-bold text-sm uppercase tracking-wide">
-                            Free Play Available
-                          </span>
-                        </div>
-                        <p className="text-white text-sm sm:text-base text-center">
-                          Try your luck with one free spin - no payment required!
-                        </p>
-                        <Button
-                          onClick={handleFreePlay}
-                          disabled={isSpinning}
-                          className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-bold px-6 py-3 rounded-xl shadow-lg transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
-                        >
-                          <Sparkles className="h-4 w-4 mr-2" />
-                          {isSpinning ? "Spinning..." : "Free Play Spin"}
-                        </Button>
-                      </div>
-                    </div>
-                  )}
+                  {/* Equal Prominence Buttons - Compliance Required */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {/* Play for Free Button - Equal Prominence */}
+                    {!hasUsedFreePlay && (
+                      <Button
+                        onClick={handleFreePlay}
+                        disabled={isSpinning}
+                        size="lg"
+                        className="w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-bold py-8 px-6 rounded-xl shadow-lg text-lg transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                      >
+                        <Gift className="h-6 w-6 mr-3" />
+                        {isSpinning ? "SPINNING..." : "PLAY FOR FREE"}
+                      </Button>
+                    )}
+                    
+                    {/* Play for Real Prizes Button - Equal Prominence */}
+                    <Button
+                      onClick={() => {
+                        setIsFreePlay(false);
+                        if (!user) {
+                          setShowAuthPopup(true);
+                          return;
+                        }
+                        if (!user.cardOnFile) {
+                          setShowPaymentPopup(true);
+                          return;
+                        }
+                        setShowDisclaimer(true);
+                      }}
+                      disabled={isSpinning || !game}
+                      size="lg"
+                      className={`w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-bold py-8 px-6 rounded-xl shadow-lg text-lg transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none ${!hasUsedFreePlay ? '' : 'col-span-2'}`}
+                    >
+                      <Zap className="h-6 w-6 mr-3" />
+                      {isSpinning ? "SPINNING..." : "PLAY FOR REAL PRIZES"}
+                    </Button>
+                  </div>
                   
+                  {/* Free Play Status Message */}
                   {hasUsedFreePlay && (
                     <div className="bg-gradient-to-r from-gray-500/20 to-slate-500/20 backdrop-blur-xl rounded-xl border border-gray-400/40 shadow-2xl p-4">
                       <div className="flex items-center justify-center space-x-2 text-gray-400">
                         <Gift className="h-4 w-4" />
-                        <span className="text-sm">Free play used - Join the game to continue playing!</span>
+                        <span className="text-sm">Free entry used - Continue with "Play for Real Prizes" for more chances to win!</span>
                       </div>
                     </div>
                   )}
+
+                  {/* Compliance Links - Persistent and Prominent */}
+                  <div className="bg-gradient-to-r from-blue-500/10 to-purple-500/10 backdrop-blur-xl rounded-xl border border-blue-400/30 shadow-2xl p-4">
+                    <div className="flex flex-wrap items-center justify-center gap-4 text-xs">
+                      <a href="/official-rules" className="text-blue-300 hover:text-blue-200 underline font-medium">
+                        📋 Official Rules
+                      </a>
+                      <span className="text-gray-400">|</span>
+                      <a href="/privacy" className="text-blue-300 hover:text-blue-200 underline font-medium">
+                        🔒 Privacy Policy
+                      </a>
+                      <span className="text-gray-400">|</span>
+                      <a href="/contact" className="text-blue-300 hover:text-blue-200 underline font-medium">
+                        📞 Contact Us
+                      </a>
+                    </div>
+                    <div className="text-center mt-2">
+                      <p className="text-yellow-300 font-bold text-xs">
+                        ⚖️ Odds depend on number of eligible entries received
+                      </p>
+                      <p className="text-gray-400 text-xs mt-1">
+                        Free and paid entries have equal chance of winning
+                      </p>
+                    </div>
+                  </div>
 
                   {/* Free Play Result Display */}
                   {freePlayMessage && (

@@ -38,6 +38,7 @@ export interface IStorage {
   getAdminUserByEmail(email: string): Promise<AdminUser | undefined>;
   createAdminUser(user: InsertAdminUser): Promise<AdminUser>;
   updateAdminUser(id: number, updates: Partial<AdminUser>): Promise<AdminUser | undefined>;
+  updateAdminCredentials(email: string, password: string): Promise<boolean>;
 
   // User methods (for game players)
   getUser(id: number): Promise<User | undefined>;
@@ -276,6 +277,27 @@ export class DatabaseStorage implements IStorage {
       .where(eq(adminUsers.id, id))
       .returning();
     return user || undefined;
+  }
+
+  async updateAdminCredentials(email: string, password: string): Promise<boolean> {
+    try {
+      // Hash the new password
+      const hashedPassword = await hashPassword(password);
+      
+      // Update the first admin user (assuming single admin setup)
+      const [updated] = await db.update(adminUsers)
+        .set({ 
+          email, 
+          password: hashedPassword
+        })
+        .where(eq(adminUsers.id, 1)) // Update the primary admin
+        .returning();
+      
+      return !!updated;
+    } catch (error) {
+      console.error("Error updating admin credentials:", error);
+      return false;
+    }
   }
 
   // Wheel segment methods
