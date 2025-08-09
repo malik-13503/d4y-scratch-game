@@ -469,7 +469,7 @@ export default function GamePage() {
                   />
                   
                   {/* Free Play Button */}
-                  {!hasUsedFreePlay && (
+                  {!hasUsedFreePlay && game.freePlayStart && game.freePlayEnd && (
                     <div className="bg-gradient-to-r from-green-500/20 to-emerald-500/20 backdrop-blur-xl rounded-xl border border-green-400/40 shadow-2xl p-4 sm:p-6">
                       <div className="flex flex-col items-center space-y-3">
                         <div className="flex items-center space-x-2">
@@ -493,7 +493,7 @@ export default function GamePage() {
                     </div>
                   )}
                   
-                  {hasUsedFreePlay && (
+                  {hasUsedFreePlay && game.freePlayStart && game.freePlayEnd && (
                     <div className="bg-gradient-to-r from-gray-500/20 to-slate-500/20 backdrop-blur-xl rounded-xl border border-gray-400/40 shadow-2xl p-4">
                       <div className="flex items-center justify-center space-x-2 text-gray-400">
                         <Gift className="h-4 w-4" />
