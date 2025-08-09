@@ -68,7 +68,6 @@ export const ProfessionalWheel = forwardRef<
   // Generate wheel numbers from available numbers for real-time updates
   const generateWheelNumbers = (): number[] => {
     const maxSegments = 50;
-    const minSegments = 8; // Always show at least 8 segments for visual appeal
     const numbers: number[] = [];
 
     if (availableNumbers.length === 0) {
@@ -81,68 +80,9 @@ export const ProfessionalWheel = forwardRef<
       return numbers;
     }
 
-    // Special case: When very few numbers are left (≤8), fill wheel with some claimed numbers for context
-    if (availableNumbers.length <= minSegments) {
-      // Add all available numbers first
-      numbers.push(...availableNumbers);
-      
-      // Fill the rest with recently claimed numbers to reach minSegments for visual appeal
-      const neededSegments = minSegments - availableNumbers.length;
-      const claimedNumbers: number[] = [];
-      
-      // Generate some recently claimed numbers for context
-      for (let i = 1; i <= totalNumbers && claimedNumbers.length < neededSegments; i++) {
-        if (!availableNumbers.includes(i)) {
-          claimedNumbers.push(i);
-        }
-      }
-      
-      numbers.push(...claimedNumbers.slice(0, neededSegments));
-      return numbers;
-    }
-
-    // NEW LOGIC: Handle different scenarios based on total numbers and claimed numbers
-    const claimedCount = totalNumbers - availableNumbers.length;
-
-    if (totalNumbers <= maxSegments) {
-      // For games with ≤50 numbers: show all available numbers (removes segments as claimed)
-      return [...availableNumbers].slice(0, maxSegments);
-    } else {
-      // For games with >50 numbers: show 50 segments until 20+ are claimed
-      if (claimedCount <= 20) {
-        // Show exactly 50 segments from available numbers (evenly distributed)
-        const step = Math.max(
-          1,
-          Math.floor(availableNumbers.length / maxSegments),
-        );
-        for (
-          let i = 0;
-          i < maxSegments && i * step < availableNumbers.length;
-          i++
-        ) {
-          numbers.push(availableNumbers[i * step]);
-        }
-        // Fill remaining slots if needed
-        while (
-          numbers.length < maxSegments &&
-          numbers.length < availableNumbers.length
-        ) {
-          const remaining = availableNumbers.filter(
-            (num) => !numbers.includes(num),
-          );
-          if (remaining.length > 0) {
-            numbers.push(remaining[0]);
-          } else {
-            break;
-          }
-        }
-      } else {
-        // After 20+ claimed: start removing segments, show only available numbers
-        return [...availableNumbers].slice(0, maxSegments);
-      }
-    }
-
-    return numbers;
+    // Simple logic: Always show only the available numbers, no matter how few
+    // This ensures 2 numbers = 2 segments, 1 number = 1 segment, etc.
+    return [...availableNumbers].slice(0, maxSegments);
   };
 
   const [wheelNumbers, setWheelNumbers] = useState<number[]>([]);
