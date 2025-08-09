@@ -251,7 +251,12 @@ export default function Home() {
           </div>
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8">
-            {games && games.length > 0 ? games.filter(game => game.isActive).map((game, index) => {
+            {games && games.length > 0 ? games.filter(game => {
+              // Filter out ended games and inactive games
+              const isEnded = game.endTime && new Date() > new Date(game.endTime);
+              const allNumbersTaken = game.numbersLeft === 0;
+              return game.isActive && !isEnded && !allNumbersTaken;
+            }).map((game, index) => {
               const Icon = getGameIcon(game.name);
               const progress = ((game.totalNumbers - game.numbersLeft) / game.totalNumbers) * 100;
               const colors = getGameColors(index);
