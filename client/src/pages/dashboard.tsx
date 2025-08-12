@@ -867,8 +867,8 @@ export default function Dashboard() {
 
 
 
-          {/* Settings Tab */}
-          <TabsContent value="settings" className="space-y-8">
+          {/* System Tab */}
+          <TabsContent value="system" className="space-y-8">
             <Card className="relative overflow-hidden bg-gradient-to-br from-slate-800/80 to-slate-900/80 border-purple-400/40 backdrop-blur-xl shadow-2xl">
               <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-blue-500/10 blur-2xl"></div>
               <CardHeader className="relative">
