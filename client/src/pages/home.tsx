@@ -324,7 +324,7 @@ export default function Home() {
                           </div>
                           <div className="flex items-center space-x-2">
                             <Users className="h-3 w-3 text-blue-400" />
-                            <span className="text-blue-400 font-bold text-xs">{Math.floor(Math.random() * 50) + 10} playing</span>
+                            <span className="text-blue-400 font-bold text-xs">Active game</span>
                           </div>
                         </div>
                       </div>

@@ -1332,7 +1332,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         // Send card setup confirmation email for sandbox
         try {
-          await emailService.sendCardSetupConfirmation(user.email, user.firstName, '4242', 'VISA');
+          await emailService.sendCardSetupConfirmation(user.email, user.firstName, 'Test', 'Sandbox');
           console.log("Card setup confirmation email sent to:", user.email);
         } catch (emailError) {
           console.error("Failed to send card setup confirmation email:", emailError);
@@ -1340,9 +1340,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
 
         res.json({ 
-          message: "Card added successfully",
-          cardLast4: '4242',
-          cardBrand: 'VISA'
+          message: "Card added successfully - Sandbox Mode",
+          cardLast4: 'Test',
+          cardBrand: 'Sandbox'
         });
       } else {
         // Production flow - verify card immediately with test transaction
@@ -1629,9 +1629,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           cardLast4 = paymentResult.cardDetails?.last4 || defaultCard?.cardLast4 || "****";
           cardBrand = paymentResult.cardDetails?.cardBrand || defaultCard?.cardBrand || "Unknown";
         } else {
-          // Sandbox mode
-          cardLast4 = "4242";
-          cardBrand = "VISA";
+          // Sandbox mode - use generic labels instead of fake card data
+          cardLast4 = "Test";
+          cardBrand = "Sandbox";
         }
 
         // Record transaction with spin result

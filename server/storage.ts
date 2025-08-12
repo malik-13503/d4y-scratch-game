@@ -124,80 +124,13 @@ export class DatabaseStorage implements IStorage {
     });
 
     this.initializeSampleData();
-    // Initialize admin user asynchronously without blocking startup
-    this.ensureDefaultAdminUser().catch(console.error);
+    // Sample data and default admin creation disabled - using real data only
+    console.log("DatabaseStorage initialized - using real data only");
   }
 
   private async initializeSampleData() {
-    try {
-      // Create sample games if none exist
-      const existingGames = await this.getGames();
-      if (existingGames.length === 0) {
-        const sampleGames = [
-          {
-            name: "Premium Travel Mug",
-            code: "MUG001",
-            description: "High-quality travel mug with thermal insulation",
-            gameType: "wheel",
-            prize: "Premium Travel Mug",
-            prizeValue: "89.99",
-            prizeDescription: "Stainless steel travel mug with 12-hour heat retention",
-            totalNumbers: 150,
-            numbersLeft: 142,
-
-            freePlayStart: 126,
-            freePlayEnd: 150,
-            startTime: new Date(),
-            endTime: new Date(Date.now() + 24 * 60 * 60 * 1000),
-            createdBy: 1,
-            emoji: "🎮",
-          },
-          {
-            name: "Premium Camera",
-            code: "CAM001", 
-            description: "Professional DSLR camera with premium lens",
-            gameType: "wheel",
-            prize: "Premium Camera",
-            prizeValue: "299.99",
-            prizeDescription: "High-resolution camera with multiple shooting modes",
-            totalNumbers: 200,
-            numbersLeft: 186,
-
-            freePlayStart: 151,
-            freePlayEnd: 200,
-            startTime: new Date(),
-            endTime: new Date(Date.now() + 72 * 60 * 60 * 1000),
-            createdBy: 1,
-            emoji: "📷",
-          },
-          {
-            name: "Gift Card Bundle",
-            code: "GFT001",
-            description: "Multi-store gift card bundle worth $250",
-            gameType: "wheel",
-            prize: "Gift Card Bundle",
-            prizeValue: "250.00",
-            prizeDescription: "Gift cards for popular retailers and restaurants",
-            totalNumbers: 200,
-            numbersLeft: 194,
-
-            freePlayStart: 176,
-            freePlayEnd: 200,
-            startTime: new Date(),
-            endTime: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-            createdBy: 1,
-            emoji: "🎁",
-          }
-        ];
-
-        for (const gameData of sampleGames) {
-          await this.createGame(gameData);
-        }
-        console.log("Sample games created successfully");
-      }
-    } catch (error) {
-      console.error("Failed to initialize sample data:", error);
-    }
+    // No longer creating sample data - only real games from admin interface
+    console.log("Sample data initialization skipped - using real data only");
   }
 
   // Game methods
@@ -452,28 +385,8 @@ export class DatabaseStorage implements IStorage {
   }
 
   async ensureDefaultAdminUser(): Promise<void> {
-    try {
-      const existingAdmin = await this.getAdminUserByEmail("admin@example.com");
-      if (!existingAdmin) {
-        console.log("Creating default admin user...");
-        const hashedPassword = await hashPassword("admin123");
-        await this.createAdminUser({
-          email: "admin@example.com",
-          password: hashedPassword,
-          firstName: "Admin",
-          lastName: "User",
-        });
-        console.log("Default admin user created successfully");
-      } else if (existingAdmin.password.startsWith("$2b$")) {
-        // Fix existing bcrypt password to use scrypt format
-        console.log("Updating default admin user password format...");
-        const hashedPassword = await hashPassword("admin123");
-        await this.updateAdminUser(existingAdmin.id, { password: hashedPassword });
-        console.log("Default admin user password format updated");
-      }
-    } catch (error) {
-      console.error("Failed to ensure default admin user:", error);
-    }
+    // No default admin creation - all admin users must be properly registered
+    console.log("Default admin creation disabled - admin accounts must be registered through proper channels");
   }
 
   // Spin result methods

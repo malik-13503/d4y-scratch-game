@@ -27,18 +27,8 @@ export function AddCardDialog({ onClose, onSuccess }: AddCardDialogProps) {
 
   const addCardMutation = useMutation({
     mutationFn: async (data: any) => {
-      // In a real implementation, this would integrate with Square Web SDK
-      // For now, we'll simulate the card creation process
-      await apiRequest("POST", "/api/payment-cards", {
-        cardLast4: data.cardNumber.slice(-4),
-        cardBrand: getCardBrand(data.cardNumber),
-        expiryMonth: parseInt(data.expiryMonth),
-        expiryYear: parseInt(data.expiryYear),
-        cardholderName: data.cardholderName,
-        squareCardId: `sq-card-${Date.now()}`, // Would be from Square
-        cardNonce: `cnon-${Date.now()}`, // Would be from Square
-        isActive: true
-      });
+      // This component should not be used - use Square Web SDK integration instead
+      throw new Error("This add card dialog is deprecated. Please use the Square Web SDK integration for real card processing.");
     },
     onSuccess: () => {
       toast({
