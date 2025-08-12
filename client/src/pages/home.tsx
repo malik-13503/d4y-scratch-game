@@ -334,7 +334,7 @@ export default function Home() {
                     <div className="mt-4 sm:mt-6 space-y-2 sm:space-y-3">
                       <div className="flex justify-between items-center">
                         <span className="text-xs sm:text-sm font-bold text-white">Game Progress</span>
-                        <span className="text-xs text-gray-300 font-mono bg-slate-800/50 px-2 py-1 rounded-full border border-white/10">{game.numbersLeft} / {game.totalNumbers} left</span>
+                        <span className="text-xs text-gray-300 font-mono bg-slate-800/50 px-2 py-1 rounded-full border border-white/10">{game.numbersLeft} spots left</span>
                       </div>
                       <div className="relative">
                         <Progress value={progress} className="h-2 bg-slate-800/50 border border-white/10" />

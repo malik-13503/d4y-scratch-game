@@ -135,7 +135,7 @@ export default function GamePage() {
   const isGameEnded = game.endTime && new Date() > new Date(game.endTime);
   
   // Check if all numbers are taken
-  const areAllNumbersTaken = availableNumbers?.availableNumbers?.length === 0;
+  const areAllNumbersTaken = availableNumbers?.totalAvailable === 0;
 
   if (isGameEnded) {
     return (
