@@ -830,20 +830,24 @@ export class DatabaseStorage implements IStorage {
       return {
         totalRevenue: Math.round(totalRevenue * 100) / 100,
         totalSpins,
-        conversionRate: Math.round((totalSpins / (totalUsers[0]?.count || 1)) * 100),
-        revenueGrowth: 15,
+        conversionRate: totalUsers[0]?.count > 0 ? Math.round((totalSpins / totalUsers[0].count) * 100 * 100) / 100 : 0,
+        revenueGrowth: 0, // Real growth calculation requires historical data comparison
+        winRate: totalSpins > 0 ? Math.round((gameStats.filter(g => g.spins > 0).length / Math.max(gameStats.length, 1)) * 100 * 100) / 100 : 0,
         todayRevenue: Math.round(Number(todayRevenue[0]?.total || 0) * 100) / 100,
         weeklyRevenue: Math.round(Number(weeklyRevenue[0]?.total || 0) * 100) / 100,
         monthlyRevenue: Math.round(Number(monthlyRevenue[0]?.total || 0) * 100) / 100,
         avgRevenuePerUser: totalUsers[0]?.count ? Math.round((totalRevenue / totalUsers[0].count) * 100) / 100 : 0,
         dailyActiveUsers: todayUsers[0]?.count || 0,
         weeklyActiveUsers: weeklyUsers[0]?.count || 0,
-        avgSessionDuration: "8m 45s",
-        retentionRate: "72%",
-        todayGrowth: 8,
+        avgSessionDuration: 0, // Real session tracking would be needed for authentic data
+        retentionRate: 0, // Real retention tracking would be needed for authentic data
+        todayGrowth: 0, // Real growth comparison would need historical data
         gameStats: gameStats.map(stat => ({
-          ...stat,
-          status: "Active",
+          id: stat.gameId,
+          name: stat.name,
+          emoji: stat.emoji,
+          players: stat.totalPlayers,
+          spins: stat.spins,
           revenue: Math.round(Number(stat.revenue) * 100) / 100
         }))
       };
