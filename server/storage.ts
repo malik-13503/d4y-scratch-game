@@ -45,6 +45,7 @@ export interface IStorage {
   getUserByEmail(email: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
   updateUser(id: number, updates: Partial<User>): Promise<User | undefined>;
+  updateUserPassword(id: number, newPassword: string): Promise<void>;
   deleteUser(id: number): Promise<boolean>;
 
   // Transaction methods
@@ -432,10 +433,10 @@ export class DatabaseStorage implements IStorage {
       // Create notification record
       await this.createNotification({
         gameId,
+        playerId: winnerId,
         title: "🎉 Congratulations! You Won!",
         message: `You've won the ${game.name}! Prize value: $${game.prizeValue}. You will be contacted within 24 hours regarding prize delivery.`,
-        type: "winner_announcement",
-        userId: user.id
+        type: "winner_announcement"
       });
 
       // Update user stats
@@ -721,6 +722,35 @@ export class DatabaseStorage implements IStorage {
     } catch (error) {
       console.error("Error updating user:", error);
       return undefined;
+    }
+  }
+
+  async updateUserPassword(id: number, newPassword: string): Promise<void> {
+    try {
+      await db.update(users)
+        .set({ password: newPassword, updatedAt: new Date() })
+        .where(eq(users.id, id));
+      console.log("Password updated successfully for user:", id);
+    } catch (error) {
+      console.error("Error updating user password:", error);
+      throw error;
+    }
+  }
+
+  async deleteUser(id: number): Promise<boolean> {
+    try {
+      // Delete all related records first
+      await db.delete(paymentCards).where(eq(paymentCards.userId, id));
+      await db.delete(transactions).where(eq(transactions.userId, id));
+      await db.delete(complianceLogs).where(eq(complianceLogs.userId, id));
+      await db.delete(players).where(eq(players.userId, id));
+      
+      // Finally delete the user
+      const result = await db.delete(users).where(eq(users.id, id));
+      return (result.rowCount || 0) > 0;
+    } catch (error) {
+      console.error("Error deleting user:", error);
+      throw error;
     }
   }
 

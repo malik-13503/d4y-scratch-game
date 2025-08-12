@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,7 +7,11 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { queryClient } from "@/lib/queryClient";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useToast } from "@/hooks/use-toast";
+import { queryClient, apiRequest } from "@/lib/queryClient";
 import { CardSetup } from "@/components/payment/card-setup";
 import EnhancedCardManagement from "@/components/payment/enhanced-card-management";
 import { 
@@ -117,6 +121,15 @@ const getAchievements = (userStats: any) => {
 export default function Dashboard() {
   const [, setLocation] = useLocation();
   const [currentTab, setCurrentTab] = useState('overview');
+  const [changePasswordOpen, setChangePasswordOpen] = useState(false);
+  const [twoFactorOpen, setTwoFactorOpen] = useState(false);
+  const [privacyOpen, setPrivacyOpen] = useState(false);
+  const [deleteAccountOpen, setDeleteAccountOpen] = useState(false);
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [deleteConfirmation, setDeleteConfirmation] = useState('');
+  const { toast } = useToast();
   
   const handleTabChange = (value: string) => {
     setCurrentTab(value);
@@ -202,6 +215,83 @@ export default function Dashboard() {
     queryClient.invalidateQueries({ queryKey: ["/api/user"] });
     // Switch back to overview tab
     handleTabChange('overview');
+  };
+
+  // Change Password mutation
+  const changePasswordMutation = useMutation({
+    mutationFn: async (data: { currentPassword: string; newPassword: string }) => {
+      return await apiRequest("POST", "/api/user/change-password", data);
+    },
+    onSuccess: () => {
+      toast({
+        title: "Password Changed",
+        description: "Your password has been updated successfully.",
+      });
+      setChangePasswordOpen(false);
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to change password.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Delete Account mutation
+  const deleteAccountMutation = useMutation({
+    mutationFn: async () => {
+      return await apiRequest("DELETE", "/api/user/delete-account");
+    },
+    onSuccess: () => {
+      toast({
+        title: "Account Deleted",
+        description: "Your account has been permanently deleted.",
+      });
+      setLocation('/');
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to delete account.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleChangePassword = () => {
+    if (newPassword !== confirmPassword) {
+      toast({
+        title: "Error",
+        description: "New passwords do not match.",
+        variant: "destructive",
+      });
+      return;
+    }
+    if (newPassword.length < 6) {
+      toast({
+        title: "Error",
+        description: "Password must be at least 6 characters long.",
+        variant: "destructive",
+      });
+      return;
+    }
+    changePasswordMutation.mutate({ currentPassword, newPassword });
+  };
+
+  const handleDeleteAccount = () => {
+    if (deleteConfirmation !== 'DELETE') {
+      toast({
+        title: "Error",
+        description: "Please type 'DELETE' to confirm account deletion.",
+        variant: "destructive",
+      });
+      return;
+    }
+    deleteAccountMutation.mutate();
   };
 
   return (
@@ -902,7 +992,7 @@ export default function Dashboard() {
                         </Badge>
                       </div>
                     </div>
-                    <Button variant="outline" className="w-full mt-4 border-purple-500 text-purple-300 hover:bg-purple-500/20">
+                    <Button variant="outline" className="w-full mt-4 border-purple-500 text-black-300">
                       Edit Profile
                     </Button>
                   </div>
@@ -967,18 +1057,229 @@ export default function Dashboard() {
                   <div className="p-6 bg-slate-700/50 rounded-xl border border-slate-600/30">
                     <h3 className="text-white font-bold text-lg mb-4">Privacy & Security</h3>
                     <div className="space-y-4">
-                      <Button variant="outline" className="w-full border-blue-500 text-blue-300 hover:bg-blue-500/20">
-                        Change Password
-                      </Button>
-                      <Button variant="outline" className="w-full border-green-500 text-green-300 hover:bg-green-500/20">
-                        Two-Factor Authentication
-                      </Button>
-                      <Button variant="outline" className="w-full border-orange-500 text-orange-300 hover:bg-orange-500/20">
-                        Privacy Settings
-                      </Button>
-                      <Button variant="outline" className="w-full border-red-500 text-red-300 hover:bg-red-500/20">
-                        Delete Account
-                      </Button>
+                      <Dialog open={changePasswordOpen} onOpenChange={setChangePasswordOpen}>
+                        <DialogTrigger asChild>
+                          <Button variant="outline" className="w-full border-blue-500 text-blue-300 hover:bg-blue-500/20">
+                            Change Password
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent className="bg-slate-900 border-slate-700 text-white">
+                          <DialogHeader>
+                            <DialogTitle>Change Password</DialogTitle>
+                            <DialogDescription className="text-gray-400">
+                              Enter your current password and choose a new one.
+                            </DialogDescription>
+                          </DialogHeader>
+                          <div className="grid gap-4 py-4">
+                            <div className="grid grid-cols-4 items-center gap-4">
+                              <Label htmlFor="current-password" className="text-right text-white">
+                                Current
+                              </Label>
+                              <Input
+                                id="current-password"
+                                type="password"
+                                value={currentPassword}
+                                onChange={(e) => setCurrentPassword(e.target.value)}
+                                className="col-span-3 bg-slate-800 border-slate-600 text-white"
+                                placeholder="Current password"
+                              />
+                            </div>
+                            <div className="grid grid-cols-4 items-center gap-4">
+                              <Label htmlFor="new-password" className="text-right text-white">
+                                New
+                              </Label>
+                              <Input
+                                id="new-password"
+                                type="password"
+                                value={newPassword}
+                                onChange={(e) => setNewPassword(e.target.value)}
+                                className="col-span-3 bg-slate-800 border-slate-600 text-white"
+                                placeholder="New password"
+                              />
+                            </div>
+                            <div className="grid grid-cols-4 items-center gap-4">
+                              <Label htmlFor="confirm-password" className="text-right text-white">
+                                Confirm
+                              </Label>
+                              <Input
+                                id="confirm-password"
+                                type="password"
+                                value={confirmPassword}
+                                onChange={(e) => setConfirmPassword(e.target.value)}
+                                className="col-span-3 bg-slate-800 border-slate-600 text-white"
+                                placeholder="Confirm new password"
+                              />
+                            </div>
+                          </div>
+                          <DialogFooter>
+                            <Button 
+                              onClick={handleChangePassword}
+                              disabled={changePasswordMutation.isPending}
+                              className="bg-blue-600 hover:bg-blue-700 text-white"
+                            >
+                              {changePasswordMutation.isPending ? "Changing..." : "Change Password"}
+                            </Button>
+                          </DialogFooter>
+                        </DialogContent>
+                      </Dialog>
+
+                      <Dialog open={twoFactorOpen} onOpenChange={setTwoFactorOpen}>
+                        <DialogTrigger asChild>
+                          <Button variant="outline" className="w-full border-green-500 text-green-300 hover:bg-green-500/20">
+                            Two-Factor Authentication
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent className="bg-slate-900 border-slate-700 text-white">
+                          <DialogHeader>
+                            <DialogTitle>Two-Factor Authentication</DialogTitle>
+                            <DialogDescription className="text-gray-400">
+                              Enable 2FA for enhanced account security.
+                            </DialogDescription>
+                          </DialogHeader>
+                          <div className="py-4">
+                            <div className="text-center space-y-4">
+                              <div className="p-6 bg-slate-800 rounded-lg border border-slate-600">
+                                <Shield className="h-12 w-12 text-green-400 mx-auto mb-4" />
+                                <p className="text-gray-300">
+                                  Two-factor authentication adds an extra layer of security to your account.
+                                </p>
+                              </div>
+                              <div className="text-yellow-400 text-sm">
+                                Feature coming soon! We're working on implementing 2FA for all users.
+                              </div>
+                            </div>
+                          </div>
+                          <DialogFooter>
+                            <Button 
+                              onClick={() => setTwoFactorOpen(false)}
+                              className="bg-gray-600 hover:bg-gray-700 text-white"
+                            >
+                              Close
+                            </Button>
+                          </DialogFooter>
+                        </DialogContent>
+                      </Dialog>
+
+                      <Dialog open={privacyOpen} onOpenChange={setPrivacyOpen}>
+                        <DialogTrigger asChild>
+                          <Button variant="outline" className="w-full border-orange-500 text-orange-300 hover:bg-orange-500/20">
+                            Privacy Settings
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent className="bg-slate-900 border-slate-700 text-white max-w-2xl">
+                          <DialogHeader>
+                            <DialogTitle>Privacy Settings</DialogTitle>
+                            <DialogDescription className="text-gray-400">
+                              Manage your privacy and data preferences.
+                            </DialogDescription>
+                          </DialogHeader>
+                          <div className="py-4 space-y-6">
+                            <div className="space-y-4">
+                              <div className="flex justify-between items-center p-4 bg-slate-800 rounded-lg">
+                                <div>
+                                  <h4 className="text-white font-medium">Marketing Communications</h4>
+                                  <p className="text-gray-400 text-sm">Receive promotional emails and offers</p>
+                                </div>
+                                <Switch defaultChecked />
+                              </div>
+                              <div className="flex justify-between items-center p-4 bg-slate-800 rounded-lg">
+                                <div>
+                                  <h4 className="text-white font-medium">Analytics Data</h4>
+                                  <p className="text-gray-400 text-sm">Help improve our service with usage data</p>
+                                </div>
+                                <Switch defaultChecked />
+                              </div>
+                              <div className="flex justify-between items-center p-4 bg-slate-800 rounded-lg">
+                                <div>
+                                  <h4 className="text-white font-medium">Profile Visibility</h4>
+                                  <p className="text-gray-400 text-sm">Show your profile to other players</p>
+                                </div>
+                                <Switch />
+                              </div>
+                              <div className="flex justify-between items-center p-4 bg-slate-800 rounded-lg">
+                                <div>
+                                  <h4 className="text-white font-medium">Transaction History</h4>
+                                  <p className="text-gray-400 text-sm">Keep detailed transaction records</p>
+                                </div>
+                                <Switch defaultChecked />
+                              </div>
+                            </div>
+                          </div>
+                          <DialogFooter>
+                            <Button 
+                              onClick={() => {
+                                toast({
+                                  title: "Settings Saved",
+                                  description: "Your privacy preferences have been updated.",
+                                });
+                                setPrivacyOpen(false);
+                              }}
+                              className="bg-orange-600 hover:bg-orange-700 text-white"
+                            >
+                              Save Settings
+                            </Button>
+                          </DialogFooter>
+                        </DialogContent>
+                      </Dialog>
+
+                      <Dialog open={deleteAccountOpen} onOpenChange={setDeleteAccountOpen}>
+                        <DialogTrigger asChild>
+                          <Button variant="outline" className="w-full border-red-500 text-red-300 hover:bg-red-500/20">
+                            Delete Account
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent className="bg-slate-900 border-slate-700 text-white">
+                          <DialogHeader>
+                            <DialogTitle className="text-red-400">Delete Account</DialogTitle>
+                            <DialogDescription className="text-gray-400">
+                              This action cannot be undone. This will permanently delete your account and remove your data from our servers.
+                            </DialogDescription>
+                          </DialogHeader>
+                          <div className="py-4">
+                            <div className="space-y-4">
+                              <div className="p-4 bg-red-900/20 border border-red-500/30 rounded-lg">
+                                <p className="text-red-300 text-sm font-medium">
+                                  ⚠️ Warning: Account deletion is permanent and irreversible
+                                </p>
+                                <ul className="text-red-200 text-sm mt-2 ml-4 list-disc">
+                                  <li>All your game history will be lost</li>
+                                  <li>Payment cards will be removed</li>
+                                  <li>Achievement progress will be deleted</li>
+                                  <li>You won't be able to recover this account</li>
+                                </ul>
+                              </div>
+                              <div>
+                                <Label htmlFor="delete-confirmation" className="text-white">
+                                  Type "DELETE" to confirm:
+                                </Label>
+                                <Input
+                                  id="delete-confirmation"
+                                  value={deleteConfirmation}
+                                  onChange={(e) => setDeleteConfirmation(e.target.value)}
+                                  className="mt-2 bg-slate-800 border-slate-600 text-white"
+                                  placeholder="DELETE"
+                                />
+                              </div>
+                            </div>
+                          </div>
+                          <DialogFooter>
+                            <Button 
+                              onClick={() => setDeleteAccountOpen(false)}
+                              variant="outline"
+                              className="border-gray-500 text-gray-300"
+                            >
+                              Cancel
+                            </Button>
+                            <Button 
+                              onClick={handleDeleteAccount}
+                              disabled={deleteAccountMutation.isPending || deleteConfirmation !== 'DELETE'}
+                              className="bg-red-600 hover:bg-red-700 text-white"
+                            >
+                              {deleteAccountMutation.isPending ? "Deleting..." : "Delete Account"}
+                            </Button>
+                          </DialogFooter>
+                        </DialogContent>
+                      </Dialog>
                     </div>
                   </div>
                 </div>
