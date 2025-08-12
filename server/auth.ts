@@ -85,16 +85,16 @@ export function setupAuth(app: Express) {
     try {
       console.log("Deserializing user ID:", id);
       const user = await storage.getAdminUser(id);
-      if (user) {
+      if (user && user.isActive) {
         console.log("User found during deserialization:", user.email);
         done(null, user);
       } else {
-        console.log("User not found during deserialization:", id);
+        console.log("User not found or inactive during deserialization:", id);
         done(null, false);
       }
     } catch (error) {
       console.error("Deserialization error:", error);
-      done(error);
+      done(error, null);
     }
   });
 
@@ -265,30 +265,42 @@ export function setupAuth(app: Express) {
       userID: req.user?.id,
       userEmail: req.user?.email,
       sessionExists: !!req.session,
-      cookies: req.headers.cookie ? "present" : "missing"
+      cookies: req.headers.cookie ? "present" : "missing",
+      passport: req.session?.passport ? "present" : "missing",
+      passportUser: req.session?.passport?.user,
+      fullSession: req.session
     });
   });
 }
 
-// Middleware to require authentication
-export function requireAuth(req: any, res: any, next: any) {
-  console.log("RequireAuth check:", {
-    isAuthenticated: req.isAuthenticated(),
-    hasUser: !!req.user,
-    sessionID: req.sessionID,
-    userID: req.user?.id,
-    session: req.session ? "exists" : "missing",
-    cookies: req.headers.cookie ? "present" : "missing"
-  });
+// Middleware to require authentication  
+export async function requireAuth(req: any, res: any, next: any) {
   
-  // Check if user session exists and is valid
+  // Check if user session exists and is valid (standard passport auth)
   if (req.isAuthenticated() && req.user && req.user.isActive) {
-    // Touch session to keep it alive
     req.session.touch();
     return next();
   }
   
-  console.log("Authentication failed - redirecting to login");
+  // Fallback check: if passport session exists but req.user is not populated
+  if (req.session?.passport?.user) {
+    console.log("Manual session check - user ID from session:", req.session.passport.user);
+    try {
+      const user = await storage.getAdminUser(req.session.passport.user);
+      if (user && user.isActive) {
+        req.user = user;
+        console.log("Manual user population successful for user:", user.email);
+        req.session.touch();
+        return next();
+      } else {
+        console.log("Manual user population failed - user not found or inactive");
+      }
+    } catch (error) {
+      console.error("Manual session check error:", error);
+    }
+  }
+  
+  console.log("Authentication failed - no valid session found");
   res.status(401).json({ message: "Authentication required" });
 }
 

@@ -2,7 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth } from "./auth";
-import { requireAuth } from "./middleware/auth";
+import { requireAuth } from "./auth";
 import { 
   insertGameSchema, insertPlayerSchema, insertGameResultSchema, 
   insertWheelSegmentSchema, insertSystemSettingSchema, insertNotificationSchema,

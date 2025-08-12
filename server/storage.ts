@@ -11,6 +11,7 @@ import { db } from "./db";
 import { eq, desc, sql, and, isNotNull } from "drizzle-orm";
 import session from "express-session";
 import MemoryStore from "memorystore";
+import connectPg from "connect-pg-simple";
 import { hashPassword } from "./utils"; // Import hashPassword
 
 const MemStore = MemoryStore(session);
@@ -113,10 +114,13 @@ export class DatabaseStorage implements IStorage {
   public sessionStore: any;
 
   constructor() {
-    this.sessionStore = new MemStore({
-      checkPeriod: 86400000, // prune expired entries every 24h
-      ttl: 7 * 24 * 60 * 60 * 1000, // 7 days TTL
-      stale: false // Don't return stale sessions
+    // Use database-backed session store instead of memory store
+    const pgStore = connectPg(session);
+    this.sessionStore = new pgStore({
+      conString: process.env.DATABASE_URL,
+      createTableIfMissing: true,
+      ttl: 7 * 24 * 60 * 60, // 7 days in seconds
+      tableName: 'admin_sessions'
     });
 
     this.initializeSampleData();
