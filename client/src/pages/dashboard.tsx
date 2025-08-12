@@ -9,7 +9,7 @@ import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { queryClient } from "@/lib/queryClient";
 import { CardSetup } from "@/components/payment/card-setup";
-import CardManagement from "@/components/payment/card-management";
+import EnhancedCardManagement from "@/components/payment/enhanced-card-management";
 import { 
   User, 
   Trophy, 
@@ -953,7 +953,7 @@ export default function Dashboard() {
 
           {/* Cards Tab */}
           <TabsContent value="cards" className="mt-6">
-            <CardManagement />
+            <EnhancedCardManagement />
           </TabsContent>
         </Tabs>
       </div>

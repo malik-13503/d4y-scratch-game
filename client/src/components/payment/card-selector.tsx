@@ -3,7 +3,8 @@ import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { CreditCard, Plus, Check } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { CreditCard, Plus, Check, AlertCircle, Shield, Star } from "lucide-react";
 
 interface PaymentCard {
   id: number;
@@ -28,36 +29,64 @@ interface CardSelectorProps {
 }
 
 export function CardSelector({ selectedCardId, onCardSelect, onAddCard }: CardSelectorProps) {
-  const { data: cards, isLoading } = useQuery<PaymentCard[]>({
+  const { data: cards, isLoading, error } = useQuery<PaymentCard[]>({
     queryKey: ["/api/payment-cards"],
   });
 
+  const getCardBrandColor = (brand: string) => {
+    switch (brand.toLowerCase()) {
+      case 'visa': return 'from-blue-600 to-blue-800';
+      case 'mastercard': return 'from-red-600 to-orange-600';
+      case 'amex': return 'from-green-600 to-teal-600';
+      case 'discover': return 'from-orange-600 to-yellow-600';
+      default: return 'from-gray-600 to-gray-800';
+    }
+  };
+
   if (isLoading) {
     return (
-      <div className="space-y-3">
-        <div className="animate-pulse">
-          <div className="h-16 bg-white/10 rounded-lg"></div>
+      <div className="space-y-4">
+        <div className="text-center py-6">
+          <div className="animate-spin w-8 h-8 border-4 border-purple-600 border-t-transparent rounded-full mx-auto mb-3" />
+          <p className="text-gray-300">Loading your payment methods...</p>
         </div>
       </div>
     );
   }
 
+  if (error) {
+    return (
+      <Alert className="border-red-500/50 bg-red-900/20">
+        <AlertCircle className="h-4 w-4" />
+        <AlertDescription className="text-red-200">
+          Failed to load payment cards. Please try again or contact support.
+        </AlertDescription>
+      </Alert>
+    );
+  }
+
   if (!cards || cards.length === 0) {
     return (
-      <Card className="bg-white/10 backdrop-blur-md border-white/20">
-        <CardContent className="p-6 text-center">
-          <CreditCard className="h-8 w-8 text-white/50 mx-auto mb-3" />
-          <h3 className="text-white font-semibold mb-2">No Payment Cards</h3>
-          <p className="text-white/70 text-sm mb-4">Add a payment card to continue with your purchase.</p>
-          <Button 
-            onClick={onAddCard}
-            className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            Add Payment Card
-          </Button>
-        </CardContent>
-      </Card>
+      <div className="text-center py-8 space-y-4">
+        <div className="p-4 bg-gradient-to-r from-purple-600/20 to-blue-600/20 rounded-full w-fit mx-auto">
+          <CreditCard className="h-10 w-10 text-purple-400" />
+        </div>
+        <div>
+          <h3 className="text-lg font-semibold text-white mb-2">No Payment Cards</h3>
+          <p className="text-gray-400 mb-6">Add a secure payment method to continue playing</p>
+        </div>
+        <Button 
+          onClick={onAddCard}
+          className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 px-6 py-3"
+        >
+          <Plus className="h-4 w-4 mr-2" />
+          Add Payment Card
+        </Button>
+        <div className="flex items-center justify-center gap-2 text-xs text-gray-400">
+          <Shield className="h-3 w-3" />
+          <span>Secured by 256-bit SSL encryption</span>
+        </div>
+      </div>
     );
   }
 

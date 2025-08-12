@@ -5,7 +5,26 @@ import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { CreditCard, Plus, Trash2, Star } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Separator } from "@/components/ui/separator";
+import { 
+  CreditCard, 
+  Plus, 
+  Trash2, 
+  Star, 
+  Shield, 
+  Lock,
+  CheckCircle,
+  AlertCircle,
+  Zap,
+  Globe,
+  Clock,
+  Users,
+  DollarSign,
+  TrendingUp,
+  Award,
+  RefreshCw
+} from "lucide-react";
 import { AddCardDialog } from "./add-card-dialog";
 
 interface PaymentCard {
