@@ -312,32 +312,67 @@ export default function Dashboard() {
 
         {/* Tabs for Dashboard Sections */}
         <Tabs value={currentTab} onValueChange={handleTabChange} className="w-full">
-          <TabsList className="grid w-full grid-cols-2 lg:grid-cols-6 bg-black/40 backdrop-blur-xl border border-purple-500/30 rounded-2xl p-2">
-            <TabsTrigger value="overview" className="text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-blue-600 rounded-xl transition-all duration-200">
-              <Gauge className="h-4 w-4 mr-2" />
-              Overview
-            </TabsTrigger>
-            <TabsTrigger value="transactions" className="text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-blue-600 rounded-xl transition-all duration-200">
-              <Activity className="h-4 w-4 mr-2" />
-              Transactions
-            </TabsTrigger>
-            <TabsTrigger value="achievements" className="text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-blue-600 rounded-xl transition-all duration-200">
-              <Award className="h-4 w-4 mr-2" />
-              Achievements
-            </TabsTrigger>
-            <TabsTrigger value="payment" className="text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-blue-600 rounded-xl transition-all duration-200">
-              <CreditCard className="h-4 w-4 mr-2" />
-              Payment Setup
-            </TabsTrigger>
-            <TabsTrigger value="cards" className="text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-blue-600 rounded-xl transition-all duration-200">
-              <Shield className="h-4 w-4 mr-2" />
-              My Cards
-            </TabsTrigger>
-            <TabsTrigger value="system" className="text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-blue-600 rounded-xl transition-all duration-200">
-              <Settings className="h-4 w-4 mr-2" />
-              System
-            </TabsTrigger>
-          </TabsList>
+          {/* Mobile Tabs - Scrollable */}
+          <div className="lg:hidden">
+            <TabsList className="flex w-full overflow-x-auto bg-black/40 backdrop-blur-xl border border-purple-500/30 rounded-2xl p-2 scrollbar-hide">
+              <div className="flex gap-2 min-w-max">
+                <TabsTrigger value="overview" className="text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-blue-600 rounded-xl transition-all duration-200 whitespace-nowrap px-3 py-2">
+                  <Gauge className="h-4 w-4 mr-1 sm:mr-2" />
+                  <span className="text-xs sm:text-sm">Overview</span>
+                </TabsTrigger>
+                <TabsTrigger value="transactions" className="text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-blue-600 rounded-xl transition-all duration-200 whitespace-nowrap px-3 py-2">
+                  <Activity className="h-4 w-4 mr-1 sm:mr-2" />
+                  <span className="text-xs sm:text-sm">Transactions</span>
+                </TabsTrigger>
+                <TabsTrigger value="achievements" className="text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-blue-600 rounded-xl transition-all duration-200 whitespace-nowrap px-3 py-2">
+                  <Award className="h-4 w-4 mr-1 sm:mr-2" />
+                  <span className="text-xs sm:text-sm">Achievements</span>
+                </TabsTrigger>
+                <TabsTrigger value="payment" className="text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-blue-600 rounded-xl transition-all duration-200 whitespace-nowrap px-3 py-2">
+                  <CreditCard className="h-4 w-4 mr-1 sm:mr-2" />
+                  <span className="text-xs sm:text-sm">Payment</span>
+                </TabsTrigger>
+                <TabsTrigger value="cards" className="text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-blue-600 rounded-xl transition-all duration-200 whitespace-nowrap px-3 py-2">
+                  <Shield className="h-4 w-4 mr-1 sm:mr-2" />
+                  <span className="text-xs sm:text-sm">My Cards</span>
+                </TabsTrigger>
+                <TabsTrigger value="system" className="text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-blue-600 rounded-xl transition-all duration-200 whitespace-nowrap px-3 py-2">
+                  <Settings className="h-4 w-4 mr-1 sm:mr-2" />
+                  <span className="text-xs sm:text-sm">System</span>
+                </TabsTrigger>
+              </div>
+            </TabsList>
+          </div>
+
+          {/* Desktop Tabs - Grid */}
+          <div className="hidden lg:block">
+            <TabsList className="grid w-full grid-cols-6 bg-black/40 backdrop-blur-xl border border-purple-500/30 rounded-2xl p-2">
+              <TabsTrigger value="overview" className="text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-blue-600 rounded-xl transition-all duration-200">
+                <Gauge className="h-4 w-4 mr-2" />
+                Overview
+              </TabsTrigger>
+              <TabsTrigger value="transactions" className="text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-blue-600 rounded-xl transition-all duration-200">
+                <Activity className="h-4 w-4 mr-2" />
+                Transactions
+              </TabsTrigger>
+              <TabsTrigger value="achievements" className="text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-blue-600 rounded-xl transition-all duration-200">
+                <Award className="h-4 w-4 mr-2" />
+                Achievements
+              </TabsTrigger>
+              <TabsTrigger value="payment" className="text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-blue-600 rounded-xl transition-all duration-200">
+                <CreditCard className="h-4 w-4 mr-2" />
+                Payment Setup
+              </TabsTrigger>
+              <TabsTrigger value="cards" className="text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-blue-600 rounded-xl transition-all duration-200">
+                <Shield className="h-4 w-4 mr-2" />
+                My Cards
+              </TabsTrigger>
+              <TabsTrigger value="system" className="text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-blue-600 rounded-xl transition-all duration-200">
+                <Settings className="h-4 w-4 mr-2" />
+                System
+              </TabsTrigger>
+            </TabsList>
+          </div>
 
           {/* Overview Tab */}
           <TabsContent value="overview" className="space-y-8">
