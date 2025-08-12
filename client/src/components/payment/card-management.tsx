@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { CreditCard, Plus, Trash2, Star } from "lucide-react";
+import { AddCardDialog } from "./add-card-dialog";
 
 interface PaymentCard {
   id: number;
@@ -181,33 +182,13 @@ export default function CardManagement() {
       )}
 
       {showAddCard && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <Card className="bg-white/95 backdrop-blur-md border-white/20 w-full max-w-md mx-4">
-            <CardHeader>
-              <CardTitle className="text-gray-900">Add New Payment Card</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <p className="text-gray-600">
-                Payment card management will be integrated with Square payment processing.
-              </p>
-              <div className="flex gap-2">
-                <Button 
-                  onClick={() => setShowAddCard(false)}
-                  variant="outline"
-                  className="flex-1"
-                >
-                  Cancel
-                </Button>
-                <Button 
-                  onClick={() => setShowAddCard(false)}
-                  className="flex-1 bg-gradient-to-r from-purple-600 to-blue-600"
-                >
-                  Coming Soon
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+        <AddCardDialog 
+          onClose={() => setShowAddCard(false)}
+          onSuccess={() => {
+            setShowAddCard(false);
+            queryClient.invalidateQueries({ queryKey: ["/api/payment-cards"] });
+          }}
+        />
       )}
     </div>
   );

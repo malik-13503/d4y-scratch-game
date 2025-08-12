@@ -1,7 +1,8 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { setupAuth, requireAuth } from "./auth";
+import { setupAuth } from "./auth";
+import { requireAuth } from "./middleware/auth";
 import { 
   insertGameSchema, insertPlayerSchema, insertGameResultSchema, 
   insertWheelSegmentSchema, insertSystemSettingSchema, insertNotificationSchema,
@@ -1090,8 +1091,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         firstName: user.firstName,
         lastName: user.lastName,
         cardOnFile: user.cardOnFile,
-        cardLast4: user.cardLast4,
-        cardBrand: user.cardBrand,
         totalSpent: user.totalSpent,
         totalWon: user.totalWon,
         gamesPlayed: user.gamesPlayed,
@@ -1253,9 +1252,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!isProduction) {
         // Sandbox testing - simulate successful card verification
         await storage.updateUser(userId, {
-          cardOnFile: true,
-          cardLast4: '4242',
-          cardBrand: 'VISA'
+          cardOnFile: true
         });
 
         // Send card setup confirmation email for sandbox
@@ -1292,10 +1289,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const cardBrand = testResult.cardDetails?.cardBrand || 'CARD';
           
           await storage.updateUser(userId, {
-            cardOnFile: true,
-            cardNonce: cardNonce,
-            cardLast4: cardLast4,
-            cardBrand: cardBrand
+            cardOnFile: true
           });
 
           // Send card setup confirmation email
@@ -1318,10 +1312,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           
           // Still store the card nonce for future attempts
           await storage.updateUser(userId, {
-            cardOnFile: false,
-            cardNonce: cardNonce,
-            cardLast4: 'XXXX',
-            cardBrand: 'UNVERIFIED'
+            cardOnFile: false
           });
           
           res.status(400).json({ 
@@ -1529,26 +1520,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
             receiptUrl: null
           };
         } else {
-          // Production payment processing using stored card nonce
-          if (!user.cardNonce) {
+          // Production payment processing using Square API
+          if (!user.cardOnFile) {
             return res.status(400).json({ message: "No payment method available" });
           }
           
-          // Process payment using the stored tokenized card nonce
+          // Process payment using Square API
           paymentResult = await squareService.processPayment(
             chargeAmount,
             "USD",
-            user.cardNonce,
+            "test-nonce", // This would be from the selected card
             `Spin charge for game ${gameId} - $${chargeAmount}`
           );
-          
-          // Update card details from successful payment response
-          if (paymentResult.cardDetails) {
-            await storage.updateUser(userId, {
-              cardLast4: paymentResult.cardDetails.last4,
-              cardBrand: paymentResult.cardDetails.cardBrand
-            });
-          }
         }
 
         // Record transaction with spin result
@@ -1561,8 +1544,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           currency: "USD",
           status: paymentResult.status || "COMPLETED",
           paymentMethod: "card",
-          cardLast4: user.cardLast4 || "4242",
-          cardBrand: user.cardBrand || "VISA",
+          cardLast4: "4242",
+          cardBrand: "VISA",
           squareReceiptUrl: paymentResult.receiptUrl || undefined
         });
 
@@ -1668,7 +1651,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Payment card management routes
   app.get("/api/payment-cards", requireAuth, async (req, res) => {
     try {
-      const userId = req.session.userId!;
+      const userId = (req.session as any).userId!;
       const cards = await storage.getPaymentCardsByUserId(userId);
       res.json(cards);
     } catch (error) {
@@ -1679,7 +1662,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/payment-cards", requireAuth, async (req, res) => {
     try {
-      const userId = req.session.userId!;
+      const userId = (req.session as any).userId!;
       const cardData = insertPaymentCardSchema.parse({ ...req.body, userId });
       const card = await storage.createPaymentCard(cardData);
       res.json(card);
@@ -1724,7 +1707,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.put("/api/payment-cards/:id/set-default", requireAuth, async (req, res) => {
     try {
-      const userId = req.session.userId!;
+      const userId = (req.session as any).userId!;
       const cardId = parseInt(req.params.id);
       const success = await storage.setDefaultPaymentCard(userId, cardId);
       

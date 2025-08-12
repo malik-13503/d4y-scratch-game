@@ -35,6 +35,8 @@ export default function GamePage() {
   const [showDisclaimer, setShowDisclaimer] = useState(false);
   const [showAuthPopup, setShowAuthPopup] = useState(false);
   const [showPaymentPopup, setShowPaymentPopup] = useState(false);
+  const [selectedCardId, setSelectedCardId] = useState<number>();
+  const [showCardSelector, setShowCardSelector] = useState(false);
   const [isSpinning, setIsSpinning] = useState(false);
   const [playerCount, setPlayerCount] = useState(1);
   const [hasUsedFreePlay, setHasUsedFreePlay] = useState(false);
@@ -194,8 +196,9 @@ export default function GamePage() {
       return;
     }
 
-    // Check if user has payment method
+    // Check if user has payment method or needs card selection
     if (!(user as any)?.cardOnFile) {
+      setShowCardSelector(true);
       setShowPaymentPopup(true);
       return;
     }
@@ -770,7 +773,16 @@ export default function GamePage() {
       {/* Payment Method Required Popup */}
       <PaymentRequiredPopup
         isOpen={showPaymentPopup}
-        onClose={() => setShowPaymentPopup(false)}
+        onClose={() => {
+          setShowPaymentPopup(false);
+          setShowCardSelector(false);
+        }}
+        showCardSelector={showCardSelector}
+        onCardSelected={(cardId) => {
+          setSelectedCardId(cardId);
+          setShowPaymentPopup(false);
+          setShowCardSelector(false);
+        }}
       />
     </div>
   );

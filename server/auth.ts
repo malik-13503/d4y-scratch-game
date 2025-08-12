@@ -6,6 +6,12 @@ import { storage } from "./storage";
 import { AdminUser } from "@shared/schema";
 import { hashPassword, comparePasswords } from "./utils";
 
+declare module "express-session" {
+  interface SessionData {
+    userId?: number;
+  }
+}
+
 declare global {
   namespace Express {
     interface User extends AdminUser {}
