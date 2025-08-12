@@ -9,6 +9,7 @@ import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { queryClient } from "@/lib/queryClient";
 import { CardSetup } from "@/components/payment/card-setup";
+import CardManagement from "@/components/payment/card-management";
 import { 
   User, 
   Trophy, 
@@ -311,7 +312,7 @@ export default function Dashboard() {
 
         {/* Tabs for Dashboard Sections */}
         <Tabs value={currentTab} onValueChange={handleTabChange} className="w-full">
-          <TabsList className="grid w-full grid-cols-2 lg:grid-cols-5 bg-black/40 backdrop-blur-xl border border-purple-500/30 rounded-2xl p-2">
+          <TabsList className="grid w-full grid-cols-2 lg:grid-cols-6 bg-black/40 backdrop-blur-xl border border-purple-500/30 rounded-2xl p-2">
             <TabsTrigger value="overview" className="text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-blue-600 rounded-xl transition-all duration-200">
               <Gauge className="h-4 w-4 mr-2" />
               Overview
@@ -326,7 +327,11 @@ export default function Dashboard() {
             </TabsTrigger>
             <TabsTrigger value="payment" className="text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-blue-600 rounded-xl transition-all duration-200">
               <CreditCard className="h-4 w-4 mr-2" />
-              Payment
+              Payment Setup
+            </TabsTrigger>
+            <TabsTrigger value="cards" className="text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-blue-600 rounded-xl transition-all duration-200">
+              <Shield className="h-4 w-4 mr-2" />
+              My Cards
             </TabsTrigger>
             <TabsTrigger value="system" className="text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-blue-600 rounded-xl transition-all duration-200">
               <Settings className="h-4 w-4 mr-2" />
@@ -944,6 +949,11 @@ export default function Dashboard() {
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* Cards Tab */}
+          <TabsContent value="cards" className="mt-6">
+            <CardManagement />
           </TabsContent>
         </Tabs>
       </div>

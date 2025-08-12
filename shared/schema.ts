@@ -14,9 +14,7 @@ export const users = pgTable("users", {
   isActive: boolean("is_active").notNull().default(true),
   squareCustomerId: text("square_customer_id").unique(),
   cardOnFile: boolean("card_on_file").notNull().default(false),
-  cardNonce: text("card_nonce"), // Store tokenized card nonce for payments
-  cardLast4: text("card_last_4"),
-  cardBrand: text("card_brand"),
+  defaultCardId: integer("default_card_id"), // Reference to default payment card
   totalSpent: decimal("total_spent", { precision: 10, scale: 2 }).notNull().default("0"),
   totalWon: decimal("total_won", { precision: 10, scale: 2 }).notNull().default("0"),
   gamesPlayed: integer("games_played").notNull().default(0),
@@ -24,6 +22,23 @@ export const users = pgTable("users", {
   // Legal compliance fields
   acceptedTermsAt: timestamp("accepted_terms_at"),
   optOutPublicity: boolean("opt_out_publicity").notNull().default(false), // TN residents can opt out
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+// Payment cards table for multiple card support
+export const paymentCards = pgTable("payment_cards", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  squareCardId: text("square_card_id").unique(),
+  cardNonce: text("card_nonce"), // Store tokenized card nonce for payments
+  cardLast4: text("card_last_4").notNull(),
+  cardBrand: text("card_brand").notNull(),
+  expiryMonth: integer("expiry_month"),
+  expiryYear: integer("expiry_year"),
+  cardholderName: text("cardholder_name"),
+  isDefault: boolean("is_default").notNull().default(false),
+  isActive: boolean("is_active").notNull().default(true),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
@@ -53,6 +68,7 @@ export const transactions = pgTable("transactions", {
   userId: integer("user_id").notNull(),
   gameId: integer("game_id").notNull(),
   spinResultId: integer("spin_result_id"),
+  paymentCardId: integer("payment_card_id"), // Reference to payment card used
   squarePaymentId: text("square_payment_id").unique(),
   amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
   currency: text("currency").notNull().default("USD"),
@@ -240,6 +256,8 @@ export const insertSystemSettingSchema = createInsertSchema(systemSettings).omit
 export const insertNotificationSchema = createInsertSchema(notifications).omit({
   id: true,
   sentAt: true,
+}).extend({
+  title: z.string().optional(),
 });
 
 export const insertSpinResultSchema = createInsertSchema(spinResults).omit({
@@ -287,3 +305,13 @@ export type User = typeof users.$inferSelect;
 export type InsertTransaction = z.infer<typeof insertTransactionSchema>;
 export type Transaction = typeof transactions.$inferSelect;
 export type ClaimedNumber = typeof claimedNumbers.$inferSelect;
+
+// Payment card schema and types
+export const insertPaymentCardSchema = createInsertSchema(paymentCards).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type PaymentCard = typeof paymentCards.$inferSelect;
+export type InsertPaymentCard = z.infer<typeof insertPaymentCardSchema>;

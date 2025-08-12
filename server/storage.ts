@@ -1,11 +1,11 @@
 import { 
   games, players, gameResults, adminUsers, wheelSegments, systemSettings, adminSessions, notifications, spinResults,
-  users, transactions, userSessions, complianceLogs, freePlayUsage,
+  users, transactions, userSessions, complianceLogs, freePlayUsage, paymentCards,
   type Game, type InsertGame, type Player, type InsertPlayer, type GameResult, type InsertGameResult, 
   type AdminUser, type InsertAdminUser, type WheelSegment, type InsertWheelSegment,
   type SystemSetting, type InsertSystemSetting, type InsertNotification, type Notification,
   type SpinResult, type InsertSpinResult, type User, type InsertUser, type Transaction, type InsertTransaction,
-  type FreePlayUsage, type InsertFreePlayUsage
+  type FreePlayUsage, type InsertFreePlayUsage, type PaymentCard, type InsertPaymentCard
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, sql, and, isNotNull } from "drizzle-orm";
@@ -93,8 +93,19 @@ export interface IStorage {
   // Session store
   sessionStore: any;
 
+  // Payment card methods
+  getPaymentCardsByUserId(userId: number): Promise<PaymentCard[]>;
+  getPaymentCard(id: number): Promise<PaymentCard | undefined>;
+  createPaymentCard(card: InsertPaymentCard): Promise<PaymentCard>;
+  updatePaymentCard(id: number, updates: Partial<PaymentCard>): Promise<PaymentCard | undefined>;
+  deletePaymentCard(id: number): Promise<boolean>;
+  setDefaultPaymentCard(userId: number, cardId: number): Promise<boolean>;
+
   // Ensure default admin user exists
   ensureDefaultAdminUser(): Promise<void>;
+  
+  // Winner notification
+  notifyWinner(gameId: number, winnerId: number): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -213,8 +224,23 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deleteGame(id: number): Promise<boolean> {
-    const result = await db.delete(games).where(eq(games.id, id));
-    return (result.rowCount || 0) > 0;
+    try {
+      // First delete related records to avoid foreign key constraints
+      await db.delete(players).where(eq(players.gameId, id));
+      await db.delete(spinResults).where(eq(spinResults.gameId, id));
+      await db.delete(gameResults).where(eq(gameResults.gameId, id));
+      await db.delete(transactions).where(eq(transactions.gameId, id));
+      await db.delete(wheelSegments).where(eq(wheelSegments.gameId, id));
+      await db.delete(notifications).where(eq(notifications.gameId, id));
+      await db.delete(freePlayUsage).where(eq(freePlayUsage.gameId, id));
+      
+      // Then delete the game itself
+      const result = await db.delete(games).where(eq(games.id, id));
+      return (result.rowCount || 0) > 0;
+    } catch (error) {
+      console.error("Error deleting game:", error);
+      return false;
+    }
   }
 
   // Player methods
@@ -330,6 +356,100 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Ensure default admin user exists
+  // Payment card methods
+  async getPaymentCardsByUserId(userId: number): Promise<PaymentCard[]> {
+    return await db.select().from(paymentCards).where(eq(paymentCards.userId, userId));
+  }
+
+  async getPaymentCard(id: number): Promise<PaymentCard | undefined> {
+    const [card] = await db.select().from(paymentCards).where(eq(paymentCards.id, id));
+    return card;
+  }
+
+  async createPaymentCard(card: InsertPaymentCard): Promise<PaymentCard> {
+    const [result] = await db.insert(paymentCards).values(card).returning();
+    
+    // If this is the first card for the user, make it default
+    const userCards = await this.getPaymentCardsByUserId(card.userId);
+    if (userCards.length === 1) {
+      await this.setDefaultPaymentCard(card.userId, result.id);
+    }
+    
+    return result;
+  }
+
+  async updatePaymentCard(id: number, updates: Partial<PaymentCard>): Promise<PaymentCard | undefined> {
+    const [card] = await db.update(paymentCards)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(paymentCards.id, id))
+      .returning();
+    return card;
+  }
+
+  async deletePaymentCard(id: number): Promise<boolean> {
+    const result = await db.delete(paymentCards).where(eq(paymentCards.id, id));
+    return (result.rowCount || 0) > 0;
+  }
+
+  async setDefaultPaymentCard(userId: number, cardId: number): Promise<boolean> {
+    try {
+      // Remove default from all user's cards
+      await db.update(paymentCards)
+        .set({ isDefault: false })
+        .where(eq(paymentCards.userId, userId));
+      
+      // Set the specified card as default
+      await db.update(paymentCards)
+        .set({ isDefault: true })
+        .where(eq(paymentCards.id, cardId));
+      
+      // Update user's default card reference
+      await db.update(users)
+        .set({ defaultCardId: cardId, cardOnFile: true })
+        .where(eq(users.id, userId));
+      
+      return true;
+    } catch (error) {
+      console.error("Error setting default payment card:", error);
+      return false;
+    }
+  }
+
+  async notifyWinner(gameId: number, winnerId: number): Promise<void> {
+    try {
+      const game = await this.getGame(gameId);
+      const winner = await this.getPlayer(winnerId);
+      const user = winner ? await this.getUser(winner.userId) : null;
+      
+      if (!game || !winner || !user) {
+        console.error("Cannot notify winner: missing game, winner, or user data");
+        return;
+      }
+
+      // Send winner notification email
+      console.log(`🎉 WINNER NOTIFICATION: User ${user.email} won ${game.name} (Prize: $${game.prizeValue})`);
+      
+      // Create notification record
+      await this.createNotification({
+        gameId,
+        title: "🎉 Congratulations! You Won!",
+        message: `You've won the ${game.name}! Prize value: $${game.prizeValue}. You will be contacted within 24 hours regarding prize delivery.`,
+        type: "winner_announcement",
+        userId: user.id
+      });
+
+      // Update user stats
+      await this.updateUser(user.id, {
+        totalWon: String(parseFloat(user.totalWon || "0") + parseFloat(String(game.prizeValue))),
+        gamesWon: user.gamesWon + 1
+      });
+
+      console.log(`Winner notification sent to ${user.email} for game ${game.name}`);
+    } catch (error) {
+      console.error("Error notifying winner:", error);
+    }
+  }
+
   async ensureDefaultAdminUser(): Promise<void> {
     try {
       const existingAdmin = await this.getAdminUserByEmail("admin@example.com");
@@ -513,6 +633,9 @@ export class DatabaseStorage implements IStorage {
       // Update winner status
       await this.updatePlayer(winningSpinResult.playerId, { isWinner: true });
 
+      // Notify the winner
+      await this.notifyWinner(gameId, winningSpinResult.playerId);
+
       // Create compliance log for winner selection
       const winner = await this.getPlayer(winningSpinResult.playerId);
       if (winner) {
@@ -627,6 +750,7 @@ export class DatabaseStorage implements IStorage {
           paymentMethod: transactions.paymentMethod,
           cardLast4: transactions.cardLast4,
           cardBrand: transactions.cardBrand,
+          paymentCardId: transactions.paymentCardId,
           squarePaymentId: transactions.squarePaymentId,
           squareReceiptUrl: transactions.squareReceiptUrl,
           currency: transactions.currency,

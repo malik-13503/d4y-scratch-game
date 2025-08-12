@@ -5,7 +5,7 @@ import { setupAuth, requireAuth } from "./auth";
 import { 
   insertGameSchema, insertPlayerSchema, insertGameResultSchema, 
   insertWheelSegmentSchema, insertSystemSettingSchema, insertNotificationSchema,
-  insertUserSchema, insertTransactionSchema, complianceLogs, users
+  insertUserSchema, insertTransactionSchema, complianceLogs, users, insertPaymentCardSchema
 } from "@shared/schema";
 import { z } from "zod";
 import { squareService } from "./squareService";
@@ -1662,6 +1662,80 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching compliance logs:", error);
       res.status(500).json({ message: "Failed to fetch compliance logs" });
+    }
+  });
+
+  // Payment card management routes
+  app.get("/api/payment-cards", requireAuth, async (req, res) => {
+    try {
+      const userId = req.session.userId!;
+      const cards = await storage.getPaymentCardsByUserId(userId);
+      res.json(cards);
+    } catch (error) {
+      console.error("Failed to fetch payment cards:", error);
+      res.status(500).json({ message: "Failed to fetch payment cards" });
+    }
+  });
+
+  app.post("/api/payment-cards", requireAuth, async (req, res) => {
+    try {
+      const userId = req.session.userId!;
+      const cardData = insertPaymentCardSchema.parse({ ...req.body, userId });
+      const card = await storage.createPaymentCard(cardData);
+      res.json(card);
+    } catch (error) {
+      console.error("Failed to create payment card:", error);
+      res.status(500).json({ message: "Failed to create payment card" });
+    }
+  });
+
+  app.put("/api/payment-cards/:id", requireAuth, async (req, res) => {
+    try {
+      const cardId = parseInt(req.params.id);
+      const updates = req.body;
+      const card = await storage.updatePaymentCard(cardId, updates);
+      
+      if (!card) {
+        return res.status(404).json({ message: "Payment card not found" });
+      }
+      
+      res.json(card);
+    } catch (error) {
+      console.error("Failed to update payment card:", error);
+      res.status(500).json({ message: "Failed to update payment card" });
+    }
+  });
+
+  app.delete("/api/payment-cards/:id", requireAuth, async (req, res) => {
+    try {
+      const cardId = parseInt(req.params.id);
+      const deleted = await storage.deletePaymentCard(cardId);
+      
+      if (!deleted) {
+        return res.status(404).json({ message: "Payment card not found" });
+      }
+      
+      res.json({ message: "Payment card deleted successfully" });
+    } catch (error) {
+      console.error("Failed to delete payment card:", error);
+      res.status(500).json({ message: "Failed to delete payment card" });
+    }
+  });
+
+  app.put("/api/payment-cards/:id/set-default", requireAuth, async (req, res) => {
+    try {
+      const userId = req.session.userId!;
+      const cardId = parseInt(req.params.id);
+      const success = await storage.setDefaultPaymentCard(userId, cardId);
+      
+      if (!success) {
+        return res.status(400).json({ message: "Failed to set default payment card" });
+      }
+      
+      res.json({ message: "Default payment card updated successfully" });
+    } catch (error) {
+      console.error("Failed to set default payment card:", error);
+      res.status(500).json({ message: "Failed to set default payment card" });
     }
   });
 
