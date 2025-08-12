@@ -1,7 +1,7 @@
 # Real-Time Prize Game Web Application
 
 ## Overview
-This project is a real-time web application designed for interactive prize games, specifically focusing on wheel-spinning mechanics. Its core purpose is to provide an engaging and fair platform for users to participate in live games to win prizes, while offering robust administrative controls. The business vision is to create a leading, entertaining online gaming experience with high market potential in the casual gaming and online sweepstakes sectors, aiming for widespread user adoption and a reputation for transparent and exciting gameplay.
+This project is a real-time web application for interactive prize games, primarily focusing on wheel-spinning mechanics. Its purpose is to provide an engaging and fair platform for live game participation and prize winning, supported by robust administrative controls. The business vision is to create a leading, entertaining online gaming experience with high market potential in casual gaming and online sweepstakes, aiming for widespread user adoption and a reputation for transparent, exciting gameplay.
 
 ## User Preferences
 Preferred communication style: Simple, everyday language.
@@ -14,13 +14,7 @@ Preferred communication style: Simple, everyday language.
 - **State Management**: TanStack Query
 - **Routing**: Wouter
 - **Build Tool**: Vite
-- **UI/UX Decisions**:
-    - Modern, responsive design with fullscreen gameplay.
-    - Professional, physics-based wheel animations.
-    - Confetti, sound effects, and celebratory animations.
-    - Consistent purple/blue gradient theme with glass morphism effects, animated backgrounds, and floating particles.
-    - Clean, accessible UI components with a focus on readability and visual engagement across all devices (mobile-first approach).
-    - Intuitive user flows for authentication, game participation, and payment.
+- **UI/UX Decisions**: Modern, responsive design with fullscreen gameplay, professional physics-based wheel animations, confetti, sound effects, and celebratory animations. Features a consistent purple/blue gradient theme with glass morphism effects, animated backgrounds, and floating particles. Emphasizes clean, accessible UI components with a focus on readability and visual engagement across all devices (mobile-first approach), and intuitive user flows.
 
 ### Backend
 - **Runtime**: Node.js with Express.js
@@ -35,13 +29,14 @@ Preferred communication style: Simple, everyday language.
 - **Migrations**: Drizzle Kit.
 
 ### Key Features
-- **Game System**: Configurable wheel-spin games with professional animations, customizable prizes, and real-time updates. Supports flexible number ranges and "free play" zones.
-- **Admin Dashboard**: Comprehensive management of games, player analytics, system settings, and real-time monitoring. Includes secure admin authentication with role-based access.
+- **Game System**: Configurable wheel-spin games with professional animations, customizable prizes, and real-time updates. Supports flexible number ranges and "free play" zones. Includes age verification and a 50-segment wheel limit.
+- **Admin Dashboard**: Comprehensive management of games, player analytics, system settings, and real-time monitoring. Includes secure admin authentication with role-based access, image upload for prizes, and game deletion.
 - **Authentication & Security**: Secure login, Bcrypt-based password hashing, robust session management, and admin-only access controls.
-- **Payment System**: Integrated real-time payment processing (production-ready).
-- **Email Notifications**: Professional, branded email templates for welcome, payment confirmations, and receipts.
+- **Payment System**: Integrated real-time payment processing with advanced card management features.
+- **Email Notifications**: Professional, branded email templates.
 - **User Engagement**: Real-time recent numbers display, enhanced user dashboard with activity timelines and statistics, and an achievement system.
-- **Informational Pages**: Comprehensive pages for game info, how-to-play, prize rules, instant play, free spins, contact us, terms & conditions, and privacy policy.
+- **Informational Pages**: Comprehensive pages for game info, how-to-play (with in-game instructions and "no purchase necessary" emphasis), prize rules, instant play, free spins, contact us, terms & conditions, and privacy policy. Includes detailed official rules documentation and generic game descriptions to support variable number ranges.
+- **Free Play System**: One-time free play system per game tracked by IP, with dedicated API endpoints and guest player support.
 
 ## External Dependencies
 
@@ -55,98 +50,3 @@ Preferred communication style: Simple, everyday language.
 - `@stripe/stripe-js`: Stripe payment processing.
 - `@stripe/react-stripe-js`: React components for Stripe.
 - `@sendgrid/mail`: Email notifications.
-
-## Changelog
-
-- February 8, 2025: **ENHANCED PAYMENT SYSTEM COMPLETE** - Implemented comprehensive multiple payment card management with rich features
-  - **Enhanced Card Management**: Created professional card management interface with drag-and-drop functionality, brand-specific colors, and comprehensive security badges
-  - **Advanced Card Selector**: Enhanced card selection system with professional UI, error handling, validation, and seamless Square integration
-  - **Robust Payment Processing**: Improved payment popup with comprehensive card selection modes, enhanced security notices, and proper state management
-  - **Professional Dashboard Integration**: Updated dashboard to use enhanced card management with rich features and better user experience  
-  - **Rich Payment Features**: Added card details view, brand-specific styling, refresh functionality, security badges, and enhanced error states
-  - **Production-Ready Security**: Comprehensive security notices, SSL encryption badges, PCI compliance indicators, and professional trust signals
-  - **User Experience Optimization**: Professional loading states, detailed error messages, comprehensive validation, and seamless payment flow
-- February 7, 2025: **FAVICON AND META TAGS ADDED** - Added professional branding with logo favicon and SEO optimization
-  - **Logo Favicon**: Added Hit the Road Jackpot logo as browser tab icon with multiple format support
-  - **SEO Meta Tags**: Added comprehensive meta description, keywords, and Open Graph tags for social sharing
-  - **Professional Title**: Updated page title to "Hit the Road Jackpot - Spin to Win Prizes"
-  - **Social Media Ready**: Added Open Graph image and description for better social media preview
-  - **Multi-Device Support**: Added apple-touch-icon for iOS devices and shortcut icon for cross-browser compatibility
-- February 7, 2025: **ADVANCED FREE PLAY CONTROLS COMPLETE** - Added sophisticated on/off toggle with individual number controls
-  - **Professional Toggle Switch**: Clean on/off toggle with green activation, smooth animations, and clear Off/On labels  
-  - **Individual Number Input**: When enabled, admins can specify exact numbers (e.g., "1,5,10,25,50") instead of ranges
-  - **Conditional Live Preview**: Free play section only appears when toggle is ON and numbers are specified
-  - **All Numbers Paid Mode**: When toggle is OFF, preview shows "All Numbers" without any free play mentions
-  - **Smart Text Display**: Dynamic preview text changes based on toggle state for clean user experience
-  - **Backward Compatible**: Uses existing freePlayStart/freePlayEnd database structure with intelligent conversion
-  - **Real-time Updates**: Live preview changes instantly as admins toggle or type numbers
-  - **Complete Admin Control**: Full manual override - toggle off for all paid numbers, or specify exact free numbers
-- February 7, 2025: **AUTOMATIC FREE PLAY LOGIC REMOVED** - Completely removed automatic "high number = free play" system per user requirements
-  - **Backend Logic Removed**: Eliminated automatic free play determination based on freePlayStart/freePlayEnd ranges in storage.ts
-  - **Wheel Component Updated**: Removed freePlayStart calculations and automatic free play assignment in professional-wheel.tsx
-  - **UI Text Updates**: Changed all "Free Spin/Free Play" references to "No Purchase Necessary: You get one free spin per game to enter this game"
-  - **Home Page Simplified**: Removed free play range display grid, now shows single game info panel with compliance messaging
-  - **Routes Updated**: Modified /api/free-spin endpoint to work with any available numbers instead of specific ranges
-  - **All Spins Paid**: Now all wheel spins require payment unless specifically designated as free entry (removed automatic logic)
-  - **Compliance Ready**: Updated all user-facing text to meet legal compliance requirements
-- February 6, 2025: **ENHANCED EDIT GAME DIALOG COMPLETE** - Implemented comprehensive edit game interface matching create game form
-  - **Full Edit Interface**: Complete edit dialog with same comprehensive form as create game (name, emoji, description, prize, value, image upload, total numbers, duration)
-  - **Real-time Live Preview**: Updates as you type showing exact admin games tab card design with proper data binding
-  - **Prize Image Management**: Drag-and-drop image upload functionality for editing game prize images with proper file handling
-  - **Data Population**: Edit form properly loads all existing game data including images, descriptions, and numeric values
-  - **Form Validation**: Proper validation and data handling for all edit operations with async image upload support
-  - **Professional UI**: Matching design system with purple/blue gradients, glass morphism effects, and responsive layout
-  - **Complete Integration**: Seamless integration with existing updateGameMutation and database operations
-- February 6, 2025: **REAL PRIZE IMAGES & GAME DELETION COMPLETE** - Added real picture upload system for prizes and fixed game deletion functionality
-  - **Prize Image Upload**: Replaced emoji system with real image upload capability in admin dashboard
-  - **File Upload Interface**: Added drag-and-drop image upload with preview functionality for game prizes
-  - **Base64 Storage**: Implemented base64 image encoding for development (production-ready for cloud storage)
-  - **Visual Preview**: Admin can see uploaded images in live game preview before creating games
-  - **Game Deletion Fixed**: Connected deleteGameMutation to actual backend API for permanent game removal
-  - **Database Schema**: Added `prizeImageUrl` field to games table for storing prize images
-  - **Dual Display Support**: Games can show either uploaded images or fallback to emoji system
-  - **Mobile Optimized**: Prize images display properly across all screen sizes with responsive sizing
-- February 6, 2025: **AGE VERIFICATION & WHEEL SEGMENTS UPDATE** - Added mandatory age verification and implemented 50-segment wheel limit
-  - **Age Verification Checkbox**: Added required 18+ age confirmation checkbox to signup form with validation
-  - **Maximum 50 Wheel Segments**: Implemented visual wheel segment limit with maximum 50 segments displayed
-  - **Claimed Number Indicators**: Added visual indicators for claimed numbers (grayed out, strikethrough, red X overlay)
-  - **Segment Progress Bar**: Added visual progress indicator showing current segments vs 50 maximum
-  - **Dynamic Segment Sizing**: Automatically adjusts segment and text size based on number of segments (smaller for 36+ segments)
-  - **Real-time Availability**: Wheel segments update in real-time to show which numbers are still available vs claimed
-- February 6, 2025: **FREE PLAY FEATURE COMPLETE** - Added comprehensive one-time free play system to game page
-  - **Database Tracking**: Added `freePlayUsage` table to track IP-based one-time usage per game with secure backend validation
-  - **Free Play API**: Implemented dedicated `/api/free-spin` endpoint and `/api/games/:gameId/free-play-status` for status checking
-  - **IP-Based Tracking**: Prevents abuse by limiting one free play per IP address per game using database storage
-  - **Guest Player Support**: Creates temporary guest players for free play spins with proper compliance logging
-  - **Free Play Button**: Added attractive green-themed free play button that appears only when available
-  - **Status Management**: Button automatically disappears after use with encouraging message to join the actual game
-  - **Real-time Integration**: Free play spins use actual game mechanics and update available numbers in real-time
-  - **Visual Feedback**: Shows free play result with celebration animation and encouragement to sign up
-  - **Disclaimer Updates**: Updated disclaimer popup to show different messaging for free play vs paid spins
-  - **Anonymous Logging**: Compliance logs support anonymous free play entries for legal tracking
-  - **Production Ready**: Complete backend/frontend integration with proper error handling and user experience
-- January 29, 2025: **GAME INSTRUCTIONS ENHANCEMENT** - Added in-game how-to-play instructions with no purchase option
-  - **Game Page Instructions**: Added 4-step how-to-play guide directly on the game page sidebar
-  - **No Purchase Visibility**: Step 4 highlights "No Purchase Necessary - Use free entry option!" prominently
-  - **Full Instructions Link**: Added "View Full Instructions" button linking to complete how-to-play page
-  - **Visual Design**: Used green highlighting for the no purchase option to make it stand out
-  - **User Experience**: Players can now see instructions without leaving the game page
-- January 29, 2025: **OFFICIAL RULES INTEGRATION COMPLETE** - Added comprehensive official rules documentation
-  - **Official Rules Page**: Created detailed official rules page with all legal requirements from provided PDF
-  - **State Exclusions**: Clearly documented excluded states (NY, FL, RI, HI) with specific prize thresholds
-  - **Entry Methods**: Detailed both paid entry and no-purchase-necessary (NPN) entry options
-  - **Legal Compliance**: Includes eligibility, winner selection, prizes, general conditions, and disclaimers
-  - **Navigation Integration**: Added official rules links to signup form, footer, and routing configuration
-- January 29, 2025: **PRODUCTION SECURITY & PRIVACY COMPLETE** - Removed demo credentials and fixed privacy policy
-  - **Demo Credentials Removal**: Removed "demo@example.com / demo123" from regular user login form for production security  
-  - **Privacy Policy Created**: Built comprehensive privacy policy page with professional design and complete information
-  - **Privacy Route Fixed**: Added /privacy route to App.tsx routing configuration to resolve broken links
-  - **Legal Compliance**: Privacy policy covers data collection, usage, protection, sharing, user rights, and cookies
-  - **Professional Design**: Privacy page features consistent branding with animated backgrounds and responsive layout
-- January 29, 2025: **GAME RANGE FLEXIBILITY UPDATE** - Made game descriptions generic to support variable number ranges
-  - **Dynamic Range Support**: Updated all references from "1-200" to generic "Spin the wheel, pay what you land on"
-  - **Flexible Free Play**: Changed "Numbers 151-200" to "Higher Numbers" to accommodate games with different ranges
-  - **Adaptable Paid Range**: Updated "Numbers 1-150" to "Lower Numbers" for variable game configurations
-  - **Multi-Page Consistency**: Updated auth landing, how-to-play, and prize-rules pages with generic language
-  - **Future-Proof Design**: Games can now have ranges like 1-50, 1-85, 1-75 without UI text conflicts
-```
