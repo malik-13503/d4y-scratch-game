@@ -1600,13 +1600,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
             return res.status(400).json({ message: "No payment method available" });
           }
           
-          // Process payment using Square API
+          // Get user's default payment card
+          const userCards = await storage.getPaymentCardsByUserId(userId);
+          const defaultCard = userCards.find(card => card.isDefault) || userCards[0];
+          
+          if (!defaultCard) {
+            return res.status(400).json({ message: "No payment card available" });
+          }
+
+          // Process payment using Square API with the user's card nonce
           paymentResult = await squareService.processPayment(
             chargeAmount,
             "USD",
-            "test-nonce", // This would be from the selected card
+            defaultCard.cardNonce || "cnon_test", // Use actual card nonce
             `Spin charge for game ${gameId} - $${chargeAmount}`
           );
+        }
+
+        // Get card details for transaction record
+        let cardLast4 = "****";
+        let cardBrand = "Unknown";
+        
+        if (isProduction) {
+          // Get from payment result or user's default card
+          const userCards = await storage.getPaymentCardsByUserId(userId);
+          const defaultCard = userCards.find(card => card.isDefault) || userCards[0];
+          
+          cardLast4 = paymentResult.cardDetails?.last4 || defaultCard?.cardLast4 || "****";
+          cardBrand = paymentResult.cardDetails?.cardBrand || defaultCard?.cardBrand || "Unknown";
+        } else {
+          // Sandbox mode
+          cardLast4 = "4242";
+          cardBrand = "VISA";
         }
 
         // Record transaction with spin result
@@ -1619,8 +1644,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           currency: "USD",
           status: paymentResult.status || "COMPLETED",
           paymentMethod: "card",
-          cardLast4: "4242",
-          cardBrand: "VISA",
+          cardLast4,
+          cardBrand,
           squareReceiptUrl: paymentResult.receiptUrl || undefined
         });
 

@@ -84,7 +84,7 @@ export default function GamePage() {
 
   const gameId = game?.id;
 
-  const { data: availableNumbers } = useQuery({
+  const { data: availableNumbers } = useQuery<{availableNumbers: number[], totalAvailable: number}>({
     queryKey: [`/api/games/${gameId}/available-numbers`],
     refetchInterval: 10000,
     enabled: !!gameId,
