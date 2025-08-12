@@ -226,20 +226,16 @@ export class DatabaseStorage implements IStorage {
 
   async deleteGame(id: number): Promise<boolean> {
     try {
-      // First delete related records to avoid foreign key constraints
-      await db.delete(players).where(eq(players.gameId, id));
-      await db.delete(spinResults).where(eq(spinResults.gameId, id));
-      await db.delete(gameResults).where(eq(gameResults.gameId, id));
-      await db.delete(transactions).where(eq(transactions.gameId, id));
-      await db.delete(wheelSegments).where(eq(wheelSegments.gameId, id));
-      await db.delete(notifications).where(eq(notifications.gameId, id));
-      await db.delete(freePlayUsage).where(eq(freePlayUsage.gameId, id));
-      
-      // Then delete the game itself
-      const result = await db.delete(games).where(eq(games.id, id));
-      return (result.rowCount || 0) > 0;
+      // Soft delete: set isActive to false instead of permanently deleting
+      // This preserves historical data and relationships
+      const [result] = await db
+        .update(games)
+        .set({ isActive: false, updatedAt: new Date() })
+        .where(eq(games.id, id))
+        .returning();
+      return !!result;
     } catch (error) {
-      console.error("Error deleting game:", error);
+      console.error("Error soft-deleting game:", error);
       return false;
     }
   }
@@ -1064,30 +1060,7 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
-  async deleteUser(id: number): Promise<boolean> {
-    try {
-      // Delete related records first (transactions, players, spin results)
-      // Delete spin results through players
-      await db.delete(spinResults)
-        .where(
-          sql`player_id IN (SELECT id FROM ${players} WHERE user_id = ${id})`
-        );
-      
-      // Delete players
-      await db.delete(players).where(eq(players.userId, id));
-      
-      // Delete transactions
-      await db.delete(transactions).where(eq(transactions.userId, id));
-      
-      // Finally delete the user
-      const result = await db.delete(users).where(eq(users.id, id));
-      
-      return true;
-    } catch (error) {
-      console.error("Error deleting user:", error);
-      return false;
-    }
-  }
+
 
   // Free play tracking methods
   async hasUsedFreePlay(ipAddress: string, gameId: number): Promise<boolean> {

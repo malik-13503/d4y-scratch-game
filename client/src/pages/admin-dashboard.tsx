@@ -142,6 +142,7 @@ export default function AdminDashboard() {
     data: adminUser,
     isLoading: authLoading,
     error,
+    refetch: refetchAdminUser,
   } = useQuery({
     queryKey: ["/api/admin/user"],
     retry: false,
@@ -3821,6 +3822,186 @@ export default function AdminDashboard() {
                 </Button>
               </div>
             </div>
+
+            {/* Admin Profile Management */}
+            <Card className="bg-black/20 backdrop-blur-sm border border-blue-500/30">
+              <CardHeader>
+                <CardTitle className="text-white flex items-center">
+                  <User className="h-5 w-5 mr-2 text-blue-400" />
+                  Admin Profile Management
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  {/* Update Profile Form */}
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold text-white mb-4">Update Profile Information</h3>
+                    <div className="space-y-2">
+                      <Label className="text-gray-300">Email Address</Label>
+                      <Input
+                        type="email"
+                        defaultValue={adminUser?.email || ""}
+                        className="bg-white/5 border-white/20 text-white"
+                        id="admin-email"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-gray-300">First Name</Label>
+                      <Input
+                        type="text"
+                        defaultValue={adminUser?.firstName || ""}
+                        className="bg-white/5 border-white/20 text-white"
+                        id="admin-firstName"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-gray-300">Last Name</Label>
+                      <Input
+                        type="text"
+                        defaultValue={adminUser?.lastName || ""}
+                        className="bg-white/5 border-white/20 text-white"
+                        id="admin-lastName"
+                      />
+                    </div>
+                    <Button 
+                      className="bg-gradient-to-r from-blue-600 to-cyan-600 w-full"
+                      onClick={async () => {
+                        const email = (document.getElementById('admin-email') as HTMLInputElement)?.value;
+                        const firstName = (document.getElementById('admin-firstName') as HTMLInputElement)?.value;
+                        const lastName = (document.getElementById('admin-lastName') as HTMLInputElement)?.value;
+                        
+                        try {
+                          const response = await fetch('/api/admin/update-profile', {
+                            method: 'PATCH',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ email, firstName, lastName }),
+                          });
+                          
+                          const result = await response.json();
+                          
+                          if (response.ok) {
+                            toast({
+                              title: "Profile Updated",
+                              description: "Your profile information has been updated successfully",
+                            });
+                            refetchAdminUser();
+                          } else {
+                            toast({
+                              title: "Update Failed",
+                              description: result.message || "Failed to update profile",
+                              variant: "destructive",
+                            });
+                          }
+                        } catch (error) {
+                          toast({
+                            title: "Update Failed",
+                            description: "Network error occurred",
+                            variant: "destructive",
+                          });
+                        }
+                      }}
+                    >
+                      <CheckCircle className="h-4 w-4 mr-2" />
+                      Update Profile
+                    </Button>
+                  </div>
+
+                  {/* Change Password Form */}
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold text-white mb-4">Change Password</h3>
+                    <div className="space-y-2">
+                      <Label className="text-gray-300">Current Password</Label>
+                      <Input
+                        type="password"
+                        className="bg-white/5 border-white/20 text-white"
+                        id="current-password"
+                        placeholder="Enter current password"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-gray-300">New Password</Label>
+                      <Input
+                        type="password"
+                        className="bg-white/5 border-white/20 text-white"
+                        id="new-password"
+                        placeholder="Enter new password"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-gray-300">Confirm New Password</Label>
+                      <Input
+                        type="password"
+                        className="bg-white/5 border-white/20 text-white"
+                        id="confirm-password"
+                        placeholder="Confirm new password"
+                      />
+                    </div>
+                    <Button 
+                      className="bg-gradient-to-r from-red-600 to-pink-600 w-full"
+                      onClick={async () => {
+                        const currentPassword = (document.getElementById('current-password') as HTMLInputElement)?.value;
+                        const newPassword = (document.getElementById('new-password') as HTMLInputElement)?.value;
+                        const confirmPassword = (document.getElementById('confirm-password') as HTMLInputElement)?.value;
+                        
+                        if (newPassword !== confirmPassword) {
+                          toast({
+                            title: "Password Mismatch",
+                            description: "New password and confirmation don't match",
+                            variant: "destructive",
+                          });
+                          return;
+                        }
+                        
+                        if (newPassword.length < 6) {
+                          toast({
+                            title: "Password Too Short",
+                            description: "Password must be at least 6 characters long",
+                            variant: "destructive",
+                          });
+                          return;
+                        }
+                        
+                        try {
+                          const response = await fetch('/api/admin/change-password', {
+                            method: 'PATCH',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ currentPassword, newPassword }),
+                          });
+                          
+                          const result = await response.json();
+                          
+                          if (response.ok) {
+                            toast({
+                              title: "Password Changed",
+                              description: "Your password has been updated successfully",
+                            });
+                            // Clear form
+                            (document.getElementById('current-password') as HTMLInputElement).value = '';
+                            (document.getElementById('new-password') as HTMLInputElement).value = '';
+                            (document.getElementById('confirm-password') as HTMLInputElement).value = '';
+                          } else {
+                            toast({
+                              title: "Password Change Failed",
+                              description: result.message || "Failed to change password",
+                              variant: "destructive",
+                            });
+                          }
+                        } catch (error) {
+                          toast({
+                            title: "Password Change Failed",
+                            description: "Network error occurred",
+                            variant: "destructive",
+                          });
+                        }
+                      }}
+                    >
+                      <Shield className="h-4 w-4 mr-2" />
+                      Change Password
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
 
             {/* System Configuration */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

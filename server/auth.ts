@@ -220,6 +220,42 @@ export function setupAuth(app: Express) {
     }
   });
 
+  // Update admin profile (email, firstName, lastName)
+  app.patch("/api/admin/update-profile", requireAuth, async (req, res) => {
+    try {
+      const { email, firstName, lastName } = req.body;
+      const user = req.user!;
+
+      // Check if email is already in use by another admin
+      if (email && email !== user.email) {
+        const existingUser = await storage.getAdminUserByEmail(email);
+        if (existingUser && existingUser.id !== user.id) {
+          return res.status(400).json({ message: "Email is already in use" });
+        }
+      }
+
+      const updatedUser = await storage.updateAdminUser(user.id, {
+        email: email || user.email,
+        firstName: firstName || user.firstName,
+        lastName: lastName || user.lastName,
+      });
+
+      if (!updatedUser) {
+        return res.status(500).json({ message: "Failed to update profile" });
+      }
+
+      // Don't return password
+      const { password: _, ...userWithoutPassword } = updatedUser;
+      res.json({ 
+        message: "Profile updated successfully", 
+        user: userWithoutPassword 
+      });
+    } catch (error) {
+      console.error("Profile update error:", error);
+      res.status(500).json({ message: "Failed to update profile" });
+    }
+  });
+
   // Session debug route (for development)
   app.get("/api/admin/session-debug", (req, res) => {
     res.json({
