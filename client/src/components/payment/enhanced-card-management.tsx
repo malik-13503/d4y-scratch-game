@@ -145,34 +145,35 @@ export default function EnhancedCardManagement() {
       <div className="relative">
         <div className="absolute inset-0 bg-gradient-to-r from-purple-600/20 to-blue-600/20 rounded-2xl blur-xl"></div>
         <Card className="relative bg-gradient-to-r from-slate-900/90 to-slate-800/90 border-purple-500/30">
-          <CardContent className="p-8">
-            <div className="flex items-center justify-between">
-              <div className="space-y-2">
+          <CardContent className="p-4 sm:p-6 lg:p-8">
+            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+              <div className="space-y-3">
                 <div className="flex items-center gap-3">
-                  <div className="p-3 bg-gradient-to-r from-purple-600 to-blue-600 rounded-xl">
-                    <CreditCard className="h-6 w-6 text-white" />
+                  <div className="p-2 sm:p-3 bg-gradient-to-r from-purple-600 to-blue-600 rounded-xl">
+                    <CreditCard className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
                   </div>
                   <div>
-                    <h2 className="text-3xl font-bold text-white">Payment Center</h2>
-                    <p className="text-gray-300">Manage your payment methods with enterprise-grade security</p>
+                    <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white">Payment Center</h2>
+                    <p className="text-sm sm:text-base text-gray-300 hidden sm:block">Manage your payment methods with enterprise-grade security</p>
+                    <p className="text-xs text-gray-300 sm:hidden">Secure payment management</p>
                   </div>
                 </div>
-                <div className="flex items-center gap-4 mt-4">
-                  <Badge className="bg-green-600/20 text-green-300 border-green-500/30">
+                <div className="flex flex-wrap items-center gap-2 sm:gap-4">
+                  <Badge className="bg-green-600/20 text-green-300 border-green-500/30 text-xs sm:text-sm">
                     <CheckCircle className="h-3 w-3 mr-1" />
-                    {cards?.length || 0} Active Cards
+                    {cards?.length || 0} Active Card{cards?.length !== 1 ? 's' : ''}
                   </Badge>
-                  <Badge className="bg-blue-600/20 text-blue-300 border-blue-500/30">
+                  <Badge className="bg-blue-600/20 text-blue-300 border-blue-500/30 text-xs sm:text-sm">
                     <Shield className="h-3 w-3 mr-1" />
                     PCI Compliant
                   </Badge>
                 </div>
               </div>
-              <div className="flex items-center gap-3">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
                 <Button
                   onClick={() => refreshCardsMutation.mutate()}
                   variant="outline"
-                  className="border-gray-600 text-gray-300 hover:bg-gray-600/20"
+                  className="border-gray-600 text-gray-300 hover:bg-gray-600/20 w-full sm:w-auto"
                   disabled={refreshCardsMutation.isPending}
                 >
                   <RefreshCw className={`h-4 w-4 mr-2 ${refreshCardsMutation.isPending ? 'animate-spin' : ''}`} />
@@ -180,10 +181,11 @@ export default function EnhancedCardManagement() {
                 </Button>
                 <Button
                   onClick={() => setShowAddCard(true)}
-                  className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 px-6 py-3 text-lg font-semibold shadow-lg"
+                  className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 px-4 sm:px-6 py-3 text-base sm:text-lg font-semibold shadow-lg w-full sm:w-auto"
                 >
-                  <Plus className="h-5 w-5 mr-2" />
-                  Add New Card
+                  <Plus className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
+                  <span className="sm:hidden">Add Card</span>
+                  <span className="hidden sm:inline">Add New Card</span>
                 </Button>
               </div>
             </div>
@@ -192,58 +194,58 @@ export default function EnhancedCardManagement() {
       </div>
 
       {/* Security Features Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
         <Card className="bg-gradient-to-br from-green-900/70 to-emerald-900/70 border-green-500/50">
-          <CardContent className="p-6">
-            <div className="flex items-center gap-4">
-              <div className="p-3 bg-green-600/40 rounded-xl">
-                <Shield className="h-6 w-6 text-green-300" />
+          <CardContent className="p-4 sm:p-6">
+            <div className="flex items-center gap-3 sm:gap-4">
+              <div className="p-2 sm:p-3 bg-green-600/40 rounded-xl flex-shrink-0">
+                <Shield className="h-5 w-5 sm:h-6 sm:w-6 text-green-300" />
               </div>
-              <div>
-                <h3 className="text-lg font-bold text-white">Bank-Level Security</h3>
-                <p className="text-green-100 text-sm font-medium">256-bit SSL encryption</p>
+              <div className="min-w-0">
+                <h3 className="text-base sm:text-lg font-bold text-white">Bank-Level Security</h3>
+                <p className="text-green-100 text-xs sm:text-sm font-medium">256-bit SSL encryption</p>
               </div>
             </div>
           </CardContent>
         </Card>
 
         <Card className="bg-gradient-to-br from-blue-900/70 to-cyan-900/70 border-blue-500/50">
-          <CardContent className="p-6">
-            <div className="flex items-center gap-4">
-              <div className="p-3 bg-blue-600/40 rounded-xl">
-                <Zap className="h-6 w-6 text-blue-300" />
+          <CardContent className="p-4 sm:p-6">
+            <div className="flex items-center gap-3 sm:gap-4">
+              <div className="p-2 sm:p-3 bg-blue-600/40 rounded-xl flex-shrink-0">
+                <Zap className="h-5 w-5 sm:h-6 sm:w-6 text-blue-300" />
               </div>
-              <div>
-                <h3 className="text-lg font-bold text-white">Instant Processing</h3>
-                <p className="text-blue-100 text-sm font-medium">Under 3 seconds</p>
+              <div className="min-w-0">
+                <h3 className="text-base sm:text-lg font-bold text-white">Instant Processing</h3>
+                <p className="text-blue-100 text-xs sm:text-sm font-medium">Under 3 seconds</p>
               </div>
             </div>
           </CardContent>
         </Card>
 
         <Card className="bg-gradient-to-br from-purple-900/70 to-pink-900/70 border-purple-500/50">
-          <CardContent className="p-6">
-            <div className="flex items-center gap-4">
-              <div className="p-3 bg-purple-600/40 rounded-xl">
-                <Globe className="h-6 w-6 text-purple-300" />
+          <CardContent className="p-4 sm:p-6">
+            <div className="flex items-center gap-3 sm:gap-4">
+              <div className="p-2 sm:p-3 bg-purple-600/40 rounded-xl flex-shrink-0">
+                <Globe className="h-5 w-5 sm:h-6 sm:w-6 text-purple-300" />
               </div>
-              <div>
-                <h3 className="text-lg font-bold text-white">Global Support</h3>
-                <p className="text-purple-100 text-sm font-medium">Worldwide accepted</p>
+              <div className="min-w-0">
+                <h3 className="text-base sm:text-lg font-bold text-white">Global Support</h3>
+                <p className="text-purple-100 text-xs sm:text-sm font-medium">Worldwide accepted</p>
               </div>
             </div>
           </CardContent>
         </Card>
 
         <Card className="bg-gradient-to-br from-orange-900/70 to-red-900/70 border-orange-500/50">
-          <CardContent className="p-6">
-            <div className="flex items-center gap-4">
-              <div className="p-3 bg-orange-600/40 rounded-xl">
-                <Award className="h-6 w-6 text-orange-300" />
+          <CardContent className="p-4 sm:p-6">
+            <div className="flex items-center gap-3 sm:gap-4">
+              <div className="p-2 sm:p-3 bg-orange-600/40 rounded-xl flex-shrink-0">
+                <Award className="h-5 w-5 sm:h-6 sm:w-6 text-orange-300" />
               </div>
-              <div>
-                <h3 className="text-lg font-bold text-white">Premium Support</h3>
-                <p className="text-orange-100 text-sm font-medium">24/7 assistance</p>
+              <div className="min-w-0">
+                <h3 className="text-base sm:text-lg font-bold text-white">Premium Support</h3>
+                <p className="text-orange-100 text-xs sm:text-sm font-medium">24/7 assistance</p>
               </div>
             </div>
           </CardContent>
@@ -286,13 +288,13 @@ export default function EnhancedCardManagement() {
           </CardContent>
         </Card>
       ) : (
-        <div className="space-y-6">
-          <div className="flex items-center justify-between">
-            <h3 className="text-xl font-bold text-white">Your Payment Methods</h3>
-            <p className="text-gray-400">{cards.length} card{cards.length !== 1 ? 's' : ''} on file</p>
+        <div className="space-y-4 sm:space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+            <h3 className="text-lg sm:text-xl font-bold text-white">Your Payment Methods</h3>
+            <p className="text-sm sm:text-base text-gray-400">{cards.length} card{cards.length !== 1 ? 's' : ''} on file</p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
             {cards.map((card) => (
               <Card 
                 key={card.id} 
@@ -304,16 +306,16 @@ export default function EnhancedCardManagement() {
               >
                 <div className={`absolute inset-0 bg-gradient-to-r ${getCardBrandColor(card.cardBrand)} opacity-5`}></div>
                 
-                <CardContent className="relative p-6">
-                  <div className="space-y-4">
+                <CardContent className="relative p-4 sm:p-6">
+                  <div className="space-y-3 sm:space-y-4">
                     {/* Card Header */}
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <CreditCard className="h-5 w-5 text-gray-300" />
-                        <span className="text-lg font-bold text-white uppercase">{card.cardBrand}</span>
+                        <CreditCard className="h-4 w-4 sm:h-5 sm:w-5 text-gray-300" />
+                        <span className="text-base sm:text-lg font-bold text-white uppercase">{card.cardBrand}</span>
                       </div>
                       {card.isDefault && (
-                        <Badge className="bg-green-600/20 text-green-300 border-green-500/30">
+                        <Badge className="bg-green-600/20 text-green-300 border-green-500/30 text-xs">
                           <Star className="h-3 w-3 mr-1 fill-current" />
                           Default
                         </Badge>
@@ -322,31 +324,31 @@ export default function EnhancedCardManagement() {
 
                     {/* Card Number */}
                     <div className="space-y-2">
-                      <p className="text-2xl font-mono text-white tracking-widest font-bold">
+                      <p className="text-lg sm:text-2xl font-mono text-white tracking-widest font-bold">
                         {formatCardNumber(card.cardLast4, showCardDetails === card.id)}
                       </p>
                       {card.cardholderName && (
-                        <p className="text-sm text-gray-100 uppercase tracking-wider font-medium">
+                        <p className="text-xs sm:text-sm text-gray-100 uppercase tracking-wider font-medium">
                           {card.cardholderName}
                         </p>
                       )}
                     </div>
 
                     {/* Card Status & Actions */}
-                    <div className="flex items-center justify-between pt-4 border-t border-gray-500/40">
+                    <div className="flex items-center justify-between pt-3 sm:pt-4 border-t border-gray-500/40">
                       <div className="flex items-center gap-2">
-                        <CheckCircle className="h-4 w-4 text-green-400" />
-                        <span className="text-sm text-green-200 font-semibold">Verified</span>
+                        <CheckCircle className="h-3 w-3 sm:h-4 sm:w-4 text-green-400" />
+                        <span className="text-xs sm:text-sm text-green-200 font-semibold">Verified</span>
                       </div>
                       
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-1 sm:gap-2">
                         <Button
                           onClick={() => setShowCardDetails(showCardDetails === card.id ? null : card.id)}
                           variant="ghost"
                           size="sm"
-                          className="text-gray-400 hover:text-white"
+                          className="text-gray-400 hover:text-white h-8 w-8 p-0"
                         >
-                          {showCardDetails === card.id ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                          {showCardDetails === card.id ? <EyeOff className="h-3 w-3 sm:h-4 sm:w-4" /> : <Eye className="h-3 w-3 sm:h-4 sm:w-4" />}
                         </Button>
                         
                         {!card.isDefault && (
@@ -354,10 +356,10 @@ export default function EnhancedCardManagement() {
                             onClick={() => setDefaultMutation.mutate(card.id)}
                             variant="ghost"
                             size="sm"
-                            className="text-gray-400 hover:text-yellow-400"
+                            className="text-gray-400 hover:text-yellow-400 h-8 w-8 p-0"
                             disabled={setDefaultMutation.isPending}
                           >
-                            <Star className="h-4 w-4" />
+                            <Star className="h-3 w-3 sm:h-4 sm:w-4" />
                           </Button>
                         )}
                         
@@ -365,10 +367,10 @@ export default function EnhancedCardManagement() {
                           onClick={() => deleteCardMutation.mutate(card.id)}
                           variant="ghost"
                           size="sm"
-                          className="text-gray-400 hover:text-red-400"
+                          className="text-gray-400 hover:text-red-400 h-8 w-8 p-0"
                           disabled={deleteCardMutation.isPending || cards.length === 1}
                         >
-                          <Trash2 className="h-4 w-4" />
+                          <Trash2 className="h-3 w-3 sm:h-4 sm:w-4" />
                         </Button>
                       </div>
                     </div>
@@ -402,27 +404,27 @@ export default function EnhancedCardManagement() {
 
       {/* Additional Security Information */}
       <Card className="bg-gradient-to-r from-slate-900/90 to-slate-800/90 border-blue-500/40">
-        <CardContent className="p-6">
-          <div className="flex items-start gap-4">
-            <div className="p-3 bg-blue-600/30 rounded-xl">
-              <Lock className="h-6 w-6 text-blue-300" />
+        <CardContent className="p-4 sm:p-6">
+          <div className="flex flex-col sm:flex-row items-start gap-4">
+            <div className="p-2 sm:p-3 bg-blue-600/30 rounded-xl flex-shrink-0">
+              <Lock className="h-5 w-5 sm:h-6 sm:w-6 text-blue-300" />
             </div>
-            <div className="space-y-2">
-              <h3 className="text-xl font-bold text-white">Your Security is Our Priority</h3>
-              <p className="text-gray-200 leading-relaxed text-base">
+            <div className="space-y-3 sm:space-y-2 w-full">
+              <h3 className="text-lg sm:text-xl font-bold text-white">Your Security is Our Priority</h3>
+              <p className="text-gray-200 leading-relaxed text-sm sm:text-base">
                 All payment information is encrypted using industry-standard 256-bit SSL encryption and processed through Square's secure payment infrastructure. 
                 We never store your complete card information on our servers, only secure tokens that cannot be used elsewhere.
               </p>
-              <div className="flex items-center gap-4 mt-4">
-                <Badge className="bg-green-600/30 text-green-200 border-green-500/40 px-3 py-1">
+              <div className="flex flex-wrap items-center gap-2 sm:gap-4 mt-4">
+                <Badge className="bg-green-600/30 text-green-200 border-green-500/40 px-2 sm:px-3 py-1 text-xs sm:text-sm">
                   <Shield className="h-3 w-3 mr-1" />
                   PCI DSS Level 1
                 </Badge>
-                <Badge className="bg-blue-600/30 text-blue-200 border-blue-500/40 px-3 py-1">
+                <Badge className="bg-blue-600/30 text-blue-200 border-blue-500/40 px-2 sm:px-3 py-1 text-xs sm:text-sm">
                   <Lock className="h-3 w-3 mr-1" />
                   256-bit SSL
                 </Badge>
-                <Badge className="bg-purple-600/30 text-purple-200 border-purple-500/40 px-3 py-1">
+                <Badge className="bg-purple-600/30 text-purple-200 border-purple-500/40 px-2 sm:px-3 py-1 text-xs sm:text-sm">
                   <CheckCircle className="h-3 w-3 mr-1" />
                   SOC 2 Compliant
                 </Badge>
