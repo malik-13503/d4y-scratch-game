@@ -25,7 +25,7 @@ import {
   Award,
   RefreshCw
 } from "lucide-react";
-import { AddCardDialog } from "./add-card-dialog";
+// AddCardDialog removed - using Square Web SDK integration only
 
 interface PaymentCard {
   id: number;
@@ -115,9 +115,10 @@ export default function CardManagement() {
         <Button 
           onClick={() => setShowAddCard(true)}
           className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+          disabled
         >
           <Plus className="h-4 w-4 mr-2" />
-          Add New Card
+          Add New Card (Use Registration Flow)
         </Button>
       </div>
 
@@ -201,13 +202,31 @@ export default function CardManagement() {
       )}
 
       {showAddCard && (
-        <AddCardDialog 
-          onClose={() => setShowAddCard(false)}
-          onSuccess={() => {
-            setShowAddCard(false);
-            queryClient.invalidateQueries({ queryKey: ["/api/payment-cards"] });
-          }}
-        />
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+          <Card className="w-full max-w-md mx-4 bg-gradient-to-br from-slate-800 to-slate-900 border border-purple-500/30">
+            <CardHeader>
+              <CardTitle className="text-white">Add Payment Card</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Alert className="border-blue-500/50 bg-blue-500/10">
+                <Shield className="h-4 w-4" />
+                <AlertDescription className="text-blue-300">
+                  Card management requires proper Square Web SDK integration. 
+                  Please use the card setup flow during registration for secure card processing.
+                </AlertDescription>
+              </Alert>
+              <div className="flex justify-end mt-4">
+                <Button 
+                  variant="outline" 
+                  onClick={() => setShowAddCard(false)}
+                  className="border-white/20 text-white hover:bg-white/10"
+                >
+                  Close
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       )}
     </div>
   );
