@@ -30,7 +30,7 @@ export function SquareCardForm({ onClose, onSuccess }: SquareCardFormProps) {
         // @ts-ignore
         const paymentsInstance = window.Square.payments(
           import.meta.env.VITE_SQUARE_APPLICATION_ID,
-          import.meta.env.VITE_SQUARE_ENVIRONMENT || "sandbox"
+          import.meta.env.VITE_SQUARE_ENVIRONMENT
         );
         
         setPayments(paymentsInstance);
