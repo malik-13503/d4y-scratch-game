@@ -44,7 +44,7 @@ interface PaymentCard {
 }
 
 export default function CardManagement() {
-  const [showAddCard, setShowAddCard] = useState(false);
+  // Removed showAddCard state - using Square Web SDK integration only
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -113,12 +113,17 @@ export default function CardManagement() {
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold text-white">Payment Cards</h2>
         <Button 
-          onClick={() => setShowAddCard(true)}
+          onClick={() => {
+            toast({
+              title: "Card Management",
+              description: "Please use the registration flow to add payment cards via Square Web SDK",
+              variant: "default",
+            });
+          }}
           className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
-          disabled
         >
           <Plus className="h-4 w-4 mr-2" />
-          Add New Card (Use Registration Flow)
+          Add New Card
         </Button>
       </div>
 
@@ -129,7 +134,13 @@ export default function CardManagement() {
             <h3 className="text-lg font-semibold text-white mb-2">No Payment Cards</h3>
             <p className="text-white/70 mb-4">Add a payment card to start playing games.</p>
             <Button 
-              onClick={() => setShowAddCard(true)}
+              onClick={() => {
+                toast({
+                  title: "Card Management",
+                  description: "Please use the registration flow to add payment cards via Square Web SDK",
+                  variant: "default",
+                });
+              }}
               className="bg-gradient-to-r from-purple-600 to-blue-600"
             >
               Add Your First Card

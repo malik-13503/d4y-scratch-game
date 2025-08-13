@@ -48,7 +48,7 @@ interface PaymentCard {
 }
 
 export default function EnhancedCardManagement() {
-  const [showAddCard, setShowAddCard] = useState(false);
+  // Removed showAddCard state - using Square Web SDK integration only
   const [showCardDetails, setShowCardDetails] = useState<number | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -200,7 +200,13 @@ export default function EnhancedCardManagement() {
                   Refresh
                 </Button>
                 <Button
-                  onClick={() => setShowAddCard(true)}
+                  onClick={() => {
+                    toast({
+                      title: "Card Management",
+                      description: "Please use the registration flow to add payment cards via Square Web SDK",
+                      variant: "default",
+                    });
+                  }}
                   className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 px-4 sm:px-6 py-3 text-base sm:text-lg font-semibold shadow-lg w-full sm:w-auto"
                 >
                   <Plus className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
@@ -318,7 +324,13 @@ export default function EnhancedCardManagement() {
                   encrypted.
                 </p>
                 <Button
-                  onClick={() => setShowAddCard(true)}
+                  onClick={() => {
+                    toast({
+                      title: "Card Management",
+                      description: "Please use the registration flow to add payment cards via Square Web SDK",
+                      variant: "default",
+                    });
+                  }}
                   className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 px-8 py-3 text-lg font-semibold"
                 >
                   <Plus className="h-5 w-5 mr-2" />

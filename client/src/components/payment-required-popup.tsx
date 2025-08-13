@@ -22,7 +22,7 @@ export function PaymentRequiredPopup({
 }: PaymentRequiredPopupProps) {
   const [, setLocation] = useLocation();
   const [selectedCardId, setSelectedCardId] = useState<number>();
-  const [showAddCard, setShowAddCard] = useState(false);
+  // Removed showAddCard state - using Square Web SDK integration only
 
   if (!isOpen) return null;
 
@@ -39,7 +39,8 @@ export function PaymentRequiredPopup({
   };
 
   const handleAddCard = () => {
-    setShowAddCard(true);
+    // Redirect to dashboard payment tab for Square Web SDK card addition
+    setLocation("/dashboard?tab=payment");
   };
 
   return (
