@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { CreditCard, Shield, Lock, X, Plus } from "lucide-react";
 import { useLocation } from "wouter";
 import { CardSelector } from "./payment/card-selector";
-import { AddCardDialog } from "./payment/add-card-dialog";
+// AddCardDialog removed - using Square Web SDK integration only
 
 interface PaymentRequiredPopupProps {
   isOpen: boolean;
@@ -150,16 +150,7 @@ export function PaymentRequiredPopup({
         </CardContent>
       </Card>
 
-      {/* Add Card Dialog */}
-      {showAddCard && (
-        <AddCardDialog 
-          onClose={() => setShowAddCard(false)}
-          onSuccess={() => {
-            setShowAddCard(false);
-            // Card list will refresh automatically via React Query
-          }}
-        />
-      )}
+      {/* AddCardDialog removed - using Square Web SDK integration only */}
     </div>
   );
 }

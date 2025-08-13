@@ -539,8 +539,18 @@ export default function GamePage() {
                     onInitiateSpin={handleInitiateSpin}
                   />
                   
-                  {/* Free Play Button - Only show if free play is properly configured */}
-                  {!hasUsedFreePlay && 
+                  {/* DEBUG: Free Play Check */}
+                  {game && console.log('🔍 Free Play Debug:', {
+                    hasUsedFreePlay,
+                    freePlayStart: game.freePlayStart,
+                    freePlayEnd: game.freePlayEnd,
+                    comparison: game.freePlayStart <= game.freePlayEnd,
+                    willShow: !hasUsedFreePlay && game.freePlayStart && game.freePlayEnd && game.freePlayStart <= game.freePlayEnd
+                  })}
+                  
+                  {/* Free Play Button - Hidden when freePlayStart > freePlayEnd (disabled free play) */}
+                  {!hasUsedFreePlay && game && 
+                   game.freePlayStart && game.freePlayEnd &&
                    game.freePlayStart <= game.freePlayEnd && 
                    game.freePlayStart <= game.totalNumbers && game.freePlayEnd <= game.totalNumbers && (
                     <div className="bg-gradient-to-r from-green-500/20 to-emerald-500/20 backdrop-blur-xl rounded-xl border border-green-400/40 shadow-2xl p-4 sm:p-6">
@@ -566,7 +576,7 @@ export default function GamePage() {
                     </div>
                   )}
                   
-                  {hasUsedFreePlay && 
+                  {hasUsedFreePlay && game && 
                    game.freePlayStart <= game.freePlayEnd && 
                    game.freePlayStart <= game.totalNumbers && game.freePlayEnd <= game.totalNumbers && (
                     <div className="bg-gradient-to-r from-gray-500/20 to-slate-500/20 backdrop-blur-xl rounded-xl border border-gray-400/40 shadow-2xl p-4">

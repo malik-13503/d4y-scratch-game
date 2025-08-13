@@ -29,7 +29,7 @@ import {
   Eye,
   EyeOff,
 } from "lucide-react";
-import { AddCardDialog } from "./add-card-dialog";
+// AddCardDialog removed - using Square Web SDK integration only
 
 interface PaymentCard {
   id: number;
@@ -509,16 +509,7 @@ export default function EnhancedCardManagement() {
         </CardContent>
       </Card>
 
-      {/* Add Card Dialog */}
-      {showAddCard && (
-        <AddCardDialog
-          onClose={() => setShowAddCard(false)}
-          onSuccess={() => {
-            setShowAddCard(false);
-            queryClient.invalidateQueries({ queryKey: ["/api/payment-cards"] });
-          }}
-        />
-      )}
+      {/* AddCardDialog removed - using Square Web SDK integration only */}
     </div>
   );
 }
