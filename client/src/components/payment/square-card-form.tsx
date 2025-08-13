@@ -73,13 +73,26 @@ export function SquareCardForm({ onClose, onSuccess }: SquareCardFormProps) {
 
     try {
       const result = await card.tokenize();
+      console.log("Square tokenization result:", result);
       
       if (result.status === 'OK') {
-        // Send the token to your server
-        await apiRequest("POST", "/api/payment-cards", {
+        // Extract card details from the result
+        const cardDetails = result.details;
+        console.log("Card details:", cardDetails);
+        
+        // Send the token to your server with required card information
+        const payload = {
           cardNonce: result.token,
-          verificationToken: result.details?.verification_token,
-        });
+          verificationToken: cardDetails?.verification_token,
+          cardLast4: cardDetails?.card?.last_4 || cardDetails?.last_4 || "****",
+          cardBrand: cardDetails?.card?.brand || cardDetails?.brand || "Unknown",
+          expiryMonth: cardDetails?.card?.exp_month || cardDetails?.exp_month,
+          expiryYear: cardDetails?.card?.exp_year || cardDetails?.exp_year,
+          cardholderName: cardDetails?.card?.cardholder_name || cardDetails?.cardholder_name || "",
+        };
+        console.log("Payload being sent:", payload);
+        
+        await apiRequest("POST", "/api/payment-cards", payload);
 
         toast({
           title: "Success",
@@ -135,41 +148,75 @@ export function SquareCardForm({ onClose, onSuccess }: SquareCardFormProps) {
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Square Card Form Container */}
             <div className="space-y-4">
-              <div 
-                id="card-container" 
-                className="p-4 bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl"
-                style={{ minHeight: "100px" }}
-              ></div>
+              <div className="relative">
+                <label className="block text-sm font-medium text-white mb-2">
+                  Card Information
+                </label>
+                <div 
+                  id="card-container" 
+                  className="p-6 bg-gradient-to-br from-white/15 to-white/5 backdrop-blur-lg border-2 border-purple-300/30 rounded-2xl shadow-2xl transition-all duration-300 hover:border-purple-400/50 focus-within:border-purple-500/70"
+                  style={{ minHeight: "120px" }}
+                >
+                  {!card && (
+                    <div className="flex items-center justify-center h-full">
+                      <div className="text-white/60 text-sm">Loading payment form...</div>
+                    </div>
+                  )}
+                </div>
+                <div className="absolute -inset-1 bg-gradient-to-r from-purple-500/20 to-blue-500/20 rounded-2xl blur-xl -z-10"></div>
+              </div>
             </div>
 
             {/* Security Info */}
-            <div className="flex items-center justify-center gap-4">
-              <Badge className="bg-green-500/20 text-green-300 border border-green-500/30 px-3 py-1.5 text-xs font-medium">
-                <Shield className="h-3 w-3 mr-1" />
-                PCI Compliant
-              </Badge>
-              <Badge className="bg-blue-500/20 text-blue-300 border border-blue-500/30 px-3 py-1.5 text-xs font-medium">
-                <Lock className="h-3 w-3 mr-1" />
-                256-bit SSL
-              </Badge>
+            <div className="bg-gradient-to-r from-slate-800/50 to-slate-700/50 border border-white/10 rounded-xl p-4 backdrop-blur-sm">
+              <div className="flex items-center justify-center gap-6">
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                  <Badge className="bg-green-500/20 text-green-300 border border-green-500/30 px-3 py-1.5 text-xs font-medium">
+                    <Shield className="h-3 w-3 mr-1" />
+                    PCI Compliant
+                  </Badge>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse"></div>
+                  <Badge className="bg-blue-500/20 text-blue-300 border border-blue-500/30 px-3 py-1.5 text-xs font-medium">
+                    <Lock className="h-3 w-3 mr-1" />
+                    256-bit SSL
+                  </Badge>
+                </div>
+              </div>
+              <p className="text-center text-xs text-white/60 mt-2">
+                Your payment information is encrypted and secure
+              </p>
             </div>
 
             {/* Action Buttons */}
-            <div className="flex gap-3">
+            <div className="flex gap-4 pt-2">
               <Button
                 type="button"
                 variant="outline"
                 onClick={onClose}
-                className="flex-1 bg-slate-800/50 border-gray-600 text-gray-300 hover:bg-slate-700/50 hover:text-white py-3 rounded-xl transition-all duration-300"
+                disabled={isLoading}
+                className="flex-1 bg-slate-800/60 border-2 border-gray-600/50 text-gray-300 hover:bg-slate-700/60 hover:text-white hover:border-gray-500/70 py-4 rounded-xl transition-all duration-300 font-semibold"
               >
                 Cancel
               </Button>
               <Button
                 type="submit"
                 disabled={isLoading || !card}
-                className="flex-1 bg-gradient-to-r from-purple-600 via-blue-600 to-purple-600 hover:from-purple-700 hover:via-blue-700 hover:to-purple-700 text-white font-bold py-3 px-6 rounded-xl shadow-2xl transform hover:scale-105 transition-all duration-300 border-2 border-white/20"
+                className="flex-1 relative bg-gradient-to-r from-purple-600 via-blue-600 to-purple-600 hover:from-purple-700 hover:via-blue-700 hover:to-purple-700 disabled:from-gray-600 disabled:via-gray-600 disabled:to-gray-600 text-white font-bold py-4 px-6 rounded-xl shadow-2xl transform hover:scale-[1.02] disabled:hover:scale-100 transition-all duration-300 border-2 border-white/20 disabled:border-gray-500/30"
               >
-                {isLoading ? "Adding..." : "Add Card"}
+                {isLoading ? (
+                  <div className="flex items-center gap-2">
+                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                    Adding Card...
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <CreditCard className="h-4 w-4" />
+                    Add Payment Card
+                  </div>
+                )}
               </Button>
             </div>
           </form>
