@@ -25,7 +25,7 @@ import {
   Award,
   RefreshCw
 } from "lucide-react";
-// AddCardDialog removed - using Square Web SDK integration only
+import { SquareCardForm } from "./square-card-form";
 
 interface PaymentCard {
   id: number;
@@ -44,7 +44,7 @@ interface PaymentCard {
 }
 
 export default function CardManagement() {
-  // Removed showAddCard state - using Square Web SDK integration only
+  const [showAddCard, setShowAddCard] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -113,13 +113,7 @@ export default function CardManagement() {
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold text-white">Payment Cards</h2>
         <Button 
-          onClick={() => {
-            toast({
-              title: "Card Management",
-              description: "Please use the registration flow to add payment cards via Square Web SDK",
-              variant: "default",
-            });
-          }}
+          onClick={() => setShowAddCard(true)}
           className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
         >
           <Plus className="h-4 w-4 mr-2" />
@@ -134,13 +128,7 @@ export default function CardManagement() {
             <h3 className="text-lg font-semibold text-white mb-2">No Payment Cards</h3>
             <p className="text-white/70 mb-4">Add a payment card to start playing games.</p>
             <Button 
-              onClick={() => {
-                toast({
-                  title: "Card Management",
-                  description: "Please use the registration flow to add payment cards via Square Web SDK",
-                  variant: "default",
-                });
-              }}
+              onClick={() => setShowAddCard(true)}
               className="bg-gradient-to-r from-purple-600 to-blue-600"
             >
               Add Your First Card
@@ -212,7 +200,16 @@ export default function CardManagement() {
         </div>
       )}
 
-
+      {/* Square Card Form */}
+      {showAddCard && (
+        <SquareCardForm
+          onClose={() => setShowAddCard(false)}
+          onSuccess={() => {
+            setShowAddCard(false);
+            queryClient.invalidateQueries({ queryKey: ["/api/payment-cards"] });
+          }}
+        />
+      )}
     </div>
   );
 }
