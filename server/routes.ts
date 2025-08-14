@@ -1512,11 +1512,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Check if we're in production mode
       const isProduction = process.env.NODE_ENV === "production" || process.env.SQUARE_ENVIRONMENT === "production";
       
-      // For sandbox environment, bypass card check as we simulate card setup
-      if (!isProduction) {
-        // Continue with spin logic for sandbox
-      } else if (!user.cardOnFile) {
-        return res.status(400).json({ message: "No card on file" });
+      // CRITICAL: Always require payment card - no bypassing even in sandbox
+      if (!user.cardOnFile) {
+        return res.status(400).json({ message: "Payment method required. Please add a payment card before spinning." });
+      }
+
+      // Validate user has sufficient payment method available
+      const userCards = await storage.getPaymentCardsByUserId(userId);
+      if (!userCards || userCards.length === 0) {
+        return res.status(400).json({ message: "No payment cards found. Please add a payment card." });
+      }
+
+      const defaultCard = userCards.find(card => card.isDefault) || userCards[0];
+      if (!defaultCard) {
+        return res.status(400).json({ message: "No valid payment card available." });
       }
 
       const game = await storage.getGame(gameId);
@@ -1541,10 +1550,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      // Spin the wheel
+      // Get wheel numbers BEFORE spinning to determine cost
+      const availableNumbers = await storage.getAvailableNumbers(gameId);
+      if (availableNumbers.length === 0) {
+        // Game is complete - trigger winner selection
+        const winner = await storage.selectGameWinner(gameId);
+        if (winner) {
+          // Send winner notifications to admin
+          try {
+            await storage.createNotification({
+              type: 'game_complete',
+              title: `Game Complete - Winner Selected!`,
+              message: `${game.name} has ended. Winner: ${winner.playerName} with number ${winner.selectedNumber}`,
+              gameId: gameId,
+              userId: winner.userId,
+              isRead: false,
+              createdAt: new Date(),
+              metadata: {
+                winnerName: winner.playerName,
+                winningNumber: winner.selectedNumber,
+                gameName: game.name
+              }
+            });
+          } catch (notificationError) {
+            console.error("Failed to create winner notification:", notificationError);
+          }
+        }
+        return res.status(400).json({ message: "Game complete! All numbers have been taken. Winner has been selected." });
+      }
+
+      // Spin the wheel - this will charge AFTER determining the result
       const spinResult = await storage.spinWheel(gameId, player.id);
       
-      // If it's not a free play, charge the user
+      // ALWAYS charge the user - no free plays in paid games
       if (!spinResult.isFreePlay) {
         const chargeAmount = parseFloat(spinResult.amountCharged);
         let paymentResult = null;

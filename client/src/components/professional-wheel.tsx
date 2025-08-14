@@ -68,11 +68,11 @@ export const ProfessionalWheel = forwardRef<
   // Generate wheel numbers from available numbers for real-time updates
   const generateWheelNumbers = (): number[] => {
     const maxSegments = 50;
-    const numbers: number[] = [];
-
+    
     if (availableNumbers.length === 0) {
       // Fallback to static generation if no available numbers yet
       const segments = Math.min(maxSegments, totalNumbers);
+      const numbers: number[] = [];
       for (let i = 0; i < segments; i++) {
         const number = Math.floor((totalNumbers / segments) * i) + 1;
         numbers.push(Math.min(number, totalNumbers));
@@ -80,9 +80,23 @@ export const ProfessionalWheel = forwardRef<
       return numbers;
     }
 
-    // Simple logic: Always show only the available numbers, no matter how few
-    // This ensures 2 numbers = 2 segments, 1 number = 1 segment, etc.
-    return [...availableNumbers].slice(0, maxSegments);
+    // CRITICAL FIX: Always show all available numbers, even if there are only 1-3 left
+    // For visual purposes, if we have very few numbers, duplicate them to fill more segments
+    let numbers = [...availableNumbers];
+    
+    if (numbers.length < 6 && numbers.length > 0) {
+      // If we have 1-5 numbers left, repeat them to create at least 6 visible segments
+      const repeats = Math.ceil(6 / numbers.length);
+      const originalNumbers = [...numbers];
+      numbers = [];
+      for (let i = 0; i < repeats; i++) {
+        numbers.push(...originalNumbers);
+      }
+      // Limit to avoid too many duplicates
+      numbers = numbers.slice(0, 12);
+    }
+    
+    return numbers.slice(0, maxSegments);
   };
 
   const [wheelNumbers, setWheelNumbers] = useState<number[]>([]);

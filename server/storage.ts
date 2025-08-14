@@ -90,7 +90,8 @@ export interface IStorage {
   spinWheel(gameId: number, playerId: number): Promise<SpinResult>;
   isNumberAvailable(gameId: number, number: number): Promise<boolean>;
   getAvailableNumbers(gameId: number): Promise<number[]>;
-  selectGameWinner(gameId: number): Promise<void>;
+  selectGameWinner(gameId: number): Promise<Player | undefined>;
+  getRecentGameTransactions(gameId: number, limit?: number): Promise<Transaction[]>;
 
   // Session store
   sessionStore: any;
@@ -511,7 +512,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Winner selection logic
-  async selectGameWinner(gameId: number): Promise<void> {
+  async selectGameWinner(gameId: number): Promise<Player | undefined> {
     try {
       const game = await this.getGame(gameId);
       if (!game) {
@@ -570,9 +571,29 @@ export class DatabaseStorage implements IStorage {
       }
 
       console.log(`Game ${gameId} completed. Winner: Player ${winningSpinResult.playerId} with number ${winningNumber}`);
+      
+      // Return the winner player object
+      return winner;
     } catch (error) {
       console.error("Error selecting game winner:", error);
       throw error;
+    }
+  }
+
+  // Get recent transactions for a specific game (used for recent numbers display)
+  async getRecentGameTransactions(gameId: number, limit: number = 6): Promise<Transaction[]> {
+    try {
+      const recentTransactions = await db
+        .select()
+        .from(transactions)
+        .where(eq(transactions.gameId, gameId))
+        .orderBy(desc(transactions.createdAt))
+        .limit(limit);
+      
+      return recentTransactions;
+    } catch (error) {
+      console.error("Error getting recent game transactions:", error);
+      return [];
     }
   }
 
