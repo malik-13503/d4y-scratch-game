@@ -741,55 +741,90 @@ export default function AdminDashboard() {
           onValueChange={setActiveTab}
           className="space-y-4 sm:space-y-8"
         >
-          {/* Mobile-Responsive Tab Navigation */}
-          <TabsList className="grid w-full grid-cols-3 sm:grid-cols-6 bg-black/20 backdrop-blur-sm border border-purple-500/30 rounded-lg sm:rounded-xl p-1 sm:p-2 gap-1 sm:gap-0">
+          {/* Enhanced Mobile-Responsive Tab Navigation */}
+          <TabsList className="grid w-full grid-cols-3 sm:grid-cols-6 bg-gradient-to-r from-black/30 via-slate-900/50 to-black/30 backdrop-blur-md border-2 border-purple-500/40 rounded-xl sm:rounded-2xl p-1 sm:p-2 gap-1 shadow-2xl shadow-purple-900/30">
             <TabsTrigger
               value="overview"
-              className="data-[state=active]:bg-purple-600 data-[state=active]:text-white text-gray-300 text-xs sm:text-sm p-2 sm:p-3"
+              className="relative group data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-purple-500/50 text-gray-300 hover:text-white hover:bg-slate-700/50 transition-all duration-300 text-xs sm:text-sm p-3 sm:p-4 rounded-lg sm:rounded-xl border border-transparent data-[state=active]:border-purple-400/60"
             >
-              <BarChart3 className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2" />
-              <span className="hidden sm:inline">Overview</span>
-              <span className="sm:hidden">Stats</span>
+              <div className="flex flex-col sm:flex-row items-center justify-center sm:justify-start space-y-1 sm:space-y-0 sm:space-x-2">
+                <div className="relative">
+                  <BarChart3 className="h-4 w-4 sm:h-5 sm:w-5 transition-transform duration-300 group-data-[state=active]:scale-110" />
+                  <div className="absolute -inset-1 bg-purple-500/20 rounded-full scale-0 group-data-[state=active]:scale-100 transition-transform duration-300"></div>
+                </div>
+                <span className="hidden sm:inline font-semibold">Overview</span>
+                <span className="sm:hidden text-xs font-medium">Stats</span>
+              </div>
             </TabsTrigger>
+            
             <TabsTrigger
               value="games"
-              className="data-[state=active]:bg-purple-600 data-[state=active]:text-white text-gray-300 text-xs sm:text-sm p-2 sm:p-3"
+              className="relative group data-[state=active]:bg-gradient-to-r data-[state=active]:from-emerald-600 data-[state=active]:to-green-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-emerald-500/50 text-gray-300 hover:text-white hover:bg-slate-700/50 transition-all duration-300 text-xs sm:text-sm p-3 sm:p-4 rounded-lg sm:rounded-xl border border-transparent data-[state=active]:border-emerald-400/60"
             >
-              <Gamepad2 className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2" />
-              <span className="hidden sm:inline">Games</span>
-              <span className="sm:hidden">Games</span>
+              <div className="flex flex-col sm:flex-row items-center justify-center sm:justify-start space-y-1 sm:space-y-0 sm:space-x-2">
+                <div className="relative">
+                  <Gamepad2 className="h-4 w-4 sm:h-5 sm:w-5 transition-transform duration-300 group-data-[state=active]:scale-110 group-data-[state=active]:rotate-12" />
+                  <div className="absolute -inset-1 bg-emerald-500/20 rounded-full scale-0 group-data-[state=active]:scale-100 transition-transform duration-300"></div>
+                </div>
+                <span className="hidden sm:inline font-semibold">Games</span>
+                <span className="sm:hidden text-xs font-medium">Games</span>
+              </div>
             </TabsTrigger>
+            
             <TabsTrigger
               value="users"
-              className="data-[state=active]:bg-purple-600 data-[state=active]:text-white text-gray-300 text-xs sm:text-sm p-2 sm:p-3"
+              className="relative group data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-600 data-[state=active]:to-red-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-orange-500/50 text-gray-300 hover:text-white hover:bg-slate-700/50 transition-all duration-300 text-xs sm:text-sm p-3 sm:p-4 rounded-lg sm:rounded-xl border border-transparent data-[state=active]:border-orange-400/60"
             >
-              <Users className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2" />
-              <span className="hidden sm:inline">Users</span>
-              <span className="sm:hidden">Users</span>
+              <div className="flex flex-col sm:flex-row items-center justify-center sm:justify-start space-y-1 sm:space-y-0 sm:space-x-2">
+                <div className="relative">
+                  <Users className="h-4 w-4 sm:h-5 sm:w-5 transition-transform duration-300 group-data-[state=active]:scale-110" />
+                  <div className="absolute -inset-1 bg-orange-500/20 rounded-full scale-0 group-data-[state=active]:scale-100 transition-transform duration-300"></div>
+                </div>
+                <span className="hidden sm:inline font-semibold">Users</span>
+                <span className="sm:hidden text-xs font-medium">Users</span>
+              </div>
             </TabsTrigger>
+            
             <TabsTrigger
               value="analytics"
-              className="data-[state=active]:bg-purple-600 data-[state=active]:text-white text-gray-300 text-xs sm:text-sm p-2 sm:p-3"
+              className="relative group data-[state=active]:bg-gradient-to-r data-[state=active]:from-cyan-600 data-[state=active]:to-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-cyan-500/50 text-gray-300 hover:text-white hover:bg-slate-700/50 transition-all duration-300 text-xs sm:text-sm p-3 sm:p-4 rounded-lg sm:rounded-xl border border-transparent data-[state=active]:border-cyan-400/60"
             >
-              <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2" />
-              <span className="hidden sm:inline">Analytics</span>
-              <span className="sm:hidden">Charts</span>
+              <div className="flex flex-col sm:flex-row items-center justify-center sm:justify-start space-y-1 sm:space-y-0 sm:space-x-2">
+                <div className="relative">
+                  <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 transition-transform duration-300 group-data-[state=active]:scale-110 group-data-[state=active]:-rotate-12" />
+                  <div className="absolute -inset-1 bg-cyan-500/20 rounded-full scale-0 group-data-[state=active]:scale-100 transition-transform duration-300"></div>
+                </div>
+                <span className="hidden sm:inline font-semibold">Analytics</span>
+                <span className="sm:hidden text-xs font-medium">Charts</span>
+              </div>
             </TabsTrigger>
+            
             <TabsTrigger
               value="settings"
-              className="data-[state=active]:bg-purple-600 data-[state=active]:text-white text-gray-300 text-xs sm:text-sm p-2 sm:p-3"
+              className="relative group data-[state=active]:bg-gradient-to-r data-[state=active]:from-pink-600 data-[state=active]:to-purple-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-pink-500/50 text-gray-300 hover:text-white hover:bg-slate-700/50 transition-all duration-300 text-xs sm:text-sm p-3 sm:p-4 rounded-lg sm:rounded-xl border border-transparent data-[state=active]:border-pink-400/60"
             >
-              <Settings className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2" />
-              <span className="hidden sm:inline">Settings</span>
-              <span className="sm:hidden">Config</span>
+              <div className="flex flex-col sm:flex-row items-center justify-center sm:justify-start space-y-1 sm:space-y-0 sm:space-x-2">
+                <div className="relative">
+                  <Settings className="h-4 w-4 sm:h-5 sm:w-5 transition-transform duration-300 group-data-[state=active]:scale-110 group-data-[state=active]:rotate-90" />
+                  <div className="absolute -inset-1 bg-pink-500/20 rounded-full scale-0 group-data-[state=active]:scale-100 transition-transform duration-300"></div>
+                </div>
+                <span className="hidden sm:inline font-semibold">Settings</span>
+                <span className="sm:hidden text-xs font-medium">Config</span>
+              </div>
             </TabsTrigger>
+            
             <TabsTrigger
               value="system"
-              className="data-[state=active]:bg-purple-600 data-[state=active]:text-white text-gray-300 text-xs sm:text-sm p-2 sm:p-3"
+              className="relative group data-[state=active]:bg-gradient-to-r data-[state=active]:from-indigo-600 data-[state=active]:to-purple-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-indigo-500/50 text-gray-300 hover:text-white hover:bg-slate-700/50 transition-all duration-300 text-xs sm:text-sm p-3 sm:p-4 rounded-lg sm:rounded-xl border border-transparent data-[state=active]:border-indigo-400/60"
             >
-              <Monitor className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2" />
-              <span className="hidden sm:inline">System</span>
-              <span className="sm:hidden">System</span>
+              <div className="flex flex-col sm:flex-row items-center justify-center sm:justify-start space-y-1 sm:space-y-0 sm:space-x-2">
+                <div className="relative">
+                  <Monitor className="h-4 w-4 sm:h-5 sm:w-5 transition-transform duration-300 group-data-[state=active]:scale-110" />
+                  <div className="absolute -inset-1 bg-indigo-500/20 rounded-full scale-0 group-data-[state=active]:scale-100 transition-transform duration-300"></div>
+                </div>
+                <span className="hidden sm:inline font-semibold">System</span>
+                <span className="sm:hidden text-xs font-medium">System</span>
+              </div>
             </TabsTrigger>
           </TabsList>
 
