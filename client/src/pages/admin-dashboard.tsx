@@ -2597,11 +2597,11 @@ export default function AdminDashboard() {
             )}
           </TabsContent>
 
-          {/* Users Management Tab */}
-          <TabsContent value="users" className="space-y-6">
-            <div className="flex flex-col sm:flex-col md:flex-row md:items-center justify-between gap-4">
-              <div>
-                <h2 className="text-xl sm:text-2xl font-bold text-white">
+          {/* Users Management Tab - Enhanced Mobile */}
+          <TabsContent value="users" className="space-y-4 sm:space-y-6">
+            <div className="flex flex-col gap-3 sm:gap-4">
+              <div className="text-center sm:text-left">
+                <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white bg-gradient-to-r from-orange-400 to-red-400 bg-clip-text text-transparent">
                   User Management
                 </h2>
                 <p className="text-gray-400 text-sm sm:text-base">
@@ -2853,25 +2853,26 @@ export default function AdminDashboard() {
             </Card>
           </TabsContent>
 
-          {/* Analytics Tab */}
-          <TabsContent value="analytics" className="space-y-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-2xl font-bold text-white">
+          {/* Analytics Tab - Mobile Enhanced */}
+          <TabsContent value="analytics" className="space-y-4 sm:space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
+              <div className="text-center sm:text-left">
+                <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">
                   Analytics & Insights
                 </h2>
-                <p className="text-gray-400">
+                <p className="text-gray-400 text-sm sm:text-base">
                   Comprehensive data analysis and performance metrics
                 </p>
               </div>
-              <div className="flex space-x-2">
+              <div className="flex flex-col sm:flex-row gap-2">
                 <Button
                   onClick={() => refetchAnalytics()}
                   variant="outline"
-                  className="border-purple-500/50 text-purple-400 hover:bg-purple-500/20"
+                  className="border-purple-500/50 text-purple-400 hover:bg-purple-500/20 text-sm sm:text-base"
                 >
-                  <RefreshCw className="h-4 w-4 mr-2" />
-                  Refresh Data
+                  <RefreshCw className="h-3 w-3 sm:h-4 sm:w-4 mr-2" />
+                  <span className="hidden sm:inline">Refresh Data</span>
+                  <span className="sm:hidden">Refresh</span>
                 </Button>
                 <Button className="bg-gradient-to-r from-purple-600 to-pink-600">
                   <Download className="h-4 w-4 mr-2" />
@@ -3932,7 +3933,7 @@ export default function AdminDashboard() {
                       <Label className="text-gray-300">Email Address</Label>
                       <Input
                         type="email"
-                        defaultValue={adminUser?.email || ""}
+                        defaultValue={(adminUser as any)?.email || ""}
                         className="bg-white/5 border-white/20 text-white"
                         id="admin-email"
                       />
@@ -3941,7 +3942,7 @@ export default function AdminDashboard() {
                       <Label className="text-gray-300">First Name</Label>
                       <Input
                         type="text"
-                        defaultValue={adminUser?.firstName || ""}
+                        defaultValue={(adminUser as any)?.firstName || ""}
                         className="bg-white/5 border-white/20 text-white"
                         id="admin-firstName"
                       />
@@ -3950,7 +3951,7 @@ export default function AdminDashboard() {
                       <Label className="text-gray-300">Last Name</Label>
                       <Input
                         type="text"
-                        defaultValue={adminUser?.lastName || ""}
+                        defaultValue={(adminUser as any)?.lastName || ""}
                         className="bg-white/5 border-white/20 text-white"
                         id="admin-lastName"
                       />
