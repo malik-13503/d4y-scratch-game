@@ -297,9 +297,9 @@ class ResendEmailService implements EmailService {
       await resend.emails.send({
         from: FROM_EMAIL,
         to: userEmail,
-        subject: `Important: You won ${gameName}`,
+        subject: `Your account update - ${gameName}`,
         html: this.getWinnerNotificationTemplate(userName, gameName, winningNumber, prizeValue, prizeDescription),
-        text: `Hello ${userName}, Great news! You won ${gameName} with number #${winningNumber}. Your prize: ${prizeDescription} (Value: $${prizeValue}). We'll contact you within 48 hours. Please have your ID ready for verification. Questions? Contact admin@hittheroadjackpot.com`,
+        text: `Hello ${userName}, This message confirms your selection for ${gameName} with number ${winningNumber}. Prize details: ${prizeDescription} (Value: $${prizeValue}). Our team will contact you within 48 hours for next steps. Please keep your ID ready. For questions contact admin@hittheroadjackpot.com`,
       });
       console.log(`Winner notification sent to ${userEmail}`);
     } catch (error) {
@@ -313,9 +313,9 @@ class ResendEmailService implements EmailService {
       await resend.emails.send({
         from: FROM_EMAIL,
         to: userEmail,
-        subject: `${gameName} results now available`,
+        subject: `${gameName} - Status update`,
         html: this.getGameCompletionTemplate(userName, gameName, winningNumber, winnerName, prizeDescription),
-        text: `Hello ${userName}, The game ${gameName} has finished. Winner: ${winnerName}, Winning Number: #${winningNumber}, Prize: ${prizeDescription}. Thank you for playing! Questions? Contact admin@hittheroadjackpot.com`,
+        text: `Hello ${userName}, This confirms ${gameName} has completed. Selected participant: ${winnerName}, Number: ${winningNumber}, Prize: ${prizeDescription}. Thank you for your participation. Questions? Contact admin@hittheroadjackpot.com`,
       });
       console.log(`Game completion notification sent to ${userEmail}`);
     } catch (error) {
@@ -331,43 +331,59 @@ class ResendEmailService implements EmailService {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>You Won!</title>
+  <title>Account Update</title>
 </head>
-<body style="margin: 0; padding: 20px; font-family: Arial, sans-serif; background-color: #f5f5f5;">
-  <table style="max-width: 600px; margin: 0 auto; background-color: white; border-radius: 8px; overflow: hidden;">
+<body style="margin: 0; padding: 20px; font-family: Arial, sans-serif; background-color: #ffffff; color: #333333;">
+  <table style="max-width: 600px; margin: 0 auto; background-color: white; border: 1px solid #dddddd;">
     <tr>
-      <td style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #d946ef 100%); padding: 40px 30px; text-align: center;">
-        <h1 style="color: white; margin: 0; font-size: 24px;">Hit The Road Jackpot</h1>
-        <p style="color: rgba(255,255,255,0.9); margin: 10px 0 0 0; font-size: 16px;">Congratulations!</p>
+      <td style="background-color: #4a5568; padding: 20px; text-align: center;">
+        <h1 style="color: white; margin: 0; font-size: 20px; font-weight: normal;">Hit The Road Jackpot</h1>
       </td>
     </tr>
     <tr>
-      <td style="padding: 40px 30px;">
-        <h2 style="color: #1f2937; margin: 0 0 20px 0; font-size: 22px;">Hello ${userName},</h2>
-        <p style="color: #374151; font-size: 16px; line-height: 1.6; margin: 0 0 25px 0;">
-          Great news! You won <strong>${gameName}</strong> with number <strong>#${winningNumber}</strong>.
+      <td style="padding: 30px;">
+        <p style="color: #333333; font-size: 16px; line-height: 1.5; margin: 0 0 20px 0;">
+          Dear ${userName},
+        </p>
+        <p style="color: #333333; font-size: 16px; line-height: 1.5; margin: 0 0 20px 0;">
+          This message confirms your account status update for ${gameName}. You have been selected with number ${winningNumber}.
         </p>
         
-        <div style="background-color: #f0f9ff; border-left: 4px solid #3b82f6; padding: 20px; margin: 25px 0;">
-          <p style="margin: 0; color: #1e40af; font-weight: 600;">Your Prize: ${prizeDescription}</p>
-          <p style="margin: 5px 0 0 0; color: #374151;">Value: $${prizeValue}</p>
-        </div>
+        <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+          <tr>
+            <td style="padding: 10px; border-bottom: 1px solid #eeeeee; color: #333333;">Game:</td>
+            <td style="padding: 10px; border-bottom: 1px solid #eeeeee; color: #333333;">${gameName}</td>
+          </tr>
+          <tr>
+            <td style="padding: 10px; border-bottom: 1px solid #eeeeee; color: #333333;">Number:</td>
+            <td style="padding: 10px; border-bottom: 1px solid #eeeeee; color: #333333;">${winningNumber}</td>
+          </tr>
+          <tr>
+            <td style="padding: 10px; border-bottom: 1px solid #eeeeee; color: #333333;">Item:</td>
+            <td style="padding: 10px; border-bottom: 1px solid #eeeeee; color: #333333;">${prizeDescription}</td>
+          </tr>
+          <tr>
+            <td style="padding: 10px; border-bottom: 1px solid #eeeeee; color: #333333;">Value:</td>
+            <td style="padding: 10px; border-bottom: 1px solid #eeeeee; color: #333333;">$${prizeValue}</td>
+          </tr>
+        </table>
         
-        <h3 style="color: #1f2937; margin: 25px 0 15px 0; font-size: 18px;">What happens next:</h3>
-        <ul style="color: #374151; line-height: 1.6; padding-left: 20px;">
-          <li>We'll contact you within 48 hours</li>
-          <li>Please have your ID ready for verification</li>
-          <li>Check your email regularly for updates</li>
+        <p style="color: #333333; font-size: 16px; line-height: 1.5; margin: 20px 0;">
+          Next steps:
+        </p>
+        <ul style="color: #333333; line-height: 1.5; padding-left: 20px; margin: 0 0 20px 0;">
+          <li>Our team will contact you within 48 hours</li>
+          <li>Please have identification ready for verification</li>
+          <li>Monitor your email for further instructions</li>
         </ul>
         
-        <div style="text-align: center; margin: 30px 0;">
-          <a href="https://hittheroadjackpot.com/dashboard" style="background: linear-gradient(135deg, #6366f1, #8b5cf6); color: white; padding: 14px 28px; text-decoration: none; border-radius: 6px; font-weight: 500; display: inline-block;">
-            View Dashboard
-          </a>
-        </div>
+        <p style="color: #333333; font-size: 16px; line-height: 1.5; margin: 20px 0;">
+          You can view your account details at: https://hittheroadjackpot.com/dashboard
+        </p>
         
-        <p style="color: #6b7280; font-size: 14px; margin: 25px 0 0 0; padding-top: 20px; border-top: 1px solid #e5e7eb;">
-          Keep this email for your records. Questions? Reply to this email or contact admin@hittheroadjackpot.com
+        <p style="color: #666666; font-size: 14px; margin: 30px 0 0 0; padding-top: 20px; border-top: 1px solid #eeeeee;">
+          This is an automated message from Hit The Road Jackpot. Please keep this email for your records.<br>
+          For assistance, contact: admin@hittheroadjackpot.com
         </p>
       </td>
     </tr>
@@ -383,41 +399,54 @@ class ResendEmailService implements EmailService {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Game Results</title>
+  <title>Status Update</title>
 </head>
-<body style="margin: 0; padding: 20px; font-family: Arial, sans-serif; background-color: #f5f5f5;">
-  <table style="max-width: 600px; margin: 0 auto; background-color: white; border-radius: 8px; overflow: hidden;">
+<body style="margin: 0; padding: 20px; font-family: Arial, sans-serif; background-color: #ffffff; color: #333333;">
+  <table style="max-width: 600px; margin: 0 auto; background-color: white; border: 1px solid #dddddd;">
     <tr>
-      <td style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #d946ef 100%); padding: 40px 30px; text-align: center;">
-        <h1 style="color: white; margin: 0; font-size: 24px;">Hit The Road Jackpot</h1>
-        <p style="color: rgba(255,255,255,0.9); margin: 10px 0 0 0; font-size: 16px;">Game Complete</p>
+      <td style="background-color: #4a5568; padding: 20px; text-align: center;">
+        <h1 style="color: white; margin: 0; font-size: 20px; font-weight: normal;">Hit The Road Jackpot</h1>
       </td>
     </tr>
     <tr>
-      <td style="padding: 40px 30px;">
-        <h2 style="color: #1f2937; margin: 0 0 20px 0; font-size: 22px;">Hello ${userName},</h2>
-        <p style="color: #374151; font-size: 16px; line-height: 1.6; margin: 0 0 25px 0;">
-          The game <strong>${gameName}</strong> has finished. Here are the final results:
+      <td style="padding: 30px;">
+        <p style="color: #333333; font-size: 16px; line-height: 1.5; margin: 0 0 20px 0;">
+          Dear ${userName},
+        </p>
+        <p style="color: #333333; font-size: 16px; line-height: 1.5; margin: 0 0 20px 0;">
+          This message confirms that ${gameName} has been completed. The final results are now available.
         </p>
         
-        <div style="background-color: #f0f9ff; border-left: 4px solid #3b82f6; padding: 20px; margin: 25px 0;">
-          <p style="margin: 0 0 8px 0; color: #1e40af; font-weight: 600;">Winner: ${winnerName}</p>
-          <p style="margin: 0 0 8px 0; color: #374151;">Winning Number: #${winningNumber}</p>
-          <p style="margin: 0; color: #374151;">Prize: ${prizeDescription}</p>
-        </div>
+        <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+          <tr>
+            <td style="padding: 10px; border-bottom: 1px solid #eeeeee; color: #333333;">Game:</td>
+            <td style="padding: 10px; border-bottom: 1px solid #eeeeee; color: #333333;">${gameName}</td>
+          </tr>
+          <tr>
+            <td style="padding: 10px; border-bottom: 1px solid #eeeeee; color: #333333;">Selected Participant:</td>
+            <td style="padding: 10px; border-bottom: 1px solid #eeeeee; color: #333333;">${winnerName}</td>
+          </tr>
+          <tr>
+            <td style="padding: 10px; border-bottom: 1px solid #eeeeee; color: #333333;">Number:</td>
+            <td style="padding: 10px; border-bottom: 1px solid #eeeeee; color: #333333;">${winningNumber}</td>
+          </tr>
+          <tr>
+            <td style="padding: 10px; border-bottom: 1px solid #eeeeee; color: #333333;">Item:</td>
+            <td style="padding: 10px; border-bottom: 1px solid #eeeeee; color: #333333;">${prizeDescription}</td>
+          </tr>
+        </table>
         
-        <p style="color: #374151; font-size: 16px; line-height: 1.6; margin: 25px 0;">
-          Thank you for playing! Check out our other games for more chances to win.
+        <p style="color: #333333; font-size: 16px; line-height: 1.5; margin: 20px 0;">
+          Thank you for your participation in this activity.
         </p>
         
-        <div style="text-align: center; margin: 30px 0;">
-          <a href="https://hittheroadjackpot.com/games" style="background: linear-gradient(135deg, #6366f1, #8b5cf6); color: white; padding: 14px 28px; text-decoration: none; border-radius: 6px; font-weight: 500; display: inline-block;">
-            Play More Games
-          </a>
-        </div>
+        <p style="color: #333333; font-size: 16px; line-height: 1.5; margin: 20px 0;">
+          You can view available activities at: https://hittheroadjackpot.com/games
+        </p>
         
-        <p style="color: #6b7280; font-size: 14px; margin: 25px 0 0 0; padding-top: 20px; border-top: 1px solid #e5e7eb;">
-          Questions? Contact admin@hittheroadjackpot.com
+        <p style="color: #666666; font-size: 14px; margin: 30px 0 0 0; padding-top: 20px; border-top: 1px solid #eeeeee;">
+          This is an automated message from Hit The Road Jackpot.<br>
+          For assistance, contact: admin@hittheroadjackpot.com
         </p>
       </td>
     </tr>
