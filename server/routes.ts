@@ -1198,6 +1198,49 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Delete winner endpoint
+  app.delete("/api/admin/winners/:id", requireAuth, async (req, res) => {
+    try {
+      const winnerId = parseInt(req.params.id);
+      
+      // Get the game result first to find the game and winner details
+      const [gameResult] = await db
+        .select({
+          gameId: gameResults.gameId,
+          winnerId: gameResults.winnerId,
+        })
+        .from(gameResults)
+        .where(eq(gameResults.id, winnerId));
+
+      if (!gameResult) {
+        return res.status(404).json({ message: "Winner record not found" });
+      }
+
+      // Delete the game result record
+      await db.delete(gameResults).where(eq(gameResults.id, winnerId));
+
+      // Reset the winner's stats (subtract the win)
+      const user = await storage.getUser(gameResult.winnerId);
+      const game = await storage.getGame(gameResult.gameId);
+      
+      if (user && game && gameResult.winnerId && gameResult.gameId) {
+        await storage.updateUser(gameResult.winnerId, {
+          totalWon: Math.max(0, parseFloat(user.totalWon) - parseFloat(game.prizeValue)).toString(),
+          gamesWon: Math.max(0, user.gamesWon - 1)
+        });
+      }
+
+      // Reactivate the game if it was completed
+      await storage.updateGame(gameResult.gameId, { isActive: true });
+
+      console.log(`Winner record ${winnerId} deleted by admin`);
+      res.json({ message: "Winner record deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting winner:", error);
+      res.status(500).json({ message: "Failed to delete winner" });
+    }
+  });
+
   // Manual winner selection endpoint (DEPRECATED - now automatic)
   app.post("/api/admin/games/:id/select-winner", requireAuth, async (req, res) => {
     try {

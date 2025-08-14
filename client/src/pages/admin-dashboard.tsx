@@ -66,6 +66,8 @@ import {
   ArrowRight,
   UserPlus,
   XCircle,
+  Check,
+  X,
 } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -4808,6 +4810,82 @@ export default function AdminDashboard() {
   );
 }
 
+// Delete Winner Button Component
+function DeleteWinnerButton({ winnerId, winnerName, onDelete }: { winnerId: number; winnerName: string; onDelete: () => void }) {
+  const { toast } = useToast();
+  const [showConfirm, setShowConfirm] = useState(false);
+
+  const deleteWinnerMutation = useMutation({
+    mutationFn: async (id: number) => {
+      const response = await fetch(`/api/admin/winners/${id}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Failed to delete winner");
+      }
+
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Winner Deleted",
+        description: `${winnerName}'s win record has been removed`,
+      });
+      onDelete();
+      setShowConfirm(false);
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Delete Failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  if (showConfirm) {
+    return (
+      <div className="flex items-center space-x-2">
+        <span className="text-red-400 text-sm">Delete {winnerName}?</span>
+        <Button
+          onClick={() => deleteWinnerMutation.mutate(winnerId)}
+          disabled={deleteWinnerMutation.isPending}
+          size="sm"
+          className="bg-red-600 hover:bg-red-700 text-white"
+        >
+          {deleteWinnerMutation.isPending ? (
+            <RefreshCw className="h-3 w-3 animate-spin" />
+          ) : (
+            <Check className="h-3 w-3" />
+          )}
+        </Button>
+        <Button
+          onClick={() => setShowConfirm(false)}
+          size="sm"
+          variant="outline"
+          className="border-gray-500"
+        >
+          <X className="h-3 w-3" />
+        </Button>
+      </div>
+    );
+  }
+
+  return (
+    <Button
+      onClick={() => setShowConfirm(true)}
+      size="sm"
+      variant="outline"
+      className="border-red-500/50 text-red-400 hover:bg-red-500/20"
+    >
+      <Trash2 className="h-3 w-3 mr-1" />
+      Delete
+    </Button>
+  );
+}
+
 // Winners List Component
 function WinnersList() {
   const { data: winners, isLoading, refetch } = useQuery({
@@ -4922,6 +5000,11 @@ function WinnersList() {
                 </div>
                 <div className="text-xs text-gray-400">Total Spins</div>
               </div>
+            </div>
+            
+            {/* Delete Winner Button */}
+            <div className="mt-4 pt-4 border-t border-slate-600/30 flex justify-end">
+              <DeleteWinnerButton winnerId={winner.id} winnerName={winner.winnerName} onDelete={refetch} />
             </div>
           </CardContent>
         </Card>
