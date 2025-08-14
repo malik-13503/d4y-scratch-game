@@ -135,12 +135,7 @@ export default function AdminDashboard() {
   const [editPrizeImagePreview, setEditPrizeImagePreview] =
     useState<string>("");
 
-  const [realTimeStats, setRealTimeStats] = useState({
-    activeUsers: 247,
-    totalSpins: 15420,
-    prizesWon: 89,
-    revenue: 12540,
-  });
+  // Removed realTimeStats state - using authentic data only from API
   const { toast } = useToast();
 
   // Check authentication with localStorage fallback
@@ -480,19 +475,7 @@ export default function AdminDashboard() {
     },
   });
 
-  // Real-time stats simulation
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setRealTimeStats((prev) => ({
-        activeUsers: prev.activeUsers + Math.floor(Math.random() * 10 - 5),
-        totalSpins: prev.totalSpins + Math.floor(Math.random() * 5),
-        prizesWon: prev.prizesWon + (Math.random() < 0.1 ? 1 : 0),
-        revenue: prev.revenue + Math.floor(Math.random() * 100),
-      }));
-    }, 3000);
-
-    return () => clearInterval(interval);
-  }, []);
+  // Removed real-time stats simulation to display only authentic data
 
   // Show loading screen while checking authentication
   if (authLoading || (!adminUser && !localAdminUser && !error)) {
