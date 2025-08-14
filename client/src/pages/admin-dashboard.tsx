@@ -739,11 +739,11 @@ export default function AdminDashboard() {
         <Tabs
           value={activeTab}
           onValueChange={setActiveTab}
-          className="flex flex-col space-y-4 sm:space-y-8"
+          className="w-full"
         >
-          {/* Enhanced Mobile-Responsive Tab Navigation - Fixed Position */}
-          <div className="sticky top-0 z-50 bg-slate-900/95 backdrop-blur-md pb-2 sm:pb-4 -mx-4 px-4 sm:-mx-6 sm:px-6">
-            <TabsList className="grid w-full grid-cols-3 sm:grid-cols-6 bg-gradient-to-r from-black/30 via-slate-900/50 to-black/30 backdrop-blur-md border-2 border-purple-500/40 rounded-xl sm:rounded-2xl p-1 sm:p-2 gap-1 shadow-2xl shadow-purple-900/30 mt-2 sm:mt-4">
+          {/* Enhanced Mobile-Responsive Tab Navigation */}
+          <div className="mb-6 sm:mb-8">
+            <TabsList className="grid w-full grid-cols-3 sm:grid-cols-6 bg-gradient-to-r from-black/30 via-slate-900/50 to-black/30 backdrop-blur-md border-2 border-purple-500/40 rounded-xl sm:rounded-2xl p-1 sm:p-2 gap-1 shadow-2xl shadow-purple-900/30">
             <TabsTrigger
               value="overview"
               className="relative group data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-purple-500/50 text-gray-300 hover:text-white hover:bg-slate-700/50 transition-all duration-300 text-xs sm:text-sm p-3 sm:p-4 rounded-lg sm:rounded-xl border border-transparent data-[state=active]:border-purple-400/60"
@@ -830,11 +830,10 @@ export default function AdminDashboard() {
             </TabsList>
           </div>
 
-          {/* Tab Content Container - Proper Z-index and Spacing */}
-          <div className="relative z-10 min-h-screen">
+          {/* Tab Content Container - Clear spacing below navigation */}
 
           {/* Overview Tab - Mobile Optimized */}
-          <TabsContent value="overview" className="space-y-4 sm:space-y-8">
+          <TabsContent value="overview" className="space-y-4 sm:space-y-8 mt-0">
             {/* Hero Stats Section - Mobile Responsive */}
             <div className="relative overflow-hidden bg-gradient-to-r from-slate-800/95 via-slate-700/95 to-slate-800/95 backdrop-blur-sm border border-slate-600/50 rounded-lg sm:rounded-2xl p-4 sm:p-8 shadow-2xl">
               <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-purple-500/10"></div>
@@ -1287,7 +1286,7 @@ export default function AdminDashboard() {
           </TabsContent>
 
           {/* Games Management Tab */}
-          <TabsContent value="games" className="space-y-6">
+          <TabsContent value="games" className="space-y-6 mt-0">
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="text-2xl font-bold text-white">
@@ -2603,7 +2602,7 @@ export default function AdminDashboard() {
           </TabsContent>
 
           {/* Users Management Tab - Enhanced Mobile */}
-          <TabsContent value="users" className="space-y-4 sm:space-y-6">
+          <TabsContent value="users" className="space-y-4 sm:space-y-6 mt-0">
             <div className="flex flex-col gap-3 sm:gap-4">
               <div className="text-center sm:text-left">
                 <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white bg-gradient-to-r from-orange-400 to-red-400 bg-clip-text text-transparent">
@@ -2859,7 +2858,7 @@ export default function AdminDashboard() {
           </TabsContent>
 
           {/* Analytics Tab - Mobile Enhanced */}
-          <TabsContent value="analytics" className="space-y-4 sm:space-y-6">
+          <TabsContent value="analytics" className="space-y-4 sm:space-y-6 mt-0">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
               <div className="text-center sm:text-left">
                 <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">
@@ -3121,7 +3120,7 @@ export default function AdminDashboard() {
           </TabsContent>
 
           {/* System Monitoring Tab */}
-          <TabsContent value="system" className="space-y-6">
+          <TabsContent value="system" className="space-y-6 mt-0">
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="text-2xl font-bold text-white">
@@ -3895,7 +3894,7 @@ export default function AdminDashboard() {
 
 
           {/* Settings Tab */}
-          <TabsContent value="settings" className="space-y-6">
+          <TabsContent value="settings" className="space-y-6 mt-0">
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="text-2xl font-bold text-white">
@@ -4332,7 +4331,6 @@ export default function AdminDashboard() {
               </Card>
             </div>
           </TabsContent>
-          </div>
         </Tabs>
       </main>
 
