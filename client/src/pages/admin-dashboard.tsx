@@ -4694,6 +4694,9 @@ export default function AdminDashboard() {
                   Complete list of all game winners and completed games
                 </p>
               </div>
+              <div className="flex space-x-2">
+                <TestEmailButton />
+              </div>
             </div>
 
             {/* Winners List */}
@@ -4833,7 +4836,7 @@ function WinnersList() {
     );
   }
 
-  if (!winners || winners.length === 0) {
+  if (!winners || (Array.isArray(winners) && winners.length === 0)) {
     return (
       <Card className="bg-gradient-to-br from-slate-800/95 via-slate-700/95 to-slate-800/95 border-slate-600/50 backdrop-blur-sm">
         <CardContent className="p-8 text-center">
@@ -4849,7 +4852,7 @@ function WinnersList() {
 
   return (
     <div className="space-y-4">
-      {winners.map((winner: any, index: number) => (
+      {Array.isArray(winners) && winners.map((winner: any, index: number) => (
         <Card
           key={winner.id}
           className="bg-gradient-to-r from-slate-800/95 via-slate-700/95 to-slate-800/95 border-slate-600/50 backdrop-blur-sm hover:border-yellow-500/50 transition-all duration-300"
@@ -4923,6 +4926,80 @@ function WinnersList() {
           </CardContent>
         </Card>
       ))}
+    </div>
+  );
+}
+
+// Test Email Button Component
+function TestEmailButton() {
+  const { toast } = useToast();
+
+  const testEmailMutation = useMutation({
+    mutationFn: async (type: "winner" | "completion") => {
+      const response = await fetch("/api/admin/test-email", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: "ahsanglobalbusiness@gmail.com",
+          type: type,
+        }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Failed to send test email");
+      }
+
+      return response.json();
+    },
+    onSuccess: (data: any) => {
+      toast({
+        title: "Email Sent",
+        description: data.message,
+      });
+    },
+    onError: (error: any) => {
+      console.error("Test email error:", error);
+      toast({
+        title: "Email Failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  return (
+    <div className="flex space-x-2">
+      <Button
+        onClick={() => testEmailMutation.mutate("winner")}
+        disabled={testEmailMutation.isPending}
+        variant="outline"
+        size="sm"
+        className="border-yellow-500/50 text-yellow-400 hover:bg-yellow-500/20"
+      >
+        {testEmailMutation.isPending ? (
+          <RefreshCw className="h-4 w-4 animate-spin mr-2" />
+        ) : (
+          <Trophy className="h-4 w-4 mr-2" />
+        )}
+        Test Winner Email
+      </Button>
+      <Button
+        onClick={() => testEmailMutation.mutate("completion")}
+        disabled={testEmailMutation.isPending}
+        variant="outline"
+        size="sm"
+        className="border-blue-500/50 text-blue-400 hover:bg-blue-500/20"
+      >
+        {testEmailMutation.isPending ? (
+          <RefreshCw className="h-4 w-4 animate-spin mr-2" />
+        ) : (
+          <Star className="h-4 w-4 mr-2" />
+        )}
+        Test Completion Email
+      </Button>
     </div>
   );
 }

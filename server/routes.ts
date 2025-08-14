@@ -1130,6 +1130,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Test email endpoint
+  app.post("/api/admin/test-email", requireAuth, async (req, res) => {
+    try {
+      const { email, type } = req.body;
+      
+      if (!email) {
+        return res.status(400).json({ message: "Email is required" });
+      }
+
+      if (type === "winner") {
+        await emailService.sendWinnerNotification(
+          email,
+          "Test Winner",
+          "Test Game Prize",
+          42,
+          "Test Game",
+          "Congratulations! You've won our test prize!"
+        );
+        res.json({ message: "Winner notification email sent successfully" });
+      } else if (type === "completion") {
+        await emailService.sendGameCompletionNotification(
+          email,
+          "Test User",
+          "Test Game",
+          42,
+          "John Doe",
+          "Test Prize"
+        );
+        res.json({ message: "Game completion email sent successfully" });
+      } else {
+        return res.status(400).json({ message: "Invalid email type. Use 'winner' or 'completion'" });
+      }
+    } catch (error: any) {
+      console.error("Test email error:", error);
+      res.status(500).json({ message: "Failed to send test email", error: error?.message || "Unknown error" });
+    }
+  });
+
   // Get all winners - New Winners List API
   app.get("/api/admin/winners", requireAuth, async (req, res) => {
     try {
