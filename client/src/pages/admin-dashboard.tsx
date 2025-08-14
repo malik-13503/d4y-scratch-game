@@ -666,29 +666,36 @@ export default function AdminDashboard() {
       className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 admin-dashboard"
       data-admin-dashboard
     >
-      {/* Futuristic Header */}
+      {/* Mobile-Optimized Header */}
       <header className="bg-black/20 backdrop-blur-xl border-b border-purple-500/30 shadow-2xl">
-        <div className="max-w-7xl mx-auto px-6 py-4">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 py-3 sm:py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-6">
-              <div className="flex items-center space-x-3">
+            {/* Logo and Title - Mobile Responsive */}
+            <div className="flex items-center space-x-2 sm:space-x-6">
+              <div className="flex items-center space-x-2 sm:space-x-3">
                 <img
                   src={logoPath}
                   alt="Hit The Road Jackpot"
-                  className="h-14 w-auto object-contain sm:h-16 md:h-18 lg:h-20"
+                  className="h-8 sm:h-12 md:h-16 lg:h-20 w-auto object-contain"
                 />
-                <div>
-                  <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
-                    ADMIN COMMAND CENTER
+                <div className="hidden sm:block">
+                  <h1 className="text-lg sm:text-2xl md:text-3xl font-bold bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
+                    ADMIN CENTER
                   </h1>
-                  <p className="text-gray-400 text-sm">
+                  <p className="text-gray-400 text-xs sm:text-sm hidden md:block">
                     Real-time Game Management System
                   </p>
                 </div>
+                {/* Mobile Title */}
+                <div className="sm:hidden">
+                  <h1 className="text-sm font-bold bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
+                    ADMIN
+                  </h1>
+                </div>
               </div>
 
-              {/* Live Status Indicator */}
-              <div className="flex items-center space-x-2 bg-green-500/20 px-4 py-2 rounded-full border border-green-500/30">
+              {/* Live Status Indicator - Hidden on Mobile */}
+              <div className="hidden lg:flex items-center space-x-2 bg-green-500/20 px-4 py-2 rounded-full border border-green-500/30">
                 <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
                 <span className="text-green-400 text-sm font-medium">
                   SYSTEM ONLINE
@@ -696,148 +703,161 @@ export default function AdminDashboard() {
               </div>
             </div>
 
-            <div className="flex items-center space-x-4">
-              {/* Admin Profile */}
-              <div className="flex items-center space-x-3 bg-white/5 backdrop-blur-sm rounded-xl px-4 py-2 border border-white/10">
-                <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full flex items-center justify-center">
-                  <Shield className="h-4 w-4 text-white" />
+            <div className="flex items-center space-x-2 sm:space-x-4">
+              {/* Admin Profile - Mobile Responsive */}
+              <div className="flex items-center space-x-2 sm:space-x-3 bg-white/5 backdrop-blur-sm rounded-lg sm:rounded-xl px-2 sm:px-4 py-1 sm:py-2 border border-white/10">
+                <div className="w-6 h-6 sm:w-8 sm:h-8 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full flex items-center justify-center">
+                  <Shield className="h-3 w-3 sm:h-4 sm:w-4 text-white" />
                 </div>
-                <div>
+                <div className="hidden sm:block">
                   <div className="text-sm font-medium text-white">
                     {(adminUser as any)?.firstName || "Admin"}
                   </div>
-                  <div className="text-xs text-gray-400">
+                  <div className="text-xs text-gray-400 hidden md:block">
                     System Administrator
                   </div>
                 </div>
               </div>
 
+              {/* Mobile Logout Button */}
               <Button
                 onClick={() => logoutMutation.mutate()}
                 variant="outline"
-                className="border-red-500/50 text-red-400 hover:bg-red-500/20 hover:border-red-500"
+                size="sm"
+                className="border-red-500/50 text-red-400 hover:bg-red-500/20 hover:border-red-500 px-2 sm:px-4"
               >
-                <LogOut className="h-4 w-4 mr-2" />
-                Logout
+                <LogOut className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2" />
+                <span className="hidden sm:inline">Logout</span>
               </Button>
             </div>
           </div>
         </div>
       </header>
 
-      {/* Main Dashboard */}
-      <main className="max-w-7xl mx-auto px-6 py-8">
+      {/* Main Dashboard - Mobile Optimized */}
+      <main className="max-w-7xl mx-auto px-3 sm:px-6 py-4 sm:py-8">
         <Tabs
           value={activeTab}
           onValueChange={setActiveTab}
-          className="space-y-8"
+          className="space-y-4 sm:space-y-8"
         >
-          {/* Enhanced Tab Navigation */}
-          <TabsList className="grid w-full grid-cols-6 bg-black/20 backdrop-blur-sm border border-purple-500/30 rounded-xl p-2">
+          {/* Mobile-Responsive Tab Navigation */}
+          <TabsList className="grid w-full grid-cols-3 sm:grid-cols-6 bg-black/20 backdrop-blur-sm border border-purple-500/30 rounded-lg sm:rounded-xl p-1 sm:p-2 gap-1 sm:gap-0">
             <TabsTrigger
               value="overview"
-              className="data-[state=active]:bg-purple-600 data-[state=active]:text-white text-gray-300"
+              className="data-[state=active]:bg-purple-600 data-[state=active]:text-white text-gray-300 text-xs sm:text-sm p-2 sm:p-3"
             >
-              <BarChart3 className="h-4 w-4 mr-2" />
-              Overview
+              <BarChart3 className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2" />
+              <span className="hidden sm:inline">Overview</span>
+              <span className="sm:hidden">Stats</span>
             </TabsTrigger>
             <TabsTrigger
               value="games"
-              className="data-[state=active]:bg-purple-600 data-[state=active]:text-white text-gray-300"
+              className="data-[state=active]:bg-purple-600 data-[state=active]:text-white text-gray-300 text-xs sm:text-sm p-2 sm:p-3"
             >
-              <Gamepad2 className="h-4 w-4 mr-2" />
-              Games
+              <Gamepad2 className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2" />
+              <span className="hidden sm:inline">Games</span>
+              <span className="sm:hidden">Games</span>
             </TabsTrigger>
             <TabsTrigger
               value="users"
-              className="data-[state=active]:bg-purple-600 data-[state=active]:text-white text-gray-300"
+              className="data-[state=active]:bg-purple-600 data-[state=active]:text-white text-gray-300 text-xs sm:text-sm p-2 sm:p-3"
             >
-              <Users className="h-4 w-4 mr-2" />
-              Users
+              <Users className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2" />
+              <span className="hidden sm:inline">Users</span>
+              <span className="sm:hidden">Users</span>
             </TabsTrigger>
             <TabsTrigger
               value="analytics"
-              className="data-[state=active]:bg-purple-600 data-[state=active]:text-white text-gray-300"
+              className="data-[state=active]:bg-purple-600 data-[state=active]:text-white text-gray-300 text-xs sm:text-sm p-2 sm:p-3"
             >
-              <TrendingUp className="h-4 w-4 mr-2" />
-              Analytics
+              <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2" />
+              <span className="hidden sm:inline">Analytics</span>
+              <span className="sm:hidden">Charts</span>
             </TabsTrigger>
             <TabsTrigger
               value="settings"
-              className="data-[state=active]:bg-purple-600 data-[state=active]:text-white text-gray-300"
+              className="data-[state=active]:bg-purple-600 data-[state=active]:text-white text-gray-300 text-xs sm:text-sm p-2 sm:p-3"
             >
-              <Settings className="h-4 w-4 mr-2" />
-              Settings
+              <Settings className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2" />
+              <span className="hidden sm:inline">Settings</span>
+              <span className="sm:hidden">Config</span>
             </TabsTrigger>
             <TabsTrigger
               value="system"
-              className="data-[state=active]:bg-purple-600 data-[state=active]:text-white text-gray-300"
+              className="data-[state=active]:bg-purple-600 data-[state=active]:text-white text-gray-300 text-xs sm:text-sm p-2 sm:p-3"
             >
-              <Monitor className="h-4 w-4 mr-2" />
-              System
+              <Monitor className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2" />
+              <span className="hidden sm:inline">System</span>
+              <span className="sm:hidden">System</span>
             </TabsTrigger>
           </TabsList>
 
-          {/* Overview Tab */}
-          <TabsContent value="overview" className="space-y-8">
-            {/* Hero Stats Section */}
-            <div className="relative overflow-hidden bg-gradient-to-r from-slate-800/95 via-slate-700/95 to-slate-800/95 backdrop-blur-sm border border-slate-600/50 rounded-2xl p-8 shadow-2xl">
+          {/* Overview Tab - Mobile Optimized */}
+          <TabsContent value="overview" className="space-y-4 sm:space-y-8">
+            {/* Hero Stats Section - Mobile Responsive */}
+            <div className="relative overflow-hidden bg-gradient-to-r from-slate-800/95 via-slate-700/95 to-slate-800/95 backdrop-blur-sm border border-slate-600/50 rounded-lg sm:rounded-2xl p-4 sm:p-8 shadow-2xl">
               <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-purple-500/10"></div>
               <div className="relative z-10">
-                <div className="text-center mb-8">
-                  <h2 className="text-4xl font-bold text-white mb-2 drop-shadow-lg">
-                    🎯 GAME CONTROL CENTER
+                <div className="text-center mb-4 sm:mb-8">
+                  <h2 className="text-xl sm:text-2xl md:text-4xl font-bold text-white mb-1 sm:mb-2 drop-shadow-lg">
+                    🎯 CONTROL CENTER
                   </h2>
-                  <p className="text-slate-200 text-lg font-medium">
-                    Real-time analytics and instant management
+                  <p className="text-slate-200 text-sm sm:text-lg font-medium">
+                    <span className="hidden sm:inline">Real-time analytics and instant management</span>
+                    <span className="sm:hidden">Real-time game management</span>
                   </p>
                 </div>
 
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                  <div className="text-center p-5 bg-slate-700/70 rounded-xl border border-slate-500/30 shadow-lg hover:bg-slate-600/70 transition-colors">
-                    <div className="text-3xl font-bold text-blue-300 mb-1">
+                <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
+                  <div className="text-center p-3 sm:p-5 bg-slate-700/70 rounded-lg sm:rounded-xl border border-slate-500/30 shadow-lg hover:bg-slate-600/70 transition-colors">
+                    <div className="text-lg sm:text-2xl lg:text-3xl font-bold text-blue-300 mb-1">
                       {dashboardStats?.totalGames || 0}
                     </div>
-                    <div className="text-sm text-slate-100 font-medium">
-                      Total Games
+                    <div className="text-xs sm:text-sm text-slate-100 font-medium">
+                      <span className="hidden sm:inline">Total Games</span>
+                      <span className="sm:hidden">Games</span>
                     </div>
-                    <div className="text-xs text-green-300 mt-1 font-semibold">
+                    <div className="text-xs text-green-300 mt-1 font-semibold hidden sm:block">
                       ↗ +12% growth
                     </div>
                   </div>
 
-                  <div className="text-center p-5 bg-slate-700/70 rounded-xl border border-slate-500/30 shadow-lg hover:bg-slate-600/70 transition-colors">
-                    <div className="text-3xl font-bold text-green-300 mb-1">
+                  <div className="text-center p-3 sm:p-5 bg-slate-700/70 rounded-lg sm:rounded-xl border border-slate-500/30 shadow-lg hover:bg-slate-600/70 transition-colors">
+                    <div className="text-lg sm:text-2xl lg:text-3xl font-bold text-green-300 mb-1">
                       {dashboardStats?.activeGames || 0}
                     </div>
-                    <div className="text-sm text-slate-100 font-medium">
-                      Live Games
+                    <div className="text-xs sm:text-sm text-slate-100 font-medium">
+                      <span className="hidden sm:inline">Live Games</span>
+                      <span className="sm:hidden">Live</span>
                     </div>
-                    <div className="text-xs text-blue-300 mt-1 font-semibold">
+                    <div className="text-xs text-blue-300 mt-1 font-semibold hidden sm:block">
                       🔥 Currently running
                     </div>
                   </div>
 
-                  <div className="text-center p-5 bg-slate-700/70 rounded-xl border border-slate-500/30 shadow-lg hover:bg-slate-600/70 transition-colors">
-                    <div className="text-3xl font-bold text-cyan-300 mb-1">
+                  <div className="text-center p-3 sm:p-5 bg-slate-700/70 rounded-lg sm:rounded-xl border border-slate-500/30 shadow-lg hover:bg-slate-600/70 transition-colors">
+                    <div className="text-lg sm:text-2xl lg:text-3xl font-bold text-cyan-300 mb-1">
                       {dashboardStats?.totalSpins || 0}
                     </div>
-                    <div className="text-sm text-slate-100 font-medium">
-                      Player Spins
+                    <div className="text-xs sm:text-sm text-slate-100 font-medium">
+                      <span className="hidden sm:inline">Player Spins</span>
+                      <span className="sm:hidden">Spins</span>
                     </div>
-                    <div className="text-xs text-cyan-300 mt-1 font-semibold">
+                    <div className="text-xs text-cyan-300 mt-1 font-semibold hidden sm:block">
                       ⚡ Real-time
                     </div>
                   </div>
 
-                  <div className="text-center p-5 bg-slate-700/70 rounded-xl border border-slate-500/30 shadow-lg hover:bg-slate-600/70 transition-colors">
-                    <div className="text-3xl font-bold text-yellow-300 mb-1">
+                  <div className="text-center p-3 sm:p-5 bg-slate-700/70 rounded-lg sm:rounded-xl border border-slate-500/30 shadow-lg hover:bg-slate-600/70 transition-colors">
+                    <div className="text-lg sm:text-2xl lg:text-3xl font-bold text-yellow-300 mb-1">
                       ${dashboardStats?.totalPrizeValue || 0}
                     </div>
-                    <div className="text-sm text-slate-100 font-medium">
-                      Prize Value
+                    <div className="text-xs sm:text-sm text-slate-100 font-medium">
+                      <span className="hidden sm:inline">Prize Value</span>
+                      <span className="sm:hidden">Prizes</span>
                     </div>
-                    <div className="text-xs text-orange-300 mt-1 font-semibold">
+                    <div className="text-xs text-orange-300 mt-1 font-semibold hidden sm:block">
                       💰 Total awarded
                     </div>
                   </div>
@@ -845,8 +865,8 @@ export default function AdminDashboard() {
               </div>
             </div>
 
-            {/* Quick Action Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* Quick Action Cards - Mobile Responsive */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
               <Card
                 className="bg-gradient-to-br from-emerald-600/90 to-green-600/90 backdrop-blur-sm border border-emerald-400/80 hover:border-emerald-300 transition-all duration-300 cursor-pointer hover:shadow-2xl hover:shadow-emerald-500/40 hover:scale-105"
                 onClick={() => setIsCreateGameOpen(true)}
@@ -923,21 +943,22 @@ export default function AdminDashboard() {
               </Card>
             </div>
 
-            {/* Advanced Management Features */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {/* Advanced Management Features - Mobile Responsive */}
+            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
               <Card
                 className="bg-gradient-to-br from-orange-600/85 to-red-600/85 backdrop-blur-sm border border-orange-300/60 hover:border-orange-200 transition-all duration-300 cursor-pointer hover:shadow-xl hover:shadow-orange-500/30 hover:scale-105"
                 onClick={() => setActiveTab("users")}
               >
-                <CardContent className="p-5">
+                <CardContent className="p-3 sm:p-5">
                   <div className="text-center">
-                    <div className="p-3 bg-white/25 rounded-full mx-auto mb-3 w-fit border border-white/20 shadow-lg">
-                      <Users className="h-6 w-6 text-white" />
+                    <div className="p-2 sm:p-3 bg-white/25 rounded-full mx-auto mb-2 sm:mb-3 w-fit border border-white/20 shadow-lg">
+                      <Users className="h-4 w-4 sm:h-6 sm:w-6 text-white" />
                     </div>
-                    <h4 className="font-bold text-white mb-2 text-sm drop-shadow-lg">
-                      User Management
+                    <h4 className="font-bold text-white mb-1 sm:mb-2 text-xs sm:text-sm drop-shadow-lg">
+                      <span className="hidden sm:inline">User Management</span>
+                      <span className="sm:hidden">Users</span>
                     </h4>
-                    <p className="text-xs text-orange-50 font-medium">
+                    <p className="text-xs text-orange-50 font-medium hidden sm:block">
                       View and manage players
                     </p>
                   </div>
@@ -999,56 +1020,62 @@ export default function AdminDashboard() {
               </Card>
             </div>
 
-            {/* System Status Panel */}
+            {/* System Status Panel - Mobile Responsive */}
             <Card className="bg-slate-800/90 backdrop-blur-sm border border-slate-600/50 shadow-2xl">
-              <CardHeader className="bg-slate-700/50 border-b border-slate-600/30">
-                <CardTitle className="text-white flex items-center font-bold">
-                  <Monitor className="h-5 w-5 mr-2 text-emerald-400" />
-                  System Status & Quick Actions
+              <CardHeader className="bg-slate-700/50 border-b border-slate-600/30 p-4 sm:p-6">
+                <CardTitle className="text-white flex items-center font-bold text-sm sm:text-base">
+                  <Monitor className="h-4 w-4 sm:h-5 sm:w-5 mr-2 text-emerald-400" />
+                  <span className="hidden sm:inline">System Status & Quick Actions</span>
+                  <span className="sm:hidden">System Status</span>
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-6 p-6">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  {/* Server Status */}
-                  <div className="space-y-3 bg-gradient-to-br from-green-600/40 to-emerald-600/40 p-5 rounded-lg border border-green-400/50 shadow-lg">
-                    <h4 className="text-sm font-bold text-white drop-shadow-lg flex items-center">
-                      <Monitor className="h-4 w-4 mr-2 text-green-200" />
-                      Server Health
+              <CardContent className="space-y-4 sm:space-y-6 p-4 sm:p-6">
+                <div className="grid grid-cols-1 sm:grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
+                  {/* Server Status - Mobile Responsive */}
+                  <div className="space-y-3 bg-gradient-to-br from-green-600/40 to-emerald-600/40 p-3 sm:p-5 rounded-lg border border-green-400/50 shadow-lg">
+                    <h4 className="text-xs sm:text-sm font-bold text-white drop-shadow-lg flex items-center">
+                      <Monitor className="h-3 w-3 sm:h-4 sm:w-4 mr-2 text-green-200" />
+                      <span className="hidden sm:inline">Server Health</span>
+                      <span className="sm:hidden">Server</span>
                     </h4>
-                    <div className="space-y-3">
-                      <div className="flex items-center justify-between text-sm bg-white/10 p-2 rounded border border-white/20">
+                    <div className="space-y-2 sm:space-y-3">
+                      <div className="flex items-center justify-between text-xs sm:text-sm bg-white/10 p-2 rounded border border-white/20">
                         <span className="text-white font-semibold">
-                          API Server
+                          <span className="hidden sm:inline">API Server</span>
+                          <span className="sm:hidden">API</span>
                         </span>
-                        <Badge className="bg-green-700 text-green-100 border-green-600 font-bold shadow-sm">
-                          <div className="w-2 h-2 bg-green-200 rounded-full mr-2 animate-pulse"></div>
+                        <Badge className="bg-green-700 text-green-100 border-green-600 font-bold shadow-sm text-xs">
+                          <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-green-200 rounded-full mr-1 sm:mr-2 animate-pulse"></div>
                           Online
                         </Badge>
                       </div>
-                      <div className="flex items-center justify-between text-sm bg-white/10 p-2 rounded border border-white/20">
+                      <div className="flex items-center justify-between text-xs sm:text-sm bg-white/10 p-2 rounded border border-white/20">
                         <span className="text-white font-semibold">
-                          Database
+                          <span className="hidden sm:inline">Database</span>
+                          <span className="sm:hidden">DB</span>
                         </span>
-                        <Badge className="bg-green-700 text-green-100 border-green-600 font-bold shadow-sm">
-                          <Database className="w-3 h-3 mr-1" />
-                          Connected
+                        <Badge className="bg-green-700 text-green-100 border-green-600 font-bold shadow-sm text-xs">
+                          <Database className="w-2 h-2 sm:w-3 sm:h-3 mr-1" />
+                          <span className="hidden sm:inline">Connected</span>
+                          <span className="sm:hidden">OK</span>
                         </Badge>
                       </div>
-                      <div className="flex items-center justify-between text-sm bg-white/10 p-2 rounded border border-white/20">
+                      <div className="flex items-center justify-between text-xs sm:text-sm bg-white/10 p-2 rounded border border-white/20">
                         <span className="text-white font-semibold">Cache</span>
-                        <Badge className="bg-yellow-700 text-yellow-100 border-yellow-600 font-bold shadow-sm">
-                          <Zap className="w-3 h-3 mr-1" />
+                        <Badge className="bg-yellow-700 text-yellow-100 border-yellow-600 font-bold shadow-sm text-xs">
+                          <Zap className="w-2 h-2 sm:w-3 sm:h-3 mr-1" />
                           Active
                         </Badge>
                       </div>
                     </div>
                   </div>
 
-                  {/* Quick Actions */}
-                  <div className="space-y-3 bg-gradient-to-br from-blue-600/40 to-purple-600/40 p-5 rounded-lg border border-blue-400/50 shadow-lg">
-                    <h4 className="text-sm font-bold text-white drop-shadow-lg flex items-center">
-                      <Zap className="h-4 w-4 mr-2 text-yellow-300" />
-                      Quick Actions
+                  {/* Quick Actions - Mobile Responsive */}
+                  <div className="space-y-3 bg-gradient-to-br from-blue-600/40 to-purple-600/40 p-3 sm:p-5 rounded-lg border border-blue-400/50 shadow-lg">
+                    <h4 className="text-xs sm:text-sm font-bold text-white drop-shadow-lg flex items-center">
+                      <Zap className="h-3 w-3 sm:h-4 sm:w-4 mr-2 text-yellow-300" />
+                      <span className="hidden sm:inline">Quick Actions</span>
+                      <span className="sm:hidden">Actions</span>
                     </h4>
                     <div className="space-y-3">
                       <Button
@@ -2396,30 +2423,30 @@ export default function AdminDashboard() {
                 </p>
               </div>
             ) : games && games.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                 {games.map((game) => (
                   <Card
                     key={game.id}
                     className="bg-black/20 backdrop-blur-sm border border-purple-500/30 hover:border-purple-400/50 transition-all duration-300"
                   >
-                    <CardContent className="p-6">
+                    <CardContent className="p-4 sm:p-6">
                       <div className="flex items-center justify-between mb-4">
-                        <div className="flex items-center space-x-3">
-                          <div className="text-3xl">{game.emoji}</div>
-                          <div>
-                            <h3 className="text-white font-bold">
+                        <div className="flex items-center space-x-2 sm:space-x-3 flex-1 min-w-0">
+                          <div className="text-2xl sm:text-3xl flex-shrink-0">{game.emoji}</div>
+                          <div className="min-w-0">
+                            <h3 className="text-white font-bold text-sm sm:text-base truncate">
                               {game.name}
                             </h3>
-                            <p className="text-gray-400 text-sm font-mono">
+                            <p className="text-gray-400 text-xs sm:text-sm font-mono truncate">
                               {game.code}
                             </p>
                           </div>
                         </div>
                         <Badge
                           variant={game.isActive ? "default" : "secondary"}
-                          className={
+                          className={`${
                             game.isActive ? "bg-green-500" : "bg-gray-500"
-                          }
+                          } text-xs flex-shrink-0 ml-2`}
                         >
                           {game.isActive ? "Active" : "Ended"}
                         </Badge>
@@ -2454,52 +2481,62 @@ export default function AdminDashboard() {
                         />
                       </div>
 
-                      <div className="flex space-x-2">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="flex-1 border-purple-500/50 text-purple-400 hover:bg-purple-500/20"
-                          onClick={() =>
-                            window.open(`/game/${game.id}`, "_blank")
-                          }
-                        >
-                          <Eye className="h-4 w-4 mr-1" />
-                          View
-                        </Button>
-                        
-                        {/* Winner Selection Button - Show for completed games or games with players */}
-                        {((!game.isActive && game.numbersLeft === 0) || game.playersCount > 0) && (
+                      {/* Mobile-first button layout */}
+                      <div className="flex flex-col sm:flex-row gap-2 sm:space-x-2 sm:gap-0">
+                        {/* Top row on mobile, first row on desktop */}
+                        <div className="flex space-x-2">
                           <Button
                             size="sm"
                             variant="outline"
-                            className="flex-1 border-yellow-500/50 text-yellow-400 hover:bg-yellow-500/20"
-                            onClick={() => {
-                              setWinnerSelectionGame(game);
-                              setIsWinnerSelectionOpen(true);
-                            }}
+                            className="flex-1 border-purple-500/50 text-purple-400 hover:bg-purple-500/20 text-xs sm:text-sm"
+                            onClick={() =>
+                              window.open(`/game/${game.id}`, "_blank")
+                            }
                           >
-                            <Crown className="h-4 w-4 mr-1" />
-                            Winner
+                            <Eye className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
+                            <span className="hidden sm:inline">View</span>
+                            <span className="sm:hidden">View</span>
                           </Button>
-                        )}
                         
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="flex-1 border-blue-500/50 text-blue-400 hover:bg-blue-500/20"
-                          onClick={() => handleEditGame(game)}
-                        >
-                          <Edit3 className="h-4 w-4 mr-1" />
-                          Edit
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          className="border-red-500/50 text-red-400 hover:bg-red-500/20"
-                          onClick={() => handleDeleteGame(game)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+                          {/* Winner Selection Button - Show for completed games or games with players */}
+                          {((!game.isActive && game.numbersLeft === 0) || game.playersCount > 0) && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="flex-1 border-yellow-500/50 text-yellow-400 hover:bg-yellow-500/20 text-xs sm:text-sm"
+                              onClick={() => {
+                                setWinnerSelectionGame(game);
+                                setIsWinnerSelectionOpen(true);
+                              }}
+                            >
+                              <Crown className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
+                              <span className="hidden sm:inline">Winner</span>
+                              <span className="sm:hidden">Winner</span>
+                            </Button>
+                          )}
+                        </div>
+                        
+                        {/* Bottom row on mobile, second part on desktop */}
+                        <div className="flex space-x-2">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="flex-1 border-blue-500/50 text-blue-400 hover:bg-blue-500/20 text-xs sm:text-sm"
+                            onClick={() => handleEditGame(game)}
+                          >
+                            <Edit3 className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
+                            <span className="hidden sm:inline">Edit</span>
+                            <span className="sm:hidden">Edit</span>
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="border-red-500/50 text-red-400 hover:bg-red-500/20 text-xs sm:text-sm px-2 sm:px-3"
+                            onClick={() => handleDeleteGame(game)}
+                          >
+                            <Trash2 className="h-3 w-3 sm:h-4 sm:w-4" />
+                          </Button>
+                        </div>
                       </div>
                     </CardContent>
                   </Card>
@@ -2527,12 +2564,12 @@ export default function AdminDashboard() {
 
           {/* Users Management Tab */}
           <TabsContent value="users" className="space-y-6">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="flex flex-col sm:flex-col md:flex-row md:items-center justify-between gap-4">
               <div>
-                <h2 className="text-2xl font-bold text-white">
+                <h2 className="text-xl sm:text-2xl font-bold text-white">
                   User Management
                 </h2>
-                <p className="text-gray-400">
+                <p className="text-gray-400 text-sm sm:text-base">
                   Monitor and manage registered users
                 </p>
               </div>
