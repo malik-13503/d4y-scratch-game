@@ -2467,8 +2467,8 @@ export default function AdminDashboard() {
                           View
                         </Button>
                         
-                        {/* Winner Selection Button - Show only for completed games */}
-                        {!game.isActive && game.numbersLeft === 0 && (
+                        {/* Winner Selection Button - Show for all games temporarily for testing */}
+                        {true && (
                           <Button
                             size="sm"
                             variant="outline"
