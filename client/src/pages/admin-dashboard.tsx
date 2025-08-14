@@ -129,8 +129,11 @@ export default function AdminDashboard() {
   });
 
   // Edit image upload state
-  const [editPrizeImageFile, setEditPrizeImageFile] = useState<File | null>(null);
-  const [editPrizeImagePreview, setEditPrizeImagePreview] = useState<string>("");
+  const [editPrizeImageFile, setEditPrizeImageFile] = useState<File | null>(
+    null,
+  );
+  const [editPrizeImagePreview, setEditPrizeImagePreview] =
+    useState<string>("");
 
   const [realTimeStats, setRealTimeStats] = useState({
     activeUsers: 247,
@@ -529,7 +532,8 @@ export default function AdminDashboard() {
 
     const durationHours = parseInt(formData.get("duration") as string) || 24;
     const prizeValue = formData.get("prizeValue") as string;
-    const totalNumbers = parseInt(formData.get("totalNumbers") as string) || 125;
+    const totalNumbers =
+      parseInt(formData.get("totalNumbers") as string) || 125;
 
     // Handle image upload if provided
     let prizeImageUrl = "";
@@ -554,8 +558,14 @@ export default function AdminDashboard() {
       prizeImageUrl: prizeImageUrl, // Add the uploaded image
       totalNumbers: totalNumbers,
       numbersLeft: totalNumbers,
-      freePlayStart: previewData.freePlayEnabled && previewData.freePlayNumbers ? 1 : Math.ceil(totalNumbers * 0.75),
-      freePlayEnd: previewData.freePlayEnabled && previewData.freePlayNumbers ? totalNumbers : totalNumbers,
+      freePlayStart:
+        previewData.freePlayEnabled && previewData.freePlayNumbers
+          ? 1
+          : Math.ceil(totalNumbers * 0.75),
+      freePlayEnd:
+        previewData.freePlayEnabled && previewData.freePlayNumbers
+          ? totalNumbers
+          : totalNumbers,
       maxWinners: 1,
       isScheduled: false,
       emoji: (formData.get("emoji") as string) || "🎮",
@@ -620,7 +630,8 @@ export default function AdminDashboard() {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
 
-    const totalNumbers = parseInt(formData.get("totalNumbers") as string) || 125;
+    const totalNumbers =
+      parseInt(formData.get("totalNumbers") as string) || 125;
     const prizeValue = parseFloat(formData.get("prizeValue") as string) || 100;
 
     // Handle prize image upload if there's a new file
@@ -736,104 +747,109 @@ export default function AdminDashboard() {
 
       {/* Main Dashboard - Mobile Optimized */}
       <main className="max-w-7xl mx-auto px-3 sm:px-6 py-4 sm:py-8">
-        <Tabs
-          value={activeTab}
-          onValueChange={setActiveTab}
-          className="w-full"
-        >
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           {/* Enhanced Mobile-Responsive Tab Navigation */}
           <div className="mb-8 sm:mb-12">
             <TabsList className="grid w-full grid-cols-3 sm:grid-cols-6 bg-gradient-to-r from-black/30 via-slate-900/50 to-black/30 backdrop-blur-md border-2 border-purple-500/40 rounded-xl sm:rounded-2xl p-1 sm:p-2 gap-1 shadow-2xl shadow-purple-900/30">
-            <TabsTrigger
-              value="overview"
-              className="relative group data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-purple-500/50 text-gray-300 hover:text-white hover:bg-slate-700/50 transition-all duration-300 text-xs sm:text-sm p-3 sm:p-4 rounded-lg sm:rounded-xl border border-transparent data-[state=active]:border-purple-400/60"
-            >
-              <div className="flex flex-col sm:flex-row items-center justify-center sm:justify-start space-y-1 sm:space-y-0 sm:space-x-2">
-                <div className="relative">
-                  <BarChart3 className="h-4 w-4 sm:h-5 sm:w-5 transition-transform duration-300 group-data-[state=active]:scale-110" />
-                  <div className="absolute -inset-1 bg-purple-500/20 rounded-full scale-0 group-data-[state=active]:scale-100 transition-transform duration-300"></div>
+              <TabsTrigger
+                value="overview"
+                className="relative group data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-purple-500/50 text-gray-300 hover:text-white hover:bg-slate-700/50 transition-all duration-300 text-xs sm:text-sm p-3 sm:p-4 rounded-lg sm:rounded-xl border border-transparent data-[state=active]:border-purple-400/60"
+              >
+                <div className="flex flex-col sm:flex-row items-center justify-center sm:justify-start space-y-1 sm:space-y-0 sm:space-x-2">
+                  <div className="relative">
+                    <BarChart3 className="h-4 w-4 sm:h-5 sm:w-5 transition-transform duration-300 group-data-[state=active]:scale-110" />
+                    <div className="absolute -inset-1 bg-purple-500/20 rounded-full scale-0 group-data-[state=active]:scale-100 transition-transform duration-300"></div>
+                  </div>
+                  <span className="hidden sm:inline font-semibold">
+                    Overview
+                  </span>
+                  <span className="sm:hidden text-xs font-medium">Stats</span>
                 </div>
-                <span className="hidden sm:inline font-semibold">Overview</span>
-                <span className="sm:hidden text-xs font-medium">Stats</span>
-              </div>
-            </TabsTrigger>
-            
-            <TabsTrigger
-              value="games"
-              className="relative group data-[state=active]:bg-gradient-to-r data-[state=active]:from-emerald-600 data-[state=active]:to-green-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-emerald-500/50 text-gray-300 hover:text-white hover:bg-slate-700/50 transition-all duration-300 text-xs sm:text-sm p-3 sm:p-4 rounded-lg sm:rounded-xl border border-transparent data-[state=active]:border-emerald-400/60"
-            >
-              <div className="flex flex-col sm:flex-row items-center justify-center sm:justify-start space-y-1 sm:space-y-0 sm:space-x-2">
-                <div className="relative">
-                  <Gamepad2 className="h-4 w-4 sm:h-5 sm:w-5 transition-transform duration-300 group-data-[state=active]:scale-110 group-data-[state=active]:rotate-12" />
-                  <div className="absolute -inset-1 bg-emerald-500/20 rounded-full scale-0 group-data-[state=active]:scale-100 transition-transform duration-300"></div>
+              </TabsTrigger>
+
+              <TabsTrigger
+                value="games"
+                className="relative group data-[state=active]:bg-gradient-to-r data-[state=active]:from-emerald-600 data-[state=active]:to-green-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-emerald-500/50 text-gray-300 hover:text-white hover:bg-slate-700/50 transition-all duration-300 text-xs sm:text-sm p-3 sm:p-4 rounded-lg sm:rounded-xl border border-transparent data-[state=active]:border-emerald-400/60"
+              >
+                <div className="flex flex-col sm:flex-row items-center justify-center sm:justify-start space-y-1 sm:space-y-0 sm:space-x-2">
+                  <div className="relative">
+                    <Gamepad2 className="h-4 w-4 sm:h-5 sm:w-5 transition-transform duration-300 group-data-[state=active]:scale-110 group-data-[state=active]:rotate-12" />
+                    <div className="absolute -inset-1 bg-emerald-500/20 rounded-full scale-0 group-data-[state=active]:scale-100 transition-transform duration-300"></div>
+                  </div>
+                  <span className="hidden sm:inline font-semibold">Games</span>
+                  <span className="sm:hidden text-xs font-medium">Games</span>
                 </div>
-                <span className="hidden sm:inline font-semibold">Games</span>
-                <span className="sm:hidden text-xs font-medium">Games</span>
-              </div>
-            </TabsTrigger>
-            
-            <TabsTrigger
-              value="users"
-              className="relative group data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-600 data-[state=active]:to-red-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-orange-500/50 text-gray-300 hover:text-white hover:bg-slate-700/50 transition-all duration-300 text-xs sm:text-sm p-3 sm:p-4 rounded-lg sm:rounded-xl border border-transparent data-[state=active]:border-orange-400/60"
-            >
-              <div className="flex flex-col sm:flex-row items-center justify-center sm:justify-start space-y-1 sm:space-y-0 sm:space-x-2">
-                <div className="relative">
-                  <Users className="h-4 w-4 sm:h-5 sm:w-5 transition-transform duration-300 group-data-[state=active]:scale-110" />
-                  <div className="absolute -inset-1 bg-orange-500/20 rounded-full scale-0 group-data-[state=active]:scale-100 transition-transform duration-300"></div>
+              </TabsTrigger>
+
+              <TabsTrigger
+                value="users"
+                className="relative group data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-600 data-[state=active]:to-red-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-orange-500/50 text-gray-300 hover:text-white hover:bg-slate-700/50 transition-all duration-300 text-xs sm:text-sm p-3 sm:p-4 rounded-lg sm:rounded-xl border border-transparent data-[state=active]:border-orange-400/60"
+              >
+                <div className="flex flex-col sm:flex-row items-center justify-center sm:justify-start space-y-1 sm:space-y-0 sm:space-x-2">
+                  <div className="relative">
+                    <Users className="h-4 w-4 sm:h-5 sm:w-5 transition-transform duration-300 group-data-[state=active]:scale-110" />
+                    <div className="absolute -inset-1 bg-orange-500/20 rounded-full scale-0 group-data-[state=active]:scale-100 transition-transform duration-300"></div>
+                  </div>
+                  <span className="hidden sm:inline font-semibold">Users</span>
+                  <span className="sm:hidden text-xs font-medium">Users</span>
                 </div>
-                <span className="hidden sm:inline font-semibold">Users</span>
-                <span className="sm:hidden text-xs font-medium">Users</span>
-              </div>
-            </TabsTrigger>
-            
-            <TabsTrigger
-              value="analytics"
-              className="relative group data-[state=active]:bg-gradient-to-r data-[state=active]:from-cyan-600 data-[state=active]:to-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-cyan-500/50 text-gray-300 hover:text-white hover:bg-slate-700/50 transition-all duration-300 text-xs sm:text-sm p-3 sm:p-4 rounded-lg sm:rounded-xl border border-transparent data-[state=active]:border-cyan-400/60"
-            >
-              <div className="flex flex-col sm:flex-row items-center justify-center sm:justify-start space-y-1 sm:space-y-0 sm:space-x-2">
-                <div className="relative">
-                  <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 transition-transform duration-300 group-data-[state=active]:scale-110 group-data-[state=active]:-rotate-12" />
-                  <div className="absolute -inset-1 bg-cyan-500/20 rounded-full scale-0 group-data-[state=active]:scale-100 transition-transform duration-300"></div>
+              </TabsTrigger>
+
+              <TabsTrigger
+                value="analytics"
+                className="relative group data-[state=active]:bg-gradient-to-r data-[state=active]:from-cyan-600 data-[state=active]:to-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-cyan-500/50 text-gray-300 hover:text-white hover:bg-slate-700/50 transition-all duration-300 text-xs sm:text-sm p-3 sm:p-4 rounded-lg sm:rounded-xl border border-transparent data-[state=active]:border-cyan-400/60"
+              >
+                <div className="flex flex-col sm:flex-row items-center justify-center sm:justify-start space-y-1 sm:space-y-0 sm:space-x-2">
+                  <div className="relative">
+                    <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 transition-transform duration-300 group-data-[state=active]:scale-110 group-data-[state=active]:-rotate-12" />
+                    <div className="absolute -inset-1 bg-cyan-500/20 rounded-full scale-0 group-data-[state=active]:scale-100 transition-transform duration-300"></div>
+                  </div>
+                  <span className="hidden sm:inline font-semibold">
+                    Analytics
+                  </span>
+                  <span className="sm:hidden text-xs font-medium">Charts</span>
                 </div>
-                <span className="hidden sm:inline font-semibold">Analytics</span>
-                <span className="sm:hidden text-xs font-medium">Charts</span>
-              </div>
-            </TabsTrigger>
-            
-            <TabsTrigger
-              value="settings"
-              className="relative group data-[state=active]:bg-gradient-to-r data-[state=active]:from-pink-600 data-[state=active]:to-purple-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-pink-500/50 text-gray-300 hover:text-white hover:bg-slate-700/50 transition-all duration-300 text-xs sm:text-sm p-3 sm:p-4 rounded-lg sm:rounded-xl border border-transparent data-[state=active]:border-pink-400/60"
-            >
-              <div className="flex flex-col sm:flex-row items-center justify-center sm:justify-start space-y-1 sm:space-y-0 sm:space-x-2">
-                <div className="relative">
-                  <Settings className="h-4 w-4 sm:h-5 sm:w-5 transition-transform duration-300 group-data-[state=active]:scale-110 group-data-[state=active]:rotate-90" />
-                  <div className="absolute -inset-1 bg-pink-500/20 rounded-full scale-0 group-data-[state=active]:scale-100 transition-transform duration-300"></div>
+              </TabsTrigger>
+
+              <TabsTrigger
+                value="settings"
+                className="relative group data-[state=active]:bg-gradient-to-r data-[state=active]:from-pink-600 data-[state=active]:to-purple-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-pink-500/50 text-gray-300 hover:text-white hover:bg-slate-700/50 transition-all duration-300 text-xs sm:text-sm p-3 sm:p-4 rounded-lg sm:rounded-xl border border-transparent data-[state=active]:border-pink-400/60"
+              >
+                <div className="flex flex-col sm:flex-row items-center justify-center sm:justify-start space-y-1 sm:space-y-0 sm:space-x-2">
+                  <div className="relative">
+                    <Settings className="h-4 w-4 sm:h-5 sm:w-5 transition-transform duration-300 group-data-[state=active]:scale-110 group-data-[state=active]:rotate-90" />
+                    <div className="absolute -inset-1 bg-pink-500/20 rounded-full scale-0 group-data-[state=active]:scale-100 transition-transform duration-300"></div>
+                  </div>
+                  <span className="hidden sm:inline font-semibold">
+                    Settings
+                  </span>
+                  <span className="sm:hidden text-xs font-medium">Config</span>
                 </div>
-                <span className="hidden sm:inline font-semibold">Settings</span>
-                <span className="sm:hidden text-xs font-medium">Config</span>
-              </div>
-            </TabsTrigger>
-            
-            <TabsTrigger
-              value="system"
-              className="relative group data-[state=active]:bg-gradient-to-r data-[state=active]:from-indigo-600 data-[state=active]:to-purple-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-indigo-500/50 text-gray-300 hover:text-white hover:bg-slate-700/50 transition-all duration-300 text-xs sm:text-sm p-3 sm:p-4 rounded-lg sm:rounded-xl border border-transparent data-[state=active]:border-indigo-400/60"
-            >
-              <div className="flex flex-col sm:flex-row items-center justify-center sm:justify-start space-y-1 sm:space-y-0 sm:space-x-2">
-                <div className="relative">
-                  <Monitor className="h-4 w-4 sm:h-5 sm:w-5 transition-transform duration-300 group-data-[state=active]:scale-110" />
-                  <div className="absolute -inset-1 bg-indigo-500/20 rounded-full scale-0 group-data-[state=active]:scale-100 transition-transform duration-300"></div>
+              </TabsTrigger>
+
+              <TabsTrigger
+                value="system"
+                className="relative group data-[state=active]:bg-gradient-to-r data-[state=active]:from-indigo-600 data-[state=active]:to-purple-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-indigo-500/50 text-gray-300 hover:text-white hover:bg-slate-700/50 transition-all duration-300 text-xs sm:text-sm p-3 sm:p-4 rounded-lg sm:rounded-xl border border-transparent data-[state=active]:border-indigo-400/60"
+              >
+                <div className="flex flex-col sm:flex-row items-center justify-center sm:justify-start space-y-1 sm:space-y-0 sm:space-x-2">
+                  <div className="relative">
+                    <Monitor className="h-4 w-4 sm:h-5 sm:w-5 transition-transform duration-300 group-data-[state=active]:scale-110" />
+                    <div className="absolute -inset-1 bg-indigo-500/20 rounded-full scale-0 group-data-[state=active]:scale-100 transition-transform duration-300"></div>
+                  </div>
+                  <span className="hidden sm:inline font-semibold">System</span>
+                  <span className="sm:hidden text-xs font-medium">System</span>
                 </div>
-                <span className="hidden sm:inline font-semibold">System</span>
-                <span className="sm:hidden text-xs font-medium">System</span>
-              </div>
-            </TabsTrigger>
+              </TabsTrigger>
             </TabsList>
           </div>
 
           {/* Tab Content Container - Clear spacing below navigation */}
 
           {/* Overview Tab - Mobile Optimized */}
-          <TabsContent value="overview" className="space-y-4 sm:space-y-8 mt-4 sm:mt-6">
+          <TabsContent
+            value="overview"
+            className="space-y-4 sm:space-y-8 mt-20 px-2 sm:px-4"
+          >
             {/* Hero Stats Section - Mobile Responsive */}
             <div className="relative overflow-hidden bg-gradient-to-r from-slate-800/95 via-slate-700/95 to-slate-800/95 backdrop-blur-sm border border-slate-600/50 rounded-lg sm:rounded-2xl p-4 sm:p-8 shadow-2xl">
               <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-purple-500/10"></div>
@@ -843,7 +859,9 @@ export default function AdminDashboard() {
                     🎯 CONTROL CENTER
                   </h2>
                   <p className="text-slate-200 text-sm sm:text-lg font-medium">
-                    <span className="hidden sm:inline">Real-time analytics and instant management</span>
+                    <span className="hidden sm:inline">
+                      Real-time analytics and instant management
+                    </span>
                     <span className="sm:hidden">Real-time game management</span>
                   </p>
                 </div>
@@ -1064,7 +1082,9 @@ export default function AdminDashboard() {
               <CardHeader className="bg-slate-700/50 border-b border-slate-600/30 p-4 sm:p-6">
                 <CardTitle className="text-white flex items-center font-bold text-sm sm:text-base">
                   <Monitor className="h-4 w-4 sm:h-5 sm:w-5 mr-2 text-emerald-400" />
-                  <span className="hidden sm:inline">System Status & Quick Actions</span>
+                  <span className="hidden sm:inline">
+                    System Status & Quick Actions
+                  </span>
                   <span className="sm:hidden">System Status</span>
                 </CardTitle>
               </CardHeader>
@@ -1286,7 +1306,7 @@ export default function AdminDashboard() {
           </TabsContent>
 
           {/* Games Management Tab */}
-          <TabsContent value="games" className="space-y-6 mt-4 sm:mt-6">
+          <TabsContent value="games" className="space-y-4 sm:space-y-6 mt-20 px-2 sm:px-4">
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="text-2xl font-bold text-white">
@@ -1439,7 +1459,9 @@ export default function AdminDashboard() {
 
                             {/* Prize Image Upload Section */}
                             <div className="space-y-3">
-                              <Label className="text-gray-300">Prize Image</Label>
+                              <Label className="text-gray-300">
+                                Prize Image
+                              </Label>
                               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="space-y-2">
                                   <input
@@ -1452,7 +1474,9 @@ export default function AdminDashboard() {
                                         setPrizeImageFile(file);
                                         const reader = new FileReader();
                                         reader.onload = () => {
-                                          setPrizeImagePreview(reader.result as string);
+                                          setPrizeImagePreview(
+                                            reader.result as string,
+                                          );
                                         };
                                         reader.readAsDataURL(file);
                                       }
@@ -1484,8 +1508,12 @@ export default function AdminDashboard() {
                                             d="M12 6v6m0 0v6m0-6h6m-6 0H6"
                                           />
                                         </svg>
-                                        <p className="text-purple-300 text-sm">Upload Prize Image</p>
-                                        <p className="text-gray-400 text-xs">PNG, JPG up to 2MB</p>
+                                        <p className="text-purple-300 text-sm">
+                                          Upload Prize Image
+                                        </p>
+                                        <p className="text-gray-400 text-xs">
+                                          PNG, JPG up to 2MB
+                                        </p>
                                       </div>
                                     )}
                                   </Label>
@@ -1494,7 +1522,9 @@ export default function AdminDashboard() {
                                   <div className="text-center text-gray-400">
                                     <p className="text-sm font-medium">OR</p>
                                     <p className="text-xs">Use emoji instead</p>
-                                    <div className="text-3xl mt-2">{previewData.emoji}</div>
+                                    <div className="text-3xl mt-2">
+                                      {previewData.emoji}
+                                    </div>
                                   </div>
                                 </div>
                               </div>
@@ -1575,33 +1605,45 @@ export default function AdminDashboard() {
                                   Free Play Numbers
                                 </Label>
                                 <div className="flex items-center space-x-2">
-                                  <span className="text-sm text-gray-400">Off</span>
+                                  <span className="text-sm text-gray-400">
+                                    Off
+                                  </span>
                                   <button
                                     type="button"
                                     onClick={() =>
                                       setPreviewData({
                                         ...previewData,
-                                        freePlayEnabled: !previewData.freePlayEnabled,
+                                        freePlayEnabled:
+                                          !previewData.freePlayEnabled,
                                       })
                                     }
                                     className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 ${
-                                      previewData.freePlayEnabled ? 'bg-green-500' : 'bg-gray-600'
+                                      previewData.freePlayEnabled
+                                        ? "bg-green-500"
+                                        : "bg-gray-600"
                                     }`}
                                   >
                                     <span
                                       className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                                        previewData.freePlayEnabled ? 'translate-x-6' : 'translate-x-1'
+                                        previewData.freePlayEnabled
+                                          ? "translate-x-6"
+                                          : "translate-x-1"
                                       }`}
                                     />
                                   </button>
-                                  <span className="text-sm text-gray-400">On</span>
+                                  <span className="text-sm text-gray-400">
+                                    On
+                                  </span>
                                 </div>
                               </div>
-                              
+
                               {previewData.freePlayEnabled && (
                                 <div className="bg-green-500/10 border border-green-500/30 rounded-lg p-4 space-y-3">
                                   <div>
-                                    <Label htmlFor="freePlayNumbers" className="text-green-300 text-sm">
+                                    <Label
+                                      htmlFor="freePlayNumbers"
+                                      className="text-green-300 text-sm"
+                                    >
                                       Free Play Numbers
                                     </Label>
                                     <Input
@@ -1618,22 +1660,27 @@ export default function AdminDashboard() {
                                       className="bg-white/10 border-green-500/30"
                                     />
                                     <p className="text-green-300 text-xs mt-2">
-                                      💡 Enter specific numbers separated by commas that require no purchase
+                                      💡 Enter specific numbers separated by
+                                      commas that require no purchase
                                     </p>
                                   </div>
                                   <div className="flex items-center justify-between text-sm">
-                                    <span className="text-green-300 font-medium">Free Numbers:</span>
+                                    <span className="text-green-300 font-medium">
+                                      Free Numbers:
+                                    </span>
                                     <span className="text-white bg-green-500/20 px-2 py-1 rounded">
-                                      {previewData.freePlayNumbers || "None specified"}
+                                      {previewData.freePlayNumbers ||
+                                        "None specified"}
                                     </span>
                                   </div>
                                 </div>
                               )}
-                              
+
                               {!previewData.freePlayEnabled && (
                                 <div className="bg-gray-500/10 border border-gray-500/30 rounded-lg p-3">
                                   <p className="text-gray-400 text-sm">
-                                    All numbers require payment when free play is disabled
+                                    All numbers require payment when free play
+                                    is disabled
                                   </p>
                                 </div>
                               )}
@@ -1768,28 +1815,32 @@ export default function AdminDashboard() {
 
                               {/* Enhanced Responsive Game Details Grid */}
                               <div className="mt-4 sm:mt-6 grid grid-cols-1 gap-2 sm:gap-3">
-                                {previewData.freePlayEnabled && previewData.freePlayNumbers && (
-                                  <div className="bg-gradient-to-br from-green-500/20 to-emerald-500/20 p-2 sm:p-3 rounded-lg border border-green-400/30 backdrop-blur-sm">
-                                    <div className="text-xs text-green-300 font-bold uppercase tracking-wider">
-                                      Free Play Numbers
+                                {previewData.freePlayEnabled &&
+                                  previewData.freePlayNumbers && (
+                                    <div className="bg-gradient-to-br from-green-500/20 to-emerald-500/20 p-2 sm:p-3 rounded-lg border border-green-400/30 backdrop-blur-sm">
+                                      <div className="text-xs text-green-300 font-bold uppercase tracking-wider">
+                                        Free Play Numbers
+                                      </div>
+                                      <div className="text-sm sm:text-base font-black text-green-200 mt-1">
+                                        {previewData.freePlayNumbers}
+                                      </div>
+                                      <div className="text-xs text-green-400 mt-1">
+                                        🎁 No cost required
+                                      </div>
                                     </div>
-                                    <div className="text-sm sm:text-base font-black text-green-200 mt-1">
-                                      {previewData.freePlayNumbers}
-                                    </div>
-                                    <div className="text-xs text-green-400 mt-1">
-                                      🎁 No cost required
-                                    </div>
-                                  </div>
-                                )}
+                                  )}
                                 <div className="bg-gradient-to-br from-blue-500/20 to-cyan-500/20 p-2 sm:p-3 rounded-lg border border-blue-400/30 backdrop-blur-sm">
                                   <div className="text-xs text-blue-300 font-bold uppercase tracking-wider">
-                                    {previewData.freePlayEnabled && previewData.freePlayNumbers ? "Paid Numbers" : "All Numbers"}
+                                    {previewData.freePlayEnabled &&
+                                    previewData.freePlayNumbers
+                                      ? "Paid Numbers"
+                                      : "All Numbers"}
                                   </div>
                                   <div className="text-sm sm:text-base font-black text-blue-200 mt-1">
-                                    {previewData.freePlayEnabled && previewData.freePlayNumbers 
+                                    {previewData.freePlayEnabled &&
+                                    previewData.freePlayNumbers
                                       ? `1-${previewData.totalNumbers} (except free numbers)`
-                                      : `1-${previewData.totalNumbers}`
-                                    }
+                                      : `1-${previewData.totalNumbers}`}
                                   </div>
                                   <div className="text-xs text-blue-400 mt-1">
                                     💰 Pay exact amount
@@ -1870,7 +1921,8 @@ export default function AdminDashboard() {
                       ✏️ Edit Game: {editingGame?.name}
                     </DialogTitle>
                     <DialogDescription className="text-gray-400 mt-2">
-                      Edit your game settings and see exactly how it will appear to players in real-time.
+                      Edit your game settings and see exactly how it will appear
+                      to players in real-time.
                     </DialogDescription>
                   </DialogHeader>
 
@@ -1881,42 +1933,60 @@ export default function AdminDashboard() {
                         <form onSubmit={handleUpdateGame} className="space-y-6">
                           <div className="grid grid-cols-2 gap-4">
                             <div>
-                              <Label htmlFor="edit-name" className="text-gray-300">
+                              <Label
+                                htmlFor="edit-name"
+                                className="text-gray-300"
+                              >
                                 Game Name
                               </Label>
                               <Input
                                 id="edit-name"
                                 name="name"
                                 value={editData.name}
-                                onChange={(e) => handleEditFieldChange("name", e.target.value)}
+                                onChange={(e) =>
+                                  handleEditFieldChange("name", e.target.value)
+                                }
                                 required
                                 className="bg-white/10 border-purple-500/30"
                                 placeholder="Enter game name"
                               />
                             </div>
                             <div>
-                              <Label htmlFor="edit-emoji" className="text-gray-300">
+                              <Label
+                                htmlFor="edit-emoji"
+                                className="text-gray-300"
+                              >
                                 Emoji
                               </Label>
                               <Input
                                 id="edit-emoji"
                                 name="emoji"
                                 value={editData.emoji}
-                                onChange={(e) => handleEditFieldChange("emoji", e.target.value)}
+                                onChange={(e) =>
+                                  handleEditFieldChange("emoji", e.target.value)
+                                }
                                 className="bg-white/10 border-purple-500/30"
                               />
                             </div>
                           </div>
 
                           <div>
-                            <Label htmlFor="edit-description" className="text-gray-300">
+                            <Label
+                              htmlFor="edit-description"
+                              className="text-gray-300"
+                            >
                               Description
                             </Label>
                             <Textarea
                               id="edit-description"
                               name="description"
                               value={editData.description}
-                              onChange={(e) => handleEditFieldChange("description", e.target.value)}
+                              onChange={(e) =>
+                                handleEditFieldChange(
+                                  "description",
+                                  e.target.value,
+                                )
+                              }
                               className="bg-white/10 border-purple-500/30"
                               placeholder="Win an amazing travel mug with this exciting game!"
                             />
@@ -1924,21 +1994,29 @@ export default function AdminDashboard() {
 
                           <div className="grid grid-cols-2 gap-4">
                             <div>
-                              <Label htmlFor="edit-prize" className="text-gray-300">
+                              <Label
+                                htmlFor="edit-prize"
+                                className="text-gray-300"
+                              >
                                 Prize Description
                               </Label>
                               <Input
                                 id="edit-prize"
                                 name="prize"
                                 value={editData.prize}
-                                onChange={(e) => handleEditFieldChange("prize", e.target.value)}
+                                onChange={(e) =>
+                                  handleEditFieldChange("prize", e.target.value)
+                                }
                                 required
                                 className="bg-white/10 border-purple-500/30"
                                 placeholder="Premium Travel Mug"
                               />
                             </div>
                             <div>
-                              <Label htmlFor="edit-prizeValue" className="text-gray-300">
+                              <Label
+                                htmlFor="edit-prizeValue"
+                                className="text-gray-300"
+                              >
                                 Prize Value ($)
                               </Label>
                               <Input
@@ -1947,7 +2025,12 @@ export default function AdminDashboard() {
                                 type="number"
                                 min="0"
                                 value={editData.prizeValue}
-                                onChange={(e) => handleEditFieldChange("prizeValue", e.target.value)}
+                                onChange={(e) =>
+                                  handleEditFieldChange(
+                                    "prizeValue",
+                                    e.target.value,
+                                  )
+                                }
                                 className="bg-white/10 border-purple-500/30"
                               />
                             </div>
@@ -1968,7 +2051,9 @@ export default function AdminDashboard() {
                                       setEditPrizeImageFile(file);
                                       const reader = new FileReader();
                                       reader.onload = () => {
-                                        setEditPrizeImagePreview(reader.result as string);
+                                        setEditPrizeImagePreview(
+                                          reader.result as string,
+                                        );
                                       };
                                       reader.readAsDataURL(file);
                                     }
@@ -2000,8 +2085,12 @@ export default function AdminDashboard() {
                                           d="M12 6v6m0 0v6m0-6h6m-6 0H6"
                                         />
                                       </svg>
-                                      <p className="text-purple-300 text-sm">Upload Prize Image</p>
-                                      <p className="text-gray-400 text-xs">PNG, JPG up to 2MB</p>
+                                      <p className="text-purple-300 text-sm">
+                                        Upload Prize Image
+                                      </p>
+                                      <p className="text-gray-400 text-xs">
+                                        PNG, JPG up to 2MB
+                                      </p>
                                     </div>
                                   )}
                                 </Label>
@@ -2010,7 +2099,9 @@ export default function AdminDashboard() {
                                 <div className="text-center text-gray-400">
                                   <p className="text-sm font-medium">OR</p>
                                   <p className="text-xs">Use emoji instead</p>
-                                  <div className="text-3xl mt-2">{editData.emoji}</div>
+                                  <div className="text-3xl mt-2">
+                                    {editData.emoji}
+                                  </div>
                                 </div>
                               </div>
                             </div>
@@ -2018,7 +2109,10 @@ export default function AdminDashboard() {
 
                           <div className="grid grid-cols-3 gap-4">
                             <div>
-                              <Label htmlFor="edit-gameType" className="text-gray-300">
+                              <Label
+                                htmlFor="edit-gameType"
+                                className="text-gray-300"
+                              >
                                 Game Type
                               </Label>
                               <Select name="gameType">
@@ -2026,14 +2120,21 @@ export default function AdminDashboard() {
                                   <SelectValue placeholder="Select type" />
                                 </SelectTrigger>
                                 <SelectContent className="bg-slate-800 border-purple-500/30">
-                                  <SelectItem value="wheel">Spinning Wheel</SelectItem>
-                                  <SelectItem value="numbers">Number Draw</SelectItem>
+                                  <SelectItem value="wheel">
+                                    Spinning Wheel
+                                  </SelectItem>
+                                  <SelectItem value="numbers">
+                                    Number Draw
+                                  </SelectItem>
                                   <SelectItem value="both">Both</SelectItem>
                                 </SelectContent>
                               </Select>
                             </div>
                             <div>
-                              <Label htmlFor="edit-totalNumbers" className="text-gray-300">
+                              <Label
+                                htmlFor="edit-totalNumbers"
+                                className="text-gray-300"
+                              >
                                 Total Numbers
                               </Label>
                               <Input
@@ -2041,12 +2142,20 @@ export default function AdminDashboard() {
                                 name="totalNumbers"
                                 type="number"
                                 value={editData.totalNumbers}
-                                onChange={(e) => handleEditFieldChange("totalNumbers", e.target.value)}
+                                onChange={(e) =>
+                                  handleEditFieldChange(
+                                    "totalNumbers",
+                                    e.target.value,
+                                  )
+                                }
                                 className="bg-white/10 border-purple-500/30"
                               />
                             </div>
                             <div>
-                              <Label htmlFor="edit-duration" className="text-gray-300">
+                              <Label
+                                htmlFor="edit-duration"
+                                className="text-gray-300"
+                              >
                                 Duration (hours)
                               </Label>
                               <Input
@@ -2054,7 +2163,12 @@ export default function AdminDashboard() {
                                 name="duration"
                                 type="number"
                                 value={editData.duration}
-                                onChange={(e) => handleEditFieldChange("duration", e.target.value)}
+                                onChange={(e) =>
+                                  handleEditFieldChange(
+                                    "duration",
+                                    e.target.value,
+                                  )
+                                }
                                 className="bg-white/10 border-purple-500/30"
                               />
                             </div>
@@ -2062,7 +2176,10 @@ export default function AdminDashboard() {
 
                           <div className="flex items-center space-x-2 p-4 bg-purple-500/20 rounded-lg border border-purple-500/30">
                             <Switch id="editIsFreePlay" name="isFreePlay" />
-                            <Label htmlFor="editIsFreePlay" className="text-purple-200 font-medium">
+                            <Label
+                              htmlFor="editIsFreePlay"
+                              className="text-purple-200 font-medium"
+                            >
                               Free Play Game
                             </Label>
                           </div>
@@ -2072,7 +2189,9 @@ export default function AdminDashboard() {
                             className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold py-3 shadow-lg"
                             disabled={updateGameMutation.isPending}
                           >
-                            {updateGameMutation.isPending ? "Updating Game..." : "🔄 Update Game"}
+                            {updateGameMutation.isPending
+                              ? "Updating Game..."
+                              : "🔄 Update Game"}
                           </Button>
                         </form>
                       </div>
@@ -2135,11 +2254,15 @@ export default function AdminDashboard() {
                                 <div className="flex flex-col space-y-1">
                                   <div className="flex items-center space-x-2">
                                     <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse shadow-lg shadow-green-400/50"></div>
-                                    <span className="text-green-400 font-bold text-xs">LIVE</span>
+                                    <span className="text-green-400 font-bold text-xs">
+                                      LIVE
+                                    </span>
                                   </div>
                                   <div className="flex items-center space-x-2">
                                     <Users className="h-3 w-3 text-blue-400" />
-                                    <span className="text-blue-400 font-bold text-xs">25 playing</span>
+                                    <span className="text-blue-400 font-bold text-xs">
+                                      25 playing
+                                    </span>
                                   </div>
                                 </div>
                               </div>
@@ -2149,15 +2272,25 @@ export default function AdminDashboard() {
 
                         {/* Game Stats Preview */}
                         <div className="bg-slate-800/50 rounded-xl p-4 border border-slate-600/30">
-                          <h4 className="text-white font-medium mb-3">Expected Performance</h4>
+                          <h4 className="text-white font-medium mb-3">
+                            Expected Performance
+                          </h4>
                           <div className="grid grid-cols-2 gap-3 text-sm">
                             <div className="bg-blue-500/20 p-3 rounded-lg">
-                              <p className="text-blue-300 font-medium">Est. Players</p>
-                              <p className="text-white text-lg font-bold">50-100</p>
+                              <p className="text-blue-300 font-medium">
+                                Est. Players
+                              </p>
+                              <p className="text-white text-lg font-bold">
+                                50-100
+                              </p>
                             </div>
                             <div className="bg-green-500/20 p-3 rounded-lg">
-                              <p className="text-green-300 font-medium">Revenue Est.</p>
-                              <p className="text-white text-lg font-bold">$2,500</p>
+                              <p className="text-green-300 font-medium">
+                                Revenue Est.
+                              </p>
+                              <p className="text-white text-lg font-bold">
+                                $2,500
+                              </p>
                             </div>
                           </div>
                         </div>
@@ -2177,7 +2310,8 @@ export default function AdminDashboard() {
                       ✏️ Edit Game: {editingGame?.name}
                     </DialogTitle>
                     <DialogDescription className="text-gray-400 mt-2">
-                      Edit your game settings and see exactly how it will appear to players in real-time.
+                      Edit your game settings and see exactly how it will appear
+                      to players in real-time.
                     </DialogDescription>
                   </DialogHeader>
 
@@ -2188,42 +2322,60 @@ export default function AdminDashboard() {
                         <form onSubmit={handleUpdateGame} className="space-y-6">
                           <div className="grid grid-cols-2 gap-4">
                             <div>
-                              <Label htmlFor="edit-name" className="text-gray-300">
+                              <Label
+                                htmlFor="edit-name"
+                                className="text-gray-300"
+                              >
                                 Game Name
                               </Label>
                               <Input
                                 id="edit-name"
                                 name="name"
                                 value={editData.name}
-                                onChange={(e) => handleEditFieldChange("name", e.target.value)}
+                                onChange={(e) =>
+                                  handleEditFieldChange("name", e.target.value)
+                                }
                                 required
                                 className="bg-white/10 border-purple-500/30"
                                 placeholder="Enter game name"
                               />
                             </div>
                             <div>
-                              <Label htmlFor="edit-emoji" className="text-gray-300">
+                              <Label
+                                htmlFor="edit-emoji"
+                                className="text-gray-300"
+                              >
                                 Emoji
                               </Label>
                               <Input
                                 id="edit-emoji"
                                 name="emoji"
                                 value={editData.emoji}
-                                onChange={(e) => handleEditFieldChange("emoji", e.target.value)}
+                                onChange={(e) =>
+                                  handleEditFieldChange("emoji", e.target.value)
+                                }
                                 className="bg-white/10 border-purple-500/30"
                               />
                             </div>
                           </div>
 
                           <div>
-                            <Label htmlFor="edit-description" className="text-gray-300">
+                            <Label
+                              htmlFor="edit-description"
+                              className="text-gray-300"
+                            >
                               Description
                             </Label>
                             <Textarea
                               id="edit-description"
                               name="description"
                               value={editData.description}
-                              onChange={(e) => handleEditFieldChange("description", e.target.value)}
+                              onChange={(e) =>
+                                handleEditFieldChange(
+                                  "description",
+                                  e.target.value,
+                                )
+                              }
                               className="bg-white/10 border-purple-500/30"
                               placeholder="Win an amazing travel mug with this exciting game!"
                             />
@@ -2231,21 +2383,29 @@ export default function AdminDashboard() {
 
                           <div className="grid grid-cols-2 gap-4">
                             <div>
-                              <Label htmlFor="edit-prize" className="text-gray-300">
+                              <Label
+                                htmlFor="edit-prize"
+                                className="text-gray-300"
+                              >
                                 Prize Description
                               </Label>
                               <Input
                                 id="edit-prize"
                                 name="prize"
                                 value={editData.prize}
-                                onChange={(e) => handleEditFieldChange("prize", e.target.value)}
+                                onChange={(e) =>
+                                  handleEditFieldChange("prize", e.target.value)
+                                }
                                 required
                                 className="bg-white/10 border-purple-500/30"
                                 placeholder="Premium Travel Mug"
                               />
                             </div>
                             <div>
-                              <Label htmlFor="edit-prizeValue" className="text-gray-300">
+                              <Label
+                                htmlFor="edit-prizeValue"
+                                className="text-gray-300"
+                              >
                                 Prize Value ($)
                               </Label>
                               <Input
@@ -2254,7 +2414,12 @@ export default function AdminDashboard() {
                                 type="number"
                                 min="0"
                                 value={editData.prizeValue}
-                                onChange={(e) => handleEditFieldChange("prizeValue", e.target.value)}
+                                onChange={(e) =>
+                                  handleEditFieldChange(
+                                    "prizeValue",
+                                    e.target.value,
+                                  )
+                                }
                                 className="bg-white/10 border-purple-500/30"
                               />
                             </div>
@@ -2275,7 +2440,9 @@ export default function AdminDashboard() {
                                       setEditPrizeImageFile(file);
                                       const reader = new FileReader();
                                       reader.onload = () => {
-                                        setEditPrizeImagePreview(reader.result as string);
+                                        setEditPrizeImagePreview(
+                                          reader.result as string,
+                                        );
                                       };
                                       reader.readAsDataURL(file);
                                     }
@@ -2307,8 +2474,12 @@ export default function AdminDashboard() {
                                           d="M12 6v6m0 0v6m0-6h6m-6 0H6"
                                         />
                                       </svg>
-                                      <p className="text-purple-300 text-sm">Upload Prize Image</p>
-                                      <p className="text-gray-400 text-xs">PNG, JPG up to 2MB</p>
+                                      <p className="text-purple-300 text-sm">
+                                        Upload Prize Image
+                                      </p>
+                                      <p className="text-gray-400 text-xs">
+                                        PNG, JPG up to 2MB
+                                      </p>
                                     </div>
                                   )}
                                 </Label>
@@ -2317,7 +2488,9 @@ export default function AdminDashboard() {
                                 <div className="text-center text-gray-400">
                                   <p className="text-sm font-medium">OR</p>
                                   <p className="text-xs">Use emoji instead</p>
-                                  <div className="text-3xl mt-2">{editData.emoji}</div>
+                                  <div className="text-3xl mt-2">
+                                    {editData.emoji}
+                                  </div>
                                 </div>
                               </div>
                             </div>
@@ -2325,7 +2498,10 @@ export default function AdminDashboard() {
 
                           <div className="grid grid-cols-2 gap-4">
                             <div>
-                              <Label htmlFor="edit-totalNumbers" className="text-gray-300">
+                              <Label
+                                htmlFor="edit-totalNumbers"
+                                className="text-gray-300"
+                              >
                                 Total Numbers
                               </Label>
                               <Input
@@ -2333,12 +2509,20 @@ export default function AdminDashboard() {
                                 name="totalNumbers"
                                 type="number"
                                 value={editData.totalNumbers}
-                                onChange={(e) => handleEditFieldChange("totalNumbers", e.target.value)}
+                                onChange={(e) =>
+                                  handleEditFieldChange(
+                                    "totalNumbers",
+                                    e.target.value,
+                                  )
+                                }
                                 className="bg-white/10 border-purple-500/30"
                               />
                             </div>
                             <div>
-                              <Label htmlFor="edit-duration" className="text-gray-300">
+                              <Label
+                                htmlFor="edit-duration"
+                                className="text-gray-300"
+                              >
                                 Duration (hours)
                               </Label>
                               <Input
@@ -2346,7 +2530,12 @@ export default function AdminDashboard() {
                                 name="duration"
                                 type="number"
                                 value={editData.duration}
-                                onChange={(e) => handleEditFieldChange("duration", e.target.value)}
+                                onChange={(e) =>
+                                  handleEditFieldChange(
+                                    "duration",
+                                    e.target.value,
+                                  )
+                                }
                                 className="bg-white/10 border-purple-500/30"
                               />
                             </div>
@@ -2357,7 +2546,9 @@ export default function AdminDashboard() {
                             className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold py-3 shadow-lg"
                             disabled={updateGameMutation.isPending}
                           >
-                            {updateGameMutation.isPending ? "Updating Game..." : "🔄 Update Game"}
+                            {updateGameMutation.isPending
+                              ? "Updating Game..."
+                              : "🔄 Update Game"}
                           </Button>
                         </form>
                       </div>
@@ -2420,11 +2611,15 @@ export default function AdminDashboard() {
                                 <div className="flex flex-col space-y-1">
                                   <div className="flex items-center space-x-2">
                                     <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse shadow-lg shadow-green-400/50"></div>
-                                    <span className="text-green-400 font-bold text-xs">LIVE</span>
+                                    <span className="text-green-400 font-bold text-xs">
+                                      LIVE
+                                    </span>
                                   </div>
                                   <div className="flex items-center space-x-2">
                                     <Users className="h-3 w-3 text-blue-400" />
-                                    <span className="text-blue-400 font-bold text-xs">25 playing</span>
+                                    <span className="text-blue-400 font-bold text-xs">
+                                      25 playing
+                                    </span>
                                   </div>
                                 </div>
                               </div>
@@ -2434,15 +2629,25 @@ export default function AdminDashboard() {
 
                         {/* Game Stats Preview */}
                         <div className="bg-slate-800/50 rounded-xl p-4 border border-slate-600/30">
-                          <h4 className="text-white font-medium mb-3">Expected Performance</h4>
+                          <h4 className="text-white font-medium mb-3">
+                            Expected Performance
+                          </h4>
                           <div className="grid grid-cols-2 gap-3 text-sm">
                             <div className="bg-blue-500/20 p-3 rounded-lg">
-                              <p className="text-blue-300 font-medium">Est. Players</p>
-                              <p className="text-white text-lg font-bold">50-100</p>
+                              <p className="text-blue-300 font-medium">
+                                Est. Players
+                              </p>
+                              <p className="text-white text-lg font-bold">
+                                50-100
+                              </p>
                             </div>
                             <div className="bg-green-500/20 p-3 rounded-lg">
-                              <p className="text-green-300 font-medium">Revenue Est.</p>
-                              <p className="text-white text-lg font-bold">$2,500</p>
+                              <p className="text-green-300 font-medium">
+                                Revenue Est.
+                              </p>
+                              <p className="text-white text-lg font-bold">
+                                $2,500
+                              </p>
                             </div>
                           </div>
                         </div>
@@ -2471,7 +2676,9 @@ export default function AdminDashboard() {
                     <CardContent className="p-4 sm:p-6">
                       <div className="flex items-center justify-between mb-4">
                         <div className="flex items-center space-x-2 sm:space-x-3 flex-1 min-w-0">
-                          <div className="text-2xl sm:text-3xl flex-shrink-0">{game.emoji}</div>
+                          <div className="text-2xl sm:text-3xl flex-shrink-0">
+                            {game.emoji}
+                          </div>
                           <div className="min-w-0">
                             <h3 className="text-white font-bold text-sm sm:text-base truncate">
                               {game.name}
@@ -2536,9 +2743,10 @@ export default function AdminDashboard() {
                             <span className="hidden sm:inline">View</span>
                             <span className="sm:hidden">View</span>
                           </Button>
-                        
+
                           {/* Winner Selection Button - Show for completed games or games with players */}
-                          {((!game.isActive && game.numbersLeft === 0) || game.playersCount > 0) && (
+                          {((!game.isActive && game.numbersLeft === 0) ||
+                            game.playersCount > 0) && (
                             <Button
                               size="sm"
                               variant="outline"
@@ -2554,7 +2762,7 @@ export default function AdminDashboard() {
                             </Button>
                           )}
                         </div>
-                        
+
                         {/* Bottom row on mobile, second part on desktop */}
                         <div className="flex space-x-2">
                           <Button
@@ -2602,7 +2810,10 @@ export default function AdminDashboard() {
           </TabsContent>
 
           {/* Users Management Tab - Enhanced Mobile */}
-          <TabsContent value="users" className="space-y-4 sm:space-y-6 mt-4 sm:mt-6">
+          <TabsContent
+            value="users"
+            className="space-y-4 sm:space-y-6 mt-20 px-2 sm:px-4"
+          >
             <div className="flex flex-col gap-3 sm:gap-4">
               <div className="text-center sm:text-left">
                 <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white bg-gradient-to-r from-orange-400 to-red-400 bg-clip-text text-transparent">
@@ -2858,7 +3069,10 @@ export default function AdminDashboard() {
           </TabsContent>
 
           {/* Analytics Tab - Mobile Enhanced */}
-          <TabsContent value="analytics" className="space-y-4 sm:space-y-6 mt-4 sm:mt-6">
+          <TabsContent
+            value="analytics"
+            className="space-y-4 sm:space-y-6 mt-20 px-2 sm:px-4"
+          >
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
               <div className="text-center sm:text-left">
                 <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">
@@ -3120,7 +3334,7 @@ export default function AdminDashboard() {
           </TabsContent>
 
           {/* System Monitoring Tab */}
-          <TabsContent value="system" className="space-y-6 mt-4 sm:mt-6">
+          <TabsContent value="system" className="space-y-4 sm:space-y-6 mt-20 px-2 sm:px-4">
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="text-2xl font-bold text-white">
@@ -3891,10 +4105,8 @@ export default function AdminDashboard() {
             </DialogContent>
           </Dialog>
 
-
-
           {/* Settings Tab */}
-          <TabsContent value="settings" className="space-y-6 mt-4 sm:mt-6">
+          <TabsContent value="settings" className="space-y-4 sm:space-y-6 mt-20 px-2 sm:px-4">
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="text-2xl font-bold text-white">
@@ -3932,7 +4144,9 @@ export default function AdminDashboard() {
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   {/* Update Profile Form */}
                   <div className="space-y-4">
-                    <h3 className="text-lg font-semibold text-white mb-4">Update Profile Information</h3>
+                    <h3 className="text-lg font-semibold text-white mb-4">
+                      Update Profile Information
+                    </h3>
                     <div className="space-y-2">
                       <Label className="text-gray-300">Email Address</Label>
                       <Input
@@ -3960,32 +4174,53 @@ export default function AdminDashboard() {
                         id="admin-lastName"
                       />
                     </div>
-                    <Button 
+                    <Button
                       className="bg-gradient-to-r from-blue-600 to-cyan-600 w-full"
                       onClick={async () => {
-                        const email = (document.getElementById('admin-email') as HTMLInputElement)?.value;
-                        const firstName = (document.getElementById('admin-firstName') as HTMLInputElement)?.value;
-                        const lastName = (document.getElementById('admin-lastName') as HTMLInputElement)?.value;
-                        
+                        const email = (
+                          document.getElementById(
+                            "admin-email",
+                          ) as HTMLInputElement
+                        )?.value;
+                        const firstName = (
+                          document.getElementById(
+                            "admin-firstName",
+                          ) as HTMLInputElement
+                        )?.value;
+                        const lastName = (
+                          document.getElementById(
+                            "admin-lastName",
+                          ) as HTMLInputElement
+                        )?.value;
+
                         try {
-                          const response = await fetch('/api/admin/update-profile', {
-                            method: 'PATCH',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ email, firstName, lastName }),
-                          });
-                          
+                          const response = await fetch(
+                            "/api/admin/update-profile",
+                            {
+                              method: "PATCH",
+                              headers: { "Content-Type": "application/json" },
+                              body: JSON.stringify({
+                                email,
+                                firstName,
+                                lastName,
+                              }),
+                            },
+                          );
+
                           const result = await response.json();
-                          
+
                           if (response.ok) {
                             toast({
                               title: "Profile Updated",
-                              description: "Your profile information has been updated successfully",
+                              description:
+                                "Your profile information has been updated successfully",
                             });
                             refetchAdminUser();
                           } else {
                             toast({
                               title: "Update Failed",
-                              description: result.message || "Failed to update profile",
+                              description:
+                                result.message || "Failed to update profile",
                               variant: "destructive",
                             });
                           }
@@ -4005,7 +4240,9 @@ export default function AdminDashboard() {
 
                   {/* Change Password Form */}
                   <div className="space-y-4">
-                    <h3 className="text-lg font-semibold text-white mb-4">Change Password</h3>
+                    <h3 className="text-lg font-semibold text-white mb-4">
+                      Change Password
+                    </h3>
                     <div className="space-y-2">
                       <Label className="text-gray-300">Current Password</Label>
                       <Input
@@ -4025,7 +4262,9 @@ export default function AdminDashboard() {
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label className="text-gray-300">Confirm New Password</Label>
+                      <Label className="text-gray-300">
+                        Confirm New Password
+                      </Label>
                       <Input
                         type="password"
                         className="bg-white/5 border-white/20 text-white"
@@ -4033,53 +4272,87 @@ export default function AdminDashboard() {
                         placeholder="Confirm new password"
                       />
                     </div>
-                    <Button 
+                    <Button
                       className="bg-gradient-to-r from-red-600 to-pink-600 w-full"
                       onClick={async () => {
-                        const currentPassword = (document.getElementById('current-password') as HTMLInputElement)?.value;
-                        const newPassword = (document.getElementById('new-password') as HTMLInputElement)?.value;
-                        const confirmPassword = (document.getElementById('confirm-password') as HTMLInputElement)?.value;
-                        
+                        const currentPassword = (
+                          document.getElementById(
+                            "current-password",
+                          ) as HTMLInputElement
+                        )?.value;
+                        const newPassword = (
+                          document.getElementById(
+                            "new-password",
+                          ) as HTMLInputElement
+                        )?.value;
+                        const confirmPassword = (
+                          document.getElementById(
+                            "confirm-password",
+                          ) as HTMLInputElement
+                        )?.value;
+
                         if (newPassword !== confirmPassword) {
                           toast({
                             title: "Password Mismatch",
-                            description: "New password and confirmation don't match",
+                            description:
+                              "New password and confirmation don't match",
                             variant: "destructive",
                           });
                           return;
                         }
-                        
+
                         if (newPassword.length < 6) {
                           toast({
                             title: "Password Too Short",
-                            description: "Password must be at least 6 characters long",
+                            description:
+                              "Password must be at least 6 characters long",
                             variant: "destructive",
                           });
                           return;
                         }
-                        
+
                         try {
-                          const response = await fetch('/api/admin/change-password', {
-                            method: 'PATCH',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ currentPassword, newPassword }),
-                          });
-                          
+                          const response = await fetch(
+                            "/api/admin/change-password",
+                            {
+                              method: "PATCH",
+                              headers: { "Content-Type": "application/json" },
+                              body: JSON.stringify({
+                                currentPassword,
+                                newPassword,
+                              }),
+                            },
+                          );
+
                           const result = await response.json();
-                          
+
                           if (response.ok) {
                             toast({
                               title: "Password Changed",
-                              description: "Your password has been updated successfully",
+                              description:
+                                "Your password has been updated successfully",
                             });
                             // Clear form
-                            (document.getElementById('current-password') as HTMLInputElement).value = '';
-                            (document.getElementById('new-password') as HTMLInputElement).value = '';
-                            (document.getElementById('confirm-password') as HTMLInputElement).value = '';
+                            (
+                              document.getElementById(
+                                "current-password",
+                              ) as HTMLInputElement
+                            ).value = "";
+                            (
+                              document.getElementById(
+                                "new-password",
+                              ) as HTMLInputElement
+                            ).value = "";
+                            (
+                              document.getElementById(
+                                "confirm-password",
+                              ) as HTMLInputElement
+                            ).value = "";
                           } else {
                             toast({
                               title: "Password Change Failed",
-                              description: result.message || "Failed to change password",
+                              description:
+                                result.message || "Failed to change password",
                               variant: "destructive",
                             });
                           }
