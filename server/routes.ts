@@ -1731,64 +1731,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      // Get wheel numbers BEFORE spinning to determine cost
+      // CRITICAL FIX: Process payment FIRST, THEN assign number only if payment succeeds
+      
+      // Get available numbers to determine cost (do this once)
       const availableNumbers = await storage.getAvailableNumbers(gameId);
       if (availableNumbers.length === 0) {
-        // Game is complete - notify admin for manual winner selection
-        try {
-          await storage.createNotification({
-            type: 'game_complete',
-            title: `Game Complete - Manual Winner Selection Required`,
-            message: `${game.name} has ended. All numbers have been taken. Please select a winner from the admin dashboard.`,
-            gameId: gameId,
-            userId: null, // Admin notification
-            isRead: false,
-            createdAt: new Date(),
-            metadata: {
-              gameName: game.name,
-              requiresManualSelection: true
-            }
-          });
-          
-          // Mark game as inactive but don't select winner yet
-          await storage.updateGame(gameId, { isActive: false });
-        } catch (notificationError) {
-          console.error("Failed to create game completion notification:", notificationError);
-        }
-        return res.status(400).json({ message: "Game complete! All numbers have been taken. Admin will select the winner soon." });
+        return res.status(400).json({ message: "Game complete! All numbers have been taken." });
       }
-
-      // Spin the wheel - this will charge AFTER determining the result
-      const spinResult = await storage.spinWheel(gameId, player.id);
       
-      // ALWAYS charge the user - no free plays in paid games
-      if (!spinResult.isFreePlay) {
-        const chargeAmount = parseFloat(spinResult.amountCharged);
-        let paymentResult = null;
+      // Select a random number from available ones
+      const randomIndex = Math.floor(Math.random() * availableNumbers.length);
+      const selectedNumber = availableNumbers[randomIndex];
+      const chargeAmount = selectedNumber; // Cost equals the number value
+      
+      // Process payment FIRST - before assigning any numbers
+      let paymentResult = null;
+      
+      // For sandbox environment, simulate payment processing  
+      if (!isProduction) {
+        console.log(`Simulated charge of $${chargeAmount} for user ${userId}`);
+        paymentResult = {
+          id: `sandbox_payment_${Date.now()}`,
+          status: "COMPLETED",
+          receiptUrl: null
+        };
+      } else {
+        // Production payment processing using Square API
+        if (!user.cardOnFile) {
+          return res.status(400).json({ message: "No payment method available" });
+        }
         
-        // For sandbox environment, simulate payment processing
-        if (!isProduction) {
-          // Simulate successful payment for testing
-          console.log(`Simulated charge of $${chargeAmount} for user ${userId}`);
-          paymentResult = {
-            id: `sandbox_payment_${Date.now()}`,
-            status: "COMPLETED",
-            receiptUrl: null
-          };
-        } else {
-          // Production payment processing using Square API
-          if (!user.cardOnFile) {
-            return res.status(400).json({ message: "No payment method available" });
-          }
-          
-          // Get user's default payment card
-          const userCards = await storage.getPaymentCardsByUserId(userId);
-          const defaultCard = userCards.find(card => card.isDefault) || userCards[0];
-          
-          if (!defaultCard) {
-            return res.status(400).json({ message: "No payment card available" });
-          }
+        // Get user's default payment card
+        const userCards = await storage.getPaymentCardsByUserId(userId);
+        const defaultCard = userCards.find(card => card.isDefault) || userCards[0];
+        
+        if (!defaultCard) {
+          return res.status(400).json({ message: "No payment card available" });
+        }
 
+        try {
           // Process payment using Square API with the user's card nonce
           paymentResult = await squareService.processPayment(
             chargeAmount,
@@ -1796,68 +1777,79 @@ export async function registerRoutes(app: Express): Promise<Server> {
             defaultCard.cardNonce || "cnon_test", // Use actual card nonce
             `Spin charge for game ${gameId} - $${chargeAmount}`
           );
+        } catch (paymentError: any) {
+          console.error("Payment failed:", paymentError);
+          // Return payment error immediately - DO NOT assign number
+          return res.status(400).json({ 
+            message: "Payment failed. Please check your payment method and try again.",
+            error: paymentError.message || "Payment processing failed"
+          });
         }
+      }
+      
+      // ONLY NOW that payment succeeded, create the spin result and assign the number
+      const spinResult = await storage.createSpinResultWithNumber(gameId, player.id, selectedNumber, chargeAmount.toString());
 
-        // Get card details for transaction record
-        let cardLast4 = "****";
-        let cardBrand = "Unknown";
+      
+      // Get card details for transaction record  
+      let cardLast4 = "****";
+      let cardBrand = "Unknown";
+      
+      if (isProduction) {
+        // Get from payment result or user's default card
+        const userCards = await storage.getPaymentCardsByUserId(userId);
+        const defaultCard = userCards.find(card => card.isDefault) || userCards[0];
         
-        if (isProduction) {
-          // Get from payment result or user's default card
-          const userCards = await storage.getPaymentCardsByUserId(userId);
-          const defaultCard = userCards.find(card => card.isDefault) || userCards[0];
-          
-          cardLast4 = paymentResult.cardDetails?.last4 || defaultCard?.cardLast4 || "****";
-          cardBrand = paymentResult.cardDetails?.cardBrand || defaultCard?.cardBrand || "Unknown";
-        } else {
-          // Sandbox mode - use generic labels instead of fake card data
-          cardLast4 = "Test";
-          cardBrand = "Sandbox";
-        }
+        cardLast4 = paymentResult.cardDetails?.last4 || defaultCard?.cardLast4 || "****";
+        cardBrand = paymentResult.cardDetails?.cardBrand || defaultCard?.cardBrand || "Unknown";
+      } else {
+        // Sandbox mode - use generic labels instead of fake card data
+        cardLast4 = "Test";
+        cardBrand = "Sandbox";
+      }
 
-        // Record transaction with spin result
-        const transaction = await storage.createTransaction({
-          userId: userId,
-          gameId: gameId,
-          spinResultId: spinResult.id,
-          squarePaymentId: paymentResult.id,
-          amount: chargeAmount.toString(),
-          currency: "USD",
-          status: paymentResult.status || "COMPLETED",
-          paymentMethod: "card",
-          cardLast4,
-          cardBrand,
-          squareReceiptUrl: paymentResult.receiptUrl || undefined
-        });
+      // Record transaction with spin result
+      const transaction = await storage.createTransaction({
+        userId: userId,
+        gameId: gameId,
+        spinResultId: spinResult.id,
+        squarePaymentId: paymentResult.id,
+        amount: chargeAmount.toString(),
+        currency: "USD",
+        status: paymentResult.status || "COMPLETED",
+        paymentMethod: "card",
+        cardLast4,
+        cardBrand,
+        squareReceiptUrl: paymentResult.receiptUrl || undefined
+      });
 
-        // Update user's total spent
-        await storage.updateUser(userId, {
-          totalSpent: (parseFloat(user.totalSpent) + chargeAmount).toString(),
-          gamesPlayed: user.gamesPlayed + 1
-        });
+      // Update user's total spent
+      await storage.updateUser(userId, {
+        totalSpent: (parseFloat(user.totalSpent) + chargeAmount).toString(),
+        gamesPlayed: user.gamesPlayed + 1
+      });
 
-        // Send payment receipt email
-        try {
-          await emailService.sendPaymentReceipt(
-            user.email, 
-            user.firstName, 
-            chargeAmount.toString(),
-            spinResult.spunNumber,
-            paymentResult.id
-          );
-          console.log("Payment receipt email sent to:", user.email);
-        } catch (emailError) {
-          console.error("Failed to send payment receipt email:", emailError);
-          // Continue even if email fails
-        }
+      // Send payment receipt email
+      try {
+        await emailService.sendPaymentReceipt(
+          user.email, 
+          user.firstName, 
+          chargeAmount.toString(),
+          spinResult.spunNumber,
+          paymentResult.id
+        );
+        console.log("Payment receipt email sent to:", user.email);
+      } catch (emailError) {
+        console.error("Failed to send payment receipt email:", emailError);
+        // Continue even if email fails
       }
 
       res.json({
         success: true,
         spinResult: {
           number: spinResult.spunNumber,
-          isFreePlay: spinResult.isFreePlay,
-          amountCharged: spinResult.amountCharged
+          isFreePlay: false, // All spins are paid
+          amountCharged: chargeAmount.toString()
         }
       });
     } catch (error: any) {

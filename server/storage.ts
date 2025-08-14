@@ -72,6 +72,7 @@ export interface IStorage {
 
   // Spin result methods
   createSpinResult(spinResult: InsertSpinResult): Promise<SpinResult>;
+  createSpinResultWithNumber(gameId: number, playerId: number, spunNumber: number, amountCharged: string): Promise<SpinResult>;
   getSpinResultsByGameId(gameId: number): Promise<SpinResult[]>;
   getSpinResultsByPlayerId(playerId: number): Promise<SpinResult[]>;
 
@@ -405,42 +406,33 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Game logic methods
+  // DEPRECATED: Old spinWheel method that assigned numbers before payment
+  // Use createSpinResultWithNumber instead for payment-first logic
   async spinWheel(gameId: number, playerId: number): Promise<SpinResult> {
+    throw new Error("spinWheel is deprecated - use createSpinResultWithNumber after payment processing");
+  }
+
+  // NEW: Creates spin result only AFTER payment succeeds
+  async createSpinResultWithNumber(gameId: number, playerId: number, spunNumber: number, amountCharged: string): Promise<SpinResult> {
     const game = await this.getGame(gameId);
     if (!game) {
       throw new Error("Game not found");
     }
 
-    // Get all spun numbers for this game
+    // Double-check that this number is still available (race condition protection)
     const existingSpins = await this.getSpinResultsByGameId(gameId);
     const spunNumbers = existingSpins.map(spin => spin.spunNumber);
     
-    // Generate available numbers (1 to totalNumbers)
-    const availableNumbers = [];
-    for (let i = 1; i <= game.totalNumbers; i++) {
-      if (!spunNumbers.includes(i)) {
-        availableNumbers.push(i);
-      }
+    if (spunNumbers.includes(spunNumber)) {
+      throw new Error(`Number ${spunNumber} has already been claimed by another player`);
     }
 
-    if (availableNumbers.length === 0) {
-      throw new Error("All numbers have been claimed - game is complete!");
-    }
-
-    // Randomly select from available numbers
-    const randomIndex = Math.floor(Math.random() * availableNumbers.length);
-    const spunNumber = availableNumbers[randomIndex];
-
-    // Removed automatic free play logic - all spins are paid unless manually designated
-    const isFreePlay = false; // All spins require payment
-    const amountCharged = spunNumber.toString();
-
-    // Create spin result
+    // Create spin result (payment already processed)
     const spinResult = await this.createSpinResult({
       gameId,
       playerId,
       spunNumber,
-      isFreePlay,
+      isFreePlay: false, // All paid spins
       amountCharged,
     });
 
@@ -453,7 +445,7 @@ export class DatabaseStorage implements IStorage {
       await this.updatePlayer(playerId, {
         ownedNumbers: newOwnedNumbers,
         totalSpent: newTotalSpent.toString(),
-        freeSpins: isFreePlay ? (player.freeSpins || 0) + 1 : player.freeSpins,
+        freeSpins: player.freeSpins, // No change for paid spins
       });
 
       // Create compliance log for spin result (only if user is authenticated)
@@ -464,7 +456,7 @@ export class DatabaseStorage implements IStorage {
           'spin_result',
           {
             spunNumber,
-            isFreePlay,
+            isFreePlay: false,
             amountCharged,
             timestamp: new Date().toISOString(),
             gameTitle: game.name
@@ -481,8 +473,16 @@ export class DatabaseStorage implements IStorage {
 
     // Check if game is complete (all numbers claimed)
     if (newNumbersLeft === 0) {
-      // Game is complete - notify admin for manual winner selection (no automatic selection)
+      // Game is complete - notify admin for manual winner selection
       await this.updateGame(gameId, { isActive: false });
+      
+      await this.createNotification({
+        type: 'game_complete',
+        message: `${game.name} has ended. All numbers have been taken. Please select a winner from the admin dashboard.`,
+        gameId: gameId,
+        playerId: null,
+        status: 'pending'
+      });
     }
 
     return spinResult;
