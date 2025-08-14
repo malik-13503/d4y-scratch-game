@@ -308,14 +308,14 @@ export default function GamePage() {
           throw new Error("Authentication required");
         }
 
-        // Handle payment failures - user saw the number but payment failed
+        // Handle payment failures - return the spun number but mark as payment failed
         if (response.status === 400 && error.paymentFailed) {
           console.log(`Payment failed for spun number ${error.spunNumber}`);
-          setLastResult(error.spunNumber);
-          
-          // Show payment failure popup instead of success
-          alert(`You spun ${error.spunNumber} but payment failed: ${error.message}\n\nThe number remains available for others to claim. Please check your payment method and try again.`);
-          throw new Error(`Payment failed for number ${error.spunNumber}: ${error.message}`);
+          return {
+            number: error.spunNumber,
+            paymentFailed: true,
+            paymentMessage: error.message
+          };
         }
 
         // For other payment/card errors
@@ -348,7 +348,11 @@ export default function GamePage() {
       // Hide confetti after 5 seconds
       setTimeout(() => setShowConfetti(false), 5000);
 
-      return result;
+      return {
+        number: result,
+        paymentFailed: false,
+        paymentMessage: null
+      };
     } catch (error) {
       console.error("🚨 Spin API error:", error);
       // Re-throw the error so the wheel component can handle it appropriately

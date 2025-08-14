@@ -9,6 +9,7 @@ import {
   Star,
   Crown,
   PartyPopper,
+  AlertTriangle,
 } from "lucide-react";
 import { Confetti } from "./confetti";
 import { DisclaimerModal } from "./payment/disclaimer-modal";
@@ -17,7 +18,7 @@ import { getQueryFn, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 
 interface SpinningWheelProps {
-  onSpin: () => Promise<number>;
+  onSpin: () => Promise<number | { number: number; paymentFailed: boolean; paymentMessage: string | null }>;
   disabled?: boolean;
   totalNumbers?: number;
 }
@@ -86,6 +87,8 @@ export function SpinningWheel({
   const [showResultModal, setShowResultModal] = useState(false);
   const [isFreePlay, setIsFreePlay] = useState(false);
   const [amountCharged, setAmountCharged] = useState<number>(0);
+  const [paymentFailed, setPaymentFailed] = useState(false);
+  const [paymentMessage, setPaymentMessage] = useState<string | null>(null);
   const wheelRef = useRef<HTMLDivElement>(null);
   const [glowIntensity, setGlowIntensity] = useState(0);
   const [showDisclaimerModal, setShowDisclaimerModal] = useState(false);
@@ -148,19 +151,36 @@ export function SpinningWheel({
     try {
       // STEP 1: Get the result from API first
       const spinResult = await onSpin();
+      
+      // Handle both old (number) and new (object) response formats
+      let resultNumber: number;
+      let isPaymentFailed = false;
+      let failureMessage: string | null = null;
+      
+      if (typeof spinResult === 'number') {
+        // Old format - direct number
+        resultNumber = spinResult;
+      } else {
+        // New format - object with payment status
+        resultNumber = spinResult.number;
+        isPaymentFailed = spinResult.paymentFailed;
+        failureMessage = spinResult.paymentMessage;
+      }
 
       // STEP 2: Find the index of the segment matching the result
       const targetIndex = wheelSegments.findIndex(
-        (segment) => segment.number === spinResult,
+        (segment) => segment.number === resultNumber,
       );
 
       if (targetIndex === -1) {
         console.warn(
           "Result not found in current wheel segments. Showing fallback.",
         );
-        setResult(spinResult);
-        setIsFreePlay(spinResult >= freePlayStart);
-        setAmountCharged(spinResult >= freePlayStart ? 0 : spinResult);
+        setResult(resultNumber);
+        setIsFreePlay(resultNumber >= freePlayStart);
+        setAmountCharged(resultNumber >= freePlayStart ? 0 : resultNumber);
+        setPaymentFailed(isPaymentFailed);
+        setPaymentMessage(failureMessage);
         setIsSpinning(false);
         setShowResultModal(true);
         return;
@@ -175,16 +195,26 @@ export function SpinningWheel({
       // STEP 4: Set the wheel rotation
       setRotation(finalRotation);
 
-      // STEP 5: Wait for animation to finish
+      // STEP 5: Wait for animation to finish COMPLETELY
       const spinDuration = 8000;
       await new Promise((resolve) => setTimeout(resolve, spinDuration));
 
-      // STEP 6: Update state after animation
-      setResult(spinResult);
-      const isFree = spinResult >= freePlayStart;
+      // STEP 6: ONLY NOW update state and show popup AFTER animation completes
+      setResult(resultNumber);
+      const isFree = resultNumber >= freePlayStart;
       setIsFreePlay(isFree);
-      setAmountCharged(isFree ? 0 : spinResult);
+      setAmountCharged(isFree ? 0 : resultNumber);
+      setPaymentFailed(isPaymentFailed);
+      setPaymentMessage(failureMessage);
       setIsSpinning(false);
+      
+      // Show payment failure popup if needed, AFTER wheel stops
+      if (isPaymentFailed && failureMessage) {
+        setTimeout(() => {
+          alert(`Payment failed for number ${resultNumber}: ${failureMessage}\n\nThe number remains available for others to claim. Please check your payment method and try again.`);
+        }, 500); // Small delay to ensure wheel has visually stopped
+      }
+      
       setShowResultModal(true);
     } catch (err) {
       console.error("Spin failed:", err);
@@ -322,10 +352,13 @@ export function SpinningWheel({
               {/* Result Announcement */}
               <div className="space-y-2">
                 <h2 className="text-3xl font-bold bg-gradient-to-r from-yellow-300 via-orange-400 to-red-400 bg-clip-text text-transparent">
-                  {isFreePlay ? "🎁 FREE PLAY! 🎁" : "✨ NUMBER CLAIMED! ✨"}
+                  {paymentFailed ? "❌ PAYMENT FAILED ❌" : 
+                   isFreePlay ? "🎁 FREE PLAY! 🎁" : "✨ NUMBER CLAIMED! ✨"}
                 </h2>
                 <p className="text-white/80 text-lg">
-                  {isFreePlay
+                  {paymentFailed
+                    ? "Payment failed - number remains available"
+                    : isFreePlay
                     ? "Lucky you - this one's free!"
                     : "You've claimed this number!"}
                 </p>
@@ -343,7 +376,19 @@ export function SpinningWheel({
 
               {/* Payment Information */}
               <div className="bg-black/30 backdrop-blur-sm rounded-xl p-6 border border-white/20">
-                {isFreePlay ? (
+                {paymentFailed ? (
+                  <div className="text-center space-y-2">
+                    <div className="text-2xl font-bold text-red-400">
+                      ❌ PAYMENT FAILED
+                    </div>
+                    <p className="text-red-300 text-sm">
+                      {paymentMessage || "Payment could not be processed"}
+                    </p>
+                    <p className="text-white/70 text-xs">
+                      Number {result} is still available for others to claim
+                    </p>
+                  </div>
+                ) : isFreePlay ? (
                   <div className="text-center space-y-2">
                     <div className="text-2xl font-bold text-green-300">
                       💰 $0.00 CHARGED
@@ -371,20 +416,35 @@ export function SpinningWheel({
                 )}
               </div>
 
-              {/* Celebration Message */}
-              <div className="bg-gradient-to-r from-green-500/20 to-emerald-500/20 backdrop-blur-sm rounded-xl p-4 border border-green-400/30">
-                <div className="flex items-center justify-center space-x-2 mb-2">
-                  <Trophy className="h-6 w-6 text-yellow-400" />
-                  <span className="text-xl font-bold text-green-300">
-                    Congratulations!
-                  </span>
-                  <Trophy className="h-6 w-6 text-yellow-400" />
+              {/* Celebration/Failure Message */}
+              {!paymentFailed ? (
+                <div className="bg-gradient-to-r from-green-500/20 to-emerald-500/20 backdrop-blur-sm rounded-xl p-4 border border-green-400/30">
+                  <div className="flex items-center justify-center space-x-2 mb-2">
+                    <Trophy className="h-6 w-6 text-yellow-400" />
+                    <span className="text-xl font-bold text-green-300">
+                      Congratulations!
+                    </span>
+                    <Trophy className="h-6 w-6 text-yellow-400" />
+                  </div>
+                  <p className="text-green-200">
+                    Amazing spin! Your lucky number is{" "}
+                    <span className="font-bold text-yellow-300">{result}</span>
+                  </p>
                 </div>
-                <p className="text-green-200">
-                  Amazing spin! Your lucky number is{" "}
-                  <span className="font-bold text-yellow-300">{result}</span>
-                </p>
-              </div>
+              ) : (
+                <div className="bg-gradient-to-r from-red-500/20 to-orange-500/20 backdrop-blur-sm rounded-xl p-4 border border-red-400/30">
+                  <div className="flex items-center justify-center space-x-2 mb-2">
+                    <AlertTriangle className="h-6 w-6 text-red-400" />
+                    <span className="text-xl font-bold text-red-300">
+                      Payment Issue
+                    </span>
+                    <AlertTriangle className="h-6 w-6 text-red-400" />
+                  </div>
+                  <p className="text-red-200">
+                    You spun {result}, but payment failed. The number remains available for others to claim.
+                  </p>
+                </div>
+              )}
 
               {/* Action Buttons */}
               <div className="flex space-x-3">
