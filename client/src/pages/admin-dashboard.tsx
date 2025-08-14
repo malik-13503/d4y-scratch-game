@@ -2851,19 +2851,20 @@ export default function AdminDashboard() {
               </div>
             </div>
 
-            {/* User Stats Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            {/* User Stats Cards - Mobile Responsive */}
+            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-6">
               <Card className="bg-gradient-to-br from-blue-500/80 to-blue-600/90 backdrop-blur-sm border-0 shadow-2xl hover:shadow-blue-500/50 transform transition-all duration-300 hover:scale-105 cursor-pointer">
-                <CardContent className="p-6 text-center relative overflow-hidden">
+                <CardContent className="p-3 sm:p-6 text-center relative overflow-hidden">
                   <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent"></div>
                   <div className="relative z-10">
-                    <div className="text-4xl font-bold text-white mb-2 drop-shadow-xl">
+                    <div className="text-2xl sm:text-4xl font-bold text-white mb-1 sm:mb-2 drop-shadow-xl">
                       {users?.length || 0}
                     </div>
-                    <div className="text-sm text-white/90 font-medium drop-shadow-lg">
-                      Total Users
+                    <div className="text-xs sm:text-sm text-white/90 font-medium drop-shadow-lg">
+                      <span className="hidden sm:inline">Total Users</span>
+                      <span className="sm:hidden">Total</span>
                     </div>
-                    <div className="text-xs text-white/70 mt-1">
+                    <div className="text-xs text-white/70 mt-1 hidden sm:block">
                       📊 Platform growth
                     </div>
                   </div>
@@ -2871,16 +2872,17 @@ export default function AdminDashboard() {
               </Card>
 
               <Card className="bg-gradient-to-br from-green-500/80 to-emerald-600/90 backdrop-blur-sm border-0 shadow-2xl hover:shadow-green-500/50 transform transition-all duration-300 hover:scale-105 cursor-pointer">
-                <CardContent className="p-6 text-center relative overflow-hidden">
+                <CardContent className="p-3 sm:p-6 text-center relative overflow-hidden">
                   <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent"></div>
                   <div className="relative z-10">
-                    <div className="text-4xl font-bold text-white mb-2 drop-shadow-xl">
+                    <div className="text-2xl sm:text-4xl font-bold text-white mb-1 sm:mb-2 drop-shadow-xl">
                       {users?.filter((u) => u.cardOnFile).length || 0}
                     </div>
-                    <div className="text-sm text-white/90 font-medium drop-shadow-lg">
-                      Verified Users
+                    <div className="text-xs sm:text-sm text-white/90 font-medium drop-shadow-lg">
+                      <span className="hidden sm:inline">Verified Users</span>
+                      <span className="sm:hidden">Verified</span>
                     </div>
-                    <div className="text-xs text-white/70 mt-1">
+                    <div className="text-xs text-white/70 mt-1 hidden sm:block">
                       💳 Currently verified
                     </div>
                   </div>
@@ -2888,10 +2890,10 @@ export default function AdminDashboard() {
               </Card>
 
               <Card className="bg-gradient-to-br from-purple-500/80 to-pink-600/90 backdrop-blur-sm border-0 shadow-2xl hover:shadow-purple-500/50 transform transition-all duration-300 hover:scale-105 cursor-pointer">
-                <CardContent className="p-6 text-center relative overflow-hidden">
+                <CardContent className="p-3 sm:p-6 text-center relative overflow-hidden">
                   <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent"></div>
                   <div className="relative z-10">
-                    <div className="text-4xl font-bold text-white mb-2 drop-shadow-xl">
+                    <div className="text-2xl sm:text-4xl font-bold text-white mb-1 sm:mb-2 drop-shadow-xl">
                       {users?.filter(
                         (u) =>
                           u.createdAt &&
@@ -2899,10 +2901,11 @@ export default function AdminDashboard() {
                             new Date(Date.now() - 24 * 60 * 60 * 1000),
                       ).length || 0}
                     </div>
-                    <div className="text-sm text-white/90 font-medium drop-shadow-lg">
-                      New Today
+                    <div className="text-xs sm:text-sm text-white/90 font-medium drop-shadow-lg">
+                      <span className="hidden sm:inline">New Today</span>
+                      <span className="sm:hidden">New</span>
                     </div>
-                    <div className="text-xs text-white/70 mt-1">
+                    <div className="text-xs text-white/70 mt-1 hidden sm:block">
                       🔥 Real-time
                     </div>
                   </div>
@@ -2910,18 +2913,19 @@ export default function AdminDashboard() {
               </Card>
 
               <Card className="bg-gradient-to-br from-orange-500/80 to-red-600/90 backdrop-blur-sm border-0 shadow-2xl hover:shadow-orange-500/50 transform transition-all duration-300 hover:scale-105 cursor-pointer">
-                <CardContent className="p-6 text-center relative overflow-hidden">
+                <CardContent className="p-3 sm:p-6 text-center relative overflow-hidden">
                   <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent"></div>
                   <div className="relative z-10">
-                    <div className="text-4xl font-bold text-white mb-2 drop-shadow-xl">
+                    <div className="text-2xl sm:text-4xl font-bold text-white mb-1 sm:mb-2 drop-shadow-xl">
                       {users?.filter((u) => u.isActive).length ||
                         users?.length ||
                         0}
                     </div>
-                    <div className="text-sm text-white/90 font-medium drop-shadow-lg">
-                      Active Users
+                    <div className="text-xs sm:text-sm text-white/90 font-medium drop-shadow-lg">
+                      <span className="hidden sm:inline">Active Users</span>
+                      <span className="sm:hidden">Active</span>
                     </div>
-                    <div className="text-xs text-white/70 mt-1">
+                    <div className="text-xs text-white/70 mt-1 hidden sm:block">
                       ⚡ Total active
                     </div>
                   </div>
@@ -2934,13 +2938,31 @@ export default function AdminDashboard() {
               <CardHeader>
                 <CardTitle className="text-white flex items-center justify-between">
                   <div className="flex items-center">
-                    <Users className="h-5 w-5 mr-2 text-blue-400" />
-                    User Directory
-                    <Badge className="ml-3 bg-blue-500/20 text-blue-300 border-blue-500/30">
+                    <Users className="h-4 w-4 sm:h-5 sm:w-5 mr-2 text-blue-400" />
+                    <span className="text-sm sm:text-base">User Directory</span>
+                    <Badge className="ml-2 sm:ml-3 bg-blue-500/20 text-blue-300 border-blue-500/30 text-xs">
                       {users?.length || 0} Total
                     </Badge>
                   </div>
-                  <div className="flex items-center space-x-2">
+                  {/* Mobile Action Buttons */}
+                  <div className="flex sm:hidden items-center space-x-1">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="border-green-500/50 text-green-400 hover:bg-green-500/20 px-2 py-1 h-7"
+                    >
+                      <Download className="h-3 w-3" />
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="border-purple-500/50 text-purple-400 hover:bg-purple-500/20 px-2 py-1 h-7"
+                    >
+                      <Target className="h-3 w-3" />
+                    </Button>
+                  </div>
+                  {/* Desktop Action Buttons */}
+                  <div className="hidden sm:flex items-center space-x-2">
                     <Button
                       size="sm"
                       variant="outline"
@@ -2961,79 +2983,137 @@ export default function AdminDashboard() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
+                <div className="space-y-3 sm:space-y-4">
                   {users && users.length > 0 ? (
                     users.map((user) => (
                       <div
                         key={user.id}
-                        className="flex items-center justify-between p-4 bg-white/5 rounded-lg border border-white/10 hover:bg-white/10 transition-colors"
+                        className="p-3 sm:p-4 bg-white/5 rounded-lg border border-white/10 hover:bg-white/10 transition-colors"
                       >
-                        <div className="flex items-center space-x-4">
-                          <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full flex items-center justify-center">
-                            <User className="h-5 w-5 text-white" />
+                        {/* Mobile Layout */}
+                        <div className="block sm:hidden">
+                          <div className="flex items-start justify-between mb-3">
+                            <div className="flex items-center space-x-3">
+                              <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
+                                <User className="h-4 w-4 text-white" />
+                              </div>
+                              <div className="min-w-0 flex-1">
+                                <div className="text-white font-medium text-sm truncate">
+                                  {user.firstName} {user.lastName}
+                                </div>
+                                <div className="text-gray-400 text-xs truncate">
+                                  {user.email}
+                                </div>
+                              </div>
+                            </div>
+                            <Badge
+                              variant={user.cardOnFile ? "default" : "secondary"}
+                              className={`text-xs px-2 py-1 ${
+                                user.cardOnFile
+                                  ? "bg-green-500 hover:bg-green-600 text-white"
+                                  : "bg-gray-500 hover:bg-gray-600 text-white"
+                              }`}
+                            >
+                              {user.cardOnFile ? "✓" : "⚠"}
+                            </Badge>
                           </div>
-                          <div>
-                            <div className="text-white font-medium">
-                              {user.firstName} {user.lastName}
-                            </div>
-                            <div className="text-gray-400 text-sm">
-                              {user.email}
-                            </div>
+                          <div className="flex items-center justify-between">
                             <div className="text-gray-500 text-xs">
-                              ID: {user.id}
+                              ID: {user.id} • Joined: {user.createdAt ? new Date(user.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }) : "N/A"}
+                            </div>
+                            <div className="flex space-x-1">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="border-blue-500/50 text-blue-400 hover:bg-blue-500/20 px-2 py-1 h-7"
+                                onClick={() => {
+                                  setSelectedUser(user);
+                                  setIsUserProfileOpen(true);
+                                }}
+                              >
+                                <Eye className="h-3 w-3" />
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="border-red-500/50 text-red-400 hover:bg-red-500/20 px-2 py-1 h-7"
+                                onClick={() => handleDeleteUser(user)}
+                              >
+                                <Trash2 className="h-3 w-3" />
+                              </Button>
                             </div>
                           </div>
                         </div>
-                        <div className="flex items-center space-x-4">
-                          <div className="text-right">
-                            <div className="flex items-center space-x-2">
-                              <Badge
-                                variant={
-                                  user.cardOnFile ? "default" : "secondary"
-                                }
-                                className={
-                                  user.cardOnFile
-                                    ? "bg-green-500 hover:bg-green-600"
-                                    : "bg-gray-500 hover:bg-gray-600"
-                                }
-                              >
-                                {user.cardOnFile ? "Verified" : "Unverified"}
-                              </Badge>
+
+                        {/* Desktop Layout */}
+                        <div className="hidden sm:flex items-center justify-between">
+                          <div className="flex items-center space-x-4">
+                            <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full flex items-center justify-center">
+                              <User className="h-5 w-5 text-white" />
                             </div>
-                            <div className="text-gray-400 text-xs mt-1">
-                              Joined:{" "}
-                              {user.createdAt
-                                ? new Date(user.createdAt).toLocaleDateString()
-                                : "N/A"}
+                            <div>
+                              <div className="text-white font-medium">
+                                {user.firstName} {user.lastName}
+                              </div>
+                              <div className="text-gray-400 text-sm">
+                                {user.email}
+                              </div>
+                              <div className="text-gray-500 text-xs">
+                                ID: {user.id}
+                              </div>
                             </div>
                           </div>
-                          <div className="flex space-x-2">
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              className="border-blue-500/50 text-blue-400 hover:bg-blue-500/20"
-                              onClick={() => {
-                                setSelectedUser(user);
-                                setIsUserProfileOpen(true);
-                              }}
-                            >
-                              <Eye className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              className="border-yellow-500/50 text-yellow-400 hover:bg-yellow-500/20"
-                            >
-                              <Edit3 className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              className="border-red-500/50 text-red-400 hover:bg-red-500/20"
-                              onClick={() => handleDeleteUser(user)}
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
+                          <div className="flex items-center space-x-4">
+                            <div className="text-right">
+                              <div className="flex items-center space-x-2">
+                                <Badge
+                                  variant={
+                                    user.cardOnFile ? "default" : "secondary"
+                                  }
+                                  className={
+                                    user.cardOnFile
+                                      ? "bg-green-500 hover:bg-green-600"
+                                      : "bg-gray-500 hover:bg-gray-600"
+                                  }
+                                >
+                                  {user.cardOnFile ? "Verified" : "Unverified"}
+                                </Badge>
+                              </div>
+                              <div className="text-gray-400 text-xs mt-1">
+                                Joined:{" "}
+                                {user.createdAt
+                                  ? new Date(user.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })
+                                  : "N/A"}
+                              </div>
+                            </div>
+                            <div className="flex space-x-2">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="border-blue-500/50 text-blue-400 hover:bg-blue-500/20"
+                                onClick={() => {
+                                  setSelectedUser(user);
+                                  setIsUserProfileOpen(true);
+                                }}
+                              >
+                                <Eye className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="border-yellow-500/50 text-yellow-400 hover:bg-yellow-500/20"
+                              >
+                                <Edit3 className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="border-red-500/50 text-red-400 hover:bg-red-500/20"
+                                onClick={() => handleDeleteUser(user)}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
                           </div>
                         </div>
                       </div>
