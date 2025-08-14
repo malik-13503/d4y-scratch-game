@@ -707,11 +707,13 @@ export class DatabaseStorage implements IStorage {
         .from(transactions)
         .leftJoin(spinResults, eq(transactions.spinResultId, spinResults.id))
         .where(eq(transactions.userId, userId))
-        .orderBy(transactions.createdAt);
+        .orderBy(desc(transactions.createdAt));
       
+      console.log(`Fetched ${result.length} transactions for user ID ${userId}`);
       return result;
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error getting transactions by user ID:", error);
+      console.error("Stack trace:", error.stack);
       return [];
     }
   }
