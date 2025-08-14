@@ -4933,16 +4933,21 @@ function WinnersList() {
 // Test Email Button Component
 function TestEmailButton() {
   const { toast } = useToast();
+  const [testEmail, setTestEmail] = useState("ahsanglobalbusiness@gmail.com");
 
   const testEmailMutation = useMutation({
     mutationFn: async (type: "winner" | "completion") => {
+      if (!testEmail || !testEmail.includes("@")) {
+        throw new Error("Please enter a valid email address");
+      }
+
       const response = await fetch("/api/admin/test-email", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          email: "ahsanglobalbusiness@gmail.com",
+          email: testEmail,
           type: type,
         }),
       });
@@ -4957,7 +4962,7 @@ function TestEmailButton() {
     onSuccess: (data: any) => {
       toast({
         title: "Email Sent",
-        description: data.message,
+        description: `${data.message} to ${testEmail}`,
       });
     },
     onError: (error: any) => {
@@ -4971,35 +4976,53 @@ function TestEmailButton() {
   });
 
   return (
-    <div className="flex space-x-2">
-      <Button
-        onClick={() => testEmailMutation.mutate("winner")}
-        disabled={testEmailMutation.isPending}
-        variant="outline"
-        size="sm"
-        className="border-yellow-500/50 text-yellow-400 hover:bg-yellow-500/20"
-      >
-        {testEmailMutation.isPending ? (
-          <RefreshCw className="h-4 w-4 animate-spin mr-2" />
-        ) : (
-          <Trophy className="h-4 w-4 mr-2" />
-        )}
-        Test Winner Email
-      </Button>
-      <Button
-        onClick={() => testEmailMutation.mutate("completion")}
-        disabled={testEmailMutation.isPending}
-        variant="outline"
-        size="sm"
-        className="border-blue-500/50 text-blue-400 hover:bg-blue-500/20"
-      >
-        {testEmailMutation.isPending ? (
-          <RefreshCw className="h-4 w-4 animate-spin mr-2" />
-        ) : (
-          <Star className="h-4 w-4 mr-2" />
-        )}
-        Test Completion Email
-      </Button>
+    <div className="space-y-3">
+      <div className="flex flex-col sm:flex-row gap-2">
+        <div className="flex-1">
+          <Label htmlFor="test-email" className="text-sm text-gray-300 mb-1 block">
+            Test Email Address
+          </Label>
+          <Input
+            id="test-email"
+            type="email"
+            value={testEmail}
+            onChange={(e) => setTestEmail(e.target.value)}
+            placeholder="Enter email to test deliverability"
+            className="bg-slate-800/50 border-slate-600 text-white placeholder-gray-400"
+          />
+        </div>
+      </div>
+      
+      <div className="flex flex-wrap gap-2">
+        <Button
+          onClick={() => testEmailMutation.mutate("winner")}
+          disabled={testEmailMutation.isPending || !testEmail.includes("@")}
+          variant="outline"
+          size="sm"
+          className="border-yellow-500/50 text-yellow-400 hover:bg-yellow-500/20"
+        >
+          {testEmailMutation.isPending ? (
+            <RefreshCw className="h-4 w-4 animate-spin mr-2" />
+          ) : (
+            <Trophy className="h-4 w-4 mr-2" />
+          )}
+          Test Winner Email
+        </Button>
+        <Button
+          onClick={() => testEmailMutation.mutate("completion")}
+          disabled={testEmailMutation.isPending || !testEmail.includes("@")}
+          variant="outline"
+          size="sm"
+          className="border-blue-500/50 text-blue-400 hover:bg-blue-500/20"
+        >
+          {testEmailMutation.isPending ? (
+            <RefreshCw className="h-4 w-4 animate-spin mr-2" />
+          ) : (
+            <Star className="h-4 w-4 mr-2" />
+          )}
+          Test Completion Email
+        </Button>
+      </div>
     </div>
   );
 }

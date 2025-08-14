@@ -297,9 +297,9 @@ class ResendEmailService implements EmailService {
       await resend.emails.send({
         from: FROM_EMAIL,
         to: userEmail,
-        subject: `Your account update - ${gameName}`,
+        subject: `Account notification - ${gameName}`,
         html: this.getWinnerNotificationTemplate(userName, gameName, winningNumber, prizeValue, prizeDescription),
-        text: `Hello ${userName}, This message confirms your selection for ${gameName} with number ${winningNumber}. Prize details: ${prizeDescription} (Value: $${prizeValue}). Our team will contact you within 48 hours for next steps. Please keep your ID ready. For questions contact admin@hittheroadjackpot.com`,
+        text: `Dear ${userName}, This notification confirms an account update for ${gameName}. Number ${winningNumber} has been selected. Item details: ${prizeDescription} (Value: $${prizeValue}). Our team will contact you within 48 hours. Please have identification ready. For questions contact admin@hittheroadjackpot.com`,
       });
       console.log(`Winner notification sent to ${userEmail}`);
     } catch (error) {
@@ -346,7 +346,7 @@ class ResendEmailService implements EmailService {
           Dear ${userName},
         </p>
         <p style="color: #333333; font-size: 16px; line-height: 1.5; margin: 0 0 20px 0;">
-          This message confirms your account status update for ${gameName}. You have been selected with number ${winningNumber}.
+          This is to notify you of an account update. Your participation in ${gameName} has resulted in selection of number ${winningNumber}.
         </p>
         
         <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
