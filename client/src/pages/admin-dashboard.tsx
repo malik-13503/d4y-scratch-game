@@ -70,6 +70,7 @@ import {
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { DeleteUserDialog } from "@/components/delete-user-dialog";
+import { WinnerSelectionModal } from "@/components/admin/winner-selection-modal";
 import logoPath from "@assets/logo_1751918412862.png";
 
 export default function AdminDashboard() {
@@ -85,6 +86,8 @@ export default function AdminDashboard() {
   const [gameToDelete, setGameToDelete] = useState<any>(null);
   const [isDeleteUserOpen, setIsDeleteUserOpen] = useState(false);
   const [userToDelete, setUserToDelete] = useState<any>(null);
+  const [isWinnerSelectionOpen, setIsWinnerSelectionOpen] = useState(false);
+  const [winnerSelectionGame, setWinnerSelectionGame] = useState<any>(null);
 
   // Edit form data state
   const [editFormData, setEditFormData] = useState({
@@ -2455,7 +2458,7 @@ export default function AdminDashboard() {
                         <Button
                           size="sm"
                           variant="outline"
-                          className="flex-1 border-purple-500/50 text-black-400 hover:bg-purple-500/20"
+                          className="flex-1 border-purple-500/50 text-purple-400 hover:bg-purple-500/20"
                           onClick={() =>
                             window.open(`/game/${game.id}`, "_blank")
                           }
@@ -2463,10 +2466,27 @@ export default function AdminDashboard() {
                           <Eye className="h-4 w-4 mr-1" />
                           View
                         </Button>
+                        
+                        {/* Winner Selection Button - Show only for completed games */}
+                        {!game.isActive && game.numbersLeft === 0 && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="flex-1 border-yellow-500/50 text-yellow-400 hover:bg-yellow-500/20"
+                            onClick={() => {
+                              setWinnerSelectionGame(game);
+                              setIsWinnerSelectionOpen(true);
+                            }}
+                          >
+                            <Crown className="h-4 w-4 mr-1" />
+                            Winner
+                          </Button>
+                        )}
+                        
                         <Button
                           size="sm"
                           variant="outline"
-                          className="flex-1 border-blue-500/50 text-black-400 hover:bg-blue-500/20"
+                          className="flex-1 border-blue-500/50 text-blue-400 hover:bg-blue-500/20"
                           onClick={() => handleEditGame(game)}
                         >
                           <Edit3 className="h-4 w-4 mr-1" />
@@ -4324,6 +4344,17 @@ export default function AdminDashboard() {
         onConfirm={confirmDeleteUser}
         user={userToDelete}
         isDeleting={deleteUserMutation.isPending}
+      />
+
+      {/* Winner Selection Modal */}
+      <WinnerSelectionModal
+        isOpen={isWinnerSelectionOpen}
+        onClose={() => setIsWinnerSelectionOpen(false)}
+        game={winnerSelectionGame}
+        onWinnerSelected={() => {
+          refetchGames();
+          setIsWinnerSelectionOpen(false);
+        }}
       />
     </div>
   );

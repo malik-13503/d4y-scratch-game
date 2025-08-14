@@ -481,8 +481,7 @@ export class DatabaseStorage implements IStorage {
 
     // Check if game is complete (all numbers claimed)
     if (newNumbersLeft === 0) {
-      // Game is complete - select winner
-      await this.selectGameWinner(gameId);
+      // Game is complete - notify admin for manual winner selection (no automatic selection)
       await this.updateGame(gameId, { isActive: false });
     }
 
@@ -581,21 +580,6 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Get recent transactions for a specific game (used for recent numbers display)
-  async getRecentGameTransactions(gameId: number, limit: number = 6): Promise<Transaction[]> {
-    try {
-      const recentTransactions = await db
-        .select()
-        .from(transactions)
-        .where(eq(transactions.gameId, gameId))
-        .orderBy(desc(transactions.createdAt))
-        .limit(limit);
-      
-      return recentTransactions;
-    } catch (error) {
-      console.error("Error getting recent game transactions:", error);
-      return [];
-    }
-  }
 
   // User methods (for game players)
   async getUser(id: number): Promise<User | undefined> {

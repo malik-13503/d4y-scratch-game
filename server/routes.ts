@@ -1092,6 +1092,187 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get game participants for winner selection
+  app.get("/api/admin/games/:id/participants", requireAuth, async (req, res) => {
+    try {
+      const gameId = parseInt(req.params.id);
+      const game = await storage.getGame(gameId);
+      
+      if (!game) {
+        return res.status(404).json({ message: "Game not found" });
+      }
+
+      // Get all spin results for this game to show participants
+      const spinResults = await storage.getSpinResultsByGameId(gameId);
+      const participants = await Promise.all(
+        spinResults.map(async (spin) => {
+          const player = await storage.getPlayer(spin.playerId);
+          const user = player ? await storage.getUser(player.userId) : null;
+          
+          return {
+            id: spin.playerId,
+            userId: player?.userId,
+            playerName: player?.playerName || `Player ${spin.playerId}`,
+            email: user?.email || 'N/A',
+            spunNumber: spin.spunNumber,
+            amountPaid: parseFloat(spin.amountCharged),
+            spunAt: spin.createdAt,
+            isWinner: player?.isWinner || false,
+            spinResultId: spin.id
+          };
+        })
+      );
+
+      // Remove duplicates (same player multiple spins) and get unique participants
+      const uniqueParticipants = participants.reduce((acc, current) => {
+        const existing = acc.find(p => p.userId === current.userId);
+        if (!existing) {
+          acc.push(current);
+        } else {
+          // Keep the one with higher amount paid or most recent
+          if (current.amountPaid > existing.amountPaid || current.spunAt > existing.spunAt) {
+            const index = acc.findIndex(p => p.userId === current.userId);
+            acc[index] = current;
+          }
+        }
+        return acc;
+      }, [] as typeof participants);
+
+      res.json({
+        gameId,
+        gameName: game.name,
+        totalParticipants: uniqueParticipants.length,
+        participants: uniqueParticipants.sort((a, b) => new Date(b.spunAt).getTime() - new Date(a.spunAt).getTime()),
+        gameCompleted: !game.isActive,
+        hasWinner: uniqueParticipants.some(p => p.isWinner)
+      });
+    } catch (error) {
+      console.error("Failed to fetch game participants:", error);
+      res.status(500).json({ message: "Failed to fetch game participants" });
+    }
+  });
+
+  // Manual winner selection endpoint
+  app.post("/api/admin/games/:id/select-winner", requireAuth, async (req, res) => {
+    try {
+      const gameId = parseInt(req.params.id);
+      const { playerId, reason } = req.body;
+
+      if (!playerId) {
+        return res.status(400).json({ message: "Player ID is required" });
+      }
+
+      const game = await storage.getGame(gameId);
+      if (!game) {
+        return res.status(404).json({ message: "Game not found" });
+      }
+
+      const player = await storage.getPlayer(playerId);
+      if (!player) {
+        return res.status(404).json({ message: "Player not found" });
+      }
+
+      const user = await storage.getUser(player.userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      // Get the player's spin result to find their number
+      const spinResults = await storage.getSpinResultsByGameId(gameId);
+      const playerSpins = spinResults.filter(spin => spin.playerId === playerId);
+      const winningNumber = playerSpins.length > 0 ? playerSpins[0].spunNumber : null;
+
+      if (!winningNumber) {
+        return res.status(400).json({ message: "Player has no valid spin results" });
+      }
+
+      // Create game result with manual selection
+      await storage.createGameResult({
+        gameId,
+        winningNumber,
+        winnerId: playerId,
+        totalParticipants: new Set(spinResults.map(spin => spin.playerId)).size,
+        totalSpins: spinResults.length
+      });
+
+      // Update winner status
+      await storage.updatePlayer(playerId, { isWinner: true });
+
+      // Create winner notification
+      await storage.createNotification({
+        type: 'winner_selected',
+        title: `🎉 Winner Selected for ${game.name}!`,
+        message: `${player.playerName} (${user.email}) has been selected as the winner with number ${winningNumber}. Prize: ${game.prizeDescription}`,
+        gameId: gameId,
+        userId: player.userId,
+        isRead: false,
+        createdAt: new Date(),
+        metadata: {
+          winnerName: player.playerName,
+          winnerEmail: user.email,
+          winningNumber: winningNumber,
+          gameName: game.name,
+          prizeDescription: game.prizeDescription,
+          prizeValue: game.prizeValue,
+          selectionReason: reason || 'Manual admin selection',
+          selectedBy: 'Admin',
+          selectionDate: new Date().toISOString()
+        }
+      });
+
+      // Send winner notification email
+      try {
+        await emailService.sendWinnerNotification(
+          user.email,
+          user.firstName,
+          game.name,
+          game.prizeDescription,
+          winningNumber.toString()
+        );
+        console.log(`Winner notification email sent to: ${user.email}`);
+      } catch (emailError) {
+        console.error("Failed to send winner notification email:", emailError);
+      }
+
+      // Create compliance log for manual winner selection
+      await storage.createComplianceLog(
+        player.userId,
+        gameId,
+        'manual_winner_selection',
+        {
+          winnerName: player.playerName,
+          winnerEmail: user.email,
+          winningNumber,
+          selectionMethod: 'manual_admin_selection',
+          selectionReason: reason || 'Manual admin selection',
+          timestamp: new Date().toISOString(),
+          gameTitle: game.name,
+          prizeValue: game.prizeValue,
+          totalParticipants: new Set(spinResults.map(spin => spin.playerId)).size,
+          selectedBy: 'Admin Dashboard'
+        }
+      );
+
+      res.json({
+        success: true,
+        message: "Winner selected successfully",
+        winner: {
+          playerId,
+          playerName: player.playerName,
+          email: user.email,
+          winningNumber,
+          gameName: game.name,
+          prizeDescription: game.prizeDescription
+        }
+      });
+
+      console.log(`Manual winner selected for game ${gameId}: ${player.playerName} with number ${winningNumber}`);
+    } catch (error) {
+      console.error("Failed to select winner:", error);
+      res.status(500).json({ message: "Failed to select winner" });
+    }
+  });
+
   // User session management and authentication
   const pgSession = connectPgSimple(session);
   
@@ -1553,30 +1734,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Get wheel numbers BEFORE spinning to determine cost
       const availableNumbers = await storage.getAvailableNumbers(gameId);
       if (availableNumbers.length === 0) {
-        // Game is complete - trigger winner selection
-        const winner = await storage.selectGameWinner(gameId);
-        if (winner) {
-          // Send winner notifications to admin
-          try {
-            await storage.createNotification({
-              type: 'game_complete',
-              title: `Game Complete - Winner Selected!`,
-              message: `${game.name} has ended. Winner: ${winner.playerName} with number ${winner.selectedNumber}`,
-              gameId: gameId,
-              userId: winner.userId,
-              isRead: false,
-              createdAt: new Date(),
-              metadata: {
-                winnerName: winner.playerName,
-                winningNumber: winner.selectedNumber,
-                gameName: game.name
-              }
-            });
-          } catch (notificationError) {
-            console.error("Failed to create winner notification:", notificationError);
-          }
+        // Game is complete - notify admin for manual winner selection
+        try {
+          await storage.createNotification({
+            type: 'game_complete',
+            title: `Game Complete - Manual Winner Selection Required`,
+            message: `${game.name} has ended. All numbers have been taken. Please select a winner from the admin dashboard.`,
+            gameId: gameId,
+            userId: null, // Admin notification
+            isRead: false,
+            createdAt: new Date(),
+            metadata: {
+              gameName: game.name,
+              requiresManualSelection: true
+            }
+          });
+          
+          // Mark game as inactive but don't select winner yet
+          await storage.updateGame(gameId, { isActive: false });
+        } catch (notificationError) {
+          console.error("Failed to create game completion notification:", notificationError);
         }
-        return res.status(400).json({ message: "Game complete! All numbers have been taken. Winner has been selected." });
+        return res.status(400).json({ message: "Game complete! All numbers have been taken. Admin will select the winner soon." });
       }
 
       // Spin the wheel - this will charge AFTER determining the result
