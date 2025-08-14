@@ -6,7 +6,8 @@ import { requireAuth } from "./auth";
 import { 
   insertGameSchema, insertPlayerSchema, insertGameResultSchema, 
   insertWheelSegmentSchema, insertSystemSettingSchema, insertNotificationSchema,
-  insertUserSchema, insertTransactionSchema, complianceLogs, users, insertPaymentCardSchema
+  insertUserSchema, insertTransactionSchema, complianceLogs, users, insertPaymentCardSchema,
+  gameResults, games
 } from "@shared/schema";
 import { z } from "zod";
 import { squareService } from "./squareService";
@@ -14,7 +15,7 @@ import { emailService } from "./emailService";
 import session from "express-session";
 import connectPgSimple from "connect-pg-simple";
 import { db } from "./db";
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, sql } from "drizzle-orm";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Setup authentication
@@ -1129,7 +1130,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Manual winner selection endpoint
+  // Get all winners - New Winners List API
+  app.get("/api/admin/winners", requireAuth, async (req, res) => {
+    try {
+      const winners = await db
+        .select({
+          id: gameResults.id,
+          gameName: games.name,
+          gameCode: games.code,
+          winningNumber: gameResults.winningNumber,
+          winnerId: gameResults.winnerId,
+          winnerName: sql<string>`${users.firstName} || ' ' || ${users.lastName}`,
+          winnerEmail: users.email,
+          prizeValue: games.prizeValue,
+          prizeDescription: games.prize,
+          totalParticipants: gameResults.totalParticipants,
+          totalSpins: gameResults.totalSpins,
+          completedAt: gameResults.completedAt,
+        })
+        .from(gameResults)
+        .leftJoin(games, eq(gameResults.gameId, games.id))
+        .leftJoin(users, eq(gameResults.winnerId, users.id))
+        .orderBy(desc(gameResults.completedAt));
+
+      res.json(winners);
+    } catch (error) {
+      console.error("Error fetching winners:", error);
+      res.status(500).json({ message: "Failed to fetch winners" });
+    }
+  });
+
+  // Manual winner selection endpoint (DEPRECATED - now automatic)
   app.post("/api/admin/games/:id/select-winner", requireAuth, async (req, res) => {
     try {
       const gameId = parseInt(req.params.id);
@@ -1822,6 +1853,94 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Continue even if email fails
       }
 
+      // Check if game is now complete (all numbers sold) and automatically select winner
+      const updatedAvailableNumbers = await storage.getAvailableNumbers(gameId);
+      if (updatedAvailableNumbers.length === 0) {
+        console.log(`Game ${gameId} is now complete! Automatically selecting winner...`);
+        
+        try {
+          // Get all spin results for this game to determine winner
+          const allSpinResults = await storage.getSpinResultsByGameId(gameId);
+          if (allSpinResults.length > 0) {
+            // Generate random winning number from all spun numbers
+            const randomIndex = Math.floor(Math.random() * allSpinResults.length);
+            const winningSpinResult = allSpinResults[randomIndex];
+            const winningNumber = winningSpinResult.spunNumber;
+            
+            console.log(`Randomly selected winning number: ${winningNumber} from ${allSpinResults.length} total spins`);
+            
+            // Create game result record
+            const gameResult = await storage.createGameResult({
+              gameId,
+              winningNumber,
+              winnerId: winningSpinResult.playerId,
+              totalParticipants: allSpinResults.length,
+              totalSpins: allSpinResults.length
+            });
+            
+            // Mark game as inactive
+            await storage.updateGame(gameId, { isActive: false });
+            
+            // Get winner details
+            const winner = await storage.getUser(winningSpinResult.playerId);
+            const winnerPlayer = await storage.getPlayer(winningSpinResult.playerId);
+            
+            if (winner && winnerPlayer) {
+              // Mark player as winner
+              await storage.updatePlayer(winnerPlayer.id, { isWinner: true });
+              
+              // Update winner's stats
+              await storage.updateUser(winner.id, {
+                totalWon: (parseFloat(winner.totalWon) + parseFloat(game.prizeValue)).toString(),
+                gamesWon: winner.gamesWon + 1
+              });
+              
+              console.log(`Winner selected: ${winner.firstName} ${winner.lastName} (${winner.email}) - Number ${winningNumber}`);
+              
+              // Send winner notification email and participant notification emails
+              try {
+                await emailService.sendWinnerNotification(
+                  winner.email,
+                  winner.firstName,
+                  game.name,
+                  winningNumber,
+                  game.prizeValue,
+                  game.prize
+                );
+                
+                // Send notification to all participants  
+                const allGamePlayers = await storage.getPlayersByGameId(gameId);
+                const allParticipants = [];
+                for (const gamePlayer of allGamePlayers) {
+                  const participant = await storage.getUser(gamePlayer.userId);
+                  if (participant) {
+                    allParticipants.push(participant);
+                  }
+                }
+                for (const participant of allParticipants) {
+                  if (participant.id !== winner.id) {
+                    await emailService.sendGameCompletionNotification(
+                      participant.email,
+                      participant.firstName,
+                      game.name,
+                      winningNumber,
+                      winner.firstName,
+                      game.prize
+                    );
+                  }
+                }
+                
+                console.log(`Winner and participant notifications sent for game ${gameId}`);
+              } catch (emailError) {
+                console.error("Failed to send winner/participant notifications:", emailError);
+              }
+            }
+          }
+        } catch (winnerSelectionError) {
+          console.error("Error during automatic winner selection:", winnerSelectionError);
+        }
+      }
+
       res.json({
         success: true,
         paymentSucceeded: true,
@@ -1829,7 +1948,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           number: spinResult.spunNumber,
           isFreePlay: false,
           amountCharged: chargeAmount.toString()
-        }
+        },
+        gameComplete: updatedAvailableNumbers.length === 0
       });
     } catch (error: any) {
       console.error("Spin error:", error);

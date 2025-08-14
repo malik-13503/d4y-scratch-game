@@ -733,7 +733,7 @@ export default function AdminDashboard() {
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           {/* Enhanced Mobile-Responsive Tab Navigation */}
           <div className="mb-8 sm:mb-12">
-            <TabsList className="grid w-full grid-cols-3 sm:grid-cols-6 bg-gradient-to-r from-black/30 via-slate-900/50 to-black/30 backdrop-blur-md border-2 border-purple-500/40 rounded-xl sm:rounded-2xl p-1 sm:p-2 gap-1 shadow-2xl shadow-purple-900/30">
+            <TabsList className="grid w-full grid-cols-3 sm:grid-cols-7 bg-gradient-to-r from-black/30 via-slate-900/50 to-black/30 backdrop-blur-md border-2 border-purple-500/40 rounded-xl sm:rounded-2xl p-1 sm:p-2 gap-1 shadow-2xl shadow-purple-900/30">
               <TabsTrigger
                 value="overview"
                 className="relative group data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-purple-500/50 text-gray-300 hover:text-white hover:bg-slate-700/50 transition-all duration-300 text-xs sm:text-sm p-3 sm:p-4 rounded-lg sm:rounded-xl border border-transparent data-[state=active]:border-purple-400/60"
@@ -821,6 +821,20 @@ export default function AdminDashboard() {
                   </div>
                   <span className="hidden sm:inline font-semibold">System</span>
                   <span className="sm:hidden text-xs font-medium">System</span>
+                </div>
+              </TabsTrigger>
+
+              <TabsTrigger
+                value="winners"
+                className="relative group data-[state=active]:bg-gradient-to-r data-[state=active]:from-yellow-600 data-[state=active]:to-amber-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-yellow-500/50 text-gray-300 hover:text-white hover:bg-slate-700/50 transition-all duration-300 text-xs sm:text-sm p-3 sm:p-4 rounded-lg sm:rounded-xl border border-transparent data-[state=active]:border-yellow-400/60"
+              >
+                <div className="flex flex-col sm:flex-row items-center justify-center sm:justify-start space-y-1 sm:space-y-0 sm:space-x-2">
+                  <div className="relative">
+                    <Trophy className="h-4 w-4 sm:h-5 sm:w-5 transition-transform duration-300 group-data-[state=active]:scale-110" />
+                    <div className="absolute -inset-1 bg-yellow-500/20 rounded-full scale-0 group-data-[state=active]:scale-100 transition-transform duration-300"></div>
+                  </div>
+                  <span className="hidden sm:inline font-semibold">Winners</span>
+                  <span className="sm:hidden text-xs font-medium">Winners</span>
                 </div>
               </TabsTrigger>
             </TabsList>
@@ -4667,6 +4681,24 @@ export default function AdminDashboard() {
               </Card>
             </div>
           </TabsContent>
+
+          {/* Winners Tab - New Winners List */}
+          <TabsContent value="winners" className="space-y-4 sm:space-y-6 mt-20 px-2 sm:px-4">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 space-y-4 sm:space-y-0">
+              <div>
+                <h2 className="text-xl sm:text-2xl font-bold text-white flex items-center">
+                  <Trophy className="h-6 w-6 sm:h-8 sm:w-8 text-yellow-400 mr-3" />
+                  Game Winners
+                </h2>
+                <p className="text-gray-400 text-sm sm:text-base">
+                  Complete list of all game winners and completed games
+                </p>
+              </div>
+            </div>
+
+            {/* Winners List */}
+            <WinnersList />
+          </TabsContent>
         </Tabs>
       </main>
 
@@ -4769,6 +4801,128 @@ export default function AdminDashboard() {
           setIsWinnerSelectionOpen(false);
         }}
       />
+    </div>
+  );
+}
+
+// Winners List Component
+function WinnersList() {
+  const { data: winners, isLoading, refetch } = useQuery({
+    queryKey: ["/api/admin/winners"],
+    staleTime: 0,
+  });
+
+  if (isLoading) {
+    return (
+      <div className="space-y-4">
+        {[1, 2, 3].map((i) => (
+          <div
+            key={i}
+            className="bg-gradient-to-r from-slate-800/50 via-slate-700/50 to-slate-800/50 border border-slate-600/30 rounded-xl p-6 animate-pulse"
+          >
+            <div className="flex items-center space-x-4">
+              <div className="w-12 h-12 bg-yellow-400/20 rounded-full"></div>
+              <div className="flex-1">
+                <div className="h-4 bg-slate-600 rounded mb-2"></div>
+                <div className="h-3 bg-slate-700 rounded w-2/3"></div>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  if (!winners || winners.length === 0) {
+    return (
+      <Card className="bg-gradient-to-br from-slate-800/95 via-slate-700/95 to-slate-800/95 border-slate-600/50 backdrop-blur-sm">
+        <CardContent className="p-8 text-center">
+          <Trophy className="h-16 w-16 text-yellow-400/50 mx-auto mb-4" />
+          <h3 className="text-xl font-bold text-white mb-2">No Winners Yet</h3>
+          <p className="text-gray-400">
+            Winners will appear here when games are completed with automatic winner selection.
+          </p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <div className="space-y-4">
+      {winners.map((winner: any, index: number) => (
+        <Card
+          key={winner.id}
+          className="bg-gradient-to-r from-slate-800/95 via-slate-700/95 to-slate-800/95 border-slate-600/50 backdrop-blur-sm hover:border-yellow-500/50 transition-all duration-300"
+        >
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-4">
+                <div className="relative">
+                  <div className="w-12 h-12 bg-gradient-to-r from-yellow-500 to-amber-500 rounded-full flex items-center justify-center">
+                    <Trophy className="h-6 w-6 text-white" />
+                  </div>
+                  <div className="absolute -top-1 -right-1 bg-gradient-to-r from-yellow-400 to-orange-400 text-black text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center">
+                    #{index + 1}
+                  </div>
+                </div>
+
+                <div className="space-y-1">
+                  <div className="flex items-center space-x-3">
+                    <h3 className="text-lg font-bold text-white">
+                      {winner.winnerName}
+                    </h3>
+                    <Badge className="bg-green-500/20 text-green-400 border-green-500/30">
+                      Winner
+                    </Badge>
+                  </div>
+                  <p className="text-gray-400 text-sm">
+                    {winner.winnerEmail}
+                  </p>
+                </div>
+              </div>
+
+              <div className="text-right space-y-1">
+                <div className="text-lg font-bold text-yellow-400">
+                  Lucky #{winner.winningNumber}
+                </div>
+                <div className="text-sm text-gray-400">
+                  {new Date(winner.completedAt).toLocaleDateString()}
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-4 pt-4 border-t border-slate-600/30">
+              <div className="text-center">
+                <div className="text-lg font-bold text-cyan-400">
+                  {winner.gameName}
+                </div>
+                <div className="text-xs text-gray-400">Game</div>
+              </div>
+              
+              <div className="text-center">
+                <div className="text-lg font-bold text-green-400">
+                  ${winner.prizeValue}
+                </div>
+                <div className="text-xs text-gray-400">Prize Value</div>
+              </div>
+
+              <div className="text-center">
+                <div className="text-lg font-bold text-blue-400">
+                  {winner.totalParticipants}
+                </div>
+                <div className="text-xs text-gray-400">Participants</div>
+              </div>
+
+              <div className="text-center">
+                <div className="text-lg font-bold text-purple-400">
+                  {winner.totalSpins}
+                </div>
+                <div className="text-xs text-gray-400">Total Spins</div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      ))}
     </div>
   );
 }
