@@ -1201,33 +1201,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Create winner notification
       await storage.createNotification({
         type: 'winner_selected',
-        title: `🎉 Winner Selected for ${game.name}!`,
         message: `${player.playerName} (${user.email}) has been selected as the winner with number ${winningNumber}. Prize: ${game.prizeDescription}`,
         gameId: gameId,
-        userId: player.userId,
-        isRead: false,
-        createdAt: new Date(),
-        metadata: {
-          winnerName: player.playerName,
-          winnerEmail: user.email,
-          winningNumber: winningNumber,
-          gameName: game.name,
-          prizeDescription: game.prizeDescription,
-          prizeValue: game.prizeValue,
-          selectionReason: reason || 'Manual admin selection',
-          selectedBy: 'Admin',
-          selectionDate: new Date().toISOString()
-        }
+        playerId: playerId,
+        status: 'pending'
       });
 
       // Send winner notification email
       try {
-        await emailService.sendWinnerNotification(
+        await emailService.sendPaymentReceipt(
           user.email,
           user.firstName,
-          game.name,
-          game.prizeDescription,
-          winningNumber.toString()
+          "0", // No charge for winning
+          winningNumber,
+          "winner_notification"
         );
         console.log(`Winner notification email sent to: ${user.email}`);
       } catch (emailError) {
@@ -1731,64 +1718,78 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      // CRITICAL FIX: Process payment FIRST, THEN assign number only if payment succeeds
+      // NEW FLOW: Spin first, then validate payment, only assign if payment succeeds
       
-      // Get available numbers to determine cost (do this once)
+      // Get available numbers for spinning
       const availableNumbers = await storage.getAvailableNumbers(gameId);
       if (availableNumbers.length === 0) {
         return res.status(400).json({ message: "Game complete! All numbers have been taken." });
       }
       
-      // Select a random number from available ones
+      // STEP 1: Spin the wheel and show user the landed number
       const randomIndex = Math.floor(Math.random() * availableNumbers.length);
-      const selectedNumber = availableNumbers[randomIndex];
-      const chargeAmount = selectedNumber; // Cost equals the number value
+      const spunNumber = availableNumbers[randomIndex];
+      const chargeAmount = spunNumber; // Cost equals the number value
       
-      // Process payment FIRST - before assigning any numbers
+      console.log(`User ${userId} spun number ${spunNumber}, attempting to charge $${chargeAmount}`);
+      
+      // STEP 2: Attempt payment processing for the spun amount
       let paymentResult = null;
+      let paymentSucceeded = false;
       
-      // For sandbox environment, simulate payment processing  
-      if (!isProduction) {
-        console.log(`Simulated charge of $${chargeAmount} for user ${userId}`);
-        paymentResult = {
-          id: `sandbox_payment_${Date.now()}`,
-          status: "COMPLETED",
-          receiptUrl: null
-        };
-      } else {
-        // Production payment processing using Square API
-        if (!user.cardOnFile) {
-          return res.status(400).json({ message: "No payment method available" });
-        }
-        
-        // Get user's default payment card
-        const userCards = await storage.getPaymentCardsByUserId(userId);
-        const defaultCard = userCards.find(card => card.isDefault) || userCards[0];
-        
-        if (!defaultCard) {
-          return res.status(400).json({ message: "No payment card available" });
-        }
+      try {
+        if (!isProduction) {
+          // Sandbox mode - simulate payment
+          console.log(`Simulated charge of $${chargeAmount} for user ${userId}`);
+          paymentResult = {
+            id: `sandbox_payment_${Date.now()}`,
+            status: "COMPLETED", 
+            receiptUrl: null
+          };
+          paymentSucceeded = true;
+        } else {
+          // Production payment processing
+          if (!user.cardOnFile) {
+            return res.status(400).json({ 
+              message: "No payment method available",
+              paymentFailed: true,
+              spunNumber
+            });
+          }
+          
+          const userCards = await storage.getPaymentCardsByUserId(userId);
+          const defaultCard = userCards.find(card => card.isDefault) || userCards[0];
+          
+          if (!defaultCard) {
+            return res.status(400).json({ 
+              message: "No payment card available",
+              paymentFailed: true,
+              spunNumber
+            });
+          }
 
-        try {
-          // Process payment using Square API with the user's card nonce
+          // Attempt payment processing
           paymentResult = await squareService.processPayment(
             chargeAmount,
             "USD",
-            defaultCard.cardNonce || "cnon_test", // Use actual card nonce
+            defaultCard.cardNonce || "cnon_test",
             `Spin charge for game ${gameId} - $${chargeAmount}`
           );
-        } catch (paymentError: any) {
-          console.error("Payment failed:", paymentError);
-          // Return payment error immediately - DO NOT assign number
-          return res.status(400).json({ 
-            message: "Payment failed. Please check your payment method and try again.",
-            error: paymentError.message || "Payment processing failed"
-          });
+          paymentSucceeded = true;
         }
+      } catch (paymentError: any) {
+        console.error("Payment failed for spun number:", paymentError);
+        // Return with payment failure - number was spun but NOT claimed
+        return res.status(400).json({ 
+          message: "Payment failed. Please check your payment method and try again.",
+          paymentFailed: true,
+          spunNumber,
+          error: paymentError.message || "Payment processing failed"
+        });
       }
       
-      // ONLY NOW that payment succeeded, create the spin result and assign the number
-      const spinResult = await storage.createSpinResultWithNumber(gameId, player.id, selectedNumber, chargeAmount.toString());
+      // STEP 3: ONLY if payment succeeded, actually claim the number
+      const spinResult = await storage.createSpinResultWithNumber(gameId, player.id, spunNumber, chargeAmount.toString());
 
       
       // Get card details for transaction record  
@@ -1846,9 +1847,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       res.json({
         success: true,
+        paymentSucceeded: true,
         spinResult: {
           number: spinResult.spunNumber,
-          isFreePlay: false, // All spins are paid
+          isFreePlay: false,
           amountCharged: chargeAmount.toString()
         }
       });

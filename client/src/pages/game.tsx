@@ -308,7 +308,17 @@ export default function GamePage() {
           throw new Error("Authentication required");
         }
 
-        // For payment failures, we want to throw specific errors
+        // Handle payment failures - user saw the number but payment failed
+        if (response.status === 400 && error.paymentFailed) {
+          console.log(`Payment failed for spun number ${error.spunNumber}`);
+          setLastResult(error.spunNumber);
+          
+          // Show payment failure popup instead of success
+          alert(`You spun ${error.spunNumber} but payment failed: ${error.message}\n\nThe number remains available for others to claim. Please check your payment method and try again.`);
+          throw new Error(`Payment failed for number ${error.spunNumber}: ${error.message}`);
+        }
+
+        // For other payment/card errors
         if (response.status === 400 && error.message?.includes("card")) {
           throw new Error("Payment method error: " + error.message);
         }
@@ -321,6 +331,12 @@ export default function GamePage() {
       if (!data.success || !data.spinResult) {
         console.error("🚨 Invalid API response:", data);
         throw new Error("Invalid response from server");
+      }
+
+      // Check if payment succeeded
+      if (!data.paymentSucceeded) {
+        console.error("Payment failed after spin");
+        throw new Error("Payment processing failed");
       }
 
       const result = data.spinResult.number;
