@@ -739,10 +739,11 @@ export default function AdminDashboard() {
         <Tabs
           value={activeTab}
           onValueChange={setActiveTab}
-          className="space-y-4 sm:space-y-8"
+          className="flex flex-col space-y-4 sm:space-y-8"
         >
-          {/* Enhanced Mobile-Responsive Tab Navigation */}
-          <TabsList className="grid w-full grid-cols-3 sm:grid-cols-6 bg-gradient-to-r from-black/30 via-slate-900/50 to-black/30 backdrop-blur-md border-2 border-purple-500/40 rounded-xl sm:rounded-2xl p-1 sm:p-2 gap-1 shadow-2xl shadow-purple-900/30">
+          {/* Enhanced Mobile-Responsive Tab Navigation - Fixed Position */}
+          <div className="sticky top-0 z-50 bg-slate-900/95 backdrop-blur-md pb-2 sm:pb-4 -mx-4 px-4 sm:-mx-6 sm:px-6">
+            <TabsList className="grid w-full grid-cols-3 sm:grid-cols-6 bg-gradient-to-r from-black/30 via-slate-900/50 to-black/30 backdrop-blur-md border-2 border-purple-500/40 rounded-xl sm:rounded-2xl p-1 sm:p-2 gap-1 shadow-2xl shadow-purple-900/30 mt-2 sm:mt-4">
             <TabsTrigger
               value="overview"
               className="relative group data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-purple-500/50 text-gray-300 hover:text-white hover:bg-slate-700/50 transition-all duration-300 text-xs sm:text-sm p-3 sm:p-4 rounded-lg sm:rounded-xl border border-transparent data-[state=active]:border-purple-400/60"
@@ -826,7 +827,11 @@ export default function AdminDashboard() {
                 <span className="sm:hidden text-xs font-medium">System</span>
               </div>
             </TabsTrigger>
-          </TabsList>
+            </TabsList>
+          </div>
+
+          {/* Tab Content Container - Proper Z-index and Spacing */}
+          <div className="relative z-10 min-h-screen">
 
           {/* Overview Tab - Mobile Optimized */}
           <TabsContent value="overview" className="space-y-4 sm:space-y-8">
@@ -4327,6 +4332,7 @@ export default function AdminDashboard() {
               </Card>
             </div>
           </TabsContent>
+          </div>
         </Tabs>
       </main>
 

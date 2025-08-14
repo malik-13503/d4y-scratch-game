@@ -632,8 +632,39 @@
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
 }
 
-/* Responsive grid improvements */
+/* Mobile stability and layout improvements */
 @media (max-width: 768px) {
+  html, body {
+    overflow-x: hidden;
+    overscroll-behavior: none;
+    -webkit-overflow-scrolling: touch;
+    position: relative;
+  }
+  
+  /* Prevent zoom on mobile inputs */
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="number"],
+  textarea,
+  select {
+    font-size: 16px !important;
+  }
+  
+  /* Prevent unwanted bouncing/movement */
+  .mobile-stable {
+    -webkit-transform: translate3d(0,0,0);
+    transform: translate3d(0,0,0);
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+  }
+  
+  /* Improved touch targets */
+  button, .touch-target {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
   .game-grid {
     grid-template-columns: 1fr;
     gap: 1rem;
