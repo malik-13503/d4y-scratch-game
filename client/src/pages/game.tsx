@@ -545,14 +545,7 @@ export default function GamePage() {
                     onInitiateSpin={handleInitiateSpin}
                   />
                   
-                  {/* DEBUG: Free Play Check */}
-                  {game && console.log('🔍 Free Play Debug:', {
-                    hasUsedFreePlay,
-                    freePlayStart: game.freePlayStart,
-                    freePlayEnd: game.freePlayEnd,
-                    comparison: game.freePlayStart <= game.freePlayEnd,
-                    willShow: !hasUsedFreePlay && game.freePlayStart && game.freePlayEnd && game.freePlayStart <= game.freePlayEnd
-                  })}
+
                   
                   {/* Free Play Button - Hidden when freePlayStart > freePlayEnd (disabled free play) */}
                   {!hasUsedFreePlay && game && 
