@@ -1748,7 +1748,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Process payment and spin wheel
+  // Get spin result (without payment processing)
   app.post("/api/spin", async (req, res) => {
     try {
       const userId = (req.session as any)?.userId;
@@ -1767,29 +1767,85 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "User not found" });
       }
 
+      const game = await storage.getGame(gameId);
+      if (!game || !game.isActive) {
+        return res.status(400).json({ message: "Game not found or inactive" });
+      }
+
+      // Get available numbers for spinning
+      const availableNumbers = await storage.getAvailableNumbers(gameId);
+      if (availableNumbers.length === 0) {
+        return res.status(400).json({ message: "Game complete! All numbers have been taken." });
+      }
+      
+      // Randomly select a number from available numbers
+      const randomIndex = Math.floor(Math.random() * availableNumbers.length);
+      const spunNumber = availableNumbers[randomIndex];
+      
+      console.log(`User ${userId} spun number ${spunNumber} - payment will be processed after wheel stops`);
+      
+      // Return just the number - payment processing happens later
+      res.json({ number: spunNumber });
+    } catch (error: any) {
+      console.error("Spin error:", error);
+      res.status(400).json({ message: "Spin failed", error: error.message });
+    }
+  });
+
+  // Process payment after wheel stops
+  app.post("/api/process-payment", async (req, res) => {
+    try {
+      const userId = (req.session as any)?.userId;
+      if (!userId) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+
+      const { gameId, number } = req.body;
+      
+      if (!gameId || !number) {
+        return res.status(400).json({ message: "Game ID and number are required" });
+      }
+
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(400).json({ message: "User not found" });
+      }
+
       // Force production mode for real payment processing
       const isProduction = true;
-      console.log(`Spin endpoint - Forced production mode for real payments: ${isProduction}`);
+      console.log(`Payment processing - Forced production mode for real payments: ${isProduction}`);
       
-      // CRITICAL: Always require payment card - no bypassing even in sandbox
+      // Require payment card
       if (!user.cardOnFile) {
-        return res.status(400).json({ message: "Payment method required. Please add a payment card before spinning." });
+        return res.status(400).json({ 
+          success: false,
+          message: "Payment method required. Please add a payment card before spinning." 
+        });
       }
 
       // Validate user has sufficient payment method available
       const userCards = await storage.getPaymentCardsByUserId(userId);
       if (!userCards || userCards.length === 0) {
-        return res.status(400).json({ message: "No payment cards found. Please add a payment card." });
+        return res.status(400).json({ 
+          success: false,
+          message: "No payment cards found. Please add a payment card." 
+        });
       }
 
       const defaultCard = userCards.find(card => card.isDefault) || userCards[0];
       if (!defaultCard) {
-        return res.status(400).json({ message: "No valid payment card available." });
+        return res.status(400).json({ 
+          success: false,
+          message: "No valid payment card available." 
+        });
       }
 
       const game = await storage.getGame(gameId);
       if (!game || !game.isActive) {
-        return res.status(400).json({ message: "Game not found or inactive" });
+        return res.status(400).json({ 
+          success: false,
+          message: "Game not found or inactive" 
+        });
       }
 
       // Create or get player
@@ -1809,22 +1865,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      // NEW FLOW: Spin first, then validate payment, only assign if payment succeeds
-      
-      // Get available numbers for spinning
+      // Check if number is still available (prevent double-claiming)
       const availableNumbers = await storage.getAvailableNumbers(gameId);
-      if (availableNumbers.length === 0) {
-        return res.status(400).json({ message: "Game complete! All numbers have been taken." });
+      if (!availableNumbers.includes(number)) {
+        return res.status(400).json({
+          success: false,
+          message: "Number is no longer available"
+        });
       }
+
+      const chargeAmount = number; // Cost equals the number value
+      console.log(`Processing payment for user ${userId}, number ${number}, charge $${chargeAmount}`);
       
-      // STEP 1: Spin the wheel and show user the landed number
-      const randomIndex = Math.floor(Math.random() * availableNumbers.length);
-      const spunNumber = availableNumbers[randomIndex];
-      const chargeAmount = spunNumber; // Cost equals the number value
-      
-      console.log(`User ${userId} spun number ${spunNumber}, attempting to charge $${chargeAmount}`);
-      
-      // STEP 2: Attempt payment processing for the spun amount
+      // Attempt payment processing
       let paymentResult = null;
       let paymentSucceeded = false;
       
@@ -1840,31 +1893,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
           paymentSucceeded = true;
         } else {
           // Production payment processing
-          if (!user.cardOnFile) {
-            return res.status(400).json({ 
-              number: spunNumber,
-              paymentFailed: true,
-              paymentMessage: "No payment method available"
-            });
-          }
-          
-          const userCards = await storage.getPaymentCardsByUserId(userId);
-          const defaultCard = userCards.find(card => card.isDefault) || userCards[0];
-          
-          if (!defaultCard) {
-            return res.status(400).json({ 
-              number: spunNumber,
-              paymentFailed: true,
-              paymentMessage: "No payment card available"
-            });
-          }
-
           // Check if card nonce is expired and needs refresh
           if (!defaultCard.cardNonce || defaultCard.cardNonce === "cnon_test") {
             return res.status(400).json({ 
-              number: spunNumber,
-              paymentFailed: true,
-              paymentMessage: "Payment card expired. Please update your payment method and try again."
+              success: false,
+              message: "Payment card expired. Please update your payment method and try again."
             });
           }
 
@@ -1873,43 +1906,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
             chargeAmount,
             "USD",
             defaultCard.cardNonce,
-            `Spin charge for game ${gameId} - $${chargeAmount}`
+            `Payment for number ${number} in game ${gameId}`
           );
           paymentSucceeded = true;
         }
       } catch (paymentError: any) {
-        console.error("Payment failed for spun number:", paymentError);
-        // Return with payment failure - number was spun but NOT claimed
+        console.error("Payment failed for number:", paymentError);
         return res.status(400).json({ 
-          number: spunNumber,
-          paymentFailed: true,
-          paymentMessage: "Payment failed. Please check your payment method and try again.",
+          success: false,
+          message: "Payment failed. Please check your payment method and try again.",
           error: paymentError.message || "Payment processing failed"
         });
       }
       
-      // STEP 3: ONLY if payment succeeded, actually claim the number
-      const spinResult = await storage.createSpinResultWithNumber(gameId, player.id, spunNumber, chargeAmount.toString());
+      // Payment succeeded - claim the number
+      const spinResult = await storage.createSpinResultWithNumber(gameId, player.id, number, chargeAmount.toString());
 
-      
       // Get card details for transaction record  
       let cardLast4 = "****";
       let cardBrand = "Unknown";
       
       if (isProduction) {
-        // Get from payment result or user's default card
-        const userCards = await storage.getPaymentCardsByUserId(userId);
-        const defaultCard = userCards.find(card => card.isDefault) || userCards[0];
-        
         cardLast4 = paymentResult.cardDetails?.last4 || defaultCard?.cardLast4 || "****";
         cardBrand = paymentResult.cardDetails?.cardBrand || defaultCard?.cardBrand || "Unknown";
       } else {
-        // Sandbox mode - use generic labels instead of fake card data
         cardLast4 = "Test";
         cardBrand = "Sandbox";
       }
 
-      // Record transaction with spin result
+      // Record transaction
       const transaction = await storage.createTransaction({
         userId: userId,
         gameId: gameId,
@@ -1930,114 +1955,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
         gamesPlayed: user.gamesPlayed + 1
       });
 
-      // Send payment receipt email
-      try {
-        await emailService.sendPaymentReceipt(
-          user.email, 
-          user.firstName, 
-          chargeAmount.toString(),
-          spinResult.spunNumber,
-          paymentResult.id
-        );
-        console.log("Payment receipt email sent to:", user.email);
-      } catch (emailError) {
-        console.error("Failed to send payment receipt email:", emailError);
-        // Continue even if email fails
-      }
+      // Send success response
+      res.json({
+        success: true,
+        number: number,
+        amount: chargeAmount,
+        transactionId: paymentResult.id
+      });
 
-      // Check if game is now complete (all numbers sold) and automatically select winner
-      const updatedAvailableNumbers = await storage.getAvailableNumbers(gameId);
-      if (updatedAvailableNumbers.length === 0) {
-        console.log(`Game ${gameId} is now complete! Automatically selecting winner...`);
-        
-        try {
-          // Get all spin results for this game to determine winner
-          const allSpinResults = await storage.getSpinResultsByGameId(gameId);
-          if (allSpinResults.length > 0) {
-            // Generate random winning number from all spun numbers
-            const randomIndex = Math.floor(Math.random() * allSpinResults.length);
-            const winningSpinResult = allSpinResults[randomIndex];
-            const winningNumber = winningSpinResult.spunNumber;
-            
-            console.log(`Randomly selected winning number: ${winningNumber} from ${allSpinResults.length} total spins`);
-            
-            // Create game result record
-            const gameResult = await storage.createGameResult({
-              gameId,
-              winningNumber,
-              winnerId: winningSpinResult.playerId,
-              totalParticipants: allSpinResults.length,
-              totalSpins: allSpinResults.length
-            });
-            
-            // Mark game as inactive
-            await storage.updateGame(gameId, { isActive: false });
-            
-            // Get winner details
-            const winner = await storage.getUser(winningSpinResult.playerId);
-            const winnerPlayer = await storage.getPlayer(winningSpinResult.playerId);
-            
-            if (winner && winnerPlayer) {
-              // Mark player as winner
-              await storage.updatePlayer(winnerPlayer.id, { isWinner: true });
-              
-              // Update winner's stats
-              await storage.updateUser(winner.id, {
-                totalWon: (parseFloat(winner.totalWon) + parseFloat(game.prizeValue)).toString(),
-                gamesWon: winner.gamesWon + 1
-              });
-              
-              console.log(`Winner selected: ${winner.firstName} ${winner.lastName} (${winner.email}) - Number ${winningNumber}`);
-              
-              // Send winner notification email and participant notification emails
-              try {
-                await emailService.sendWinnerNotification(
-                  winner.email,
-                  winner.firstName,
-                  game.name,
-                  winningNumber,
-                  game.prizeValue,
-                  game.prize
-                );
-                
-                // Send notification to all participants  
-                const allGamePlayers = await storage.getPlayersByGameId(gameId);
-                const allParticipants = [];
-                for (const gamePlayer of allGamePlayers) {
-                  const participant = await storage.getUser(gamePlayer.userId);
-                  if (participant) {
-                    allParticipants.push(participant);
-                  }
-                }
-                for (const participant of allParticipants) {
-                  if (participant.id !== winner.id) {
-                    await emailService.sendGameCompletionNotification(
-                      participant.email,
-                      participant.firstName,
-                      game.name,
-                      winningNumber,
-                      winner.firstName,
-                      game.prize
-                    );
-                  }
-                }
-                
-                console.log(`Winner and participant notifications sent for game ${gameId}`);
-              } catch (emailError) {
-                console.error("Failed to send winner/participant notifications:", emailError);
-              }
-            }
-          }
-        } catch (winnerSelectionError) {
-          console.error("Error during automatic winner selection:", winnerSelectionError);
-        }
-      }
-
-      // Return simple number for successful spins (client expects this format)
-      res.json(spunNumber);
     } catch (error: any) {
-      console.error("Spin error:", error);
-      res.status(400).json({ message: "Spin failed", error: error.message });
+      console.error("Payment processing error:", error);
+      res.status(500).json({ 
+        success: false,
+        message: "Internal server error during payment processing"
+      });
     }
   });
 

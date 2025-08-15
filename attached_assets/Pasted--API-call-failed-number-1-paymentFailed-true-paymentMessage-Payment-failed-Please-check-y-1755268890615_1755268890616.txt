@@ -1,0 +1,57 @@
+🚨 API call failed: {number: 1, paymentFailed: true, paymentMessage: 'Payment failed. Please check your payment method and try again.', error: 'Payment processing failed. Please try again or contact support.'}
+handleSpin @ game.tsx:304
+await in handleSpin
+(anonymous) @ professional-wheel.tsx:197
+setTimeout
+handleSpin @ professional-wheel.tsx:190
+triggerSpin @ professional-wheel.tsx:44
+handleConfirmSpin @ game.tsx:237
+handleConfirm @ disclaimer-popup.tsx:32
+callCallback2 @ chunk-WERSD76P.js?v=87dfb8f5:3674
+invokeGuardedCallbackDev @ chunk-WERSD76P.js?v=87dfb8f5:3699
+invokeGuardedCallback @ chunk-WERSD76P.js?v=87dfb8f5:3733
+invokeGuardedCallbackAndCatchFirstError @ chunk-WERSD76P.js?v=87dfb8f5:3736
+executeDispatch @ chunk-WERSD76P.js?v=87dfb8f5:7014
+processDispatchQueueItemsInOrder @ chunk-WERSD76P.js?v=87dfb8f5:7034
+processDispatchQueue @ chunk-WERSD76P.js?v=87dfb8f5:7043
+dispatchEventsForPlugins @ chunk-WERSD76P.js?v=87dfb8f5:7051
+(anonymous) @ chunk-WERSD76P.js?v=87dfb8f5:7174
+batchedUpdates$1 @ chunk-WERSD76P.js?v=87dfb8f5:18913
+batchedUpdates @ chunk-WERSD76P.js?v=87dfb8f5:3579
+dispatchEventForPluginEventSystem @ chunk-WERSD76P.js?v=87dfb8f5:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-WERSD76P.js?v=87dfb8f5:5478
+dispatchEvent @ chunk-WERSD76P.js?v=87dfb8f5:5472
+dispatchDiscreteEvent @ chunk-WERSD76P.js?v=87dfb8f5:5449Understand this error
+game.tsx:313 ❌ Payment failed for spun number 1: Payment failed. Please check your payment method and try again.
+game.tsx:319 🔄 Returning payment failure object: {number: 1, paymentFailed: true, paymentMessage: 'Payment failed. Please check your payment method and try again.'}
+professional-wheel.tsx:202 🚨 Payment failed - treating as API failure: {number: 1, paymentFailed: true, paymentMessage: 'Payment failed. Please check your payment method and try again.'}
+professional-wheel.tsx:268 🎯 8-second wheel animation started - will land on: {spinResult: {…}, targetSegmentIndex: 0, frozenNumbers: Array(8), finalRotation: 2497.5, apiCallSuccessful: false}
+professional-wheel.tsx:278 🎯 8-second spin completed, showing result...
+professional-wheel.tsx:299 🚨 Setting payment failed state after wheel stopped
+professional-wheel.tsx:306 ⚠️ Spin completed with API failure - showing error in modal
+(anonymous) @ professional-wheel.tsx:306
+setTimeout
+(anonymous) @ professional-wheel.tsx:303
+setTimeout
+(anonymous) @ professional-wheel.tsx:277
+setTimeout
+handleSpin @ professional-wheel.tsx:190
+triggerSpin @ professional-wheel.tsx:44
+handleConfirmSpin @ game.tsx:237
+handleConfirm @ disclaimer-popup.tsx:32
+callCallback2 @ chunk-WERSD76P.js?v=87dfb8f5:3674
+invokeGuardedCallbackDev @ chunk-WERSD76P.js?v=87dfb8f5:3699
+invokeGuardedCallback @ chunk-WERSD76P.js?v=87dfb8f5:3733
+invokeGuardedCallbackAndCatchFirstError @ chunk-WERSD76P.js?v=87dfb8f5:3736
+executeDispatch @ chunk-WERSD76P.js?v=87dfb8f5:7014
+processDispatchQueueItemsInOrder @ chunk-WERSD76P.js?v=87dfb8f5:7034
+processDispatchQueue @ chunk-WERSD76P.js?v=87dfb8f5:7043
+dispatchEventsForPlugins @ chunk-WERSD76P.js?v=87dfb8f5:7051
+(anonymous) @ chunk-WERSD76P.js?v=87dfb8f5:7174
+batchedUpdates$1 @ chunk-WERSD76P.js?v=87dfb8f5:18913
+batchedUpdates @ chunk-WERSD76P.js?v=87dfb8f5:3579
+dispatchEventForPluginEventSystem @ chunk-WERSD76P.js?v=87dfb8f5:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-WERSD76P.js?v=87dfb8f5:5478
+dispatchEvent @ chunk-WERSD76P.js?v=87dfb8f5:5472
+dispatchDiscreteEvent @ chunk-WERSD76P.js?v=87dfb8f5:5449Understand this error
+professional-wheel.tsx:326 🎯 Spin sequence fully completed

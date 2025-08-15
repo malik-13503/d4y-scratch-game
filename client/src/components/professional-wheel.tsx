@@ -186,49 +186,36 @@ export const ProfessionalWheel = forwardRef<
       wheelRef.current.offsetHeight; // Force reflow
     }
 
-    // Step 4: Wait longer for rotation reset to fully take effect, then make API call and calculate spin
+    // Step 4: Get the number to spin to (without payment processing)
     setTimeout(async () => {
       let spinResult = null;
-      let apiCallSuccessful = false;
+      let resultNumber: number;
 
       try {
-        // Get API result (this processes payment and gets actual number)
-        console.log("🎯 Making API call for spin result...");
+        // Get just the number from the API (no payment yet)
+        console.log("🎯 Getting spin number...");
         spinResult = await onSpin();
         
-        // Check if the result indicates payment failure
-        if (typeof spinResult === 'object' && spinResult !== null && spinResult.paymentFailed) {
-          apiCallSuccessful = false;
-          console.log("🚨 Payment failed - treating as API failure:", spinResult);
+        // Extract the number from the result
+        if (typeof spinResult === 'object' && spinResult.number) {
+          resultNumber = spinResult.number;
+        } else if (typeof spinResult === 'number') {
+          resultNumber = spinResult;
         } else {
-          apiCallSuccessful = true;
-          console.log("🎯 API call successful, result:", spinResult);
+          resultNumber = Number(spinResult);
         }
+        
+        console.log("🎯 Got spin number:", resultNumber);
       } catch (apiError) {
-        console.error("🚨 API call failed:", apiError);
-        apiCallSuccessful = false;
-        // DON'T set payment failed here - wait until wheel stops completely
-
-        // Even if API fails, we need to complete the wheel animation
-        // Use a random fallback from available numbers to ensure wheel doesn't hang
+        console.error("🚨 Failed to get spin number:", apiError);
+        // Use fallback random number
         if (availableNumbers.length > 0) {
           const randomIndex = Math.floor(Math.random() * availableNumbers.length);
-          spinResult = availableNumbers[randomIndex];
+          resultNumber = availableNumbers[randomIndex];
         } else {
-          // If no available numbers, use a random number from total range
-          spinResult = Math.floor(Math.random() * totalNumbers) + 1;
+          resultNumber = Math.floor(Math.random() * totalNumbers) + 1;
         }
-        console.log("🎯 Using fallback random result:", spinResult);
-      }
-
-      // Step 5: Extract number from result for wheel positioning
-      let resultNumber: number;
-      if (typeof spinResult === 'number') {
-        resultNumber = spinResult;
-      } else if (typeof spinResult === 'object' && spinResult !== null && 'number' in spinResult) {
-        resultNumber = spinResult.number;
-      } else {
-        resultNumber = Number(spinResult);
+        console.log("🎯 Using fallback number:", resultNumber);
       }
 
       // Calculate precise landing position using FROZEN wheel numbers
@@ -266,55 +253,69 @@ export const ProfessionalWheel = forwardRef<
         wheelRef.current.style.transform = `rotate(${finalRotation}deg)`;
       }
       console.log("🎯 8-second wheel animation started - will land on:", {
-        spinResult,
+        targetNumber: resultNumber,
         targetSegmentIndex,
         frozenNumbers: frozenWheelNumbers,
         finalRotation,
-        apiCallSuccessful,
       });
 
       // Step 8: Complete the spin sequence after EXACTLY 8 seconds from animation start
       setTimeout(async () => {
-        console.log("🎯 8-second spin completed, showing result...");
+        console.log("🎯 8-second spin completed, now processing payment...");
 
-        // Extract number from result (handle both number and object formats)
-        let resultNumber: number;
-        if (typeof spinResult === 'number') {
-          resultNumber = spinResult;
-        } else if (typeof spinResult === 'object' && spinResult !== null && 'number' in spinResult) {
-          resultNumber = spinResult.number;
-        } else {
-          resultNumber = Number(spinResult);
-        }
-        
-        // Set final result (always use just the number)
+        // Set the result number for display
         setResult(resultNumber);
-        const isFree = false; // Removed automatic free play logic
-        setIsFreePlay(isFree);
-        setAmountCharged(resultNumber); // All spins require payment
+        setAmountCharged(resultNumber);
 
-        // Set payment failure state ONLY after wheel stops completely
-        if (!apiCallSuccessful || (typeof spinResult === 'object' && spinResult !== null && spinResult.paymentFailed)) {
+        // NOW process payment for the spun number
+        let paymentSuccessful = false;
+        try {
+          console.log("💳 Processing payment for number", resultNumber);
+          
+          // Call the payment processing endpoint
+          const paymentResponse = await fetch("/api/process-payment", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify({
+              gameId: window.location.pathname.match(/\/game\/(\d+)/)?.[1],
+              number: resultNumber
+            })
+          });
+
+          if (paymentResponse.ok) {
+            const paymentResult = await paymentResponse.json();
+            if (paymentResult.success) {
+              paymentSuccessful = true;
+              setIsFreePlay(false);
+              console.log("💳 Payment successful for number", resultNumber);
+            } else {
+              throw new Error(paymentResult.message || "Payment failed");
+            }
+          } else {
+            const error = await paymentResponse.json();
+            throw new Error(error.message || "Payment failed");
+          }
+        } catch (paymentError) {
+          console.error("💳 Payment failed:", paymentError);
           setPaymentFailed(true);
-          console.log("🚨 Setting payment failed state after wheel stopped");
+          setIsFreePlay(false);
         }
 
-        // Show result modal immediately after wheel stops
+        // Show result modal with payment outcome
         setTimeout(() => {
           setShowResultModal(true);
-          if (!apiCallSuccessful) {
-            console.error(
-              "⚠️ Spin completed with API failure - showing error in modal",
-            );
+          if (!paymentSuccessful) {
+            console.log("⚠️ Showing payment failure modal");
           }
-        }, 200);
+        }, 500);
 
         // Only after modal is shown, release the spinning state and refresh numbers
         setTimeout(async () => {
           setIsSpinning(false);
 
-          // Refresh available numbers ONLY after everything is complete
-          if (apiCallSuccessful) {
+          // Refresh available numbers if payment was successful
+          if (paymentSuccessful) {
             const path = window.location.pathname;
             const gameIdMatch = path.match(/\/game\/(\d+)/);
             if (gameIdMatch) {
