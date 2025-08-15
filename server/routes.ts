@@ -1909,7 +1909,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             console.log(`💳 ERROR: Card nonce invalid or expired:`, defaultCard.cardNonce);
             return res.status(400).json({ 
               success: false,
-              message: "Payment card expired. Please update your payment method and try again."
+              message: "Your payment method has expired. Please go to your dashboard and update your payment card to continue playing."
             });
           }
 
@@ -1930,6 +1930,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       } catch (paymentError: any) {
         console.error("Payment failed for number:", paymentError);
+        
+        // Check if it's a card token expired error
+        if (paymentError.message && paymentError.message.includes('CARD_TOKEN_EXPIRED')) {
+          return res.status(400).json({ 
+            success: false,
+            message: "Your payment card has expired. Please update your payment method in your dashboard and try again.",
+            requiresCardUpdate: true
+          });
+        }
+        
         return res.status(400).json({ 
           success: false,
           message: "Payment failed. Please check your payment method and try again.",

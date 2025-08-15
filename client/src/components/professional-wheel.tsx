@@ -300,6 +300,11 @@ export const ProfessionalWheel = forwardRef<
           console.error("💳 Payment failed:", paymentError);
           setPaymentFailed(true);
           setIsFreePlay(false);
+          
+          // Show specific error message for card expiration
+          if (paymentError.message && paymentError.message.includes('expired')) {
+            console.log("💳 Card expired - user needs to update payment method");
+          }
         }
 
         // Show result modal with payment outcome
