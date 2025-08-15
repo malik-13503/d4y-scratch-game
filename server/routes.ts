@@ -1881,10 +1881,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let paymentResult = null;
       let paymentSucceeded = false;
       
+      console.log(`💳 PAYMENT PROCESSING DEBUG:`, {
+        isProduction,
+        userId,
+        chargeAmount,
+        cardNonce: defaultCard.cardNonce ? `${defaultCard.cardNonce.substring(0, 10)}...` : 'none',
+        cardLast4: defaultCard.cardLast4,
+        environment: process.env.SQUARE_ENVIRONMENT
+      });
+      
       try {
         if (!isProduction) {
           // Sandbox mode - simulate payment
-          console.log(`Simulated charge of $${chargeAmount} for user ${userId}`);
+          console.log(`💳 SANDBOX: Simulated charge of $${chargeAmount} for user ${userId}`);
           paymentResult = {
             id: `sandbox_payment_${Date.now()}`,
             status: "COMPLETED", 
@@ -1893,21 +1902,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
           paymentSucceeded = true;
         } else {
           // Production payment processing
+          console.log(`💳 PRODUCTION: Processing REAL charge of $${chargeAmount} for user ${userId}`);
+          
           // Check if card nonce is expired and needs refresh
           if (!defaultCard.cardNonce || defaultCard.cardNonce === "cnon_test") {
+            console.log(`💳 ERROR: Card nonce invalid or expired:`, defaultCard.cardNonce);
             return res.status(400).json({ 
               success: false,
               message: "Payment card expired. Please update your payment method and try again."
             });
           }
 
-          // Attempt payment processing
+          // Attempt REAL payment processing
+          console.log(`💳 CHARGING CARD: About to charge $${chargeAmount} to card ending in ${defaultCard.cardLast4}`);
           paymentResult = await squareService.processPayment(
             chargeAmount,
             "USD",
             defaultCard.cardNonce,
             `Payment for number ${number} in game ${gameId}`
           );
+          console.log(`💳 PAYMENT SUCCESS:`, {
+            paymentId: paymentResult.id,
+            status: paymentResult.status,
+            amount: chargeAmount
+          });
           paymentSucceeded = true;
         }
       } catch (paymentError: any) {
