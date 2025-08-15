@@ -1542,8 +1542,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Check if we're in production mode (matches client environment detection)
-      const isProduction = process.env.SQUARE_ENVIRONMENT === "production";
-      console.log(`Card add endpoint - SQUARE_ENVIRONMENT: ${process.env.SQUARE_ENVIRONMENT}, isProduction: ${isProduction}`);
+      // Force production mode for real payment processing
+      const isProduction = true;
+      console.log(`Card add endpoint - Forced production mode for real payments: ${isProduction}`);
       
       if (!isProduction) {
         // Sandbox testing - simulate successful card verification
@@ -1766,9 +1767,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "User not found" });
       }
 
-      // Check if we're in production mode
-      const isProduction = process.env.NODE_ENV === "production" || process.env.SQUARE_ENVIRONMENT === "production";
-      console.log(`Spin endpoint - NODE_ENV: ${process.env.NODE_ENV}, SQUARE_ENVIRONMENT: ${process.env.SQUARE_ENVIRONMENT}, isProduction: ${isProduction}`);
+      // Force production mode for real payment processing
+      const isProduction = true;
+      console.log(`Spin endpoint - Forced production mode for real payments: ${isProduction}`);
       
       // CRITICAL: Always require payment card - no bypassing even in sandbox
       if (!user.cardOnFile) {
