@@ -214,15 +214,25 @@ export const ProfessionalWheel = forwardRef<
         console.log("🎯 Using fallback random result:", spinResult);
       }
 
-      // Step 5: Calculate precise landing position using FROZEN wheel numbers
+      // Step 5: Extract number from result for wheel positioning
+      let resultNumber: number;
+      if (typeof spinResult === 'number') {
+        resultNumber = spinResult;
+      } else if (typeof spinResult === 'object' && spinResult !== null && 'number' in spinResult) {
+        resultNumber = spinResult.number;
+      } else {
+        resultNumber = Number(spinResult);
+      }
+
+      // Calculate precise landing position using FROZEN wheel numbers
       const segmentAngle = 360 / frozenWheelNumbers.length;
       let targetSegmentIndex = frozenWheelNumbers.findIndex(
-        (num) => num === spinResult,
+        (num) => num === resultNumber,
       );
 
       if (targetSegmentIndex === -1 && frozenWheelNumbers.length < 50) {
         // If exact number not found and we have space, add it to the wheel
-        frozenWheelNumbers.push(spinResult);
+        frozenWheelNumbers.push(resultNumber);
         targetSegmentIndex = frozenWheelNumbers.length - 1;
         setWheelNumbers([...frozenWheelNumbers]);
       } else if (targetSegmentIndex === -1) {
@@ -230,7 +240,7 @@ export const ProfessionalWheel = forwardRef<
         targetSegmentIndex = Math.floor(
           Math.random() * frozenWheelNumbers.length,
         );
-        frozenWheelNumbers[targetSegmentIndex] = spinResult;
+        frozenWheelNumbers[targetSegmentIndex] = resultNumber;
         setWheelNumbers([...frozenWheelNumbers]);
       }
 
@@ -260,11 +270,21 @@ export const ProfessionalWheel = forwardRef<
       setTimeout(async () => {
         console.log("🎯 8-second spin completed, showing result...");
 
-        // Set final result
-        setResult(spinResult);
+        // Extract number from result (handle both number and object formats)
+        let resultNumber: number;
+        if (typeof spinResult === 'number') {
+          resultNumber = spinResult;
+        } else if (typeof spinResult === 'object' && spinResult !== null && 'number' in spinResult) {
+          resultNumber = spinResult.number;
+        } else {
+          resultNumber = Number(spinResult);
+        }
+        
+        // Set final result (always use just the number)
+        setResult(resultNumber);
         const isFree = false; // Removed automatic free play logic
         setIsFreePlay(isFree);
-        setAmountCharged(spinResult); // All spins require payment
+        setAmountCharged(resultNumber); // All spins require payment
 
         // Set payment failure state ONLY after wheel stops completely
         if (!apiCallSuccessful) {

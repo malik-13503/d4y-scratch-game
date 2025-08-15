@@ -1,0 +1,50 @@
+chunk-WERSD76P.js?v=87dfb8f5:14032 The above error occurred in the <span> component:
+
+    at span
+    at div
+    at div
+    at div
+    at div
+    at div
+    at div
+    at div
+    at div
+    at div
+    at div
+    at https://f45475b4-a7c6-4031-bbbd-cffdcb6fa4d5-00-1aqxf2ubqm5iz.janeway.replit.dev/src/components/professional-wheel.tsx:37:6
+    at div
+    at div
+    at _c9 (https://f45475b4-a7c6-4031-bbbd-cffdcb6fa4d5-00-1aqxf2ubqm5iz.janeway.replit.dev/src/components/ui/card.tsx:114:12)
+    at div
+    at _c (https://f45475b4-a7c6-4031-bbbd-cffdcb6fa4d5-00-1aqxf2ubqm5iz.janeway.replit.dev/src/components/ui/card.tsx:20:11)
+    at div
+    at div
+    at main
+    at div
+    at GamePage (https://f45475b4-a7c6-4031-bbbd-cffdcb6fa4d5-00-1aqxf2ubqm5iz.janeway.replit.dev/src/pages/game.tsx:45:18)
+    at Route (https://f45475b4-a7c6-4031-bbbd-cffdcb6fa4d5-00-1aqxf2ubqm5iz.janeway.repli…/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=87dfb8f5:323:16)
+    at Switch (https://f45475b4-a7c6-4031-bbbd-cffdcb6fa4d5-00-1aqxf2ubqm5iz.janeway.repli…/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=87dfb8f5:379:17)
+    at Router (https://f45475b4-a7c6-4031-bbbd-cffdcb6fa4d5-00-1aqxf2ubqm5iz.janeway.replit.dev/src/App.tsx?v=5YUnhkAUpF7ysCAhHB2mG:50:47)
+    at div
+    at Provider (https://f45475b4-a7c6-4031-bbbd-cffdcb6fa4d5-00-1aqxf2ubqm5iz.janeway.repli…unner/workspace/node_modules/.vite/deps/chunk-PLT6GTVM.js?v=87dfb8f5:38:15)
+    at TooltipProvider (https://f45475b4-a7c6-4031-bbbd-cffdcb6fa4d5-00-1aqxf2ubqm5iz.janeway.repli…rkspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=87dfb8f5:61:5)
+    at QueryClientProvider (https://f45475b4-a7c6-4031-bbbd-cffdcb6fa4d5-00-1aqxf2ubqm5iz.janeway.repli…rkspace/node_modules/.vite/deps/@tanstack_react-query.js?v=87dfb8f5:2805:3)
+    at App
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
+chunk-WERSD76P.js?v=87dfb8f5:9934 Uncaught Error: Objects are not valid as a React child (found: object with keys {number, paymentFailed, paymentMessage}). If you meant to render a collection of children, use an array instead.
+    at throwOnInvalidObjectType (chunk-WERSD76P.js?v=87dfb8f5:9934:17)
+    at reconcileChildFibers2 (chunk-WERSD76P.js?v=87dfb8f5:10564:15)
+    at reconcileChildren (chunk-WERSD76P.js?v=87dfb8f5:14290:37)
+    at updateHostComponent (chunk-WERSD76P.js?v=87dfb8f5:14807:11)
+    at beginWork (chunk-WERSD76P.js?v=87dfb8f5:15935:22)
+    at beginWork$1 (chunk-WERSD76P.js?v=87dfb8f5:19753:22)
+    at performUnitOfWork (chunk-WERSD76P.js?v=87dfb8f5:19198:20)
+    at workLoopSync (chunk-WERSD76P.js?v=87dfb8f5:19137:13)
+    at renderRootSync (chunk-WERSD76P.js?v=87dfb8f5:19116:15)
+    at recoverFromConcurrentError (chunk-WERSD76P.js?v=87dfb8f5:18736:28)
+professional-wheel.tsx:261 🎯 8-second spin completed, showing result...
+professional-wheel.tsx:299 🎯 Spin sequence fully completed
+﻿
+
