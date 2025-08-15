@@ -1768,6 +1768,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Check if we're in production mode
       const isProduction = process.env.NODE_ENV === "production" || process.env.SQUARE_ENVIRONMENT === "production";
+      console.log(`Spin endpoint - NODE_ENV: ${process.env.NODE_ENV}, SQUARE_ENVIRONMENT: ${process.env.SQUARE_ENVIRONMENT}, isProduction: ${isProduction}`);
       
       // CRITICAL: Always require payment card - no bypassing even in sandbox
       if (!user.cardOnFile) {
