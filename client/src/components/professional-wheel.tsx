@@ -195,8 +195,15 @@ export const ProfessionalWheel = forwardRef<
         // Get API result (this processes payment and gets actual number)
         console.log("🎯 Making API call for spin result...");
         spinResult = await onSpin();
-        apiCallSuccessful = true;
-        console.log("🎯 API call successful, result:", spinResult);
+        
+        // Check if the result indicates payment failure
+        if (typeof spinResult === 'object' && spinResult !== null && spinResult.paymentFailed) {
+          apiCallSuccessful = false;
+          console.log("🚨 Payment failed - treating as API failure:", spinResult);
+        } else {
+          apiCallSuccessful = true;
+          console.log("🎯 API call successful, result:", spinResult);
+        }
       } catch (apiError) {
         console.error("🚨 API call failed:", apiError);
         apiCallSuccessful = false;
@@ -287,7 +294,7 @@ export const ProfessionalWheel = forwardRef<
         setAmountCharged(resultNumber); // All spins require payment
 
         // Set payment failure state ONLY after wheel stops completely
-        if (!apiCallSuccessful) {
+        if (!apiCallSuccessful || (typeof spinResult === 'object' && spinResult !== null && spinResult.paymentFailed)) {
           setPaymentFailed(true);
           console.log("🚨 Setting payment failed state after wheel stopped");
         }

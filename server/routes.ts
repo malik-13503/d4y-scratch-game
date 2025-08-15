@@ -1859,11 +1859,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
             });
           }
 
+          // Check if card nonce is expired and needs refresh
+          if (!defaultCard.cardNonce || defaultCard.cardNonce === "cnon_test") {
+            return res.status(400).json({ 
+              number: spunNumber,
+              paymentFailed: true,
+              paymentMessage: "Payment card expired. Please update your payment method and try again."
+            });
+          }
+
           // Attempt payment processing
           paymentResult = await squareService.processPayment(
             chargeAmount,
             "USD",
-            defaultCard.cardNonce || "cnon_test",
+            defaultCard.cardNonce,
             `Spin charge for game ${gameId} - $${chargeAmount}`
           );
           paymentSucceeded = true;
