@@ -151,6 +151,7 @@ export function SpinningWheel({
     try {
       // STEP 1: Get the result from API first
       const spinResult = await onSpin();
+      console.log("🎯 Spinning wheel received result:", spinResult, "Type:", typeof spinResult);
       
       // Handle both old (number) and new (object) response formats
       let resultNumber: number;
@@ -158,16 +159,19 @@ export function SpinningWheel({
       let failureMessage: string | null = null;
       
       if (typeof spinResult === 'number') {
-        // Old format - direct number
+        // Success case - direct number
         resultNumber = spinResult;
-      } else if (typeof spinResult === 'object' && spinResult !== null) {
-        // New format - object with payment status
+        console.log("✅ Processing number result:", resultNumber);
+      } else if (typeof spinResult === 'object' && spinResult !== null && 'number' in spinResult) {
+        // Payment failure case - object with payment status
         resultNumber = spinResult.number;
         isPaymentFailed = spinResult.paymentFailed || false;
         failureMessage = spinResult.paymentMessage || null;
+        console.log("❌ Processing payment failure:", { resultNumber, isPaymentFailed, failureMessage });
       } else {
         // Fallback - treat as number
         resultNumber = Number(spinResult);
+        console.log("⚠️ Using fallback conversion:", resultNumber);
       }
 
       // STEP 2: Find the index of the segment matching the result
