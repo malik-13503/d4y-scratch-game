@@ -160,11 +160,14 @@ export function SpinningWheel({
       if (typeof spinResult === 'number') {
         // Old format - direct number
         resultNumber = spinResult;
-      } else {
+      } else if (typeof spinResult === 'object' && spinResult !== null) {
         // New format - object with payment status
         resultNumber = spinResult.number;
-        isPaymentFailed = spinResult.paymentFailed;
-        failureMessage = spinResult.paymentMessage;
+        isPaymentFailed = spinResult.paymentFailed || false;
+        failureMessage = spinResult.paymentMessage || null;
+      } else {
+        // Fallback - treat as number
+        resultNumber = Number(spinResult);
       }
 
       // STEP 2: Find the index of the segment matching the result
