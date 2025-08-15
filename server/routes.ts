@@ -1840,9 +1840,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           // Production payment processing
           if (!user.cardOnFile) {
             return res.status(400).json({ 
-              message: "No payment method available",
+              number: spunNumber,
               paymentFailed: true,
-              spunNumber
+              paymentMessage: "No payment method available"
             });
           }
           
@@ -1851,9 +1851,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           
           if (!defaultCard) {
             return res.status(400).json({ 
-              message: "No payment card available",
+              number: spunNumber,
               paymentFailed: true,
-              spunNumber
+              paymentMessage: "No payment card available"
             });
           }
 
@@ -1870,9 +1870,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.error("Payment failed for spun number:", paymentError);
         // Return with payment failure - number was spun but NOT claimed
         return res.status(400).json({ 
-          message: "Payment failed. Please check your payment method and try again.",
+          number: spunNumber,
           paymentFailed: true,
-          spunNumber,
+          paymentMessage: "Payment failed. Please check your payment method and try again.",
           error: paymentError.message || "Payment processing failed"
         });
       }
@@ -2022,16 +2022,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
 
-      res.json({
-        success: true,
-        paymentSucceeded: true,
-        spinResult: {
-          number: spinResult.spunNumber,
-          isFreePlay: false,
-          amountCharged: chargeAmount.toString()
-        },
-        gameComplete: updatedAvailableNumbers.length === 0
-      });
+      // Return simple number for successful spins (client expects this format)
+      res.json(spunNumber);
     } catch (error: any) {
       console.error("Spin error:", error);
       res.status(400).json({ message: "Spin failed", error: error.message });

@@ -310,11 +310,11 @@ export default function GamePage() {
 
         // Handle payment failures - return the spun number but mark as payment failed
         if (response.status === 400 && error.paymentFailed) {
-          console.log(`Payment failed for spun number ${error.spunNumber}`);
+          console.log(`Payment failed for spun number ${error.number}`);
           return {
-            number: error.spunNumber,
+            number: error.number,
             paymentFailed: true,
-            paymentMessage: error.message
+            paymentMessage: error.paymentMessage
           };
         }
 
