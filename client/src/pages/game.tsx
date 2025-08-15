@@ -327,32 +327,16 @@ export default function GamePage() {
       }
 
       const data = await response.json();
+      console.log("🎯 API call successful, received result:", data);
 
-      if (!data.success || !data.spinResult) {
-        console.error("🚨 Invalid API response:", data);
-        throw new Error("Invalid response from server");
-      }
-
-      // Check if payment succeeded
-      if (!data.paymentSucceeded) {
-        console.error("Payment failed after spin");
-        throw new Error("Payment processing failed");
-      }
-
-      const result = data.spinResult.number;
-      console.log("🎯 API call successful, received result:", result);
-
-      setLastResult(result);
+      // Server now returns just the number directly for successful spins
+      setLastResult(data);
       setShowConfetti(true);
 
       // Hide confetti after 5 seconds
       setTimeout(() => setShowConfetti(false), 5000);
 
-      return {
-        number: result,
-        paymentFailed: false,
-        paymentMessage: null
-      };
+      return data; // Return just the number for successful spins
     } catch (error) {
       console.error("🚨 Spin API error:", error);
       // Re-throw the error so the wheel component can handle it appropriately
