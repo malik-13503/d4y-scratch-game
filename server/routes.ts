@@ -1832,7 +1832,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      const defaultCard = userCards.find(card => card.isDefault) || userCards[0];
+      // Get the most recent active card (don't rely on expired field for now)
+      const validCards = userCards.filter(card => card.isActive);
+      if (!validCards || validCards.length === 0) {
+        return res.status(400).json({ 
+          success: false,
+          message: "No active payment cards found. Please add a new payment card to continue playing." 
+        });
+      }
+
+      const defaultCard = validCards.find(card => card.isDefault) || validCards[0];
       if (!defaultCard) {
         return res.status(400).json({ 
           success: false,
@@ -1913,14 +1922,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
             });
           }
 
-          // Attempt REAL payment processing
+          // Attempt REAL payment processing using stored card
           console.log(`💳 CHARGING CARD: About to charge $${chargeAmount} to card ending in ${defaultCard.cardLast4}`);
-          paymentResult = await squareService.processPayment(
-            chargeAmount,
-            "USD",
-            defaultCard.cardNonce,
-            `Payment for number ${number} in game ${gameId}`
-          );
+          
+          // Use Square customer ID and card ID for payment instead of expired nonce
+          if (user.squareCustomerId && defaultCard.squareCardId) {
+            console.log(`💳 Using stored card - Customer: ${user.squareCustomerId}, Card: ${defaultCard.squareCardId}`);
+            paymentResult = await squareService.chargeCard(
+              chargeAmount,
+              "USD",
+              defaultCard.squareCardId,
+              user.squareCustomerId
+            );
+          } else {
+            // Fallback to nonce-based payment (for cards added before customer system)
+            console.log(`💳 Using nonce-based payment as fallback`);
+            paymentResult = await squareService.processPayment(
+              chargeAmount,
+              "USD",
+              defaultCard.cardNonce,
+              `Payment for number ${number} in game ${gameId}`
+            );
+          }
           console.log(`💳 PAYMENT SUCCESS:`, {
             paymentId: paymentResult.id,
             status: paymentResult.status,
@@ -1932,10 +1955,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.error("Payment failed for number:", paymentError);
         
         // Check if it's a card token expired error
-        if (paymentError.message && paymentError.message.includes('CARD_TOKEN_EXPIRED')) {
+        if (paymentError.message && (paymentError.message.includes('CARD_TOKEN_EXPIRED') || paymentError.message.includes('expired'))) {
+          console.log(`💳 Card token expired for user ${userId} - card needs refresh`);
+          
           return res.status(400).json({ 
             success: false,
-            message: "Your payment card has expired. Please update your payment method in your dashboard and try again.",
+            message: "Your payment card token has expired. Please go to your dashboard and re-add your payment method to continue playing.",
             requiresCardUpdate: true
           });
         }
