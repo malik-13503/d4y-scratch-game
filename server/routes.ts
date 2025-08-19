@@ -1811,10 +1811,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "User not found" });
       }
 
-      // Allow test mode for gym cards and development testing
-      // Set to false to test payment flow without real charges
-      const isProduction = false; // TEMPORARILY SET TO FALSE FOR TESTING
-      console.log(`Payment processing - Using test mode for gym card testing: production=${isProduction}`);
+      // Force production mode for real payment processing
+      const isProduction = true;
+      console.log(`Payment processing - Production mode enabled for real payments: ${isProduction}`);
       
       // Require payment card
       if (!user.cardOnFile) {
@@ -1907,10 +1906,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       try {
         if (!isProduction) {
-          // Test mode - simulate successful payment for testing
-          console.log(`💳 TEST MODE: Simulating successful charge of $${chargeAmount} for user ${userId} (gym card testing)`);
+          // Sandbox mode - simulate payment
+          console.log(`💳 SANDBOX: Simulated charge of $${chargeAmount} for user ${userId}`);
           paymentResult = {
-            id: `test_payment_${Date.now()}`,
+            id: `sandbox_payment_${Date.now()}`,
             status: "COMPLETED", 
             receiptUrl: null
           };
