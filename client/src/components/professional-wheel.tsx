@@ -72,33 +72,28 @@ export const ProfessionalWheel = forwardRef<
 
       const cardData = await response.json();
       
-      console.log("💳 FRONTEND DEBUG - Card data:", {
-        hasSquareCustomerId: !!cardData.squareCustomerId,
-        hasSquareCardId: !!cardData.squareCardId,
-        hasCardNonce: !!cardData.cardNonce,
-        cardNoncePrefix: cardData.cardNonce ? cardData.cardNonce.substring(0, 10) : 'none'
-      });
+
       
       // If we have Square customer and card IDs, use the stored card approach
       if (cardData.squareCustomerId && cardData.squareCardId) {
-        console.log("💳 Using Square stored card method");
+
         return `stored_card:${cardData.squareCardId}:${cardData.squareCustomerId}`;
       }
 
       // For cards with valid nonces, use them directly
       if (cardData.cardNonce && cardData.cardNonce.startsWith('cnon:')) {
-        console.log("💳 Using valid stored card nonce for payment");
+
         return cardData.cardNonce;
       }
 
       // If we have any other valid-looking nonce, try it
       if (cardData.cardNonce && cardData.cardNonce.length > 10 && !cardData.cardNonce.includes('expired')) {
-        console.log("💳 Using stored card nonce (non-cnon format)");
+
         return cardData.cardNonce;
       }
 
       // No valid payment method available
-      console.log("💳 No valid card nonce available - needs fresh card");
+
       return "needs_fresh_card";
       
     } catch (error) {

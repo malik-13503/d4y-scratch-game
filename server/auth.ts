@@ -44,11 +44,11 @@ export function setupAuth(app: Express) {
       { usernameField: "email" },
       async (email, password, done) => {
         try {
-          console.log("Attempting login for email:", email);
+
           const user = await storage.getAdminUserByEmail(email);
           
           if (!user) {
-            console.log("User not found:", email);
+
             return done(null, false, { message: "Invalid credentials" });
           }
           
@@ -59,11 +59,11 @@ export function setupAuth(app: Express) {
 
           const isValid = await comparePasswords(password, user.password);
           if (!isValid) {
-            console.log("Invalid password for user:", email);
+
             return done(null, false, { message: "Invalid credentials" });
           }
 
-          console.log("Login successful for user:", email);
+
           // Update last login time
           await storage.updateAdminUser(user.id, { lastLoginAt: new Date() });
           

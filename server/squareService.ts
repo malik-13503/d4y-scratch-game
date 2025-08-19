@@ -179,7 +179,7 @@ export class SquareService {
         throw new Error("Payment failed - no payment object returned");
       }
     } catch (error: any) {
-      console.error("Error processing Square payment with nonce:", error);
+
       
       // Check if it's a card verification issue
       if (error.message && error.message.includes('CVV_FAILURE')) {

@@ -1898,24 +1898,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let paymentResult = null;
       let paymentSucceeded = false;
       
-      console.log(`💳 PAYMENT PROCESSING DEBUG:`, {
-        isProduction,
-        userId,
-        chargeAmount,
-        number,
-        cardNonce: defaultCard.cardNonce ? `${defaultCard.cardNonce.substring(0, 10)}...` : 'none',
-        cardLast4: defaultCard.cardLast4,
-        environment: process.env.SQUARE_ENVIRONMENT
-      });
+
       
       // CHECK: Is this number still available before payment?
       const availableBeforePayment = await storage.getAvailableNumbers(gameId);
-      console.log(`💳 BEFORE PAYMENT: Available numbers count: ${availableBeforePayment.length}, includes ${number}: ${availableBeforePayment.includes(number)}`);
+
       
       try {
         if (!isProduction) {
           // Sandbox mode - simulate payment
-          console.log(`💳 SANDBOX: Simulated charge of $${chargeAmount} for user ${userId}`);
+
           paymentResult = {
             id: `sandbox_payment_${Date.now()}`,
             status: "COMPLETED", 
@@ -1924,18 +1916,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
           paymentSucceeded = true;
         } else {
           // Production payment processing
-          console.log(`💳 PRODUCTION: Processing REAL charge of $${chargeAmount} for user ${userId}`);
+
           
           // Determine payment method based on what's provided
           let paymentMethod = null;
           
-          console.log(`💳 PAYMENT METHOD DETECTION: frontendCardNonce = ${cardNonce ? cardNonce.substring(0, 10) + '...' : 'null'}, storedCardNonce = ${defaultCard.cardNonce ? defaultCard.cardNonce.substring(0, 10) + '...' : 'null'}`);
+
           
           // Use stored card nonce if frontend sent fallback message
           let actualCardNonce = cardNonce;
           if (cardNonce === 'needs_fresh_card' && defaultCard.cardNonce) {
             actualCardNonce = defaultCard.cardNonce;
-            console.log(`💳 Using stored card nonce instead of frontend fallback: ${actualCardNonce.substring(0, 15)}...`);
+
           }
           
           if (actualCardNonce && actualCardNonce.startsWith('stored_card:')) {
@@ -1944,16 +1936,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
             if (parts.length === 3) {
               const [, squareCardId, squareCustomerId] = parts;
               paymentMethod = { type: 'stored_card', squareCardId, squareCustomerId };
-              console.log(`💳 Using stored card method - Customer: ${squareCustomerId}, Card: ${squareCardId}`);
+
             }
           } else if (actualCardNonce && actualCardNonce.startsWith('cnon:')) {
             // Handle fresh nonce approach - PRIORITY: Use this for real payments
             paymentMethod = { type: 'nonce', nonce: actualCardNonce };
-            console.log(`💳 ✅ Using fresh card nonce for REAL payment: ${actualCardNonce.substring(0, 15)}...`);
+
           } else if (actualCardNonce && actualCardNonce.startsWith('CH')) {
             // Handle Mastercard/Visa test nonce
             paymentMethod = { type: 'nonce', nonce: actualCardNonce };
-            console.log(`💳 Using valid card nonce for payment`);
+
           } else if (user.squareCustomerId && defaultCard?.squareCardId) {
             // Fallback to stored Square customer/card
             paymentMethod = { 
@@ -1961,10 +1953,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
               squareCardId: defaultCard.squareCardId, 
               squareCustomerId: user.squareCustomerId 
             };
-            console.log(`💳 Fallback to stored card - Customer: ${user.squareCustomerId}, Card: ${defaultCard.squareCardId}`);
+
           } else if (actualCardNonce && (actualCardNonce === 'needs_fresh_card' || actualCardNonce === 'needs_card_update')) {
             // Handle case where card exists but needs fresh nonce
-            console.log(`💳 Card exists but needs fresh nonce - requesting payment method update`);
+
             return res.status(400).json({ 
               success: false,
               message: "To complete your purchase, please go to your dashboard and update your payment card. This ensures secure processing of your payment.",
@@ -1974,9 +1966,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
             // Last resort - try stored nonce (likely to fail)
             if (defaultCard?.cardNonce && defaultCard.cardNonce !== "cnon_test" && !defaultCard.cardNonce.includes('expired')) {
               paymentMethod = { type: 'nonce', nonce: defaultCard.cardNonce };
-              console.log(`💳 Last resort: using stored nonce (may be expired): ${defaultCard.cardNonce.substring(0, 10)}...`);
+
             } else {
-              console.log(`💳 ERROR: No valid payment method available - frontendCardNonce: ${cardNonce}, actualCardNonce: ${actualCardNonce}, defaultCard.cardNonce: ${defaultCard?.cardNonce}`);
+
               return res.status(400).json({ 
                 success: false,
                 message: "No valid payment method found. Please update your payment card and try again."
@@ -1985,7 +1977,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
 
           // Attempt REAL payment processing
-          console.log(`💳 CHARGING CARD: About to charge $${chargeAmount} to card ending in ${defaultCard.cardLast4}`);
+
           
           if (paymentMethod && paymentMethod.type === 'stored_card') {
             paymentResult = await squareService.chargeCard(
@@ -2004,11 +1996,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           } else {
             throw new Error("Invalid payment method configuration");
           }
-          console.log(`💳 PAYMENT SUCCESS:`, {
-            paymentId: paymentResult.id,
-            status: paymentResult.status,
-            amount: chargeAmount
-          });
+
           paymentSucceeded = true;
         }
       } catch (paymentError: any) {
