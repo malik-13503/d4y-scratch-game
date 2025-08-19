@@ -1,6 +1,6 @@
 import { randomUUID } from "crypto";
 
-// Simple Square service implementation using direct API calls
+// Enhanced Square service implementation with Card on File support
 export class SquareService {
   private accessToken: string;
   private environment: string;
@@ -65,6 +65,7 @@ export class SquareService {
     return await response.json();
   }
 
+  // Create Square customer for card on file
   async createCustomer(firstName: string, lastName: string, email: string) {
     try {
       const requestBody = {
@@ -86,21 +87,30 @@ export class SquareService {
     }
   }
 
-  async createCard(customerId: string, sourceId: string, cardNonce: string) {
+  // Create and store a card on file for a customer
+  async createCardOnFile(customerId: string, cardNonce: string, cardholderName: string) {
     try {
       const requestBody = {
-        source_id: sourceId,
         idempotency_key: randomUUID(),
+        source_id: cardNonce,
         card: {
           customer_id: customerId,
-          card_nonce: cardNonce,
-        },
+          cardholder_name: cardholderName
+        }
       };
 
       const response = await this.makeRequest("/cards", "POST", requestBody);
       
       if (response.card) {
-        return response.card;
+        return {
+          id: response.card.id,
+          last4: response.card.last_4,
+          cardBrand: response.card.card_brand,
+          expMonth: response.card.exp_month,
+          expYear: response.card.exp_year,
+          cardholderName: response.card.cardholder_name || cardholderName,
+          customerId: customerId
+        };
       } else {
         throw new Error("Failed to create card");
       }
@@ -110,33 +120,87 @@ export class SquareService {
     }
   }
 
-  async chargeCard(amount: number, currency: string = "USD", sourceId: string, customerId?: string) {
+  // Charge a stored card on file
+  async chargeStoredCard(amount: number, currency: string, cardId: string, customerId: string, description: string) {
     try {
       const requestBody = {
-        source_id: sourceId,
+        idempotency_key: randomUUID(),
         amount_money: {
           amount: Math.round(amount * 100), // Convert to cents
-          currency: currency,
+          currency: currency
         },
-        idempotency_key: randomUUID(),
+        source_id: cardId,
+        note: description,
         autocomplete: true,
-        customer_id: customerId,
-        note: "Hit the Road Jackpot - Game Spin",
+        customer_id: customerId
       };
 
       const response = await this.makeRequest("/payments", "POST", requestBody);
       
       if (response.payment) {
-        return response.payment;
+        return {
+          id: response.payment.id,
+          status: response.payment.status,
+          receiptUrl: response.payment.receipt_url,
+          amountMoney: response.payment.amount_money,
+          cardDetails: response.payment.card_details,
+          customerId: customerId
+        };
       } else {
-        throw new Error("Payment failed");
+        throw new Error("Payment failed - no payment returned");
       }
     } catch (error) {
-      console.error("Error processing Square payment:", error);
+      console.error("Square stored card payment failed:", error);
       throw error;
     }
   }
 
+  // Get customer's stored cards
+  async getCustomerCards(customerId: string) {
+    try {
+      const response = await this.makeRequest(`/cards?customer_id=${customerId}`, "GET");
+      
+      return response.cards?.map((card: any) => ({
+        id: card.id,
+        last4: card.last_4,
+        cardBrand: card.card_brand,
+        expMonth: card.exp_month,
+        expYear: card.exp_year,
+        cardholderName: card.cardholder_name,
+        enabled: card.enabled
+      })) || [];
+    } catch (error) {
+      console.error("Error getting customer cards:", error);
+      throw error;
+    }
+  }
+
+  // Disable a stored card (Square doesn't allow deletion)
+  async disableCard(cardId: string) {
+    try {
+      const requestBody = {
+        card: {
+          enabled: false
+        }
+      };
+
+      const response = await this.makeRequest(`/cards/${cardId}`, "PUT", requestBody);
+      
+      if (response.card) {
+        return {
+          id: response.card.id,
+          enabled: response.card.enabled
+        };
+      } else {
+        throw new Error("Failed to disable card");
+      }
+    } catch (error) {
+      console.error("Error disabling card:", error);
+      throw error;
+    }
+  }
+
+  // Legacy payment processing method (for backward compatibility)
   async processPayment(amount: number, currency: string, cardNonce: string, note?: string) {
     try {
       const requestBody = {
@@ -179,8 +243,6 @@ export class SquareService {
         throw new Error("Payment failed - no payment object returned");
       }
     } catch (error: any) {
-
-      
       // Check if it's a card verification issue
       if (error.message && error.message.includes('CVV_FAILURE')) {
         throw new Error("Card verification failed. Please ensure CVV is correct and try again.");
@@ -192,60 +254,18 @@ export class SquareService {
     }
   }
 
-  async getCustomerCards(customerId: string) {
-    try {
-      const response = await this.makeRequest(`/cards?customer_id=${customerId}`, "GET");
-      
-      return response.cards || [];
-    } catch (error) {
-      console.error("Error getting customer cards:", error);
-      throw error;
-    }
-  }
-
-  async createCardOnFile(customerId: string, cardNonce: string, cardholderName?: string) {
+  // Verify card with small test charge (for card validation)
+  async verifyCard(cardNonce: string, customerId?: string) {
     try {
       const requestBody = {
         source_id: cardNonce,
-        idempotency_key: randomUUID(),
-        card: {
-          cardholder_name: cardholderName || "Cardholder"
-        }
-      };
-
-      const response = await this.makeRequest(`/customers/${customerId}/cards`, "POST", requestBody);
-      
-      if (response.card) {
-        return {
-          id: response.card.id,
-          last4: response.card.last_4,
-          cardBrand: response.card.card_brand,
-          cardType: response.card.card_type,
-          expMonth: response.card.exp_month,
-          expYear: response.card.exp_year,
-          cardholderName: response.card.cardholder_name
-        };
-      } else {
-        throw new Error("Failed to create card on file");
-      }
-    } catch (error) {
-      console.error("Error creating card on file:", error);
-      throw error;
-    }
-  }
-
-  async processPaymentWithStoredCard(customerId: string, cardId: string, amount: number, currency: string = "USD", note?: string) {
-    try {
-      const requestBody = {
-        source_id: cardId,
         amount_money: {
-          amount: Math.round(amount * 100), // Convert to cents
-          currency: currency,
+          amount: 1, // 1 cent verification
+          currency: "USD",
         },
         idempotency_key: randomUUID(),
         autocomplete: true,
-        note: note || "Game spin payment with stored card",
-        accept_partial_authorization: false,
+        note: "Card verification charge",
         customer_id: customerId
       };
 
@@ -265,75 +285,12 @@ export class SquareService {
           }
         };
       } else {
-        throw new Error("Payment failed - no payment object returned");
-      }
-    } catch (error) {
-      console.error("Error processing payment with stored card:", error);
-      
-      // Check for specific error types
-      if (error.message && error.message.includes('CVV_FAILURE')) {
-        throw new Error("Card verification failed. Please update your payment method.");
-      } else if (error.message && error.message.includes('GENERIC_DECLINE')) {
-        throw new Error("Payment was declined by your bank. Please try another payment method.");
-      } else if (error.message && error.message.includes('CARD_EXPIRED')) {
-        throw new Error("Your stored card has expired. Please update your payment method.");
-      }
-      
-      throw new Error("Payment processing failed. Please try again or update your payment method.");
-    }
-  }
-
-  async verifyCard(cardNonce: string) {
-    try {
-      // Instead of processing a payment, we'll verify the card by attempting to create a card on file
-      // This is safer and doesn't trigger payment delays
-      const tempCustomer = await this.createTempCustomer();
-      
-      const cardRequestBody = {
-        source_id: cardNonce,
-        idempotency_key: randomUUID(),
-        card: {
-          cardholder_name: "Verification Test"
-        }
-      };
-
-      const response = await this.makeRequest(`/customers/${tempCustomer.id}/cards`, "POST", cardRequestBody);
-      
-      if (response.card) {
-        // Clean up the temporary customer
-        await this.makeRequest(`/customers/${tempCustomer.id}`, "DELETE");
-        
-        return {
-          verified: true,
-          card: response.card,
-        };
-      } else {
-        return { verified: false };
+        throw new Error("Card verification failed");
       }
     } catch (error) {
       console.error("Error verifying card:", error);
-      return { verified: false, error: error };
+      throw error;
     }
-  }
-
-  async createTempCustomer() {
-    const requestBody = {
-      given_name: "Temp",
-      family_name: "Verification",
-      email_address: `temp-${randomUUID()}@verification.test`,
-    };
-
-    const response = await this.makeRequest("/customers", "POST", requestBody);
-    
-    if (response.customer) {
-      return response.customer;
-    } else {
-      throw new Error("Failed to create temporary customer");
-    }
-  }
-
-  isApiError(error: any): boolean {
-    return error?.name === 'ApiError' || error?.constructor?.name === 'ApiError';
   }
 }
 
