@@ -1220,7 +1220,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await db.delete(gameResults).where(eq(gameResults.id, winnerId));
 
       // Reset the winner's stats (subtract the win)
-      const user = await storage.getUser(gameResult.winnerId);
+      const user = gameResult.winnerId ? await storage.getUser(gameResult.winnerId) : null;
       const game = await storage.getGame(gameResult.gameId);
       
       if (user && game && gameResult.winnerId && gameResult.gameId) {
