@@ -1894,10 +1894,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         isProduction,
         userId,
         chargeAmount,
+        number,
         cardNonce: defaultCard.cardNonce ? `${defaultCard.cardNonce.substring(0, 10)}...` : 'none',
         cardLast4: defaultCard.cardLast4,
         environment: process.env.SQUARE_ENVIRONMENT
       });
+      
+      // CHECK: Is this number still available before payment?
+      const availableBeforePayment = await storage.getAvailableNumbers(gameId);
+      console.log(`💳 BEFORE PAYMENT: Available numbers count: ${availableBeforePayment.length}, includes ${number}: ${availableBeforePayment.includes(number)}`);
       
       try {
         if (!isProduction) {
@@ -1965,6 +1970,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
           });
         }
         
+        // CHECK: Is number still available after payment failed?
+        const availableAfterFailure = await storage.getAvailableNumbers(gameId);
+        console.log(`💳 AFTER PAYMENT FAILURE: Available numbers count: ${availableAfterFailure.length}, includes ${number}: ${availableAfterFailure.includes(number)}`);
+        
         return res.status(400).json({ 
           success: false,
           message: "Payment failed. Please check your payment method and try again.",
@@ -1973,7 +1982,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Payment succeeded - claim the number
+      console.log(`💳 PAYMENT SUCCESS: Now claiming number ${number} for user ${userId}`);
       const spinResult = await storage.createSpinResultWithNumber(gameId, player.id, number, chargeAmount.toString());
+      
+      // CHECK: Number should now be unavailable
+      const availableAfterSuccess = await storage.getAvailableNumbers(gameId);
+      console.log(`💳 AFTER SUCCESSFUL CLAIM: Available numbers count: ${availableAfterSuccess.length}, includes ${number}: ${availableAfterSuccess.includes(number)}`);
 
       // Get card details for transaction record  
       let cardLast4 = "****";
