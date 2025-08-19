@@ -2267,12 +2267,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "No active payment cards found" });
       }
 
-      // Return card details (without sensitive information)
+      // Return card details (including cardNonce for payment processing)
       res.json({
         cardLast4: defaultCard.cardLast4,
         cardBrand: defaultCard.cardBrand,
         squareCustomerId: user.squareCustomerId,
         squareCardId: defaultCard.squareCardId,
+        cardNonce: defaultCard.cardNonce, // Critical for payment processing
         isDefault: defaultCard.isDefault
       });
     } catch (error) {
