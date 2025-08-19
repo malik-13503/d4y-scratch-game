@@ -22,12 +22,18 @@ interface ProfessionalWheelProps {
   disabled?: boolean;
   totalNumbers?: number;
   onInitiateSpin?: () => void;
+  gameData?: {
+    id: number;
+    totalNumbers: number;
+    freePlayStart: number;
+    freePlayEnd: number;
+  };
 }
 
 export const ProfessionalWheel = forwardRef<
   { triggerSpin: () => Promise<void> },
   ProfessionalWheelProps
->(({ onSpin, disabled = false, totalNumbers = 200, onInitiateSpin }, ref) => {
+>(({ onSpin, disabled = false, totalNumbers = 200, onInitiateSpin, gameData }, ref) => {
   const [isSpinning, setIsSpinning] = useState(false);
   const [rotation, setRotation] = useState(0);
   const [pointerRotation, setPointerRotation] = useState(0);
@@ -36,6 +42,7 @@ export const ProfessionalWheel = forwardRef<
   const [isFreePlay, setIsFreePlay] = useState(false);
   const [amountCharged, setAmountCharged] = useState<number>(0);
   const [availableNumbers, setAvailableNumbers] = useState<number[]>([]);
+  const [claimedNumbers, setClaimedNumbers] = useState<number[]>([]);
   const [paymentFailed, setPaymentFailed] = useState(false);
 
   // Expose the handleSpin function for external triggers
@@ -65,43 +72,40 @@ export const ProfessionalWheel = forwardRef<
     "#4CAF50", // Green
   ];
 
-  // Generate wheel numbers from available numbers for real-time updates
-  const generateWheelNumbers = (): number[] => {
+  // Generate ALL wheel numbers in game range, showing "Claimed" for taken numbers
+  const generateWheelNumbers = (): {number: number, isClaimed: boolean}[] => {
     const maxSegments = 50;
+    const gameRange = gameData?.totalNumbers || totalNumbers;
     
-    if (availableNumbers.length === 0) {
-      // Fallback to static generation if no available numbers yet
-      const segments = Math.min(maxSegments, totalNumbers);
-      const numbers: number[] = [];
-      for (let i = 0; i < segments; i++) {
-        const number = Math.floor((totalNumbers / segments) * i) + 1;
-        numbers.push(Math.min(number, totalNumbers));
-      }
-      return numbers;
-    }
-
-    // CRITICAL FIX: Always show all available numbers, even if there are only 1-3 left
-    // For visual purposes, if we have very few numbers, duplicate them to fill more segments
-    let numbers = [...availableNumbers];
+    // Generate ALL numbers in the game range (1 to gameRange)
+    const allNumbers: {number: number, isClaimed: boolean}[] = [];
     
-    if (numbers.length < 6 && numbers.length > 0) {
-      // If we have 1-5 numbers left, repeat them to create at least 6 visible segments
-      const repeats = Math.ceil(6 / numbers.length);
-      const originalNumbers = [...numbers];
-      numbers = [];
-      for (let i = 0; i < repeats; i++) {
-        numbers.push(...originalNumbers);
-      }
-      // Limit to avoid too many duplicates
-      numbers = numbers.slice(0, 12);
+    for (let i = 1; i <= gameRange; i++) {
+      allNumbers.push({
+        number: i,
+        isClaimed: !availableNumbers.includes(i) && gameRange <= maxSegments
+      });
     }
     
-    return numbers.slice(0, maxSegments);
+    // If game has more numbers than max segments, sample them evenly
+    if (gameRange > maxSegments) {
+      const sampledNumbers: {number: number, isClaimed: boolean}[] = [];
+      for (let i = 0; i < maxSegments; i++) {
+        const number = Math.floor((gameRange / maxSegments) * i) + 1;
+        sampledNumbers.push({
+          number: Math.min(number, gameRange),
+          isClaimed: !availableNumbers.includes(Math.min(number, gameRange))
+        });
+      }
+      return sampledNumbers;
+    }
+    
+    return allNumbers;
   };
 
-  const [wheelNumbers, setWheelNumbers] = useState<number[]>([]);
+  const [wheelNumbers, setWheelNumbers] = useState<{number: number, isClaimed: boolean}[]>([]);
 
-  // Fetch available numbers from API
+  // Fetch available numbers and calculate claimed numbers
   const fetchAvailableNumbers = async (gameId: number) => {
     try {
       const response = await fetch(`/api/games/${gameId}/available-numbers`, {
@@ -110,6 +114,17 @@ export const ProfessionalWheel = forwardRef<
       if (response.ok) {
         const data = await response.json();
         setAvailableNumbers(data.availableNumbers);
+        
+        // Calculate claimed numbers based on game range
+        const range = gameData?.totalNumbers || totalNumbers;
+        const claimed: number[] = [];
+        for (let i = 1; i <= range; i++) {
+          if (!data.availableNumbers.includes(i)) {
+            claimed.push(i);
+          }
+        }
+        setClaimedNumbers(claimed);
+        
         return data.availableNumbers;
       }
     } catch (error) {
@@ -221,12 +236,12 @@ export const ProfessionalWheel = forwardRef<
       // Calculate precise landing position using FROZEN wheel numbers
       const segmentAngle = 360 / frozenWheelNumbers.length;
       let targetSegmentIndex = frozenWheelNumbers.findIndex(
-        (num) => num === resultNumber,
+        (wheelItem) => wheelItem.number === resultNumber,
       );
 
       if (targetSegmentIndex === -1 && frozenWheelNumbers.length < 50) {
         // If exact number not found and we have space, add it to the wheel
-        frozenWheelNumbers.push(resultNumber);
+        frozenWheelNumbers.push({ number: resultNumber, isClaimed: false });
         targetSegmentIndex = frozenWheelNumbers.length - 1;
         setWheelNumbers([...frozenWheelNumbers]);
       } else if (targetSegmentIndex === -1) {
@@ -234,7 +249,7 @@ export const ProfessionalWheel = forwardRef<
         targetSegmentIndex = Math.floor(
           Math.random() * frozenWheelNumbers.length,
         );
-        frozenWheelNumbers[targetSegmentIndex] = resultNumber;
+        frozenWheelNumbers[targetSegmentIndex] = { number: resultNumber, isClaimed: false };
         setWheelNumbers([...frozenWheelNumbers]);
       }
 
@@ -302,7 +317,7 @@ export const ProfessionalWheel = forwardRef<
           setIsFreePlay(false);
           
           // Show specific error message for card expiration
-          if (paymentError.message && paymentError.message.includes('expired')) {
+          if (paymentError instanceof Error && paymentError.message.includes('expired')) {
             console.log("💳 Card expired - user needs to update payment method");
           }
         }
@@ -389,13 +404,15 @@ export const ProfessionalWheel = forwardRef<
                     }}
                   >
                     {/* Wheel Segments - up to 50 segments */}
-                    {wheelNumbers.map((number, index) => {
+                    {wheelNumbers.map((wheelItem, index) => {
                       const segmentCount = wheelNumbers.length;
                       const angle = (360 / segmentCount) * index;
                       const nextAngle = (360 / segmentCount) * (index + 1);
                       const colorIndex = index % segmentColors.length;
                       const color = segmentColors[colorIndex];
-                      const isAvailable = availableNumbers.includes(number);
+                      const number = wheelItem.number;
+                      const isClaimed = wheelItem.isClaimed;
+                      const isAvailable = !isClaimed;
 
                       return (
                         <div
@@ -483,6 +500,7 @@ export const ProfessionalWheel = forwardRef<
                               display: "flex",
                               alignItems: "center",
                               justifyContent: "center",
+                              flexDirection: "column",
                               textShadow: "2px 2px 4px rgba(0,0,0,0.9)",
                               backgroundColor: isAvailable
                                 ? "rgba(0,0,0,0.7)"
@@ -526,45 +544,22 @@ export const ProfessionalWheel = forwardRef<
                               letterSpacing: number >= 100 ? "-0.5px" : "0",
                             }}
                           >
-                            {isAvailable ? (
-                              number
-                            ) : (
-                              <span style={{ textDecoration: "line-through" }}>
-                                {number}
-                              </span>
+                            <div style={{ fontSize: 'inherit', lineHeight: '1' }}>
+                              {number}
+                            </div>
+                            {isClaimed && (
+                              <div style={{ 
+                                fontSize: segmentCount > 10 ? '6px' : '8px',
+                                lineHeight: '1',
+                                opacity: 0.9,
+                                color: '#9CA3AF',
+                                marginTop: '1px'
+                              }}>
+                                Claimed
+                              </div>
                             )}
                           </div>
-                          {/* Claimed indicator overlay - responsive for mobile */}
-                          {!isAvailable && (
-                            <div
-                              className="absolute"
-                              style={{
-                                position: "absolute",
-                                left: "50%",
-                                top: "50%",
-                                transform: `translate(-50%, -50%) translate(${Math.cos(((angle + 360 / segmentCount / 2 - 90) * Math.PI) / 180) * (numberRadius * 0.8)}px, ${Math.sin(((angle + 360 / segmentCount / 2 - 90) * Math.PI) / 180) * (numberRadius * 0.8)}px) rotate(${-rotation}deg)`,
-                                transition: isSpinning
-                                  ? `transform 8.0s cubic-bezier(0.25, 0.1, 0.25, 1.0)`
-                                  : "none",
-                                width: isMobile ? "14px" : "16px",
-                                height: isMobile ? "14px" : "16px",
-                                backgroundColor: "rgba(239, 68, 68, 0.95)",
-                                borderRadius: "50%",
-                                zIndex: 20,
-                                marginTop: isMobile ? "-18px" : "-20px",
-                                fontSize: isMobile ? "8px" : "9px",
-                                color: "white",
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "center",
-                                fontWeight: "bold",
-                                border: "1px solid rgba(255,255,255,0.8)",
-                                textShadow: "1px 1px 2px rgba(0,0,0,0.8)",
-                              }}
-                            >
-                              ✗
-                            </div>
-                          )}
+
                         </div>
                       );
                     })}

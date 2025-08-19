@@ -543,6 +543,12 @@ export default function GamePage() {
                     disabled={isSpinning}
                     totalNumbers={game?.totalNumbers || 200}
                     onInitiateSpin={handleInitiateSpin}
+                    gameData={game ? {
+                      id: game.id,
+                      totalNumbers: game.totalNumbers,
+                      freePlayStart: game.freePlayStart,
+                      freePlayEnd: game.freePlayEnd
+                    } : undefined}
                   />
                   
 
