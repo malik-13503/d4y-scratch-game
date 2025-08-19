@@ -1802,6 +1802,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const { gameId, number, cardNonce } = req.body;
       
+      console.log(`💳 RAW REQUEST DEBUG:`, {
+        gameId,
+        number,
+        cardNonce: cardNonce ? `${cardNonce.substring(0, 15)}...` : 'null',
+        cardNonceType: typeof cardNonce,
+        cardNonceLength: cardNonce ? cardNonce.length : 0
+      });
+      
       if (!gameId || !number) {
         return res.status(400).json({ message: "Game ID and number are required" });
       }
@@ -1921,6 +1929,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           // Determine payment method based on what's provided
           let paymentMethod = null;
           
+          console.log(`💳 PAYMENT METHOD DETECTION: cardNonce = ${cardNonce ? cardNonce.substring(0, 10) + '...' : 'null'}`);
+          
           if (cardNonce && cardNonce.startsWith('stored_card:')) {
             // Handle stored card approach
             const parts = cardNonce.split(':');
@@ -1930,9 +1940,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
               console.log(`💳 Using stored card method - Customer: ${squareCustomerId}, Card: ${squareCardId}`);
             }
           } else if (cardNonce && cardNonce.startsWith('cnon:')) {
-            // Handle fresh nonce approach
+            // Handle fresh nonce approach - PRIORITY: Use this for real payments
             paymentMethod = { type: 'nonce', nonce: cardNonce };
-            console.log(`💳 Using fresh card nonce for payment`);
+            console.log(`💳 ✅ Using fresh card nonce for REAL payment: ${cardNonce.substring(0, 15)}...`);
+          } else if (cardNonce && cardNonce.startsWith('CH')) {
+            // Handle Mastercard/Visa test nonce
+            paymentMethod = { type: 'nonce', nonce: cardNonce };
+            console.log(`💳 Using valid card nonce for payment`);
           } else if (user.squareCustomerId && defaultCard?.squareCardId) {
             // Fallback to stored Square customer/card
             paymentMethod = { 
@@ -1951,11 +1965,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
             });
           } else {
             // Last resort - try stored nonce (likely to fail)
-            if (defaultCard?.cardNonce && defaultCard.cardNonce !== "cnon_test") {
+            if (defaultCard?.cardNonce && defaultCard.cardNonce !== "cnon_test" && !defaultCard.cardNonce.includes('expired')) {
               paymentMethod = { type: 'nonce', nonce: defaultCard.cardNonce };
-              console.log(`💳 Last resort: using stored nonce (may be expired)`);
+              console.log(`💳 Last resort: using stored nonce (may be expired): ${defaultCard.cardNonce.substring(0, 10)}...`);
             } else {
-              console.log(`💳 ERROR: No valid payment method available`);
+              console.log(`💳 ERROR: No valid payment method available - cardNonce: ${cardNonce}, defaultCard.cardNonce: ${defaultCard?.cardNonce}`);
               return res.status(400).json({ 
                 success: false,
                 message: "No valid payment method found. Please update your payment card and try again."
