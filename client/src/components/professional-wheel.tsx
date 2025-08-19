@@ -416,7 +416,7 @@ export const ProfessionalWheel = forwardRef<
                       
                       // Debug logging for claimed numbers
                       if (number === 5) {
-                        console.log(`Number 5: isClaimed=${isClaimed}, availableNumbers includes 5:`, availableNumbers.includes(5));
+                        console.log(`Number 5: isClaimed=${isClaimed}, tick symbol should show:`, isClaimed);
                       }
 
                       return (
@@ -560,23 +560,23 @@ export const ProfessionalWheel = forwardRef<
                                 position: "absolute",
                                 left: "50%",
                                 top: "50%",
-                                transform: `translate(-50%, -50%) translate(${Math.cos(((angle - 90) * Math.PI) / 180) * (numberRadius * 0.4)}px, ${Math.sin(((angle - 90) * Math.PI) / 180) * (numberRadius * 0.4)}px) rotate(${-rotation}deg)`,
+                                transform: `translate(-50%, -50%) translate(${Math.cos(((angle - 90) * Math.PI) / 180) * (numberRadius * 0.5)}px, ${Math.sin(((angle - 90) * Math.PI) / 180) * (numberRadius * 0.5)}px) rotate(${-rotation}deg)`,
                                 transition: isSpinning
                                   ? `transform 8.0s cubic-bezier(0.25, 0.1, 0.25, 1.0)`
                                   : "none",
-                                width: isMobile ? "16px" : "20px",
-                                height: isMobile ? "16px" : "20px",
+                                width: isMobile ? "20px" : "24px",
+                                height: isMobile ? "20px" : "24px",
                                 borderRadius: "50%",
-                                backgroundColor: "rgba(34, 197, 94, 0.95)",
+                                backgroundColor: "rgb(34, 197, 94)",
                                 display: "flex",
                                 alignItems: "center",
                                 justifyContent: "center",
-                                fontSize: isMobile ? "8px" : "10px",
+                                fontSize: isMobile ? "10px" : "12px",
                                 color: "white",
                                 fontWeight: "bold",
-                                border: "1px solid rgba(34, 197, 94, 1)",
-                                boxShadow: "0 0 6px rgba(34, 197, 94, 0.6)",
-                                zIndex: 20,
+                                border: "2px solid white",
+                                boxShadow: "0 0 10px rgba(34, 197, 94, 0.8), 0 0 20px rgba(34, 197, 94, 0.4)",
+                                zIndex: 25,
                               }}
                             >
                               ✓
