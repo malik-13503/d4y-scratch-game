@@ -15,7 +15,7 @@ import { queryClient, apiRequest } from "@/lib/queryClient";
 import { logout } from "@/lib/auth";
 import { CardSetup } from "@/components/payment/card-setup";
 import EnhancedCardManagement from "@/components/payment/enhanced-card-management";
-import { CardOnFileDemo } from "@/components/payment/card-on-file-demo";
+import { RealCardManagement } from "@/components/payment/real-card-management";
 import { 
   User, 
   Trophy, 
@@ -1311,7 +1311,7 @@ export default function Dashboard() {
 
           {/* Cards Tab */}
           <TabsContent value="cards" className="mt-6">
-            <CardOnFileDemo />
+            <RealCardManagement />
           </TabsContent>
         </Tabs>
       </div>

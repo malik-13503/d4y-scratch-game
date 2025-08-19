@@ -1,10 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Separator } from "@/components/ui/separator";
 import { 
@@ -20,6 +18,7 @@ import {
 } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { SquareCardForm } from "./square-card-form";
 
 interface StoredCard {
   id: number;
@@ -33,7 +32,7 @@ interface StoredCard {
   createdAt: string;
 }
 
-export function CardOnFileDemo() {
+export function RealCardManagement() {
   const [showAddCard, setShowAddCard] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -48,24 +47,6 @@ export function CardOnFileDemo() {
     retry: false
   });
 
-  // Real Square Card Form Integration
-  const [squareCardForm, setSquareCardForm] = useState<any>(null);
-  
-  // Initialize Square payment form when adding card
-  const initializeSquareForm = async () => {
-    try {
-      // This would be integrated with actual Square Web SDK
-      console.log("Initializing Square payment form for real card processing");
-      setShowAddCard(true);
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to initialize payment form",
-        variant: "destructive",
-      });
-    }
-  };
-
   // Delete card mutation
   const deleteCardMutation = useMutation({
     mutationFn: async (cardId: number) => {
@@ -75,13 +56,13 @@ export function CardOnFileDemo() {
       queryClient.invalidateQueries({ queryKey: ["/api/payment-cards"] });
       toast({
         title: "Success",
-        description: "Card deleted successfully",
+        description: "Card removed successfully",
       });
     },
     onError: (error: any) => {
       toast({
         title: "Error",
-        description: error.message || "Failed to delete card",
+        description: error.message || "Failed to remove card",
         variant: "destructive",
       });
     },
@@ -108,33 +89,14 @@ export function CardOnFileDemo() {
     },
   });
 
-  // Real payment processing - integrates with actual game flow
-  const processRealPayment = async (gameId: number, numberSelected: number) => {
-    try {
-      const response = await apiRequest("POST", "/api/process-payment", {
-        gameId,
-        number: numberSelected
-      });
-      
-      toast({
-        title: "Payment Successful!",
-        description: `Payment processed successfully using your stored card`,
-      });
-      
-      return response;
-    } catch (error: any) {
-      toast({
-        title: "Payment Failed",
-        description: error.message || "Payment processing failed",
-        variant: "destructive",
-      });
-      throw error;
-    }
-  };
-
-  const handleAddCard = () => {
-    // Redirect to real Square payment form integration
-    initializeSquareForm();
+  const handleCardAdded = () => {
+    // Refresh the cards list when a new card is added
+    queryClient.invalidateQueries({ queryKey: ["/api/payment-cards"] });
+    setShowAddCard(false);
+    toast({
+      title: "Success",
+      description: "Payment card added successfully!",
+    });
   };
 
   const getCardBrandIcon = (brand: string) => {
@@ -156,36 +118,36 @@ export function CardOnFileDemo() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Shield className="h-5 w-5 text-blue-500" />
-            Square Card on File Demo
+            Payment Card Management
           </CardTitle>
         </CardHeader>
         <CardContent>
           <Alert className="mb-4">
             <Lock className="h-4 w-4" />
             <AlertDescription>
-              This demo shows how users can securely store their payment cards with Square 
-              and use them for future payments without re-entering card details.
+              Securely store your payment cards with Square for fast, automatic payments when you spin the wheel.
+              Your card information is protected with bank-level security.
             </AlertDescription>
           </Alert>
 
           {/* Stored Cards Section */}
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold">Stored Payment Cards</h3>
+              <h3 className="text-lg font-semibold">Your Payment Cards</h3>
               <Button
                 onClick={() => setShowAddCard(!showAddCard)}
                 size="sm"
                 className="flex items-center gap-2"
               >
                 <Plus className="h-4 w-4" />
-                Add Card
+                Add New Card
               </Button>
             </div>
 
             {cardsLoading && (
               <div className="flex items-center justify-center p-8">
                 <Loader2 className="h-6 w-6 animate-spin" />
-                <span className="ml-2">Loading cards...</span>
+                <span className="ml-2">Loading your cards...</span>
               </div>
             )}
 
@@ -193,7 +155,7 @@ export function CardOnFileDemo() {
               <Alert variant="destructive">
                 <AlertCircle className="h-4 w-4" />
                 <AlertDescription>
-                  Failed to load stored cards. Please try again.
+                  Failed to load your stored cards. Please refresh the page and try again.
                 </AlertDescription>
               </Alert>
             )}
@@ -202,7 +164,7 @@ export function CardOnFileDemo() {
               <Alert>
                 <CreditCard className="h-4 w-4" />
                 <AlertDescription>
-                  No stored cards found. Add a card to enable automatic payments.
+                  No payment cards found. Add a card to enable automatic payments when you play games.
                 </AlertDescription>
               </Alert>
             )}
@@ -261,81 +223,27 @@ export function CardOnFileDemo() {
             {showAddCard && (
               <Card className="p-4 border-dashed">
                 <div className="space-y-4">
-                  <Label htmlFor="cardNonce">Card Nonce (for testing)</Label>
-                  <Input
-                    id="cardNonce"
-                    placeholder="Enter Square card nonce (e.g., cnon:test-card-nonce)"
-                    value={cardNonce}
-                    onChange={(e) => setCardNonce(e.target.value)}
+                  <h4 className="font-medium">Add New Payment Card</h4>
+                  <SquareCardForm
+                    onSuccess={handleCardAdded}
+                    onCancel={() => setShowAddCard(false)}
                   />
-                  <Label htmlFor="cardholderName">Cardholder Name</Label>
-                  <Input
-                    id="cardholderName"
-                    placeholder="Enter cardholder name"
-                    value={cardholderName}
-                    onChange={(e) => setCardholderName(e.target.value)}
-                  />
-                  <div className="flex gap-2">
-                    <Button
-                      onClick={handleAddCard}
-                      disabled={addCardMutation.isPending}
-                      className="flex items-center gap-2"
-                    >
-                      {addCardMutation.isPending ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : (
-                        <Plus className="h-4 w-4" />
-                      )}
-                      Add Card
-                    </Button>
-                    <Button
-                      variant="outline"
-                      onClick={() => setShowAddCard(false)}
-                    >
-                      Cancel
-                    </Button>
-                  </div>
                 </div>
               </Card>
             )}
 
             <Separator />
 
-            {/* Test Payment Section */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold">Test Payment with Stored Card</h3>
-              <div className="flex items-center gap-4">
-                <div className="flex-1">
-                  <Label htmlFor="testAmount">Test Amount ($)</Label>
-                  <Input
-                    id="testAmount"
-                    type="number"
-                    step="0.01"
-                    min="1"
-                    max="100"
-                    value={testAmount}
-                    onChange={(e) => setTestAmount(e.target.value)}
-                    placeholder="5.00"
-                  />
-                </div>
-                <Button
-                  onClick={() => testPaymentMutation.mutate()}
-                  disabled={testPaymentMutation.isPending || !storedCards?.length}
-                  className="mt-6"
-                >
-                  {testPaymentMutation.isPending ? (
-                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                  ) : (
-                    <CreditCard className="h-4 w-4 mr-2" />
-                  )}
-                  Test Payment
-                </Button>
+            {/* Information Section */}
+            <div className="space-y-2">
+              <h3 className="text-lg font-semibold">How It Works</h3>
+              <div className="text-sm text-muted-foreground space-y-2">
+                <p>• Add your payment card securely through Square's encrypted payment form</p>
+                <p>• Your card is stored safely with Square, never on our servers</p>
+                <p>• When you spin the wheel, your default card is automatically charged</p>
+                <p>• Set any card as your default for automatic payments</p>
+                <p>• Remove cards anytime from this dashboard</p>
               </div>
-              {!storedCards?.length && (
-                <p className="text-sm text-muted-foreground">
-                  Add a stored card first to test payments
-                </p>
-              )}
             </div>
           </div>
         </CardContent>

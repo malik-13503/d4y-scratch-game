@@ -16,6 +16,8 @@ This project is a real-time web application for interactive prize games, primari
 - **Winners Tab Complete**: Added comprehensive Winners list in admin dashboard showing all completed games with winner details
 - **Email Templates Active**: Professional winner notification and game completion emails fully operational via Resend service
 - **Deployment Fixes Applied**: Resolved Docker registry upload failures and digest mismatch errors with comprehensive deployment optimizations (January 19, 2025)
+- **Square Card on File Integration**: Implemented full Square Card on File system with secure card storage and automatic payment processing (January 19, 2025)
+- **Real Payment Card Management**: Added comprehensive card management interface for users to securely add, manage, and use stored payment cards (January 19, 2025)
 
 ## User Preferences
 Preferred communication style: Simple, everyday language.
@@ -46,7 +48,7 @@ Preferred communication style: Simple, everyday language.
 - **Game System**: Configurable wheel-spin games with professional animations, customizable prizes, and real-time updates. Supports flexible number ranges and "free play" zones. Includes age verification and a 50-segment wheel limit.
 - **Admin Dashboard**: Comprehensive management of games, player analytics, system settings, and real-time monitoring. Includes secure admin authentication with role-based access, image upload for prizes, and game deletion.
 - **Authentication & Security**: Secure login, Bcrypt-based password hashing, robust session management, and admin-only access controls.
-- **Payment System**: Integrated real-time payment processing with advanced card management features.
+- **Payment System**: Integrated real-time payment processing with Square Card on File feature for secure card storage and automatic charging.
 - **Email Notifications**: Professional, branded email templates.
 - **User Engagement**: Real-time recent numbers display, enhanced user dashboard with activity timelines and statistics, and an achievement system.
 - **Informational Pages**: Comprehensive pages for game info, how-to-play (with in-game instructions and "no purchase necessary" emphasis), prize rules, instant play, free spins, contact us, terms & conditions, and privacy policy. Includes detailed official rules documentation and generic game descriptions to support variable number ranges.

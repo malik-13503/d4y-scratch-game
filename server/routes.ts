@@ -1650,6 +1650,88 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Add payment card to Card on File system
+  app.post("/api/payment-cards", async (req, res) => {
+    try {
+      const userId = (req.session as any)?.userId;
+      if (!userId) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+
+      const { cardNonce, cardLast4, cardBrand, expiryMonth, expiryYear, cardholderName } = req.body;
+      if (!cardNonce) {
+        return res.status(400).json({ message: "Card nonce is required" });
+      }
+
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      // Create Square customer if they don't have one
+      let squareCustomerId = user.squareCustomerId;
+      if (!squareCustomerId) {
+        try {
+          const squareCustomer = await squareService.createCustomer(
+            user.firstName,
+            user.lastName,
+            user.email
+          );
+          squareCustomerId = squareCustomer.id;
+          
+          // Update user with Square customer ID
+          await storage.updateUser(userId, { squareCustomerId });
+        } catch (squareError) {
+          console.error("Failed to create Square customer:", squareError);
+          return res.status(500).json({ message: "Payment setup failed. Please try again." });
+        }
+      }
+
+      // Create card on file with Square
+      const squareCard = await squareService.createCardOnFile(
+        squareCustomerId,
+        cardNonce,
+        cardholderName || `${user.firstName} ${user.lastName}`
+      );
+
+      // Check if this is the user's first card to set as default
+      const existingCards = await storage.getPaymentCardsByUserId(userId);
+      const isFirstCard = !existingCards || existingCards.length === 0;
+
+      // Store card information in our database
+      const cardData = {
+        userId: userId,
+        squareCardId: squareCard.id,
+        cardLast4: squareCard.last4,
+        cardBrand: squareCard.cardBrand,
+        expiryMonth: squareCard.expMonth,
+        expiryYear: squareCard.expYear,
+        cardholderName: squareCard.cardholderName,
+        isDefault: isFirstCard,
+        isActive: true
+      };
+
+      const savedCard = await storage.createPaymentCard(cardData);
+
+      // Set cardOnFile to true for the user
+      await storage.updateUser(userId, { cardOnFile: true });
+
+      console.log(`✅ Card on file created for user ${userId}: ${squareCard.last4}`);
+
+      res.json({
+        id: savedCard.id,
+        cardLast4: savedCard.cardLast4,
+        cardBrand: savedCard.cardBrand,
+        isDefault: savedCard.isDefault,
+        message: "Payment card added successfully"
+      });
+
+    } catch (error: any) {
+      console.error("Add payment card error:", error);
+      res.status(500).json({ message: "Failed to add payment card", error: error.message });
+    }
+  });
+
   // Get user's payment cards endpoint
   app.get("/api/payment-cards", async (req, res) => {
     try {

@@ -8,11 +8,12 @@ import { apiRequest } from "@/lib/queryClient";
 import { useQueryClient } from "@tanstack/react-query";
 
 interface SquareCardFormProps {
-  onClose: () => void;
-  onSuccess: () => void;
+  onClose?: () => void;
+  onSuccess?: () => void;
+  onCancel?: () => void;
 }
 
-export function SquareCardForm({ onClose, onSuccess }: SquareCardFormProps) {
+export function SquareCardForm({ onClose, onSuccess, onCancel }: SquareCardFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [payments, setPayments] = useState<any>(null);
   const [card, setCard] = useState<any>(null);
