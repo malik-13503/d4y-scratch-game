@@ -1571,6 +1571,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.log("Production mode: Testing card with verification payment...");
         
         try {
+          // Create card on file with Square
+          const cardOnFile = await squareService.createCardOnFile(
+            squareCustomerId,
+            cardNonce,
+            `${user.firstName} ${user.lastName}`
+          );
+
+          // Store card information in our database
+          const savedCard = await storage.createPaymentCard({
+            userId: userId,
+            squareCardId: cardOnFile.id,
+            cardLast4: cardOnFile.last4,
+            cardBrand: cardOnFile.cardBrand,
+            expiryMonth: cardOnFile.expMonth,
+            expiryYear: cardOnFile.expYear,
+            cardholderName: cardOnFile.cardholderName,
+            isDefault: true,
+            isActive: true
+          });
+
+          // Update user to indicate they have a card on file
+          await storage.updateUser(userId, {
+            cardOnFile: true,
+            defaultCardId: savedCard.id
+          });
+
           // Test card with minimal charge to verify it works
           const testResult = await squareService.processPayment(
             0.01, // 1 cent test charge
@@ -1621,6 +1647,114 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error: any) {
       console.error("Add card error:", error);
       res.status(400).json({ message: "Failed to add card", error: error.message });
+    }
+  });
+
+  // Get user's payment cards endpoint
+  app.get("/api/payment-cards", async (req, res) => {
+    try {
+      const userId = (req.session as any)?.userId;
+      if (!userId) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+
+      const cards = await storage.getPaymentCardsByUserId(userId);
+      
+      // Return only safe card information
+      const safeCards = cards.map(card => ({
+        id: card.id,
+        cardLast4: card.cardLast4,
+        cardBrand: card.cardBrand,
+        expiryMonth: card.expiryMonth,
+        expiryYear: card.expiryYear,
+        cardholderName: card.cardholderName,
+        isDefault: card.isDefault,
+        isActive: card.isActive,
+        createdAt: card.createdAt
+      }));
+
+      res.json(safeCards);
+    } catch (error: any) {
+      console.error("Get cards error:", error);
+      res.status(500).json({ message: "Failed to get payment cards" });
+    }
+  });
+
+  // Delete payment card endpoint
+  app.delete("/api/payment-cards/:cardId", async (req, res) => {
+    try {
+      const userId = (req.session as any)?.userId;
+      if (!userId) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+
+      const cardId = parseInt(req.params.cardId);
+      if (!cardId) {
+        return res.status(400).json({ message: "Invalid card ID" });
+      }
+
+      // Verify the card belongs to the user
+      const card = await storage.getPaymentCard(cardId);
+      if (!card || card.userId !== userId) {
+        return res.status(404).json({ message: "Card not found" });
+      }
+
+      // Delete the card
+      const deleted = await storage.deletePaymentCard(cardId);
+      if (!deleted) {
+        return res.status(500).json({ message: "Failed to delete card" });
+      }
+
+      // If this was the default card, update user's card status
+      if (card.isDefault) {
+        const remainingCards = await storage.getPaymentCardsByUserId(userId);
+        if (remainingCards.length === 0) {
+          await storage.updateUser(userId, { 
+            cardOnFile: false, 
+            defaultCardId: null 
+          });
+        } else {
+          // Set another card as default
+          await storage.setDefaultPaymentCard(userId, remainingCards[0].id);
+        }
+      }
+
+      res.json({ message: "Card deleted successfully" });
+    } catch (error: any) {
+      console.error("Delete card error:", error);
+      res.status(500).json({ message: "Failed to delete card" });
+    }
+  });
+
+  // Set default payment card endpoint
+  app.put("/api/payment-cards/:cardId/set-default", async (req, res) => {
+    try {
+      const userId = (req.session as any)?.userId;
+      if (!userId) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+
+      const cardId = parseInt(req.params.cardId);
+      if (!cardId) {
+        return res.status(400).json({ message: "Invalid card ID" });
+      }
+
+      // Verify the card belongs to the user
+      const card = await storage.getPaymentCard(cardId);
+      if (!card || card.userId !== userId) {
+        return res.status(404).json({ message: "Card not found" });
+      }
+
+      // Set as default
+      const success = await storage.setDefaultPaymentCard(userId, cardId);
+      if (!success) {
+        return res.status(500).json({ message: "Failed to set default card" });
+      }
+
+      res.json({ message: "Default card updated successfully" });
+    } catch (error: any) {
+      console.error("Set default card error:", error);
+      res.status(500).json({ message: "Failed to set default card" });
     }
   });
 
@@ -1898,16 +2032,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let paymentResult = null;
       let paymentSucceeded = false;
       
-
-      
       // CHECK: Is this number still available before payment?
       const availableBeforePayment = await storage.getAvailableNumbers(gameId);
 
-      
       try {
         if (!isProduction) {
           // Sandbox mode - simulate payment
-
           paymentResult = {
             id: `sandbox_payment_${Date.now()}`,
             status: "COMPLETED", 
@@ -1915,89 +2045,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
           };
           paymentSucceeded = true;
         } else {
-          // Production payment processing
-
+          // Production payment processing using stored card
+          console.log(`Using stored card for payment: ${defaultCard.squareCardId} for customer: ${user.squareCustomerId}`);
           
-          // Determine payment method based on what's provided
-          let paymentMethod = null;
-          
-
-          
-          // Use stored card nonce if frontend sent fallback message
-          let actualCardNonce = cardNonce;
-          if (cardNonce === 'needs_fresh_card' && defaultCard.cardNonce) {
-            actualCardNonce = defaultCard.cardNonce;
-
-          }
-          
-          if (actualCardNonce && actualCardNonce.startsWith('stored_card:')) {
-            // Handle stored card approach
-            const parts = cardNonce.split(':');
-            if (parts.length === 3) {
-              const [, squareCardId, squareCustomerId] = parts;
-              paymentMethod = { type: 'stored_card', squareCardId, squareCustomerId };
-
-            }
-          } else if (actualCardNonce && actualCardNonce.startsWith('cnon:')) {
-            // Handle fresh nonce approach - PRIORITY: Use this for real payments
-            paymentMethod = { type: 'nonce', nonce: actualCardNonce };
-
-          } else if (actualCardNonce && actualCardNonce.startsWith('CH')) {
-            // Handle Mastercard/Visa test nonce
-            paymentMethod = { type: 'nonce', nonce: actualCardNonce };
-
-          } else if (user.squareCustomerId && defaultCard?.squareCardId) {
-            // Fallback to stored Square customer/card
-            paymentMethod = { 
-              type: 'stored_card', 
-              squareCardId: defaultCard.squareCardId, 
-              squareCustomerId: user.squareCustomerId 
-            };
-
-          } else if (actualCardNonce && (actualCardNonce === 'needs_fresh_card' || actualCardNonce === 'needs_card_update')) {
-            // Handle case where card exists but needs fresh nonce
-
-            return res.status(400).json({ 
-              success: false,
-              message: "To complete your purchase, please go to your dashboard and update your payment card. This ensures secure processing of your payment.",
-              requiresCardUpdate: true
-            });
-          } else {
-            // Last resort - try stored nonce (likely to fail)
-            if (defaultCard?.cardNonce && defaultCard.cardNonce !== "cnon_test" && !defaultCard.cardNonce.includes('expired')) {
-              paymentMethod = { type: 'nonce', nonce: defaultCard.cardNonce };
-
-            } else {
-
-              return res.status(400).json({ 
-                success: false,
-                message: "No valid payment method found. Please update your payment card and try again."
-              });
-            }
-          }
-
-          // Attempt REAL payment processing
-
-          
-          if (paymentMethod && paymentMethod.type === 'stored_card') {
-            paymentResult = await squareService.chargeCard(
-              chargeAmount,
-              "USD",
-              paymentMethod.squareCardId,
-              paymentMethod.squareCustomerId
-            );
-          } else if (paymentMethod && paymentMethod.type === 'nonce') {
-            paymentResult = await squareService.processPayment(
-              chargeAmount,
-              "USD",
-              paymentMethod.nonce,
-              `Payment for number ${number} in game ${gameId}`
-            );
-          } else {
-            throw new Error("Invalid payment method configuration");
-          }
+          // Use Square Card on File to charge the stored card
+          paymentResult = await squareService.chargeStoredCard(
+            chargeAmount,
+            "USD",
+            defaultCard.squareCardId,
+            user.squareCustomerId,
+            `Payment for number ${number} in game ${game.name}`
+          );
 
           paymentSucceeded = true;
+          console.log(`Payment successful with stored card: ${paymentResult.id}`);
         }
       } catch (paymentError: any) {
         console.error("Payment failed for number:", paymentError);

@@ -203,6 +203,86 @@ export class SquareService {
     }
   }
 
+  async createCardOnFile(customerId: string, cardNonce: string, cardholderName?: string) {
+    try {
+      const requestBody = {
+        source_id: cardNonce,
+        idempotency_key: randomUUID(),
+        card: {
+          cardholder_name: cardholderName || "Cardholder"
+        }
+      };
+
+      const response = await this.makeRequest(`/customers/${customerId}/cards`, "POST", requestBody);
+      
+      if (response.card) {
+        return {
+          id: response.card.id,
+          last4: response.card.last_4,
+          cardBrand: response.card.card_brand,
+          cardType: response.card.card_type,
+          expMonth: response.card.exp_month,
+          expYear: response.card.exp_year,
+          cardholderName: response.card.cardholder_name
+        };
+      } else {
+        throw new Error("Failed to create card on file");
+      }
+    } catch (error) {
+      console.error("Error creating card on file:", error);
+      throw error;
+    }
+  }
+
+  async processPaymentWithStoredCard(customerId: string, cardId: string, amount: number, currency: string = "USD", note?: string) {
+    try {
+      const requestBody = {
+        source_id: cardId,
+        amount_money: {
+          amount: Math.round(amount * 100), // Convert to cents
+          currency: currency,
+        },
+        idempotency_key: randomUUID(),
+        autocomplete: true,
+        note: note || "Game spin payment with stored card",
+        accept_partial_authorization: false,
+        customer_id: customerId
+      };
+
+      const response = await this.makeRequest("/payments", "POST", requestBody);
+      
+      if (response.payment) {
+        const cardDetails = response.payment.card_details?.card || {};
+        
+        return {
+          id: response.payment.id,
+          status: response.payment.status,
+          receiptUrl: response.payment.receipt_url,
+          cardDetails: {
+            last4: cardDetails.last_4,
+            cardBrand: cardDetails.card_brand,
+            cardType: cardDetails.card_type
+          }
+        };
+      } else {
+        throw new Error("Payment failed - no payment object returned");
+      }
+    } catch (error) {
+      console.error("Error processing payment with stored card:", error);
+      
+      // Check for specific error types
+      if (error.message && error.message.includes('CVV_FAILURE')) {
+        throw new Error("Card verification failed. Please update your payment method.");
+      } else if (error.message && error.message.includes('GENERIC_DECLINE')) {
+        throw new Error("Payment was declined by your bank. Please try another payment method.");
+      } else if (error.message && error.message.includes('CARD_EXPIRED')) {
+        throw new Error("Your stored card has expired. Please update your payment method.");
+      }
+      
+      throw new Error("Payment processing failed. Please try again or update your payment method.");
+    }
+  }
+
   async verifyCard(cardNonce: string) {
     try {
       // Instead of processing a payment, we'll verify the card by attempting to create a card on file

@@ -327,6 +327,12 @@ export class DatabaseStorage implements IStorage {
     return (result.rowCount || 0) > 0;
   }
 
+  async getDefaultPaymentCard(userId: number): Promise<PaymentCard | undefined> {
+    const [card] = await db.select().from(paymentCards)
+      .where(and(eq(paymentCards.userId, userId), eq(paymentCards.isDefault, true)));
+    return card;
+  }
+
   async setDefaultPaymentCard(userId: number, cardId: number): Promise<boolean> {
     try {
       // Remove default from all user's cards
