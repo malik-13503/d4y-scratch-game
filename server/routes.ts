@@ -1929,9 +1929,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
           // Determine payment method based on what's provided
           let paymentMethod = null;
           
-          console.log(`💳 PAYMENT METHOD DETECTION: cardNonce = ${cardNonce ? cardNonce.substring(0, 10) + '...' : 'null'}`);
+          console.log(`💳 PAYMENT METHOD DETECTION: frontendCardNonce = ${cardNonce ? cardNonce.substring(0, 10) + '...' : 'null'}, storedCardNonce = ${defaultCard.cardNonce ? defaultCard.cardNonce.substring(0, 10) + '...' : 'null'}`);
           
-          if (cardNonce && cardNonce.startsWith('stored_card:')) {
+          // Use stored card nonce if frontend sent fallback message
+          let actualCardNonce = cardNonce;
+          if (cardNonce === 'needs_fresh_card' && defaultCard.cardNonce) {
+            actualCardNonce = defaultCard.cardNonce;
+            console.log(`💳 Using stored card nonce instead of frontend fallback: ${actualCardNonce.substring(0, 15)}...`);
+          }
+          
+          if (actualCardNonce && actualCardNonce.startsWith('stored_card:')) {
             // Handle stored card approach
             const parts = cardNonce.split(':');
             if (parts.length === 3) {
