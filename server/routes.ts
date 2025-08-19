@@ -1929,12 +1929,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
               paymentMethod = { type: 'stored_card', squareCardId, squareCustomerId };
               console.log(`💳 Using stored card method - Customer: ${squareCustomerId}, Card: ${squareCardId}`);
             }
-          } else if (cardNonce && cardNonce === 'needs_fresh_card') {
+          } else if (cardNonce && (cardNonce === 'needs_fresh_card' || cardNonce === 'needs_card_update')) {
             // Handle case where card exists but needs fresh nonce
             console.log(`💳 Card exists but needs fresh nonce - requesting payment method update`);
             return res.status(400).json({ 
               success: false,
-              message: "Your payment method needs to be updated for security. Please go to your dashboard and re-add your payment card to continue playing.",
+              message: "To complete your purchase, please go to your dashboard and update your payment card. This ensures secure processing of your payment.",
               requiresCardUpdate: true
             });
           } else if (cardNonce && cardNonce.startsWith('cnon:')) {

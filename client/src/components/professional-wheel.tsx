@@ -15,6 +15,7 @@ import {
 import { Gift, DollarSign, Sparkles, Play } from "lucide-react";
 import { Confetti } from "./confetti";
 import { WheelPointer } from "./wheel-pointer";
+import { QuickCardUpdate } from "./payment/quick-card-update";
 import logoPath from "@assets/logo_1751956932645.png";
 
 interface ProfessionalWheelProps {
@@ -44,6 +45,7 @@ export const ProfessionalWheel = forwardRef<
   const [availableNumbers, setAvailableNumbers] = useState<number[]>([]);
   const [claimedNumbers, setClaimedNumbers] = useState<number[]>([]);
   const [paymentFailed, setPaymentFailed] = useState(false);
+  const [showCardUpdate, setShowCardUpdate] = useState(false);
 
   // Expose the handleSpin function for external triggers
   useImperativeHandle(ref, () => ({
@@ -75,24 +77,30 @@ export const ProfessionalWheel = forwardRef<
         return `stored_card:${cardData.squareCardId}:${cardData.squareCustomerId}`;
       }
 
-      // For cards without Square IDs, we'll create a fresh nonce using Square Web SDK
+      // For cards without Square IDs, create a fresh nonce using stored card info
+      // This requires the Square Web SDK to be loaded
       // @ts-ignore
       if (!window.Square) {
         console.error("Square Web SDK not loaded");
-        return null;
+        return "needs_fresh_card";
       }
 
-      // @ts-ignore
-      const payments = window.Square.payments(
-        import.meta.env.VITE_SQUARE_APPLICATION_ID,
-        import.meta.env.VITE_SQUARE_ENVIRONMENT
-      );
+      try {
+        // @ts-ignore
+        const payments = window.Square.payments(
+          import.meta.env.VITE_SQUARE_APPLICATION_ID,
+          import.meta.env.VITE_SQUARE_ENVIRONMENT
+        );
 
-      // Create a temporary card form to generate a fresh nonce
-      // This approach would require the user to re-enter card details
-      // For now, return an indicator that we need a different payment method
-      console.log("Card exists but requires fresh nonce generation - requesting payment method update");
-      return "needs_fresh_card";
+        // For existing cards, we'll use the stored card approach if available
+        // or guide the user to update their payment method
+        console.log("Card found but requires payment method update for security");
+        return "needs_card_update";
+        
+      } catch (error) {
+        console.error("Square SDK error:", error);
+        return "needs_fresh_card";
+      }
       
     } catch (error) {
       console.error("Error generating fresh card nonce:", error);
@@ -336,10 +344,10 @@ export const ProfessionalWheel = forwardRef<
           // Step 1: Generate fresh card nonce from Square for this payment
           const cardNonce = await generateFreshCardNonce();
           if (!cardNonce) {
-            throw new Error("Failed to generate payment token. Please check your payment method.");
+            throw new Error("Failed to generate payment token. Please update your payment method in your dashboard.");
           }
           
-          console.log("💳 Generated fresh card nonce for payment");
+          console.log("💳 Generated payment token for processing");
           
           // Step 2: Call the payment processing endpoint with fresh nonce
           const paymentResponse = await fetch("/api/process-payment", {
@@ -371,9 +379,9 @@ export const ProfessionalWheel = forwardRef<
           setPaymentFailed(true);
           setIsFreePlay(false);
           
-          // Show specific error message for card expiration
-          if (paymentError instanceof Error && paymentError.message.includes('expired')) {
-            console.log("💳 Card expired - user needs to update payment method");
+          // Check if this is a card update requirement
+          if (paymentError instanceof Error && paymentError.message.includes("update your payment")) {
+            setShowCardUpdate(true);
           }
         }
 
@@ -806,6 +814,16 @@ export const ProfessionalWheel = forwardRef<
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Quick Card Update Modal */}
+      <QuickCardUpdate 
+        isOpen={showCardUpdate}
+        onClose={() => setShowCardUpdate(false)}
+        onUpdateComplete={() => {
+          setShowCardUpdate(false);
+          // Optionally refresh the page or reset state
+        }}
+      />
     </div>
   );
 });
