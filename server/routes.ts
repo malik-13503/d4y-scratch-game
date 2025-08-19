@@ -1958,20 +1958,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
           // Attempt REAL payment processing
           console.log(`💳 CHARGING CARD: About to charge $${chargeAmount} to card ending in ${defaultCard.cardLast4}`);
           
-          if (paymentMethod.type === 'stored_card') {
+          if (paymentMethod && paymentMethod.type === 'stored_card') {
             paymentResult = await squareService.chargeCard(
               chargeAmount,
               "USD",
               paymentMethod.squareCardId,
               paymentMethod.squareCustomerId
             );
-          } else {
+          } else if (paymentMethod && paymentMethod.type === 'nonce') {
             paymentResult = await squareService.processPayment(
               chargeAmount,
               "USD",
               paymentMethod.nonce,
               `Payment for number ${number} in game ${gameId}`
             );
+          } else {
+            throw new Error("Invalid payment method configuration");
           }
           console.log(`💳 PAYMENT SUCCESS:`, {
             paymentId: paymentResult.id,
@@ -2127,7 +2129,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Payment card management routes
-  app.get("/api/payment-cards", requireAuth, async (req, res) => {
+  // User authentication middleware for payment cards
+  const requireUserAuth = (req: any, res: any, next: any) => {
+    const userId = (req.session as any)?.userId;
+    console.log("Payment card auth check - Session data:", {
+      sessionExists: !!req.session,
+      userId: userId,
+      sessionKeys: req.session ? Object.keys(req.session) : [],
+      fullSession: req.session
+    });
+    
+    if (!userId) {
+      console.log("Payment card authentication failed - no userId in session");
+      return res.status(401).json({ message: "Authentication required" });
+    }
+    console.log("Payment card authentication successful for user:", userId);
+    next();
+  };
+
+  app.get("/api/payment-cards", requireUserAuth, async (req, res) => {
     try {
       const userId = (req.session as any).userId!;
       const cards = await storage.getPaymentCardsByUserId(userId);
@@ -2138,7 +2158,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/payment-cards", requireAuth, async (req, res) => {
+  app.post("/api/payment-cards", requireUserAuth, async (req, res) => {
     try {
       const userId = (req.session as any).userId!;
       const cardData = insertPaymentCardSchema.parse({ ...req.body, userId });
@@ -2150,7 +2170,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put("/api/payment-cards/:id", requireAuth, async (req, res) => {
+  app.put("/api/payment-cards/:id", requireUserAuth, async (req, res) => {
     try {
       const cardId = parseInt(req.params.id);
       const updates = req.body;
@@ -2167,7 +2187,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/payment-cards/:id", requireAuth, async (req, res) => {
+  app.delete("/api/payment-cards/:id", requireUserAuth, async (req, res) => {
     try {
       const cardId = parseInt(req.params.id);
       const deleted = await storage.deletePaymentCard(cardId);
@@ -2183,7 +2203,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put("/api/payment-cards/:id/set-default", requireAuth, async (req, res) => {
+  app.put("/api/payment-cards/:id/set-default", requireUserAuth, async (req, res) => {
     try {
       const userId = (req.session as any).userId!;
       const cardId = parseInt(req.params.id);

@@ -1,0 +1,34 @@
+Failed to load resource: the server responded with a status of 401 (Unauthorized)Understand this error
+square.js:3 Card tokenization error: Error: 401: {"message":"Authentication required"}
+    at throwIfResNotOk (queryClient.ts:11:11)
+    at async apiRequest (queryClient.ts:27:3)
+    at async handleSubmit (square-card-form.tsx:95:9)
+(anonymous) @ square.js:3Understand this error
+square.js:3 Square tokenization result: {details: {…}, status: 'OK', token: 'cnon:CA4SECj-_44VSYf6ujb2q-8LuREYASgB'}
+square.js:3 Card details: {billing: {…}, card: {…}, method: 'Card'}
+square.js:3 Payload being sent: {cardNonce: 'cnon:CA4SECj-_44VSYf6ujb2q-8LuREYASgB', verificationToken: undefined, cardLast4: '****', cardBrand: 'MASTERCARD', expiryMonth: undefined, …}
+square.js:3  POST https://f45475b4-a7c6-4031-bbbd-cffdcb6fa4d5-00-1aqxf2ubqm5iz.janeway.replit.dev/api/payment-cards 401 (Unauthorized)
+(anonymous) @ square.js:3
+apiRequest @ queryClient.ts:20
+handleSubmit @ square-card-form.tsx:95
+await in handleSubmit
+callCallback2 @ chunk-WERSD76P.js?v=87dfb8f5:3674
+n @ square.js:3
+invokeGuardedCallbackDev @ chunk-WERSD76P.js?v=87dfb8f5:3699
+invokeGuardedCallback @ chunk-WERSD76P.js?v=87dfb8f5:3733
+invokeGuardedCallbackAndCatchFirstError @ chunk-WERSD76P.js?v=87dfb8f5:3736
+executeDispatch @ chunk-WERSD76P.js?v=87dfb8f5:7014
+processDispatchQueueItemsInOrder @ chunk-WERSD76P.js?v=87dfb8f5:7034
+processDispatchQueue @ chunk-WERSD76P.js?v=87dfb8f5:7043
+dispatchEventsForPlugins @ chunk-WERSD76P.js?v=87dfb8f5:7051
+(anonymous) @ chunk-WERSD76P.js?v=87dfb8f5:7174
+batchedUpdates$1 @ chunk-WERSD76P.js?v=87dfb8f5:18913
+batchedUpdates @ chunk-WERSD76P.js?v=87dfb8f5:3579
+dispatchEventForPluginEventSystem @ chunk-WERSD76P.js?v=87dfb8f5:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-WERSD76P.js?v=87dfb8f5:5478
+dispatchEvent @ chunk-WERSD76P.js?v=87dfb8f5:5472
+dispatchDiscreteEvent @ chunk-WERSD76P.js?v=87dfb8f5:5449Understand this error
+square.js:3 Card tokenization error: Error: 401: {"message":"Authentication required"}
+    at throwIfResNotOk (queryClient.ts:11:11)
+    at async apiRequest (queryClient.ts:27:3)
+    at async handleSubmit (square-card-form.tsx:95:9)
