@@ -465,11 +465,14 @@ export class DatabaseStorage implements IStorage {
       }
     }
 
-    // Update game numbers left
-    const newNumbersLeft = game.numbersLeft - 1;
-    await this.updateGame(gameId, {
-      numbersLeft: newNumbersLeft,
-    });
+    // Update game numbers left - only decrement for successful payments
+    let newNumbersLeft = game.numbersLeft;
+    if (!isFreePlay && transaction) {
+      newNumbersLeft = game.numbersLeft - 1;
+      await this.updateGame(gameId, {
+        numbersLeft: newNumbersLeft,
+      });
+    }
 
     // Check if game is complete (all numbers claimed)
     if (newNumbersLeft === 0) {
