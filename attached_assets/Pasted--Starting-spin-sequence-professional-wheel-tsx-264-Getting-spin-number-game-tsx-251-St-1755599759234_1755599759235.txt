@@ -1,0 +1,62 @@
+🎯 Starting spin sequence...
+professional-wheel.tsx:264 🎯 Getting spin number...
+game.tsx:251 🎯 Starting API call for game spin...
+game.tsx:329 🎯 API call successful, received result: {number: 5}
+professional-wheel.tsx:276 🎯 Got spin number: 5
+professional-wheel.tsx:323 🎯 8-second wheel animation started - will land on: {targetNumber: 5, targetSegmentIndex: 4, frozenNumbers: Array(5), finalRotation: 2196}
+professional-wheel.tsx:332 🎯 8-second spin completed, now processing payment...
+professional-wheel.tsx:341 💳 Processing payment for number 5
+professional-wheel.tsx:75 💳 FRONTEND DEBUG - Card data: {hasSquareCustomerId: true, hasSquareCardId: false, hasCardNonce: false, cardNoncePrefix: 'none'}
+professional-wheel.tsx:101 💳 No valid card nonce available - needs fresh card
+professional-wheel.tsx:349 💳 Generated payment token for processing
+professional-wheel.tsx:352  POST https://f45475b4-a7c6-4031-bbbd-cffdcb6fa4d5-00-1aqxf2ubqm5iz.janeway.replit.dev/api/process-payment 400 (Bad Request)
+(anonymous) @ professional-wheel.tsx:352
+setTimeout
+(anonymous) @ professional-wheel.tsx:331
+setTimeout
+handleSpin @ professional-wheel.tsx:258
+triggerSpin @ professional-wheel.tsx:53
+handleConfirmSpin @ game.tsx:240
+handleConfirm @ disclaimer-popup.tsx:32
+callCallback2 @ chunk-WERSD76P.js?v=87dfb8f5:3674
+invokeGuardedCallbackDev @ chunk-WERSD76P.js?v=87dfb8f5:3699
+invokeGuardedCallback @ chunk-WERSD76P.js?v=87dfb8f5:3733
+invokeGuardedCallbackAndCatchFirstError @ chunk-WERSD76P.js?v=87dfb8f5:3736
+executeDispatch @ chunk-WERSD76P.js?v=87dfb8f5:7014
+processDispatchQueueItemsInOrder @ chunk-WERSD76P.js?v=87dfb8f5:7034
+processDispatchQueue @ chunk-WERSD76P.js?v=87dfb8f5:7043
+dispatchEventsForPlugins @ chunk-WERSD76P.js?v=87dfb8f5:7051
+(anonymous) @ chunk-WERSD76P.js?v=87dfb8f5:7174
+batchedUpdates$1 @ chunk-WERSD76P.js?v=87dfb8f5:18913
+batchedUpdates @ chunk-WERSD76P.js?v=87dfb8f5:3579
+dispatchEventForPluginEventSystem @ chunk-WERSD76P.js?v=87dfb8f5:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-WERSD76P.js?v=87dfb8f5:5478
+dispatchEvent @ chunk-WERSD76P.js?v=87dfb8f5:5472
+dispatchDiscreteEvent @ chunk-WERSD76P.js?v=87dfb8f5:5449Understand this error
+professional-wheel.tsx:377 💳 Payment failed: Error: Payment failed. Please check your payment method and try again.
+    at professional-wheel.tsx:374:19
+(anonymous) @ professional-wheel.tsx:377
+setTimeout
+(anonymous) @ professional-wheel.tsx:331
+setTimeout
+handleSpin @ professional-wheel.tsx:258
+triggerSpin @ professional-wheel.tsx:53
+handleConfirmSpin @ game.tsx:240
+handleConfirm @ disclaimer-popup.tsx:32
+callCallback2 @ chunk-WERSD76P.js?v=87dfb8f5:3674
+invokeGuardedCallbackDev @ chunk-WERSD76P.js?v=87dfb8f5:3699
+invokeGuardedCallback @ chunk-WERSD76P.js?v=87dfb8f5:3733
+invokeGuardedCallbackAndCatchFirstError @ chunk-WERSD76P.js?v=87dfb8f5:3736
+executeDispatch @ chunk-WERSD76P.js?v=87dfb8f5:7014
+processDispatchQueueItemsInOrder @ chunk-WERSD76P.js?v=87dfb8f5:7034
+processDispatchQueue @ chunk-WERSD76P.js?v=87dfb8f5:7043
+dispatchEventsForPlugins @ chunk-WERSD76P.js?v=87dfb8f5:7051
+(anonymous) @ chunk-WERSD76P.js?v=87dfb8f5:7174
+batchedUpdates$1 @ chunk-WERSD76P.js?v=87dfb8f5:18913
+batchedUpdates @ chunk-WERSD76P.js?v=87dfb8f5:3579
+dispatchEventForPluginEventSystem @ chunk-WERSD76P.js?v=87dfb8f5:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-WERSD76P.js?v=87dfb8f5:5478
+dispatchEvent @ chunk-WERSD76P.js?v=87dfb8f5:5472
+dispatchDiscreteEvent @ chunk-WERSD76P.js?v=87dfb8f5:5449Understand this error
+professional-wheel.tsx:391 ⚠️ Showing payment failure modal
+professional-wheel.tsx:409 🎯 Spin sequence fully completed
