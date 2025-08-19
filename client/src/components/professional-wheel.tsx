@@ -414,10 +414,7 @@ export const ProfessionalWheel = forwardRef<
                       const isClaimed = wheelItem.isClaimed;
                       const isAvailable = !isClaimed;
                       
-                      // Debug logging for claimed numbers
-                      if (number === 5) {
-                        console.log(`Number 5: isClaimed=${isClaimed}, tick symbol should show:`, isClaimed);
-                      }
+
 
                       return (
                         <div
@@ -552,7 +549,7 @@ export const ProfessionalWheel = forwardRef<
                             </div>
                           </div>
 
-                          {/* Tick symbol for claimed numbers - positioned at segment start near mid circle */}
+                          {/* Tick symbol for claimed numbers - positioned in center of segment */}
                           {isClaimed && (
                             <div
                               className="absolute"
@@ -560,22 +557,22 @@ export const ProfessionalWheel = forwardRef<
                                 position: "absolute",
                                 left: "50%",
                                 top: "50%",
-                                transform: `translate(-50%, -50%) translate(${Math.cos(((angle - 90) * Math.PI) / 180) * (numberRadius * 0.5)}px, ${Math.sin(((angle - 90) * Math.PI) / 180) * (numberRadius * 0.5)}px) rotate(${-rotation}deg)`,
+                                transform: `translate(-50%, -50%) translate(${Math.cos(((angle + 360 / segmentCount / 2 - 90) * Math.PI) / 180) * (numberRadius * 0.7)}px, ${Math.sin(((angle + 360 / segmentCount / 2 - 90) * Math.PI) / 180) * (numberRadius * 0.7)}px) rotate(${-rotation}deg)`,
                                 transition: isSpinning
                                   ? `transform 8.0s cubic-bezier(0.25, 0.1, 0.25, 1.0)`
                                   : "none",
-                                width: isMobile ? "20px" : "24px",
-                                height: isMobile ? "20px" : "24px",
+                                width: isMobile ? "18px" : "22px",
+                                height: isMobile ? "18px" : "22px",
                                 borderRadius: "50%",
                                 backgroundColor: "rgb(34, 197, 94)",
                                 display: "flex",
                                 alignItems: "center",
                                 justifyContent: "center",
-                                fontSize: isMobile ? "10px" : "12px",
+                                fontSize: isMobile ? "9px" : "11px",
                                 color: "white",
                                 fontWeight: "bold",
                                 border: "2px solid white",
-                                boxShadow: "0 0 10px rgba(34, 197, 94, 0.8), 0 0 20px rgba(34, 197, 94, 0.4)",
+                                boxShadow: "0 0 8px rgba(34, 197, 94, 0.8)",
                                 zIndex: 25,
                               }}
                             >
