@@ -57,20 +57,7 @@ export const ProfessionalWheel = forwardRef<
   // Function to generate fresh card nonce for each payment
   const generateFreshCardNonce = async (): Promise<string | null> => {
     try {
-      // Check if Square SDK is loaded
-      // @ts-ignore
-      if (!window.Square) {
-        console.error("Square Web SDK not loaded");
-        return null;
-      }
-
-      // @ts-ignore
-      const payments = window.Square.payments(
-        import.meta.env.VITE_SQUARE_APPLICATION_ID,
-        import.meta.env.VITE_SQUARE_ENVIRONMENT
-      );
-
-      // Create a temporary card instance to get the stored card details
+      // Get stored card details first
       const response = await fetch("/api/user/default-card", {
         method: "GET",
         credentials: "include"
@@ -83,18 +70,29 @@ export const ProfessionalWheel = forwardRef<
 
       const cardData = await response.json();
       
-      // Use stored card details to create a new nonce
-      // Note: For production, this should use the customer's stored card with Square
-      // For now, we'll need to generate nonce from stored card info
-      
-      // If we have Square customer and card IDs, we can use a different approach
+      // If we have Square customer and card IDs, use the stored card approach
       if (cardData.squareCustomerId && cardData.squareCardId) {
-        // Return special identifier for stored card charging
         return `stored_card:${cardData.squareCardId}:${cardData.squareCustomerId}`;
       }
 
-      console.warn("No stored card found - user needs to re-add payment method");
-      return null;
+      // For cards without Square IDs, we'll create a fresh nonce using Square Web SDK
+      // @ts-ignore
+      if (!window.Square) {
+        console.error("Square Web SDK not loaded");
+        return null;
+      }
+
+      // @ts-ignore
+      const payments = window.Square.payments(
+        import.meta.env.VITE_SQUARE_APPLICATION_ID,
+        import.meta.env.VITE_SQUARE_ENVIRONMENT
+      );
+
+      // Create a temporary card form to generate a fresh nonce
+      // This approach would require the user to re-enter card details
+      // For now, return an indicator that we need a different payment method
+      console.log("Card exists but requires fresh nonce generation - requesting payment method update");
+      return "needs_fresh_card";
       
     } catch (error) {
       console.error("Error generating fresh card nonce:", error);

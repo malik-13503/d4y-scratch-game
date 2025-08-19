@@ -1929,6 +1929,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
               paymentMethod = { type: 'stored_card', squareCardId, squareCustomerId };
               console.log(`💳 Using stored card method - Customer: ${squareCustomerId}, Card: ${squareCardId}`);
             }
+          } else if (cardNonce && cardNonce === 'needs_fresh_card') {
+            // Handle case where card exists but needs fresh nonce
+            console.log(`💳 Card exists but needs fresh nonce - requesting payment method update`);
+            return res.status(400).json({ 
+              success: false,
+              message: "Your payment method needs to be updated for security. Please go to your dashboard and re-add your payment card to continue playing.",
+              requiresCardUpdate: true
+            });
           } else if (cardNonce && cardNonce.startsWith('cnon:')) {
             // Handle fresh nonce approach
             paymentMethod = { type: 'nonce', nonce: cardNonce };
@@ -2132,18 +2140,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // User authentication middleware for payment cards
   const requireUserAuth = (req: any, res: any, next: any) => {
     const userId = (req.session as any)?.userId;
-    console.log("Payment card auth check - Session data:", {
-      sessionExists: !!req.session,
-      userId: userId,
-      sessionKeys: req.session ? Object.keys(req.session) : [],
-      fullSession: req.session
-    });
-    
     if (!userId) {
-      console.log("Payment card authentication failed - no userId in session");
       return res.status(401).json({ message: "Authentication required" });
     }
-    console.log("Payment card authentication successful for user:", userId);
     next();
   };
 
