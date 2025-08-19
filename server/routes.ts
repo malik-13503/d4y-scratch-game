@@ -1946,13 +1946,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
               paymentMethod = { type: 'stored_card', squareCardId, squareCustomerId };
               console.log(`💳 Using stored card method - Customer: ${squareCustomerId}, Card: ${squareCardId}`);
             }
-          } else if (cardNonce && cardNonce.startsWith('cnon:')) {
+          } else if (actualCardNonce && actualCardNonce.startsWith('cnon:')) {
             // Handle fresh nonce approach - PRIORITY: Use this for real payments
-            paymentMethod = { type: 'nonce', nonce: cardNonce };
-            console.log(`💳 ✅ Using fresh card nonce for REAL payment: ${cardNonce.substring(0, 15)}...`);
-          } else if (cardNonce && cardNonce.startsWith('CH')) {
+            paymentMethod = { type: 'nonce', nonce: actualCardNonce };
+            console.log(`💳 ✅ Using fresh card nonce for REAL payment: ${actualCardNonce.substring(0, 15)}...`);
+          } else if (actualCardNonce && actualCardNonce.startsWith('CH')) {
             // Handle Mastercard/Visa test nonce
-            paymentMethod = { type: 'nonce', nonce: cardNonce };
+            paymentMethod = { type: 'nonce', nonce: actualCardNonce };
             console.log(`💳 Using valid card nonce for payment`);
           } else if (user.squareCustomerId && defaultCard?.squareCardId) {
             // Fallback to stored Square customer/card
@@ -1962,7 +1962,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               squareCustomerId: user.squareCustomerId 
             };
             console.log(`💳 Fallback to stored card - Customer: ${user.squareCustomerId}, Card: ${defaultCard.squareCardId}`);
-          } else if (cardNonce && (cardNonce === 'needs_fresh_card' || cardNonce === 'needs_card_update')) {
+          } else if (actualCardNonce && (actualCardNonce === 'needs_fresh_card' || actualCardNonce === 'needs_card_update')) {
             // Handle case where card exists but needs fresh nonce
             console.log(`💳 Card exists but needs fresh nonce - requesting payment method update`);
             return res.status(400).json({ 
@@ -1976,7 +1976,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               paymentMethod = { type: 'nonce', nonce: defaultCard.cardNonce };
               console.log(`💳 Last resort: using stored nonce (may be expired): ${defaultCard.cardNonce.substring(0, 10)}...`);
             } else {
-              console.log(`💳 ERROR: No valid payment method available - cardNonce: ${cardNonce}, defaultCard.cardNonce: ${defaultCard?.cardNonce}`);
+              console.log(`💳 ERROR: No valid payment method available - frontendCardNonce: ${cardNonce}, actualCardNonce: ${actualCardNonce}, defaultCard.cardNonce: ${defaultCard?.cardNonce}`);
               return res.status(400).json({ 
                 success: false,
                 message: "No valid payment method found. Please update your payment card and try again."
