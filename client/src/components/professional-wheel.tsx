@@ -413,6 +413,11 @@ export const ProfessionalWheel = forwardRef<
                       const number = wheelItem.number;
                       const isClaimed = wheelItem.isClaimed;
                       const isAvailable = !isClaimed;
+                      
+                      // Debug logging for claimed numbers
+                      if (number === 5) {
+                        console.log(`Number 5: isClaimed=${isClaimed}, availableNumbers includes 5:`, availableNumbers.includes(5));
+                      }
 
                       return (
                         <div
