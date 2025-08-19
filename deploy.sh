@@ -1,19 +1,27 @@
 #!/bin/bash
 
-# Deployment script to handle layer push issues
+# Deployment script to prepare clean build environment
 echo "Starting deployment preparation..."
 
-# Clear any existing npm cache
+# Clear npm cache
+echo "Clearing npm cache..."
 npm cache clean --force
 
-# Remove node_modules to ensure clean state
+# Remove node_modules and lock file for clean install
+echo "Removing existing node_modules and package-lock.json..."
 rm -rf node_modules
+rm -f package-lock.json
 
-# Install dependencies with no cache
-npm ci --no-cache --include=dev
+# Install dependencies
+echo "Installing dependencies..."
+npm install --no-fund --no-audit
 
-# Run build with explicit flags to avoid caching issues
-NODE_ENV=production npm run build
+# Verify installation
+echo "Verifying installation..."
+npm list --depth=0
 
-echo "Build completed successfully"
-echo "Ready for deployment"
+# Build project
+echo "Building project..."
+npm run build
+
+echo "Deployment preparation completed!"
