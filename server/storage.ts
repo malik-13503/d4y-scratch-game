@@ -8,7 +8,7 @@ import {
   type FreePlayUsage, type InsertFreePlayUsage, type PaymentCard, type InsertPaymentCard
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, desc, sql, and, isNotNull } from "drizzle-orm";
+import { eq, desc, sql, asc, and, isNotNull } from "drizzle-orm";
 import session from "express-session";
 import MemoryStore from "memorystore";
 import connectPg from "connect-pg-simple";
@@ -498,8 +498,20 @@ export class DatabaseStorage implements IStorage {
     const game = await this.getGame(gameId);
     if (!game) return [];
 
-    const existingSpins = await this.getSpinResultsByGameId(gameId);
-    const spunNumbers = existingSpins.map(spin => spin.spunNumber);
+    // Only consider numbers claimed if there's a successful payment transaction
+    // This query gets all numbers that have both a spin result AND a completed payment
+    const claimedNumbers = await db
+      .select({ spunNumber: spinResults.spunNumber })
+      .from(spinResults)
+      .innerJoin(transactions, eq(spinResults.id, transactions.spinResultId))
+      .where(
+        and(
+          eq(spinResults.gameId, gameId),
+          eq(transactions.status, 'COMPLETED')
+        )
+      );
+    
+    const spunNumbers = claimedNumbers.map(result => result.spunNumber);
     
     const availableNumbers = [];
     for (let i = 1; i <= game.totalNumbers; i++) {

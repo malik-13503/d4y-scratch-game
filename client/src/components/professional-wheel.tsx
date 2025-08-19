@@ -212,8 +212,8 @@ export const ProfessionalWheel = forwardRef<
         spinResult = await onSpin();
         
         // Extract the number from the result
-        if (typeof spinResult === 'object' && spinResult.number) {
-          resultNumber = spinResult.number;
+        if (typeof spinResult === 'object' && spinResult && 'number' in spinResult) {
+          resultNumber = (spinResult as any).number;
         } else if (typeof spinResult === 'number') {
           resultNumber = spinResult;
         } else {
@@ -420,10 +420,8 @@ export const ProfessionalWheel = forwardRef<
                           className="absolute inset-0 z-10"
                           style={{
                             clipPath: `polygon(50% 50%, ${50 + 65 * Math.cos(((angle - 90) * Math.PI) / 180)}% ${50 + 65 * Math.sin(((angle - 90) * Math.PI) / 180)}%, ${50 + 65 * Math.cos(((nextAngle - 90) * Math.PI) / 180)}% ${50 + 65 * Math.sin(((nextAngle - 90) * Math.PI) / 180)}%)`,
-                            background: isAvailable
-                              ? `linear-gradient(135deg, ${color}, ${color}dd)`
-                              : `linear-gradient(135deg, #6B7280, #374151)`, // Gray for claimed numbers
-                            opacity: isAvailable ? 1 : 0.6,
+                            background: `linear-gradient(135deg, ${color}, ${color}dd)`, // Keep original colors always
+                            opacity: 1,
                           }}
                         >
                           {/* Always upright number - counter-rotates exactly to stay readable */}
@@ -544,18 +542,35 @@ export const ProfessionalWheel = forwardRef<
                               letterSpacing: number >= 100 ? "-0.5px" : "0",
                             }}
                           >
-                            <div style={{ fontSize: 'inherit', lineHeight: '1' }}>
-                              {number}
-                            </div>
-                            {isClaimed && (
-                              <div style={{ 
-                                fontSize: segmentCount > 10 ? '6px' : '8px',
-                                lineHeight: '1',
-                                opacity: 0.9,
-                                color: '#9CA3AF',
-                                marginTop: '1px'
-                              }}>
-                                Claimed
+                            {!isClaimed ? (
+                              <div style={{ fontSize: 'inherit', lineHeight: '1' }}>
+                                {number}
+                              </div>
+                            ) : (
+                              <div className="relative">
+                                <div style={{ fontSize: 'inherit', lineHeight: '1', opacity: 0.6 }}>
+                                  {number}
+                                </div>
+                                <div style={{ 
+                                  position: 'absolute',
+                                  top: '50%',
+                                  left: '50%',
+                                  transform: 'translate(-50%, -50%)',
+                                  width: '120%',
+                                  height: '120%',
+                                  borderRadius: '50%',
+                                  backgroundColor: 'rgba(34, 197, 94, 0.9)',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  fontSize: '8px',
+                                  color: 'white',
+                                  fontWeight: 'bold',
+                                  border: '1px solid rgba(34, 197, 94, 1)',
+                                  boxShadow: '0 0 8px rgba(34, 197, 94, 0.5)'
+                                }}>
+                                  ✓
+                                </div>
                               </div>
                             )}
                           </div>
