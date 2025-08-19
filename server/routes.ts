@@ -1800,7 +1800,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: "Not authenticated" });
       }
 
-      const { gameId, number } = req.body;
+      const { gameId, number, cardNonce } = req.body;
       
       if (!gameId || !number) {
         return res.status(400).json({ message: "Game ID and number are required" });
@@ -1918,34 +1918,58 @@ export async function registerRoutes(app: Express): Promise<Server> {
           // Production payment processing
           console.log(`💳 PRODUCTION: Processing REAL charge of $${chargeAmount} for user ${userId}`);
           
-          // Check if card nonce is expired and needs refresh
-          if (!defaultCard.cardNonce || defaultCard.cardNonce === "cnon_test") {
-            console.log(`💳 ERROR: Card nonce invalid or expired:`, defaultCard.cardNonce);
-            return res.status(400).json({ 
-              success: false,
-              message: "Your payment method has expired. Please go to your dashboard and update your payment card to continue playing."
-            });
+          // Determine payment method based on what's provided
+          let paymentMethod = null;
+          
+          if (cardNonce && cardNonce.startsWith('stored_card:')) {
+            // Handle stored card approach
+            const parts = cardNonce.split(':');
+            if (parts.length === 3) {
+              const [, squareCardId, squareCustomerId] = parts;
+              paymentMethod = { type: 'stored_card', squareCardId, squareCustomerId };
+              console.log(`💳 Using stored card method - Customer: ${squareCustomerId}, Card: ${squareCardId}`);
+            }
+          } else if (cardNonce && cardNonce.startsWith('cnon:')) {
+            // Handle fresh nonce approach
+            paymentMethod = { type: 'nonce', nonce: cardNonce };
+            console.log(`💳 Using fresh card nonce for payment`);
+          } else if (user.squareCustomerId && defaultCard?.squareCardId) {
+            // Fallback to stored Square customer/card
+            paymentMethod = { 
+              type: 'stored_card', 
+              squareCardId: defaultCard.squareCardId, 
+              squareCustomerId: user.squareCustomerId 
+            };
+            console.log(`💳 Fallback to stored card - Customer: ${user.squareCustomerId}, Card: ${defaultCard.squareCardId}`);
+          } else {
+            // Last resort - try stored nonce (likely to fail)
+            if (defaultCard?.cardNonce && defaultCard.cardNonce !== "cnon_test") {
+              paymentMethod = { type: 'nonce', nonce: defaultCard.cardNonce };
+              console.log(`💳 Last resort: using stored nonce (may be expired)`);
+            } else {
+              console.log(`💳 ERROR: No valid payment method available`);
+              return res.status(400).json({ 
+                success: false,
+                message: "No valid payment method found. Please update your payment card and try again."
+              });
+            }
           }
 
-          // Attempt REAL payment processing using stored card
+          // Attempt REAL payment processing
           console.log(`💳 CHARGING CARD: About to charge $${chargeAmount} to card ending in ${defaultCard.cardLast4}`);
           
-          // Use Square customer ID and card ID for payment instead of expired nonce
-          if (user.squareCustomerId && defaultCard.squareCardId) {
-            console.log(`💳 Using stored card - Customer: ${user.squareCustomerId}, Card: ${defaultCard.squareCardId}`);
+          if (paymentMethod.type === 'stored_card') {
             paymentResult = await squareService.chargeCard(
               chargeAmount,
               "USD",
-              defaultCard.squareCardId,
-              user.squareCustomerId
+              paymentMethod.squareCardId,
+              paymentMethod.squareCustomerId
             );
           } else {
-            // Fallback to nonce-based payment (for cards added before customer system)
-            console.log(`💳 Using nonce-based payment as fallback`);
             paymentResult = await squareService.processPayment(
               chargeAmount,
               "USD",
-              defaultCard.cardNonce,
+              paymentMethod.nonce,
               `Payment for number ${number} in game ${gameId}`
             );
           }
@@ -2173,6 +2197,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Failed to set default payment card:", error);
       res.status(500).json({ message: "Failed to set default payment card" });
+    }
+  });
+
+  // Get user's default card details
+  app.get("/api/user/default-card", async (req, res) => {
+    try {
+      const userId = (req.session as any)?.userId;
+      if (!userId) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      // Get user's payment cards
+      const userCards = await storage.getPaymentCardsByUserId(userId);
+      if (!userCards || userCards.length === 0) {
+        return res.status(404).json({ message: "No payment cards found" });
+      }
+
+      // Get the default card or first active card
+      const defaultCard = userCards.find(card => card.isDefault && card.isActive) 
+        || userCards.find(card => card.isActive);
+      
+      if (!defaultCard) {
+        return res.status(404).json({ message: "No active payment cards found" });
+      }
+
+      // Return card details (without sensitive information)
+      res.json({
+        cardLast4: defaultCard.cardLast4,
+        cardBrand: defaultCard.cardBrand,
+        squareCustomerId: user.squareCustomerId,
+        squareCardId: defaultCard.squareCardId,
+        isDefault: defaultCard.isDefault
+      });
+    } catch (error) {
+      console.error("Error fetching default card:", error);
+      res.status(500).json({ message: "Failed to fetch card details" });
     }
   });
 

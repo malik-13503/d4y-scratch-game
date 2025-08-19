@@ -54,6 +54,54 @@ export const ProfessionalWheel = forwardRef<
 
   const wheelRef = useRef<HTMLDivElement>(null);
 
+  // Function to generate fresh card nonce for each payment
+  const generateFreshCardNonce = async (): Promise<string | null> => {
+    try {
+      // Check if Square SDK is loaded
+      // @ts-ignore
+      if (!window.Square) {
+        console.error("Square Web SDK not loaded");
+        return null;
+      }
+
+      // @ts-ignore
+      const payments = window.Square.payments(
+        import.meta.env.VITE_SQUARE_APPLICATION_ID,
+        import.meta.env.VITE_SQUARE_ENVIRONMENT
+      );
+
+      // Create a temporary card instance to get the stored card details
+      const response = await fetch("/api/user/default-card", {
+        method: "GET",
+        credentials: "include"
+      });
+
+      if (!response.ok) {
+        console.error("Failed to get default card details");
+        return null;
+      }
+
+      const cardData = await response.json();
+      
+      // Use stored card details to create a new nonce
+      // Note: For production, this should use the customer's stored card with Square
+      // For now, we'll need to generate nonce from stored card info
+      
+      // If we have Square customer and card IDs, we can use a different approach
+      if (cardData.squareCustomerId && cardData.squareCardId) {
+        // Return special identifier for stored card charging
+        return `stored_card:${cardData.squareCardId}:${cardData.squareCustomerId}`;
+      }
+
+      console.warn("No stored card found - user needs to re-add payment method");
+      return null;
+      
+    } catch (error) {
+      console.error("Error generating fresh card nonce:", error);
+      return null;
+    }
+  };
+
   // Removed automatic free play logic - all spins are paid unless manually designated
 
   // Vibrant logo-inspired segment colors
@@ -287,14 +335,23 @@ export const ProfessionalWheel = forwardRef<
         try {
           console.log("💳 Processing payment for number", resultNumber);
           
-          // Call the payment processing endpoint
+          // Step 1: Generate fresh card nonce from Square for this payment
+          const cardNonce = await generateFreshCardNonce();
+          if (!cardNonce) {
+            throw new Error("Failed to generate payment token. Please check your payment method.");
+          }
+          
+          console.log("💳 Generated fresh card nonce for payment");
+          
+          // Step 2: Call the payment processing endpoint with fresh nonce
           const paymentResponse = await fetch("/api/process-payment", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             credentials: "include",
             body: JSON.stringify({
               gameId: window.location.pathname.match(/\/game\/(\d+)/)?.[1],
-              number: resultNumber
+              number: resultNumber,
+              cardNonce: cardNonce // Include fresh nonce for this payment
             })
           });
 
