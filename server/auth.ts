@@ -9,6 +9,9 @@ import { hashPassword, comparePasswords } from "./utils";
 declare module "express-session" {
   interface SessionData {
     userId?: number;
+    passport?: {
+      user?: any;
+    };
   }
 }
 

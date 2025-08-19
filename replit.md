@@ -15,6 +15,7 @@ This project is a real-time web application for interactive prize games, primari
 - **Production Ready**: All endpoints return real data only - no fallback to fake or sample content
 - **Winners Tab Complete**: Added comprehensive Winners list in admin dashboard showing all completed games with winner details
 - **Email Templates Active**: Professional winner notification and game completion emails fully operational via Resend service
+- **Deployment Fixes Applied**: Resolved Docker registry upload failures and digest mismatch errors with comprehensive deployment optimizations (January 19, 2025)
 
 ## User Preferences
 Preferred communication style: Simple, everyday language.
