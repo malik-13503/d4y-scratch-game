@@ -542,38 +542,41 @@ export const ProfessionalWheel = forwardRef<
                               letterSpacing: number >= 100 ? "-0.5px" : "0",
                             }}
                           >
-                            {!isClaimed ? (
-                              <div style={{ fontSize: 'inherit', lineHeight: '1' }}>
-                                {number}
-                              </div>
-                            ) : (
-                              <div className="relative">
-                                <div style={{ fontSize: 'inherit', lineHeight: '1', opacity: 0.6 }}>
-                                  {number}
-                                </div>
-                                <div style={{ 
-                                  position: 'absolute',
-                                  top: '50%',
-                                  left: '50%',
-                                  transform: 'translate(-50%, -50%)',
-                                  width: '120%',
-                                  height: '120%',
-                                  borderRadius: '50%',
-                                  backgroundColor: 'rgba(34, 197, 94, 0.9)',
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  justifyContent: 'center',
-                                  fontSize: '8px',
-                                  color: 'white',
-                                  fontWeight: 'bold',
-                                  border: '1px solid rgba(34, 197, 94, 1)',
-                                  boxShadow: '0 0 8px rgba(34, 197, 94, 0.5)'
-                                }}>
-                                  ✓
-                                </div>
-                              </div>
-                            )}
+                            <div style={{ fontSize: 'inherit', lineHeight: '1' }}>
+                              {number}
+                            </div>
                           </div>
+
+                          {/* Tick symbol for claimed numbers - positioned at segment start near mid circle */}
+                          {isClaimed && (
+                            <div
+                              className="absolute"
+                              style={{
+                                position: "absolute",
+                                left: "50%",
+                                top: "50%",
+                                transform: `translate(-50%, -50%) translate(${Math.cos(((angle - 90) * Math.PI) / 180) * (radius * 0.4)}px, ${Math.sin(((angle - 90) * Math.PI) / 180) * (radius * 0.4)}px) rotate(${-rotation}deg)`,
+                                transition: isSpinning
+                                  ? `transform 8.0s cubic-bezier(0.25, 0.1, 0.25, 1.0)`
+                                  : "none",
+                                width: isMobile ? "16px" : "20px",
+                                height: isMobile ? "16px" : "20px",
+                                borderRadius: "50%",
+                                backgroundColor: "rgba(34, 197, 94, 0.95)",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                fontSize: isMobile ? "8px" : "10px",
+                                color: "white",
+                                fontWeight: "bold",
+                                border: "1px solid rgba(34, 197, 94, 1)",
+                                boxShadow: "0 0 6px rgba(34, 197, 94, 0.6)",
+                                zIndex: 20,
+                              }}
+                            >
+                              ✓
+                            </div>
+                          )}
 
                         </div>
                       );
