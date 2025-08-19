@@ -59,3 +59,20 @@ export const isAuthValid = (): boolean => {
   const authData = getAuthFromStorage();
   return authData?.isAuthenticated || false;
 };
+
+export const logout = async (): Promise<void> => {
+  try {
+    // Call the server logout endpoint
+    await fetch('/api/logout', { 
+      method: 'POST',
+      credentials: 'include'
+    });
+  } catch (error) {
+    console.error('Logout request failed:', error);
+  } finally {
+    // Always clear local storage regardless of server response
+    clearAuthFromStorage();
+    // Redirect to home page
+    window.location.href = '/';
+  }
+};

@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
+import { logout } from "@/lib/auth";
 import { CardSetup } from "@/components/payment/card-setup";
 import EnhancedCardManagement from "@/components/payment/enhanced-card-management";
 import { 
@@ -34,7 +35,8 @@ import {
   Settings,
   Gauge,
   Crown,
-  Shield
+  Shield,
+  LogOut
 } from "lucide-react";
 import logoPath from "@assets/logo_1751918412862.png";
 
@@ -325,18 +327,28 @@ export default function Dashboard() {
                 </h1>
               </div>
               
-              {/* Mobile Refresh Button */}
-              <Button
-                onClick={refreshData}
-                size="sm"
-                className="sm:hidden bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white border-0 shadow-lg px-3"
-              >
-                <RefreshCw className="h-4 w-4" />
-              </Button>
+              {/* Mobile Actions */}
+              <div className="sm:hidden flex items-center space-x-2">
+                <Button
+                  onClick={refreshData}
+                  size="sm"
+                  className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white border-0 shadow-lg px-3"
+                >
+                  <RefreshCw className="h-4 w-4" />
+                </Button>
+                <Button
+                  onClick={() => logout()}
+                  size="sm"
+                  variant="outline"
+                  className="text-gray-300 border-gray-600 hover:bg-red-500/20 hover:border-red-500 hover:text-red-300 px-3"
+                >
+                  <LogOut className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
             
-            {/* Desktop Refresh Button */}
-            <div className="hidden sm:flex">
+            {/* Desktop Actions */}
+            <div className="hidden sm:flex items-center space-x-3">
               <Button
                 onClick={refreshData}
                 size="sm"
@@ -344,6 +356,15 @@ export default function Dashboard() {
               >
                 <RefreshCw className="h-4 w-4 mr-2" />
                 Refresh
+              </Button>
+              <Button
+                onClick={() => logout()}
+                size="sm"
+                variant="outline"
+                className="text-gray-300 border-gray-600 hover:bg-red-500/20 hover:border-red-500 hover:text-red-300"
+              >
+                <LogOut className="h-4 w-4 mr-2" />
+                Logout
               </Button>
             </div>
           </div>

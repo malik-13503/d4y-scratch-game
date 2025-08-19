@@ -4,7 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Coffee, Camera, Gift, Trophy, Star, Zap, Crown, Sparkles, Users, Gamepad2, Target, Gem, User, ArrowRight } from "lucide-react";
+import { Coffee, Camera, Gift, Trophy, Star, Zap, Crown, Sparkles, Users, Gamepad2, Target, Gem, User, ArrowRight, LogOut } from "lucide-react";
+import { logout } from "@/lib/auth";
 import type { Game } from "@shared/schema";
 import logoPath from "@assets/logo_1751918412862.png";
 
@@ -137,6 +138,14 @@ export default function Home() {
                 >
                   <User className="h-4 w-4 mr-2" />
                   <span className="font-semibold">Dashboard</span>
+                </Button>
+                <Button
+                  onClick={() => logout()}
+                  variant="outline"
+                  className="text-gray-300 border-gray-600 hover:bg-red-500/20 hover:border-red-500 hover:text-red-300 px-4 py-2 sm:px-6 sm:py-3"
+                >
+                  <LogOut className="h-4 w-4 mr-2" />
+                  <span className="font-semibold">Logout</span>
                 </Button>
               </div>
             </div>
