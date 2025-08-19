@@ -84,11 +84,14 @@ export default function GamePage() {
 
   const gameId = game?.id;
 
-  const { data: availableNumbers } = useQuery<{availableNumbers: number[], totalAvailable: number}>({
+  const { data: availableNumbersData } = useQuery<{availableNumbers: number[], totalAvailable: number}>({
     queryKey: [`/api/games/${gameId}/available-numbers`],
     refetchInterval: 10000,
     enabled: !!gameId,
   });
+
+  const availableNumbers = availableNumbersData?.availableNumbers || [];
+  const totalAvailable = availableNumbersData?.totalAvailable || 0;
 
   const { data: recentNumbers = [] } = useQuery({
     queryKey: [`/api/games/${gameId}/recent-numbers`],
@@ -135,7 +138,7 @@ export default function GamePage() {
   const isGameEnded = game.endTime && new Date() > new Date(game.endTime);
   
   // Check if all numbers are taken
-  const areAllNumbersTaken = availableNumbers?.totalAvailable === 0;
+  const areAllNumbersTaken = availableNumbers.length === 0;
 
   if (isGameEnded) {
     return (
@@ -308,16 +311,10 @@ export default function GamePage() {
           throw new Error("Authentication required");
         }
 
-        // Handle payment failures - return the spun number but mark as payment failed
+        // Handle payment failures - throw error instead of returning object
         if (response.status === 400 && error.paymentFailed) {
           console.log(`❌ Payment failed for spun number ${error.number}:`, error.paymentMessage);
-          const paymentFailureResult = {
-            number: error.number,
-            paymentFailed: true,
-            paymentMessage: error.paymentMessage
-          };
-          console.log("🔄 Returning payment failure object:", paymentFailureResult);
-          return paymentFailureResult;
+          throw new Error(`Payment failed: ${error.paymentMessage}`);
         }
 
         // For other payment/card errors
@@ -730,24 +727,20 @@ export default function GamePage() {
                     <div className="flex items-center justify-between">
                       <span>Active Segments:</span>
                       <span className="text-green-300 font-bold">
-                        {Math.min((availableNumbers as number[])?.length || 0, 50)} / 50 max
+                        {availableNumbers.length} / {game?.totalNumbers || 0} max
                       </span>
                     </div>
                     <div className="w-full bg-gray-700 rounded-full h-1.5 mt-1">
                       <div 
                         className="bg-gradient-to-r from-green-500 to-blue-500 h-1.5 rounded-full transition-all duration-300"
                         style={{ 
-                          width: `${Math.min((((availableNumbers as number[])?.length || 0) / 50) * 100, 100)}%` 
+                          width: `${game?.totalNumbers ? (availableNumbers.length / game.totalNumbers) * 100 : 0}%` 
                         }}
                       ></div>
                     </div>
                     <div className="text-center mt-1">
                       <span className="text-xs text-gray-500">
-                        {game && availableNumbers ? (
-                          game.totalNumbers <= 50 
-                            ? `${game.totalNumbers - (availableNumbers as number[]).length} numbers claimed`
-                            : `${game.totalNumbers - (availableNumbers as number[]).length} of ${game.totalNumbers} claimed`
-                        ) : ''}
+                        {game ? `${game.totalNumbers - availableNumbers.length} numbers claimed` : ''}
                       </span>
                     </div>
                   </div>

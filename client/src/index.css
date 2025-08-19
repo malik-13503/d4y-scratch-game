@@ -4,12 +4,15 @@
 
 /* Hide scrollbar for mobile tabs */
 .scrollbar-hide {
-  -ms-overflow-style: none;  /* Internet Explorer 10+ */
-  scrollbar-width: none;  /* Firefox */
+  -ms-overflow-style: none;
+  /* Internet Explorer 10+ */
+  scrollbar-width: none;
+  /* Firefox */
 }
 
-.scrollbar-hide::-webkit-scrollbar { 
-  display: none;  /* Safari and Chrome */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+  /* Safari and Chrome */
 }
 
 /* Enhanced text contrast for all informational pages */
@@ -261,34 +264,91 @@
 
 /* New exciting animations */
 @keyframes rainbow-glow {
-  0% { box-shadow: 0 0 20px #ff0080, 0 0 40px #ff0080, 0 0 60px #ff0080; }
-  16.67% { box-shadow: 0 0 20px #ff8000, 0 0 40px #ff8000, 0 0 60px #ff8000; }
-  33.33% { box-shadow: 0 0 20px #ffff00, 0 0 40px #ffff00, 0 0 60px #ffff00; }
-  50% { box-shadow: 0 0 20px #80ff00, 0 0 40px #80ff00, 0 0 60px #80ff00; }
-  66.67% { box-shadow: 0 0 20px #00ff80, 0 0 40px #00ff80, 0 0 60px #00ff80; }
-  83.33% { box-shadow: 0 0 20px #0080ff, 0 0 40px #0080ff, 0 0 60px #0080ff; }
-  100% { box-shadow: 0 0 20px #ff0080, 0 0 40px #ff0080, 0 0 60px #ff0080; }
+  0% {
+    box-shadow: 0 0 20px #ff0080, 0 0 40px #ff0080, 0 0 60px #ff0080;
+  }
+
+  16.67% {
+    box-shadow: 0 0 20px #ff8000, 0 0 40px #ff8000, 0 0 60px #ff8000;
+  }
+
+  33.33% {
+    box-shadow: 0 0 20px #ffff00, 0 0 40px #ffff00, 0 0 60px #ffff00;
+  }
+
+  50% {
+    box-shadow: 0 0 20px #80ff00, 0 0 40px #80ff00, 0 0 60px #80ff00;
+  }
+
+  66.67% {
+    box-shadow: 0 0 20px #00ff80, 0 0 40px #00ff80, 0 0 60px #00ff80;
+  }
+
+  83.33% {
+    box-shadow: 0 0 20px #0080ff, 0 0 40px #0080ff, 0 0 60px #0080ff;
+  }
+
+  100% {
+    box-shadow: 0 0 20px #ff0080, 0 0 40px #ff0080, 0 0 60px #ff0080;
+  }
 }
 
 @keyframes text-rainbow {
-  0% { color: #ff0080; }
-  16.67% { color: #ff8000; }
-  33.33% { color: #ffff00; }
-  50% { color: #80ff00; }
-  66.67% { color: #00ff80; }
-  83.33% { color: #0080ff; }
-  100% { color: #ff0080; }
+  0% {
+    color: #ff0080;
+  }
+
+  16.67% {
+    color: #ff8000;
+  }
+
+  33.33% {
+    color: #ffff00;
+  }
+
+  50% {
+    color: #80ff00;
+  }
+
+  66.67% {
+    color: #00ff80;
+  }
+
+  83.33% {
+    color: #0080ff;
+  }
+
+  100% {
+    color: #ff0080;
+  }
 }
 
 @keyframes card-hover {
-  0% { transform: translateY(0px) scale(1); }
-  50% { transform: translateY(-5px) scale(1.02); }
-  100% { transform: translateY(0px) scale(1); }
+  0% {
+    transform: translateY(0px) scale(1);
+  }
+
+  50% {
+    transform: translateY(-5px) scale(1.02);
+  }
+
+  100% {
+    transform: translateY(0px) scale(1);
+  }
 }
 
 @keyframes sparkle {
-  0%, 100% { opacity: 0; transform: scale(0) rotate(0deg); }
-  50% { opacity: 1; transform: scale(1) rotate(180deg); }
+
+  0%,
+  100% {
+    opacity: 0;
+    transform: scale(0) rotate(0deg);
+  }
+
+  50% {
+    opacity: 1;
+    transform: scale(1) rotate(180deg);
+  }
 }
 
 .animate-rainbow-glow {
@@ -329,8 +389,8 @@
   position: absolute !important;
   top: 50% !important;
   left: 50% !important;
-  width: 40px !important;
-  height: 40px !important;
+  width: 32px !important;
+  height: 32px !important;
   background-color: rgba(0, 0, 0, 0.8) !important;
   border-radius: 50% !important;
   border: 2px solid rgba(255, 255, 255, 0.95) !important;
@@ -634,13 +694,15 @@
 
 /* Mobile stability and layout improvements */
 @media (max-width: 768px) {
-  html, body {
+
+  html,
+  body {
     overflow-x: hidden;
     overscroll-behavior: none;
     -webkit-overflow-scrolling: touch;
     position: relative;
   }
-  
+
   /* Prevent zoom on mobile inputs */
   input[type="text"],
   input[type="email"],
@@ -650,17 +712,18 @@
   select {
     font-size: 16px !important;
   }
-  
+
   /* Prevent unwanted bouncing/movement */
   .mobile-stable {
-    -webkit-transform: translate3d(0,0,0);
-    transform: translate3d(0,0,0);
+    -webkit-transform: translate3d(0, 0, 0);
+    transform: translate3d(0, 0, 0);
     -webkit-backface-visibility: hidden;
     backface-visibility: hidden;
   }
-  
+
   /* Improved touch targets */
-  button, .touch-target {
+  button,
+  .touch-target {
     min-height: 44px;
     min-width: 44px;
   }
