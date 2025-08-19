@@ -555,7 +555,7 @@ export const ProfessionalWheel = forwardRef<
                                 position: "absolute",
                                 left: "50%",
                                 top: "50%",
-                                transform: `translate(-50%, -50%) translate(${Math.cos(((angle - 90) * Math.PI) / 180) * (radius * 0.4)}px, ${Math.sin(((angle - 90) * Math.PI) / 180) * (radius * 0.4)}px) rotate(${-rotation}deg)`,
+                                transform: `translate(-50%, -50%) translate(${Math.cos(((angle - 90) * Math.PI) / 180) * (numberRadius * 0.4)}px, ${Math.sin(((angle - 90) * Math.PI) / 180) * (numberRadius * 0.4)}px) rotate(${-rotation}deg)`,
                                 transition: isSpinning
                                   ? `transform 8.0s cubic-bezier(0.25, 0.1, 0.25, 1.0)`
                                   : "none",
