@@ -1,0 +1,44 @@
+🎯 Starting spin sequence...
+square.js:3 🎯 Getting spin number...
+square.js:3 🎯 Starting API call for game spin...
+square.js:3 🎯 API call successful, received result: Object
+square.js:3 🎯 Got spin number: 1
+square.js:3 🎯 8-second wheel animation started - will land on: Object
+square.js:3 🎯 8-second spin completed, now processing payment...
+square.js:3 💳 Processing payment for number 1
+square.js:3 Card found but requires payment method update for security
+square.js:3 💳 Generated payment token for processing
+square.js:3  POST https://f45475b4-a7c6-4031-bbbd-cffdcb6fa4d5-00-1aqxf2ubqm5iz.janeway.replit.dev/api/process-payment 400 (Bad Request)
+(anonymous) @ square.js:3
+(anonymous) @ professional-wheel.tsx:353
+await in (anonymous)
+n @ square.js:3Understand this error
+square.js:3 💳 Payment failed: Error: To complete your purchase, please go to your dashboard and update your payment card. This ensures secure processing of your payment.
+    at professional-wheel.tsx:375:19
+(anonymous) @ square.js:3
+(anonymous) @ professional-wheel.tsx:378
+await in (anonymous)
+n @ square.js:3Understand this error
+square.js:3 Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+(anonymous) @ square.js:3
+(anonymous) @ chunk-AI6AHIIQ.js?v=87dfb8f5:337
+commitHookEffectListMount @ chunk-WERSD76P.js?v=87dfb8f5:16915
+commitPassiveMountOnFiber @ chunk-WERSD76P.js?v=87dfb8f5:18156
+commitPassiveMountEffects_complete @ chunk-WERSD76P.js?v=87dfb8f5:18129
+commitPassiveMountEffects_begin @ chunk-WERSD76P.js?v=87dfb8f5:18119
+commitPassiveMountEffects @ chunk-WERSD76P.js?v=87dfb8f5:18109
+flushPassiveEffectsImpl @ chunk-WERSD76P.js?v=87dfb8f5:19490
+flushPassiveEffects @ chunk-WERSD76P.js?v=87dfb8f5:19447
+commitRootImpl @ chunk-WERSD76P.js?v=87dfb8f5:19416
+commitRoot @ chunk-WERSD76P.js?v=87dfb8f5:19277
+performSyncWorkOnRoot @ chunk-WERSD76P.js?v=87dfb8f5:18895
+flushSyncCallbacks @ chunk-WERSD76P.js?v=87dfb8f5:9119
+commitRootImpl @ chunk-WERSD76P.js?v=87dfb8f5:19432
+commitRoot @ chunk-WERSD76P.js?v=87dfb8f5:19277
+finishConcurrentRender @ chunk-WERSD76P.js?v=87dfb8f5:18805
+performConcurrentWorkOnRoot @ chunk-WERSD76P.js?v=87dfb8f5:18718
+workLoop @ chunk-WERSD76P.js?v=87dfb8f5:197
+flushWork @ chunk-WERSD76P.js?v=87dfb8f5:176
+performWorkUntilDeadline @ chunk-WERSD76P.js?v=87dfb8f5:384Understand this warning
+square.js:3 ⚠️ Showing payment failure modal
+square.js:3 🎯 Spin sequence fully completed

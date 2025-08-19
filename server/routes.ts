@@ -1929,14 +1929,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
               paymentMethod = { type: 'stored_card', squareCardId, squareCustomerId };
               console.log(`💳 Using stored card method - Customer: ${squareCustomerId}, Card: ${squareCardId}`);
             }
-          } else if (cardNonce && (cardNonce === 'needs_fresh_card' || cardNonce === 'needs_card_update')) {
-            // Handle case where card exists but needs fresh nonce
-            console.log(`💳 Card exists but needs fresh nonce - requesting payment method update`);
-            return res.status(400).json({ 
-              success: false,
-              message: "To complete your purchase, please go to your dashboard and update your payment card. This ensures secure processing of your payment.",
-              requiresCardUpdate: true
-            });
           } else if (cardNonce && cardNonce.startsWith('cnon:')) {
             // Handle fresh nonce approach
             paymentMethod = { type: 'nonce', nonce: cardNonce };
@@ -1949,6 +1941,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
               squareCustomerId: user.squareCustomerId 
             };
             console.log(`💳 Fallback to stored card - Customer: ${user.squareCustomerId}, Card: ${defaultCard.squareCardId}`);
+          } else if (cardNonce && (cardNonce === 'needs_fresh_card' || cardNonce === 'needs_card_update')) {
+            // Handle case where card exists but needs fresh nonce
+            console.log(`💳 Card exists but needs fresh nonce - requesting payment method update`);
+            return res.status(400).json({ 
+              success: false,
+              message: "To complete your purchase, please go to your dashboard and update your payment card. This ensures secure processing of your payment.",
+              requiresCardUpdate: true
+            });
           } else {
             // Last resort - try stored nonce (likely to fail)
             if (defaultCard?.cardNonce && defaultCard.cardNonce !== "cnon_test") {

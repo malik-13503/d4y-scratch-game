@@ -77,30 +77,10 @@ export const ProfessionalWheel = forwardRef<
         return `stored_card:${cardData.squareCardId}:${cardData.squareCustomerId}`;
       }
 
-      // For cards without Square IDs, create a fresh nonce using stored card info
-      // This requires the Square Web SDK to be loaded
-      // @ts-ignore
-      if (!window.Square) {
-        console.error("Square Web SDK not loaded");
-        return "needs_fresh_card";
-      }
-
-      try {
-        // @ts-ignore
-        const payments = window.Square.payments(
-          import.meta.env.VITE_SQUARE_APPLICATION_ID,
-          import.meta.env.VITE_SQUARE_ENVIRONMENT
-        );
-
-        // For existing cards, we'll use the stored card approach if available
-        // or guide the user to update their payment method
-        console.log("Card found but requires payment method update for security");
-        return "needs_card_update";
-        
-      } catch (error) {
-        console.error("Square SDK error:", error);
-        return "needs_fresh_card";
-      }
+      // For cards without Square IDs, return the stored nonce directly
+      // The server will handle whether it's expired or not
+      console.log("Using stored card nonce for payment processing");
+      return cardData.cardNonce || "needs_fresh_card";
       
     } catch (error) {
       console.error("Error generating fresh card nonce:", error);
