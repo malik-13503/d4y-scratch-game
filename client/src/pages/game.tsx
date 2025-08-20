@@ -554,7 +554,10 @@ export default function GamePage() {
                   {!hasUsedFreePlay && game && 
                    game.freePlayStart && game.freePlayEnd &&
                    game.freePlayStart <= game.freePlayEnd && 
-                   game.freePlayStart <= game.totalNumbers && game.freePlayEnd <= game.totalNumbers && (
+                   game.freePlayStart <= game.totalNumbers && game.freePlayEnd <= game.totalNumbers && 
+                   game.freePlayStart > 0 && game.freePlayEnd > 0 && // Only show if free play is actually enabled
+                   game.freePlayStart !== game.totalNumbers + 1 && // Don't show if set to disabled values
+                   (
                     <div className="bg-gradient-to-r from-green-500/20 to-emerald-500/20 backdrop-blur-xl rounded-xl border border-green-400/40 shadow-2xl p-4 sm:p-6">
                       <div className="flex flex-col items-center space-y-3">
                         <div className="flex items-center space-x-2">

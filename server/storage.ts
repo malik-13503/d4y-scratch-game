@@ -473,7 +473,8 @@ export class DatabaseStorage implements IStorage {
 
     // Update game numbers left - only decrement for successful payments
     let newNumbersLeft = game.numbersLeft;
-    if (!isFreePlay && transaction) {
+    const isFreePlayNumber = spunNumber >= game.freePlayStart && spunNumber <= game.freePlayEnd;
+    if (!isFreePlayNumber && amountCharged && parseFloat(amountCharged) > 0) {
       newNumbersLeft = game.numbersLeft - 1;
       await this.updateGame(gameId, {
         numbersLeft: newNumbersLeft,
