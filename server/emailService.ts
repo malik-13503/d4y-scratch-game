@@ -13,6 +13,7 @@ export interface EmailService {
   sendPaymentReceipt(userEmail: string, userName: string, amount: string, gameNumber: number, transactionId: string): Promise<void>;
   sendWinnerNotification(userEmail: string, userName: string, gameName: string, winningNumber: number, prizeValue: string, prizeDescription: string): Promise<void>;
   sendGameCompletionNotification(userEmail: string, userName: string, gameName: string, winningNumber: number, winnerName: string, prizeDescription: string): Promise<void>;
+  sendGameWinnerAnnouncementToAllParticipants(gameName: string, winnerName: string, winningNumber: number, prizeDescription: string, participantEmails: Array<{email: string, name: string}>): Promise<void>;
 }
 
 class ResendEmailService implements EmailService {
@@ -51,12 +52,12 @@ class ResendEmailService implements EmailService {
       await resend.emails.send({
         from: FROM_EMAIL,
         to: userEmail,
-        subject: '🎯 Game Spin Receipt - Your Lucky Number Awaits!',
+        subject: '🎯 Payment Successful - Your Lucky Number Awaits!',
         html: this.getPaymentReceiptTemplate(userName, amount, gameNumber, transactionId),
       });
-      console.log(`Payment receipt sent to ${userEmail}`);
+      console.log(`Payment success email sent to ${userEmail}`);
     } catch (error) {
-      console.error('Failed to send payment receipt:', error);
+      console.error('Failed to send payment success email:', error);
       throw error;
     }
   }
@@ -384,6 +385,92 @@ class ResendEmailService implements EmailService {
         <p style="color: #666666; font-size: 14px; margin: 30px 0 0 0; padding-top: 20px; border-top: 1px solid #eeeeee;">
           This is an automated message from Hit The Road Jackpot. Please keep this email for your records.<br>
           For assistance, contact: admin@hittheroadjackpot.com
+        </p>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`;
+  }
+
+  async sendGameWinnerAnnouncementToAllParticipants(gameName: string, winnerName: string, winningNumber: number, prizeDescription: string, participantEmails: Array<{email: string, name: string}>): Promise<void> {
+    try {
+      const emailPromises = participantEmails.map(participant =>
+        resend.emails.send({
+          from: FROM_EMAIL,
+          to: participant.email,
+          subject: `🎉 Winner Announced - ${gameName} Results`,
+          html: this.getWinnerAnnouncementTemplate(participant.name, gameName, winnerName, winningNumber, prizeDescription),
+        })
+      );
+
+      await Promise.all(emailPromises);
+      console.log(`Winner announcement emails sent to ${participantEmails.length} participants for game ${gameName}`);
+    } catch (error) {
+      console.error('Failed to send winner announcement emails:', error);
+      throw error;
+    }
+  }
+
+  private getWinnerAnnouncementTemplate(participantName: string, gameName: string, winnerName: string, winningNumber: number, prizeDescription: string): string {
+    return `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Winner Announcement</title>
+</head>
+<body style="margin: 0; padding: 20px; font-family: Arial, sans-serif; background-color: #f8fafc; color: #333333;">
+  <table style="max-width: 600px; margin: 0 auto; background-color: white; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+    <tr>
+      <td style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #d946ef 100%); padding: 30px; text-align: center;">
+        <h1 style="color: white; margin: 0; font-size: 24px; font-weight: bold;">🎉 Winner Announcement</h1>
+        <p style="color: rgba(255,255,255,0.9); margin: 10px 0 0 0; font-size: 16px;">The results are in!</p>
+      </td>
+    </tr>
+    <tr>
+      <td style="padding: 40px 30px;">
+        <p style="color: #333333; font-size: 18px; line-height: 1.5; margin: 0 0 20px 0;">
+          Hello ${participantName},
+        </p>
+        <p style="color: #333333; font-size: 16px; line-height: 1.5; margin: 0 0 25px 0;">
+          Thank you for participating in <strong>${gameName}</strong>! The winner has been selected and we're excited to share the results with all participants.
+        </p>
+        
+        <div style="background-color: #f1f5f9; border-left: 4px solid #6366f1; padding: 25px; margin: 25px 0; border-radius: 8px;">
+          <h3 style="color: #1e293b; margin: 0 0 15px 0; font-size: 18px;">🏆 Winner Details</h3>
+          <table style="width: 100%; border-collapse: collapse;">
+            <tr>
+              <td style="padding: 8px 0; color: #64748b; font-weight: 500;">Game:</td>
+              <td style="padding: 8px 0; color: #1e293b; font-weight: bold;">${gameName}</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px 0; color: #64748b; font-weight: 500;">Winner:</td>
+              <td style="padding: 8px 0; color: #6366f1; font-weight: bold;">${winnerName}</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px 0; color: #64748b; font-weight: 500;">Winning Number:</td>
+              <td style="padding: 8px 0; color: #dc2626; font-weight: bold; font-size: 18px;">#${winningNumber}</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px 0; color: #64748b; font-weight: 500;">Prize:</td>
+              <td style="padding: 8px 0; color: #059669; font-weight: bold;">${prizeDescription}</td>
+            </tr>
+          </table>
+        </div>
+        
+        <p style="color: #333333; font-size: 16px; line-height: 1.5; margin: 25px 0;">
+          Congratulations to our winner! Thank you for being part of the Hit the Road Jackpot community.
+        </p>
+        
+        <div style="text-align: center; margin: 30px 0;">
+          <a href="https://hittheroadjackpot.com/games" style="display: inline-block; background: linear-gradient(135deg, #6366f1, #8b5cf6); color: white; padding: 15px 25px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px;">Play More Games</a>
+        </div>
+        
+        <p style="color: #64748b; font-size: 14px; margin: 30px 0 0 0; padding-top: 20px; border-top: 1px solid #e2e8f0; text-align: center;">
+          This is an automated message from Hit The Road Jackpot.<br>
+          For questions, contact: admin@hittheroadjackpot.com
         </p>
       </td>
     </tr>

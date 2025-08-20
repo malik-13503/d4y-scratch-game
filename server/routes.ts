@@ -1296,18 +1296,59 @@ export async function registerRoutes(app: Express): Promise<Server> {
         status: 'pending'
       });
 
-      // Send winner notification email
+      // Send winner notification email to the winner
       try {
-        await emailService.sendPaymentReceipt(
+        await emailService.sendWinnerNotification(
           user.email,
-          user.firstName,
-          "0", // No charge for winning
+          `${user.firstName} ${user.lastName}`,
+          game.name,
           winningNumber,
-          "winner_notification"
+          game.prizeValue?.toString() || "0",
+          game.prizeDescription
         );
         console.log(`Winner notification email sent to: ${user.email}`);
       } catch (emailError) {
         console.error("Failed to send winner notification email:", emailError);
+      }
+
+      // Send winner announcement email to all participants
+      try {
+        // Get all participants who made spins in this game
+        const allSpinResults = await storage.getSpinResultsByGameId(gameId);
+        const participantIds = [...new Set(allSpinResults.map(spin => spin.playerId))];
+        
+        // Get participant details
+        const participantEmails: Array<{email: string, name: string}> = [];
+        for (const participantId of participantIds) {
+          try {
+            const participant = await storage.getPlayer(participantId);
+            if (participant && participant.userId > 0) { // Skip guest players
+              const participantUser = await storage.getUser(participant.userId);
+              if (participantUser) {
+                participantEmails.push({
+                  email: participantUser.email,
+                  name: `${participantUser.firstName} ${participantUser.lastName}`
+                });
+              }
+            }
+          } catch (err) {
+            console.error(`Failed to get participant details for player ${participantId}:`, err);
+          }
+        }
+
+        // Send announcement emails to all participants
+        if (participantEmails.length > 0) {
+          await emailService.sendGameWinnerAnnouncementToAllParticipants(
+            game.name,
+            `${user.firstName} ${user.lastName}`,
+            winningNumber,
+            game.prizeDescription,
+            participantEmails
+          );
+          console.log(`Winner announcement emails sent to ${participantEmails.length} participants`);
+        }
+      } catch (emailError) {
+        console.error("Failed to send winner announcement emails to participants:", emailError);
       }
 
       // Create compliance log for manual winner selection
@@ -2201,6 +2242,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
         cardBrand,
         squareReceiptUrl: paymentResult.receiptUrl || undefined
       });
+
+      // Send payment success email
+      try {
+        const game = await storage.getGame(gameId);
+        await emailService.sendPaymentReceipt(
+          user.email,
+          `${user.firstName} ${user.lastName}`,
+          chargeAmount.toString(),
+          number,
+          paymentResult.id
+        );
+        console.log(`✅ Payment success email sent to ${user.email}`);
+      } catch (emailError) {
+        console.error('❌ Failed to send payment success email:', emailError);
+        // Don't fail the payment if email fails
+      }
 
       // Update user's total spent
       await storage.updateUser(userId, {
