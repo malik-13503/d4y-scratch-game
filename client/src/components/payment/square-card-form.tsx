@@ -119,12 +119,26 @@ export function SquareCardForm({ onClose, onSuccess, onCancel }: SquareCardFormP
     }
   };
 
+  const handleClose = () => {
+    console.log("Close button clicked");
+    onClose?.();
+  };
+
+  const handleOverlayClick = (e: React.MouseEvent) => {
+    if (e.target === e.currentTarget) {
+      handleClose();
+    }
+  };
+
   return (
-    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div 
+      className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+      onClick={handleOverlayClick}
+    >
       <Card className="w-full max-w-md bg-gradient-to-br from-slate-900/98 via-slate-800/98 to-slate-900/98 backdrop-blur-xl border-2 border-purple-500/50 shadow-2xl shadow-purple-500/25 rounded-3xl overflow-hidden animate-in fade-in-0 zoom-in-95 duration-300">
         <CardHeader className="relative text-center pb-4">
           <button
-            onClick={() => onClose?.()}
+            onClick={handleClose}
             className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors z-10"
           >
             <X className="h-6 w-6" />
@@ -196,7 +210,7 @@ export function SquareCardForm({ onClose, onSuccess, onCancel }: SquareCardFormP
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => onClose?.()}
+                onClick={handleClose}
                 disabled={isLoading}
                 className="flex-1 bg-slate-800/60 border-2 border-gray-600/50 text-gray-300 hover:bg-slate-700/60 hover:text-white hover:border-gray-500/70 py-4 rounded-xl transition-all duration-300 font-semibold"
               >
