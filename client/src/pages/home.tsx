@@ -1,5 +1,6 @@
 import { useLocation, Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -25,6 +26,15 @@ import { logout } from "@/lib/auth";
 import type { Game } from "@shared/schema";
 import logoPath from "@assets/logo_1751918412862.png";
 
+// Custom hook to fetch available numbers for a game - defined outside component
+const useAvailableNumbers = (gameId: number) => {
+  return useQuery<{availableNumbers: number[], totalAvailable: number}>({
+    queryKey: [`/api/games/${gameId}/available-numbers`],
+    refetchInterval: 15000, // Refresh every 15 seconds for real-time updates
+    enabled: !!gameId,
+  });
+};
+
 export default function Home() {
   const [, setLocation] = useLocation();
 
@@ -34,14 +44,7 @@ export default function Home() {
     refetchInterval: 30000, // Refresh every 30 seconds for real-time updates
   });
 
-  // Custom hook to fetch available numbers for all games
-  const useAvailableNumbers = (gameId: number) => {
-    return useQuery<{availableNumbers: number[], totalAvailable: number}>({
-      queryKey: [`/api/games/${gameId}/available-numbers`],
-      refetchInterval: 15000, // Refresh every 15 seconds for real-time updates
-      enabled: !!gameId,
-    });
-  };
+
 
   // Icon mapping for different game types
   const getGameIcon = (gameName: string) => {
