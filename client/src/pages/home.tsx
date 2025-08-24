@@ -34,6 +34,15 @@ export default function Home() {
     refetchInterval: 30000, // Refresh every 30 seconds for real-time updates
   });
 
+  // Custom hook to fetch available numbers for all games
+  const useAvailableNumbers = (gameId: number) => {
+    return useQuery<{availableNumbers: number[], totalAvailable: number}>({
+      queryKey: [`/api/games/${gameId}/available-numbers`],
+      refetchInterval: 15000, // Refresh every 15 seconds for real-time updates
+      enabled: !!gameId,
+    });
+  };
+
   // Icon mapping for different game types
   const getGameIcon = (gameName: string) => {
     if (
@@ -321,10 +330,13 @@ export default function Home() {
                 .filter((game) => game.isActive)
                 .map((game, index) => {
                   const Icon = getGameIcon(game.name);
-                  const progress =
-                    ((game.totalNumbers - game.numbersLeft) /
-                      game.totalNumbers) *
-                    100;
+                  
+                  // Get real-time available numbers for this game
+                  const { data: availableData } = useAvailableNumbers(game.id);
+                  const realTimeAvailable = availableData?.totalAvailable ?? game.numbersLeft;
+                  
+                  // Calculate progress using real-time data
+                  const progress = ((game.totalNumbers - realTimeAvailable) / game.totalNumbers) * 100;
                   const colors = getGameColors(index);
 
                   // Removed automatic free play logic - all numbers require payment
@@ -433,7 +445,7 @@ export default function Home() {
                               Game Progress
                             </span>
                             <span className="text-xs text-gray-300 font-mono bg-slate-800/50 px-2 py-1 rounded-full border border-white/10">
-                              {game.numbersLeft} spots left
+                              {realTimeAvailable} spots left
                             </span>
                           </div>
                           <div className="relative">
