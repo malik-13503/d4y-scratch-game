@@ -324,16 +324,14 @@ export default function Home() {
                 <span className="text-blue-300 font-bold">BIG PRIZES</span>
               </div>
             </div>
-            {/* Only show "No Purchase Necessary" if any active games have free play available */}
+            {/* Only show "No Purchase Necessary" if any active games have free play actually enabled */}
             {games &&
               games.some(
                 (game) =>
                   game.isActive &&
-                  game.freePlayStart &&
-                  game.freePlayEnd &&
-                  game.freePlayStart <= game.totalNumbers &&
-                  game.freePlayEnd <= game.totalNumbers &&
-                  game.numbersLeft > 0,
+                  game.freePlayStart === 1 &&
+                  game.freePlayEnd === game.totalNumbers &&
+                  (availableNumbersMap.get(game.id) ?? game.numbersLeft) > 0,
               ) && (
                 <div className="bg-gradient-to-r from-purple-500/20 to-pink-500/20 backdrop-blur-sm border border-purple-400/40 rounded-xl px-6 py-3">
                   <div className="flex items-center space-x-2">
@@ -501,11 +499,9 @@ export default function Home() {
                             <div className="text-sm sm:text-base font-black text-blue-200 mt-1">
                               Spin the wheel, pay what you land on
                             </div>
-                            {/* Only show "No Purchase Necessary" if this specific game has free play available */}
-                            {game.freePlayStart &&
-                              game.freePlayEnd &&
-                              game.freePlayStart <= game.totalNumbers &&
-                              game.freePlayEnd <= game.totalNumbers && (
+                            {/* Only show "No Purchase Necessary" if this specific game has free play actually enabled */}
+                            {game.freePlayStart === 1 && 
+                              game.freePlayEnd === game.totalNumbers && (
                                 <div className="text-xs text-blue-400 mt-1">
                                   💰 No Purchase Necessary: One free entry per
                                   game
