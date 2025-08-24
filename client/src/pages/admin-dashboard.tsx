@@ -910,11 +910,11 @@ export default function AdminDashboard() {
                       ${dashboardStats?.totalPrizeValue || 0}
                     </div>
                     <div className="text-xs sm:text-sm text-slate-100 font-medium">
-                      <span className="hidden sm:inline">Prize Value</span>
-                      <span className="sm:hidden">Prizes</span>
+                      <span className="hidden sm:inline">Total Revenue</span>
+                      <span className="sm:hidden">Revenue</span>
                     </div>
-                    <div className="text-xs text-orange-300 mt-1 font-semibold hidden sm:block">
-                      💰 Total awarded
+                    <div className="text-xs text-green-300 mt-1 font-semibold hidden sm:block">
+                      💰 Gross income
                     </div>
                   </div>
                 </div>
