@@ -696,7 +696,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/admin/games", requireAuth, async (req, res) => {
     try {
       const games = await storage.getGames();
-      res.json(games);
+      
+      // Add real player counts for each game
+      const gamesWithPlayerCounts = await Promise.all(
+        games.map(async (game) => {
+          const players = await storage.getPlayersByGameId(game.id);
+          const uniquePlayers = new Set(players.map(p => p.userId)).size;
+          
+          return {
+            ...game,
+            playersCount: uniquePlayers
+          };
+        })
+      );
+      
+      res.json(gamesWithPlayerCounts);
     } catch (error) {
       console.error("Failed to fetch admin games:", error);
       res.status(500).json({ message: "Failed to fetch games" });
