@@ -26,23 +26,48 @@ import { logout } from "@/lib/auth";
 import type { Game } from "@shared/schema";
 import logoPath from "@assets/logo_1751918412862.png";
 
-// Custom hook to fetch available numbers for a game - defined outside component
-const useAvailableNumbers = (gameId: number) => {
-  return useQuery<{availableNumbers: number[], totalAvailable: number}>({
-    queryKey: [`/api/games/${gameId}/available-numbers`],
-    refetchInterval: 15000, // Refresh every 15 seconds for real-time updates
-    enabled: !!gameId,
-  });
-};
-
 export default function Home() {
   const [, setLocation] = useLocation();
+  const [availableNumbersMap, setAvailableNumbersMap] = useState<Map<number, number>>(new Map());
 
   // Fetch real games data from API
   const { data: games, isLoading } = useQuery<Game[]>({
     queryKey: ["/api/games"],
     refetchInterval: 30000, // Refresh every 30 seconds for real-time updates
   });
+
+  // Fetch available numbers for all active games
+  useEffect(() => {
+    if (!games) return;
+
+    const fetchAvailableNumbers = async () => {
+      const newMap = new Map<number, number>();
+      
+      for (const game of games.filter(g => g.isActive)) {
+        try {
+          const response = await fetch(`/api/games/${game.id}/available-numbers`);
+          if (response.ok) {
+            const data = await response.json();
+            newMap.set(game.id, data.totalAvailable);
+          } else {
+            // Fallback to static value if API fails
+            newMap.set(game.id, game.numbersLeft);
+          }
+        } catch (error) {
+          // Fallback to static value if fetch fails
+          newMap.set(game.id, game.numbersLeft);
+        }
+      }
+      
+      setAvailableNumbersMap(newMap);
+    };
+
+    fetchAvailableNumbers();
+    
+    // Set up interval to refresh available numbers
+    const interval = setInterval(fetchAvailableNumbers, 15000);
+    return () => clearInterval(interval);
+  }, [games]);
 
 
 
@@ -335,8 +360,7 @@ export default function Home() {
                   const Icon = getGameIcon(game.name);
                   
                   // Get real-time available numbers for this game
-                  const { data: availableData } = useAvailableNumbers(game.id);
-                  const realTimeAvailable = availableData?.totalAvailable ?? game.numbersLeft;
+                  const realTimeAvailable = availableNumbersMap.get(game.id) ?? game.numbersLeft;
                   
                   // Calculate progress using real-time data
                   const progress = ((game.totalNumbers - realTimeAvailable) / game.totalNumbers) * 100;
