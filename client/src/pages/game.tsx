@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useParams, useLocation } from "wouter";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -30,6 +30,7 @@ import type { Game } from "@shared/schema";
 export default function GamePage() {
   const { id } = useParams();
   const [, setLocation] = useLocation();
+  const queryClient = useQueryClient();
   const [lastResult, setLastResult] = useState<number | null>(null);
   const [showConfetti, setShowConfetti] = useState(false);
   const [showDisclaimer, setShowDisclaimer] = useState(false);
@@ -277,6 +278,12 @@ export default function GamePage() {
         setLastResult(data.result.number);
         setShowConfetti(true);
         setFreePlayMessage(data.result.message);
+
+        // Invalidate queries to refresh available numbers and game data
+        queryClient.invalidateQueries({ queryKey: [`/api/games/${game.id}/available-numbers`] });
+        queryClient.invalidateQueries({ queryKey: [`/api/games/${game.id}/recent-numbers`] });
+        queryClient.invalidateQueries({ queryKey: [`/api/games/${game.id}`] });
+
         setTimeout(() => {
           setShowConfetti(false);
           setFreePlayMessage(null);
@@ -332,6 +339,11 @@ export default function GamePage() {
       setLastResult(data);
       setShowConfetti(true);
 
+      // Invalidate queries to refresh available numbers and game data
+      queryClient.invalidateQueries({ queryKey: [`/api/games/${game.id}/available-numbers`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/games/${game.id}/recent-numbers`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/games/${game.id}`] });
+
       // Hide confetti after 5 seconds
       setTimeout(() => setShowConfetti(false), 5000);
 
@@ -343,8 +355,10 @@ export default function GamePage() {
     }
   };
 
-  const progress =
-    ((game.totalNumbers - game.numbersLeft) / game.totalNumbers) * 100;
+  // Calculate progress using real-time available numbers data
+  const progress = game && totalAvailable !== undefined
+    ? ((game.totalNumbers - totalAvailable) / game.totalNumbers) * 100 
+    : 0;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden">
@@ -506,7 +520,7 @@ export default function GamePage() {
                       Available
                     </p>
                     <p className="text-white text-sm sm:text-lg font-black">
-                      {game.numbersLeft}/{game.totalNumbers}
+                      {totalAvailable}/{game.totalNumbers}
                     </p>
                   </div>
                 </div>
@@ -645,7 +659,7 @@ export default function GamePage() {
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-gray-400">Numbers Available</span>
                     <span className="text-white">
-                      {game.numbersLeft} / {game.totalNumbers}
+                      {totalAvailable} / {game.totalNumbers}
                     </span>
                   </div>
                   <Progress value={progress} className="bg-white/20 h-3" />
