@@ -7,7 +7,7 @@ import {
   insertGameSchema, insertPlayerSchema, insertGameResultSchema, 
   insertWheelSegmentSchema, insertSystemSettingSchema, insertNotificationSchema,
   insertUserSchema, insertTransactionSchema, complianceLogs, users, insertPaymentCardSchema,
-  gameResults, games
+  gameResults, games, transactions, spinResults
 } from "@shared/schema";
 import { z } from "zod";
 import { squareService } from "./squareService";
@@ -16,6 +16,26 @@ import session from "express-session";
 import connectPgSimple from "connect-pg-simple";
 import { db } from "./db";
 import { eq, desc, sql } from "drizzle-orm";
+
+// Helper function to format time ago
+function getTimeAgo(date: Date): string {
+  const now = new Date();
+  const diffInMs = now.getTime() - date.getTime();
+  const diffInSeconds = Math.floor(diffInMs / 1000);
+  const diffInMinutes = Math.floor(diffInSeconds / 60);
+  const diffInHours = Math.floor(diffInMinutes / 60);
+  const diffInDays = Math.floor(diffInHours / 24);
+
+  if (diffInSeconds < 60) {
+    return diffInSeconds <= 1 ? "just now" : `${diffInSeconds} seconds ago`;
+  } else if (diffInMinutes < 60) {
+    return diffInMinutes === 1 ? "1 minute ago" : `${diffInMinutes} minutes ago`;
+  } else if (diffInHours < 24) {
+    return diffInHours === 1 ? "1 hour ago" : `${diffInHours} hours ago`;
+  } else {
+    return diffInDays === 1 ? "1 day ago" : `${diffInDays} days ago`;
+  }
+}
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Setup authentication
@@ -703,6 +723,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const players = await storage.getPlayersByGameId(game.id);
           const uniquePlayers = new Set(players.map(p => p.userId)).size;
           
+          console.log(`Game ${game.name} (ID: ${game.id}): Found ${players.length} players, ${uniquePlayers} unique players`);
+          
           return {
             ...game,
             playersCount: uniquePlayers
@@ -1024,6 +1046,100 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Admin analytics - using only real database data
+  // Admin activity feed - Real-time activity data
+  app.get("/api/admin/activity", requireAuth, async (req, res) => {
+    try {
+      // Get recent user activities from transactions and spin results
+      const activities = [];
+
+      // Get recent transactions for payment activities
+      const recentTransactions = await db
+        .select({
+          id: transactions.id,
+          userId: transactions.userId,
+          gameId: transactions.gameId,
+          amount: transactions.amount,
+          status: transactions.status,
+          type: transactions.type,
+          description: transactions.description,
+          createdAt: transactions.createdAt,
+          number: transactions.metadata
+        })
+        .from(transactions)
+        .orderBy(desc(transactions.createdAt))
+        .limit(10);
+
+      // Get recent spin results for game activities
+      const recentSpins = await db
+        .select({
+          id: spinResults.id,
+          playerId: spinResults.playerId,
+          gameId: spinResults.gameId,
+          spunNumber: spinResults.spunNumber,
+          amountCharged: spinResults.amountCharged,
+          createdAt: spinResults.createdAt
+        })
+        .from(spinResults)
+        .orderBy(desc(spinResults.createdAt))
+        .limit(10);
+
+      // Process transactions into activity items
+      for (const transaction of recentTransactions) {
+        const user = await storage.getUser(transaction.userId);
+        const game = transaction.gameId ? await storage.getGame(transaction.gameId) : null;
+        
+        let actionText = "";
+        let activityType = "payment";
+        
+        if (transaction.type === "game_entry") {
+          actionText = `Joined ${game?.name || 'game'}`;
+          activityType = "join";
+        } else if (transaction.status === "completed") {
+          actionText = `Paid $${transaction.amount} for ${game?.name || 'game'}`;
+          activityType = "payment";
+        } else if (transaction.status === "failed") {
+          actionText = `Payment failed for ${game?.name || 'game'}`;
+          activityType = "error";
+        }
+
+        activities.push({
+          id: `transaction-${transaction.id}`,
+          user: user ? `${user.firstName} ${user.lastName}` : `Player #${transaction.userId}`,
+          action: actionText,
+          time: getTimeAgo(transaction.createdAt),
+          type: activityType,
+          timestamp: transaction.createdAt
+        });
+      }
+
+      // Process spin results into activity items
+      for (const spin of recentSpins) {
+        const player = await storage.getPlayer(spin.playerId);
+        const user = player ? await storage.getUser(player.userId) : null;
+        const game = await storage.getGame(spin.gameId);
+        
+        activities.push({
+          id: `spin-${spin.id}`,
+          user: user ? `${user.firstName} ${user.lastName}` : `Player #${spin.playerId}`,
+          action: `Spun number ${spin.spunNumber} in ${game?.name || 'game'}`,
+          time: getTimeAgo(spin.createdAt),
+          type: "spin",
+          timestamp: spin.createdAt
+        });
+      }
+
+      // Sort all activities by timestamp and return top 15
+      const sortedActivities = activities
+        .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+        .slice(0, 15);
+
+      res.json(sortedActivities);
+    } catch (error) {
+      console.error("Failed to fetch admin activity:", error);
+      res.status(500).json({ message: "Failed to fetch activity" });
+    }
+  });
+
   app.get("/api/admin/analytics", requireAuth, async (req, res) => {
     try {
       // Get real analytics data from database

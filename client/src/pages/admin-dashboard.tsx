@@ -1212,60 +1212,42 @@ export default function AdminDashboard() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4 max-h-96 overflow-y-auto">
-                  {[
-                    {
-                      user: "Player #247",
-                      action: "Won $50 prize in Travel Mug game",
-                      time: "2 seconds ago",
-                      type: "win",
-                    },
-                    {
-                      user: "Player #246",
-                      action: "Joined Camera game",
-                      time: "15 seconds ago",
-                      type: "join",
-                    },
-                    {
-                      user: "Player #245",
-                      action: "Completed Free Play game",
-                      time: "32 seconds ago",
-                      type: "complete",
-                    },
-                    {
-                      user: "Player #244",
-                      action: "Won $10 prize in Coffee game",
-                      time: "1 minute ago",
-                      type: "win",
-                    },
-                    {
-                      user: "Player #243",
-                      action: "Joined Travel Mug game",
-                      time: "2 minutes ago",
-                      type: "join",
-                    },
-                  ].map((activity, index) => (
-                    <div
-                      key={index}
-                      className="flex items-center space-x-3 p-3 bg-white/5 rounded-lg"
-                    >
+                  {recentActivity && recentActivity.length > 0 ? (
+                    recentActivity.map((activity: any, index: number) => (
                       <div
-                        className={`w-2 h-2 rounded-full ${
-                          activity.type === "win"
-                            ? "bg-green-400"
-                            : activity.type === "join"
-                              ? "bg-blue-400"
-                              : "bg-yellow-400"
-                        } animate-pulse`}
-                      ></div>
-                      <div className="flex-1">
-                        <p className="text-white text-sm">{activity.user}</p>
-                        <p className="text-gray-400 text-xs">
-                          {activity.action}
-                        </p>
+                        key={activity.id || index}
+                        className="flex items-center space-x-3 p-3 bg-white/5 rounded-lg hover:bg-white/10 transition-colors"
+                      >
+                        <div
+                          className={`w-2 h-2 rounded-full ${
+                            activity.type === "win" || activity.type === "payment"
+                              ? "bg-green-400"
+                              : activity.type === "join" || activity.type === "spin"
+                                ? "bg-blue-400"
+                                : activity.type === "error"
+                                  ? "bg-red-400"
+                                  : "bg-yellow-400"
+                          } animate-pulse`}
+                        ></div>
+                        <div className="flex-1">
+                          <p className="text-white text-sm font-medium">{activity.user}</p>
+                          <p className="text-gray-400 text-xs">
+                            {activity.action}
+                          </p>
+                        </div>
+                        <p className="text-gray-500 text-xs">{activity.time}</p>
                       </div>
-                      <p className="text-gray-500 text-xs">{activity.time}</p>
+                    ))
+                  ) : (
+                    <div className="text-center py-8">
+                      <div className="text-gray-400 text-sm">
+                        No recent activity to display
+                      </div>
+                      <p className="text-gray-500 text-xs mt-2">
+                        Activity will appear here as users interact with games
+                      </p>
                     </div>
-                  ))}
+                  )}
                 </CardContent>
               </Card>
 
