@@ -1159,29 +1159,37 @@ export class DatabaseStorage implements IStorage {
   // Get all winners for admin dashboard
   async getAllWinners() {
     try {
-      const winnersQuery = sql`
-        SELECT 
-          gr.id,
-          gr.game_id as "gameId",
-          g.name as "gameName",
-          g.code as "gameCode", 
-          gr.winning_number as "winningNumber",
-          gr.winner_id as "winnerId",
-          p.player_name as "winnerName",
-          p.email as "winnerEmail",
-          g.prize_value as "prizeValue",
-          g.prize as "prizeDescription",
-          gr.total_participants as "totalParticipants",
-          gr.total_spins as "totalSpins",
-          gr.completed_at as "completedAt"
-        FROM game_results gr
-        LEFT JOIN games g ON gr.game_id = g.id
-        LEFT JOIN players p ON gr.winner_id = p.id
-        ORDER BY gr.completed_at DESC
-      `;
+      // Get all game results
+      const gameResultsList = await db.select().from(gameResults).orderBy(desc(gameResults.completedAt));
       
-      const result = await db.execute(winnersQuery);
-      return result.rows;
+      const winners = [];
+      
+      for (const result of gameResultsList) {
+        // Get game details
+        const game = await this.getGame(result.gameId);
+        // Get winner player details
+        const player = await this.getPlayer(result.winnerId);
+        
+        if (game && player) {
+          winners.push({
+            id: result.id,
+            gameId: result.gameId,
+            gameName: game.name,
+            gameCode: game.code,
+            winningNumber: result.winningNumber,
+            winnerId: result.winnerId,
+            winnerName: player.playerName,
+            winnerEmail: player.email,
+            prizeValue: game.prizeValue,
+            prizeDescription: game.prize,
+            totalParticipants: result.totalParticipants,
+            totalSpins: result.totalSpins,
+            completedAt: result.completedAt,
+          });
+        }
+      }
+      
+      return winners;
     } catch (error) {
       console.error("Error fetching winners:", error);
       throw error;
