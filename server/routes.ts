@@ -1305,8 +1305,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           gameCode: games.code,
           winningNumber: gameResults.winningNumber,
           winnerId: gameResults.winnerId,
-          winnerName: sql<string>`${users.firstName} || ' ' || ${users.lastName}`,
-          winnerEmail: users.email,
+          winnerName: sql<string>`COALESCE(${users.firstName} || ' ' || ${users.lastName}, ${players.playerName})`,
+          winnerEmail: sql<string>`COALESCE(${users.email}, ${players.email})`,
           prizeValue: games.prizeValue,
           prizeDescription: games.prize,
           totalParticipants: gameResults.totalParticipants,
@@ -1315,7 +1315,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         })
         .from(gameResults)
         .leftJoin(games, eq(gameResults.gameId, games.id))
-        .leftJoin(users, eq(gameResults.winnerId, users.id))
+        .leftJoin(players, eq(gameResults.winnerId, players.id))
+        .leftJoin(users, eq(players.userId, users.id))
         .orderBy(desc(gameResults.completedAt));
 
       res.json(winners);
