@@ -1159,39 +1159,54 @@ export class DatabaseStorage implements IStorage {
   // Get all winners for admin dashboard
   async getAllWinners() {
     try {
-      // Return hardcoded test data first to verify the UI works
-      return [
-        {
-          id: 1,
-          gameId: 16,
-          gameName: "ONW Shirt",
-          gameCode: "G187917",
-          winningNumber: 27,
-          winnerId: 37,
-          winnerName: "Player-1752149877751",
-          winnerEmail: "winner1@example.com",
-          prizeValue: 25,
-          prizeDescription: "Premium ONW Shirt",
-          totalParticipants: 8,
-          totalSpins: 13,
-          completedAt: new Date("2025-01-18T12:30:00Z"),
-        },
-        {
-          id: 2,
-          gameId: 14,
-          gameName: "Premium Travel Mug",
-          gameCode: "G187915",
-          winningNumber: 15,
-          winnerId: 29,
-          winnerName: "Player-1752149242125",
-          winnerEmail: "winner2@example.com",
-          prizeValue: 29,
-          prizeDescription: "Insulated Travel Mug",
-          totalParticipants: 5,
-          totalSpins: 8,
-          completedAt: new Date("2025-01-18T11:45:00Z"),
+      // Get real data using separate simple queries
+      const gameResultsQuery = `
+        SELECT id, game_id, winning_number, winner_id, total_participants, total_spins, completed_at 
+        FROM game_results 
+        WHERE completed_at IS NOT NULL 
+        ORDER BY completed_at DESC
+      `;
+      
+      const results = await db.execute(sql.raw(gameResultsQuery));
+      const winners = [];
+      
+      for (const result of results.rows) {
+        try {
+          // Get game info
+          const gameQuery = `SELECT name, code, prize_value, prize FROM games WHERE id = ${result.game_id}`;
+          const gameData = await db.execute(sql.raw(gameQuery));
+          
+          // Get player info  
+          const playerQuery = `SELECT player_name, email FROM players WHERE id = ${result.winner_id}`;
+          const playerData = await db.execute(sql.raw(playerQuery));
+          
+          if (gameData.rows[0] && playerData.rows[0]) {
+            const game = gameData.rows[0];
+            const player = playerData.rows[0];
+            
+            winners.push({
+              id: result.id,
+              gameId: result.game_id,
+              gameName: game.name,
+              gameCode: game.code,
+              winningNumber: result.winning_number,
+              winnerId: result.winner_id,
+              winnerName: player.player_name,
+              winnerEmail: player.email,
+              prizeValue: game.prize_value,
+              prizeDescription: game.prize,
+              totalParticipants: result.total_participants,
+              totalSpins: result.total_spins,
+              completedAt: result.completed_at,
+            });
+          }
+        } catch (innerError) {
+          console.error(`Error processing result ${result.id}:`, innerError);
+          // Continue with other results
         }
-      ];
+      }
+      
+      return winners;
     } catch (error) {
       console.error("Error fetching winners:", error);
       throw error;
