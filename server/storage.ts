@@ -1155,6 +1155,38 @@ export class DatabaseStorage implements IStorage {
       throw error;
     }
   }
+
+  // Get all winners for admin dashboard
+  async getAllWinners() {
+    try {
+      const winnersQuery = sql`
+        SELECT 
+          gr.id,
+          gr.game_id as "gameId",
+          g.name as "gameName",
+          g.code as "gameCode", 
+          gr.winning_number as "winningNumber",
+          gr.winner_id as "winnerId",
+          p.player_name as "winnerName",
+          p.email as "winnerEmail",
+          g.prize_value as "prizeValue",
+          g.prize as "prizeDescription",
+          gr.total_participants as "totalParticipants",
+          gr.total_spins as "totalSpins",
+          gr.completed_at as "completedAt"
+        FROM game_results gr
+        LEFT JOIN games g ON gr.game_id = g.id
+        LEFT JOIN players p ON gr.winner_id = p.id
+        ORDER BY gr.completed_at DESC
+      `;
+      
+      const result = await db.execute(winnersQuery);
+      return result.rows;
+    } catch (error) {
+      console.error("Error fetching winners:", error);
+      throw error;
+    }
+  }
 }
 
 export const storage = new DatabaseStorage();
