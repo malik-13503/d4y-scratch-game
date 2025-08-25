@@ -1159,32 +1159,32 @@ export class DatabaseStorage implements IStorage {
   // Get all winners for admin dashboard
   async getAllWinners() {
     try {
-      // Get all game results
-      const gameResultsList = await db.select().from(gameResults).orderBy(desc(gameResults.completedAt));
+      // Get all game results first with simple query
+      const results = await db.execute(sql`SELECT * FROM game_results ORDER BY completed_at DESC`);
       
       const winners = [];
       
-      for (const result of gameResultsList) {
+      for (const result of results.rows) {
         // Get game details
-        const game = await this.getGame(result.gameId);
-        // Get winner player details
-        const player = await this.getPlayer(result.winnerId);
+        const game = await this.getGame(result.game_id);
+        // Get winner player details  
+        const player = await this.getPlayer(result.winner_id);
         
         if (game && player) {
           winners.push({
             id: result.id,
-            gameId: result.gameId,
+            gameId: result.game_id,
             gameName: game.name,
             gameCode: game.code,
-            winningNumber: result.winningNumber,
-            winnerId: result.winnerId,
+            winningNumber: result.winning_number,
+            winnerId: result.winner_id,
             winnerName: player.playerName,
             winnerEmail: player.email,
             prizeValue: game.prizeValue,
             prizeDescription: game.prize,
-            totalParticipants: result.totalParticipants,
-            totalSpins: result.totalSpins,
-            completedAt: result.completedAt,
+            totalParticipants: result.total_participants,
+            totalSpins: result.total_spins,
+            completedAt: result.completed_at,
           });
         }
       }
