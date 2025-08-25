@@ -643,10 +643,16 @@ export class DatabaseStorage implements IStorage {
       }
       
       const winnerPlayer = await this.getPlayer(gameResult.winnerId);
-      const winnerUser = winnerPlayer ? await this.getUser(winnerPlayer.userId) : null;
+      if (!winnerPlayer) {
+        throw new Error("Winner player not found");
+      }
 
-      if (!winnerPlayer || !winnerUser) {
-        throw new Error("Winner not found");
+      // Check if winner has a user account
+      const winnerUser = winnerPlayer.userId ? await this.getUser(winnerPlayer.userId) : null;
+      
+      if (!winnerUser || !winnerUser.email) {
+        console.log(`⚠️ Winner player ${winnerPlayer.id} (${winnerPlayer.playerName}) has no user account or email. Skipping email notifications for game ${game.name}.`);
+        return; // Skip email sending for players without user accounts
       }
 
       // Get all participants for announcement emails
