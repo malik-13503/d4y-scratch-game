@@ -7,7 +7,7 @@ import {
   insertGameSchema, insertPlayerSchema, insertGameResultSchema, 
   insertWheelSegmentSchema, insertSystemSettingSchema, insertNotificationSchema,
   insertUserSchema, insertTransactionSchema, complianceLogs, users, insertPaymentCardSchema,
-  gameResults, games, transactions, spinResults
+  gameResults, games, transactions, spinResults, players
 } from "@shared/schema";
 import { z } from "zod";
 import { squareService } from "./squareService";
