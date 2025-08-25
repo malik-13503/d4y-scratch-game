@@ -1305,6 +1305,132 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Manually select winner for a game
+  app.post("/api/admin/games/:gameId/select-winner", requireAuth, async (req, res) => {
+    try {
+      const gameId = parseInt(req.params.gameId);
+      const { playerId, reason } = req.body;
+      
+      const game = await storage.getGame(gameId);
+      
+      if (!game) {
+        return res.status(404).json({ message: "Game not found" });
+      }
+
+      // Check if game has participants
+      const spinResults = await storage.getSpinResultsByGameId(gameId);
+      if (spinResults.length === 0) {
+        return res.status(400).json({ message: "Game has no participants yet" });
+      }
+
+      // Check if winner already selected
+      const existingResult = await storage.getGameResult(gameId);
+      if (existingResult) {
+        return res.status(400).json({ message: "Winner already selected for this game" });
+      }
+
+      let winner;
+      
+      if (playerId) {
+        // Manual winner selection - select specific player
+        const selectedPlayer = await storage.getPlayer(playerId);
+        if (!selectedPlayer) {
+          return res.status(404).json({ message: "Selected player not found" });
+        }
+        
+        // Verify player participated in this game
+        const playerSpin = spinResults.find(spin => spin.playerId === playerId);
+        if (!playerSpin) {
+          return res.status(400).json({ message: "Selected player did not participate in this game" });
+        }
+        
+        // Select this specific player as winner
+        winner = await storage.selectSpecificWinner(gameId, playerId, reason || "Manual selection by admin");
+      } else {
+        // Automatic winner selection - select randomly from all participants
+        winner = await storage.selectGameWinner(gameId);
+      }
+      
+      if (!winner) {
+        return res.status(500).json({ message: "Failed to select winner" });
+      }
+
+      // Send completion emails
+      await storage.sendGameCompletionEmails(gameId);
+      
+      // Mark game as inactive since it's complete
+      await storage.updateGame(gameId, { isActive: false });
+
+      res.json({ 
+        message: "Winner selected successfully",
+        winner: {
+          id: winner.id,
+          playerName: winner.playerName,
+          email: winner.email
+        }
+      });
+    } catch (error) {
+      console.error("Failed to select winner:", error);
+      res.status(500).json({ message: "Failed to select winner" });
+    }
+  });
+
+  // Get game participants for winner selection
+  app.get("/api/admin/games/:gameId/participants", requireAuth, async (req, res) => {
+    try {
+      const gameId = parseInt(req.params.gameId);
+      const game = await storage.getGame(gameId);
+      
+      if (!game) {
+        return res.status(404).json({ message: "Game not found" });
+      }
+
+      // Get all spin results for the game
+      const spinResults = await storage.getSpinResultsByGameId(gameId);
+      
+      // Check if game already has a winner
+      const existingResult = await storage.getGameResult(gameId);
+      const hasWinner = !!existingResult;
+
+      // Build participant list with user information
+      const participants = [];
+      
+      for (const spin of spinResults) {
+        const player = await storage.getPlayer(spin.playerId);
+        if (player) {
+          const user = player.userId ? await storage.getUser(player.userId) : null;
+          
+          participants.push({
+            id: player.id,
+            userId: player.userId,
+            playerName: player.playerName,
+            email: user?.email || "No email",
+            spunNumber: spin.spunNumber,
+            amountPaid: spin.amount,
+            spunAt: spin.spunAt,
+            isWinner: player.isWinner || false,
+            spinResultId: spin.id
+          });
+        }
+      }
+
+      // Sort by spin date (most recent first)
+      participants.sort((a, b) => new Date(b.spunAt).getTime() - new Date(a.spunAt).getTime());
+
+      res.json({
+        gameId,
+        gameName: game.name,
+        totalParticipants: participants.length,
+        participants,
+        gameCompleted: !game.isActive || hasWinner,
+        hasWinner
+      });
+    } catch (error) {
+      console.error("Failed to get game participants:", error);
+      res.status(500).json({ message: "Failed to get game participants" });
+    }
+  });
+
   // Delete winner endpoint
   app.delete("/api/admin/winners/:id", requireAuth, async (req, res) => {
     try {

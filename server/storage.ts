@@ -92,6 +92,7 @@ export interface IStorage {
   isNumberAvailable(gameId: number, number: number): Promise<boolean>;
   getAvailableNumbers(gameId: number): Promise<number[]>;
   selectGameWinner(gameId: number): Promise<Player | undefined>;
+  selectSpecificWinner(gameId: number, playerId: number, reason?: string): Promise<Player | undefined>;
   getRecentGameTransactions(gameId: number, limit?: number): Promise<Transaction[]>;
 
   // Session store
@@ -619,6 +620,66 @@ export class DatabaseStorage implements IStorage {
       return winner;
     } catch (error) {
       console.error("Error selecting game winner:", error);
+      throw error;
+    }
+  }
+
+  // Select a specific player as winner (manual selection)
+  async selectSpecificWinner(gameId: number, playerId: number, reason: string = "Manual selection by admin"): Promise<Player | undefined> {
+    try {
+      const game = await this.getGame(gameId);
+      if (!game) {
+        throw new Error("Game not found");
+      }
+
+      // Get the selected player
+      const winner = await this.getPlayer(playerId);
+      if (!winner) {
+        throw new Error("Selected player not found");
+      }
+
+      // Get the player's spin result for this game to get their number
+      const spinResults = await this.getSpinResultsByGameId(gameId);
+      const winnerSpin = spinResults.find(spin => spin.playerId === playerId);
+      
+      if (!winnerSpin) {
+        throw new Error("Player did not participate in this game");
+      }
+
+      // Create game result
+      await this.createGameResult({
+        gameId,
+        winningNumber: winnerSpin.spunNumber,
+        winnerId: playerId,
+        totalParticipants: new Set(spinResults.map(spin => spin.playerId)).size,
+        totalSpins: spinResults.length
+      });
+
+      // Update winner status
+      await this.updatePlayer(playerId, { isWinner: true });
+
+      // Create compliance log for manual winner selection
+      await this.createComplianceLog(
+        winner.userId,
+        gameId,
+        'winner_selection',
+        {
+          winningNumber: winnerSpin.spunNumber,
+          totalParticipants: new Set(spinResults.map(spin => spin.playerId)).size,
+          totalSpins: spinResults.length,
+          selectionMethod: 'manual_admin_selection',
+          selectionReason: reason,
+          timestamp: new Date().toISOString(),
+          gameTitle: game.name,
+          prizeValue: game.prizeValue
+        }
+      );
+
+      console.log(`👑 Manual winner selected for game ${gameId}: Player ${playerId} (${winner.playerName}) with number ${winnerSpin.spunNumber}. Reason: ${reason}`);
+      
+      return winner;
+    } catch (error) {
+      console.error("Error selecting specific winner:", error);
       throw error;
     }
   }
