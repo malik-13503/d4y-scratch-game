@@ -1431,6 +1431,80 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Send winner emails manually
+  app.post("/api/admin/send-winner-emails/:gameId", requireAuth, async (req, res) => {
+    try {
+      const gameId = parseInt(req.params.gameId);
+      
+      // Get game and winner info
+      const game = await storage.getGame(gameId);
+      const gameResult = await storage.getGameResult(gameId);
+      
+      if (!game || !gameResult || !gameResult.winnerId) {
+        return res.status(404).json({ message: "Game or result not found" });
+      }
+      
+      const winner = await storage.getPlayer(gameResult.winnerId);
+      if (!winner) {
+        return res.status(404).json({ message: "Winner not found" });
+      }
+      
+      const winnerUser = winner.userId ? await storage.getUser(winner.userId) : null;
+      
+      console.log(`Sending emails for ${game.name}:`);
+      console.log(`Winner: ${winner.playerName} (${winnerUser?.email})`);
+      
+      // Send winner notification
+      if (winnerUser?.email) {
+        await emailService.sendWinnerNotification(
+          winnerUser.email,
+          winnerUser.firstName || winner.playerName,
+          game.name,
+          gameResult.winningNumber,
+          game.prizeValue.toString(),
+          game.prizeDescription
+        );
+        console.log(`✅ Winner notification sent to: ${winnerUser.email}`);
+      }
+      
+      // Send completion notifications to all participants
+      const spinResults = await storage.getSpinResultsByGameId(gameId);
+      let participantEmailCount = 0;
+      
+      for (const spin of spinResults) {
+        const player = await storage.getPlayer(spin.playerId);
+        if (player && player.userId) {
+          const user = await storage.getUser(player.userId);
+          if (user?.email && user.email !== winnerUser?.email) {
+            await emailService.sendGameCompletionNotification(
+              user.email,
+              user.firstName || player.playerName,
+              game.name,
+              gameResult.winningNumber,
+              winner.playerName,
+              game.prizeDescription
+            );
+            console.log(`✅ Completion notification sent to: ${user.email}`);
+            participantEmailCount++;
+          }
+        }
+      }
+      
+      res.json({ 
+        message: "Emails sent successfully",
+        winnerEmail: winnerUser?.email || "No email",
+        participantEmails: participantEmailCount
+      });
+      
+    } catch (error) {
+      console.error("Failed to send winner emails:", error);
+      res.status(500).json({ 
+        message: "Failed to send emails", 
+        error: error instanceof Error ? error.message : "Unknown error"
+      });
+    }
+  });
+
   // Delete winner endpoint
   app.delete("/api/admin/winners/:id", requireAuth, async (req, res) => {
     try {
