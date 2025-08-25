@@ -169,27 +169,29 @@ export default function AdminDashboard() {
   }, []);
 
   useEffect(() => {
-    // Wait longer for authentication to complete
+    // Only redirect if we have neither server nor local auth AND not loading AND enough time has passed
     if (!authLoading && !adminUser && !localAdminUser) {
       console.log("No authentication found, redirecting to login");
-      // Longer delay to prevent redirect loops during session establishment
+      // Even longer delay to ensure session establishment
       setTimeout(() => {
-        setLocation("/admin-login");
-      }, 2000);
+        // Double check before redirecting
+        const currentStored = localStorage.getItem("admin_user");
+        if (!currentStored) {
+          setLocation("/admin-login");
+        }
+      }, 5000);
       return;
     }
 
-    // Only clear localStorage after multiple failed attempts
-    if (!authLoading && !adminUser && localAdminUser && error) {
-      console.log(
-        "Server authentication failed after login, clearing localStorage and redirecting",
-      );
+    // Don't clear localStorage or redirect if we have local auth - let the user continue
+    // Only redirect if completely no auth and clear error
+    if (!authLoading && !adminUser && !localAdminUser && error) {
+      console.log("Complete authentication failure, redirecting");
       localStorage.removeItem("admin_user");
       setLocalAdminUser(null);
-      // Don't redirect immediately to avoid loops
       setTimeout(() => {
         setLocation("/admin-login");
-      }, 3000);
+      }, 5000);
     }
   }, [adminUser, localAdminUser, authLoading, error, setLocation]);
 
