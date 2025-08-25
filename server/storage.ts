@@ -483,16 +483,41 @@ export class DatabaseStorage implements IStorage {
 
     // Check if game is complete (all numbers claimed)
     if (newNumbersLeft === 0) {
-      // Game is complete - notify admin for manual winner selection
+      // Game is complete - automatically select winner and send notifications
       await this.updateGame(gameId, { isActive: false });
       
-      await this.createNotification({
-        type: 'game_complete',
-        message: `${game.name} has ended. All numbers have been taken. Please select a winner from the admin dashboard.`,
-        gameId: gameId,
-        playerId: null,
-        status: 'pending'
-      });
+      console.log(`🎮 Game ${game.name} (ID: ${gameId}) is complete! All numbers claimed. Automatically selecting winner...`);
+      
+      try {
+        // Automatically select winner
+        const winner = await this.selectGameWinner(gameId);
+        
+        if (winner) {
+          console.log(`🏆 Winner selected for game ${game.name}: Player ${winner.id} with number ${winner.selectedNumber}`);
+          
+          // Send email notifications to all participants and winner
+          await this.sendGameCompletionEmails(gameId);
+        }
+        
+        await this.createNotification({
+          type: 'game_complete',
+          message: `${game.name} has ended. Winner automatically selected and notifications sent.`,
+          gameId: gameId,
+          playerId: winner?.id || null,
+          status: 'completed'
+        });
+      } catch (error) {
+        console.error(`Failed to automatically select winner for game ${gameId}:`, error);
+        
+        // Fallback to manual selection
+        await this.createNotification({
+          type: 'game_complete',
+          message: `${game.name} has ended. Automatic winner selection failed. Please select a winner manually from the admin dashboard.`,
+          gameId: gameId,
+          playerId: null,
+          status: 'pending'
+        });
+      }
     }
 
     return spinResult;
@@ -569,9 +594,6 @@ export class DatabaseStorage implements IStorage {
       // Update winner status
       await this.updatePlayer(winningSpinResult.playerId, { isWinner: true });
 
-      // Notify the winner
-      await this.notifyWinner(gameId, winningSpinResult.playerId);
-
       // Create compliance log for winner selection
       const winner = await this.getPlayer(winningSpinResult.playerId);
       if (winner) {
@@ -597,6 +619,77 @@ export class DatabaseStorage implements IStorage {
       return winner;
     } catch (error) {
       console.error("Error selecting game winner:", error);
+      throw error;
+    }
+  }
+
+  // New function to send completion emails to all participants and winner
+  async sendGameCompletionEmails(gameId: number): Promise<void> {
+    try {
+      const game = await this.getGame(gameId);
+      if (!game) {
+        throw new Error("Game not found");
+      }
+
+      // Get the game result to find the winner
+      const gameResult = await this.getGameResult(gameId);
+      if (!gameResult) {
+        throw new Error("Game result not found");
+      }
+
+      // Get winner details
+      const winnerPlayer = await this.getPlayer(gameResult.winnerId);
+      const winnerUser = winnerPlayer ? await this.getUser(winnerPlayer.userId) : null;
+
+      if (!winnerPlayer || !winnerUser) {
+        throw new Error("Winner not found");
+      }
+
+      // Get all participants for announcement emails
+      const spinResults = await this.getSpinResultsByGameId(gameId);
+      const participantEmails: Array<{email: string, name: string}> = [];
+      
+      for (const spin of spinResults) {
+        const player = await this.getPlayer(spin.playerId);
+        const user = player ? await this.getUser(player.userId) : null;
+        
+        if (user && user.email) {
+          // Avoid duplicates
+          if (!participantEmails.find(p => p.email === user.email)) {
+            participantEmails.push({
+              email: user.email,
+              name: `${user.firstName} ${user.lastName}`
+            });
+          }
+        }
+      }
+
+      // Import emailService here to avoid circular dependencies
+      const { emailService } = await import('./emailService');
+
+      // Send winner notification email
+      await emailService.sendWinnerNotification(
+        winnerUser.email,
+        `${winnerUser.firstName} ${winnerUser.lastName}`,
+        game.name,
+        gameResult.winningNumber,
+        game.prizeValue?.toString() || '0',
+        game.prize || game.description
+      );
+
+      // Send announcement emails to all participants
+      await emailService.sendGameWinnerAnnouncementToAllParticipants(
+        game.name,
+        `${winnerUser.firstName} ${winnerUser.lastName}`,
+        gameResult.winningNumber,
+        game.prize || game.description,
+        participantEmails
+      );
+
+      console.log(`✅ Sent game completion emails for ${game.name}: Winner notification to ${winnerUser.email} and announcements to ${participantEmails.length} participants`);
+      
+    } catch (error) {
+      console.error('Failed to send game completion emails:', error);
       throw error;
     }
   }

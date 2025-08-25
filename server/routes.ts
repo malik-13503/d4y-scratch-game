@@ -723,7 +723,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const players = await storage.getPlayersByGameId(game.id);
           const uniquePlayers = new Set(players.map(p => p.userId)).size;
           
-          console.log(`Game ${game.name} (ID: ${game.id}): Found ${players.length} players, ${uniquePlayers} unique players`);
           
           return {
             ...game,
@@ -1062,8 +1061,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           status: transactions.status,
           type: transactions.type,
           description: transactions.description,
-          createdAt: transactions.createdAt,
-          number: transactions.metadata
+          createdAt: transactions.createdAt
         })
         .from(transactions)
         .orderBy(desc(transactions.createdAt))
