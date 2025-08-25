@@ -1297,28 +1297,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get all winners - New Winners List API
   app.get("/api/admin/winners", requireAuth, async (req, res) => {
     try {
-      const winners = await db
-        .select({
-          id: gameResults.id,
-          gameId: gameResults.gameId,
-          gameName: games.name,
-          gameCode: games.code,
-          winningNumber: gameResults.winningNumber,
-          winnerId: gameResults.winnerId,
-          winnerName: players.playerName,
-          winnerEmail: players.email,
-          prizeValue: games.prizeValue,
-          prizeDescription: games.prize,
-          totalParticipants: gameResults.totalParticipants,
-          totalSpins: gameResults.totalSpins,
-          completedAt: gameResults.completedAt,
-        })
-        .from(gameResults)
-        .leftJoin(games, eq(gameResults.gameId, games.id))
-        .leftJoin(players, eq(gameResults.winnerId, players.id))
-        .orderBy(desc(gameResults.completedAt));
-
-      res.json(winners);
+      // Use raw SQL query to avoid Drizzle syntax issues
+      const winnersQuery = `
+        SELECT 
+          gr.id,
+          gr.game_id as "gameId",
+          g.name as "gameName",
+          g.code as "gameCode", 
+          gr.winning_number as "winningNumber",
+          gr.winner_id as "winnerId",
+          p.player_name as "winnerName",
+          p.email as "winnerEmail",
+          g.prize_value as "prizeValue",
+          g.prize as "prizeDescription",
+          gr.total_participants as "totalParticipants",
+          gr.total_spins as "totalSpins",
+          gr.completed_at as "completedAt"
+        FROM game_results gr
+        LEFT JOIN games g ON gr.game_id = g.id
+        LEFT JOIN players p ON gr.winner_id = p.id
+        ORDER BY gr.completed_at DESC
+      `;
+      
+      const winners = await db.execute(sql.raw(winnersQuery));
+      res.json(winners.rows);
     } catch (error) {
       console.error("Error fetching winners:", error);
       res.status(500).json({ message: "Failed to fetch winners" });
