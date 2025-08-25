@@ -1059,8 +1059,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
           gameId: transactions.gameId,
           amount: transactions.amount,
           status: transactions.status,
-          type: transactions.type,
-          description: transactions.description,
           createdAt: transactions.createdAt
         })
         .from(transactions)
@@ -1089,15 +1087,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         let actionText = "";
         let activityType = "payment";
         
-        if (transaction.type === "game_entry") {
-          actionText = `Joined ${game?.name || 'game'}`;
-          activityType = "join";
-        } else if (transaction.status === "completed") {
+        if (transaction.status === "COMPLETED") {
           actionText = `Paid $${transaction.amount} for ${game?.name || 'game'}`;
           activityType = "payment";
-        } else if (transaction.status === "failed") {
+        } else if (transaction.status === "FAILED") {
           actionText = `Payment failed for ${game?.name || 'game'}`;
           activityType = "error";
+        } else {
+          actionText = `Transaction for ${game?.name || 'game'}`;
+          activityType = "payment";
         }
 
         activities.push({
@@ -1366,6 +1364,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error deleting winner:", error);
       res.status(500).json({ message: "Failed to delete winner" });
+    }
+  });
+
+  // Send completion emails for an already completed game (for testing and retroactive emails)
+  app.post("/api/admin/games/:id/send-completion-emails", requireAuth, async (req, res) => {
+    try {
+      const gameId = parseInt(req.params.id);
+      
+      const game = await storage.getGame(gameId);
+      if (!game) {
+        return res.status(404).json({ message: "Game not found" });
+      }
+
+      const gameResult = await storage.getGameResult(gameId);
+      if (!gameResult) {
+        return res.status(404).json({ message: "Game has no winner yet" });
+      }
+
+      // Send emails for this completed game
+      await storage.sendGameCompletionEmails(gameId);
+      
+      res.json({ 
+        message: "Completion emails sent successfully",
+        gameId,
+        gameName: game.name,
+        winningNumber: gameResult.winningNumber
+      });
+    } catch (error) {
+      console.error("Failed to send completion emails:", error);
+      res.status(500).json({ message: "Failed to send completion emails" });
     }
   });
 

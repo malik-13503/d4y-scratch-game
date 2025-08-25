@@ -638,6 +638,10 @@ export class DatabaseStorage implements IStorage {
       }
 
       // Get winner details
+      if (!gameResult.winnerId) {
+        throw new Error("Game result has no winner ID");
+      }
+      
       const winnerPlayer = await this.getPlayer(gameResult.winnerId);
       const winnerUser = winnerPlayer ? await this.getUser(winnerPlayer.userId) : null;
 
@@ -668,25 +672,29 @@ export class DatabaseStorage implements IStorage {
       const { emailService } = await import('./emailService');
 
       // Send winner notification email
-      await emailService.sendWinnerNotification(
-        winnerUser.email,
-        `${winnerUser.firstName} ${winnerUser.lastName}`,
-        game.name,
-        gameResult.winningNumber,
-        game.prizeValue?.toString() || '0',
-        game.prize || game.description
-      );
+      if (winnerUser.email) {
+        await emailService.sendWinnerNotification(
+          winnerUser.email,
+          `${winnerUser.firstName} ${winnerUser.lastName}`,
+          game.name,
+          gameResult.winningNumber || 0,
+          game.prizeValue?.toString() || '0',
+          game.prize || game.description
+        );
+      }
 
       // Send announcement emails to all participants
-      await emailService.sendGameWinnerAnnouncementToAllParticipants(
-        game.name,
-        `${winnerUser.firstName} ${winnerUser.lastName}`,
-        gameResult.winningNumber,
-        game.prize || game.description,
-        participantEmails
-      );
+      if (participantEmails.length > 0) {
+        await emailService.sendGameWinnerAnnouncementToAllParticipants(
+          game.name,
+          `${winnerUser.firstName} ${winnerUser.lastName}`,
+          gameResult.winningNumber || 0,
+          game.prize || game.description,
+          participantEmails
+        );
+      }
 
-      console.log(`✅ Sent game completion emails for ${game.name}: Winner notification to ${winnerUser.email} and announcements to ${participantEmails.length} participants`);
+      console.log(`✅ Sent game completion emails for ${game.name}: Winner notification to ${winnerUser.email || 'unknown'} and announcements to ${participantEmails.length} participants`);
       
     } catch (error) {
       console.error('Failed to send game completion emails:', error);

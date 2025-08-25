@@ -53,6 +53,8 @@ import {
   Shield,
   Database,
   Monitor,
+  Mail,
+  Loader2,
   Wifi,
   Lock,
   Unlock,
@@ -4984,14 +4986,64 @@ function WinnersList() {
               </div>
             </div>
             
-            {/* Delete Winner Button */}
-            <div className="mt-4 pt-4 border-t border-slate-600/30 flex justify-end">
+            {/* Action Buttons */}
+            <div className="mt-4 pt-4 border-t border-slate-600/30 flex justify-end space-x-3">
+              <SendCompletionEmailsButton gameId={winner.gameId} gameName={winner.gameName} onEmailSent={refetch} />
               <DeleteWinnerButton winnerId={winner.id} winnerName={winner.winnerName} onDelete={refetch} />
             </div>
           </CardContent>
         </Card>
       ))}
     </div>
+  );
+}
+
+// Send Completion Emails Button Component
+function SendCompletionEmailsButton({ gameId, gameName, onEmailSent }: { gameId: number; gameName: string; onEmailSent: () => void }) {
+  const { toast } = useToast();
+
+  const sendEmailsMutation = useMutation({
+    mutationFn: async () => {
+      const response = await apiRequest("POST", `/api/admin/games/${gameId}/send-completion-emails`);
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Success",
+        description: `Completion emails sent for ${gameName}`,
+      });
+      onEmailSent();
+    },
+    onError: (error: any) => {
+      console.error("Failed to send completion emails:", error);
+      toast({
+        title: "Error", 
+        description: "Failed to send completion emails",
+        variant: "destructive",
+      });
+    },
+  });
+
+  return (
+    <Button
+      variant="outline"
+      size="sm"
+      onClick={() => sendEmailsMutation.mutate()}
+      disabled={sendEmailsMutation.isPending}
+      className="bg-blue-500/20 border-blue-500/50 text-blue-400 hover:bg-blue-500/30 hover:border-blue-400"
+    >
+      {sendEmailsMutation.isPending ? (
+        <>
+          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+          Sending...
+        </>
+      ) : (
+        <>
+          <Mail className="h-4 w-4 mr-2" />
+          Send Emails
+        </>
+      )}
+    </Button>
   );
 }
 
