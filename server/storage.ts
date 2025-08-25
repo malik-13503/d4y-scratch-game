@@ -472,10 +472,11 @@ export class DatabaseStorage implements IStorage {
       }
     }
 
-    // Update game numbers left - only decrement for successful payments
+    // Update game numbers left - decrement for ALL successful payments
+    // The free play range only applies to actual free spins (isFreePlay = true)
+    // If someone paid money, always count it regardless of the number they landed on
     let newNumbersLeft = game.numbersLeft;
-    const isFreePlayNumber = spunNumber >= game.freePlayStart && spunNumber <= game.freePlayEnd;
-    if (!isFreePlayNumber && amountCharged && parseFloat(amountCharged) > 0) {
+    if (amountCharged && parseFloat(amountCharged) > 0) {
       newNumbersLeft = game.numbersLeft - 1;
       await this.updateGame(gameId, {
         numbersLeft: newNumbersLeft,
