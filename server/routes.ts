@@ -1300,6 +1300,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const winners = await db
         .select({
           id: gameResults.id,
+          gameId: gameResults.gameId,
           gameName: games.name,
           gameCode: games.code,
           winningNumber: gameResults.winningNumber,
