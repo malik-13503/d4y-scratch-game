@@ -434,6 +434,32 @@ export class DatabaseStorage implements IStorage {
       throw new Error(`Number ${spunNumber} has already been claimed by another player`);
     }
 
+    // CRITICAL FIX: Ensure player record exists for automatic winner selection to work
+    let player = await this.getPlayer(playerId);
+    if (!player) {
+      // Create player record if it doesn't exist (this happens when user spins without joining via old API)
+      const user = await this.getUser(playerId); // Assuming playerId matches userId for authenticated users
+      if (user) {
+        const newPlayer = await this.createPlayer({
+          gameId,
+          playerName: `${user.firstName} ${user.lastName}`,
+          email: user.email,
+          phone: user.phone || '',
+          ipAddress: '127.0.0.1', // Default IP
+          userAgent: 'Auto-created',
+          ownedNumbers: [],
+          totalSpent: '0',
+          freeSpins: 0,
+          referralCount: 0,
+          userId: user.id
+        });
+        player = newPlayer;
+        console.log(`🔧 Auto-created player record for user ${user.email} in game ${game.name}`);
+      } else {
+        throw new Error("User not found - cannot create player record");
+      }
+    }
+
     // Create spin result (payment already processed)
     const spinResult = await this.createSpinResult({
       gameId,
@@ -444,7 +470,6 @@ export class DatabaseStorage implements IStorage {
     });
 
     // Update player's owned numbers and total spent
-    const player = await this.getPlayer(playerId);
     if (player) {
       const newOwnedNumbers = [...(player.ownedNumbers || []), spunNumber.toString()];
       const newTotalSpent = parseFloat(player.totalSpent || "0") + parseFloat(amountCharged);
@@ -598,7 +623,7 @@ export class DatabaseStorage implements IStorage {
 
       // Create compliance log for winner selection
       const winner = await this.getPlayer(winningSpinResult.playerId);
-      if (winner) {
+      if (winner && winner.userId) {
         await this.createComplianceLog(
           winner.userId,
           gameId,
@@ -660,21 +685,23 @@ export class DatabaseStorage implements IStorage {
       await this.updatePlayer(playerId, { isWinner: true });
 
       // Create compliance log for manual winner selection
-      await this.createComplianceLog(
-        winner.userId,
-        gameId,
-        'winner_selection',
-        {
-          winningNumber: winnerSpin.spunNumber,
-          totalParticipants: new Set(spinResults.map(spin => spin.playerId)).size,
-          totalSpins: spinResults.length,
-          selectionMethod: 'manual_admin_selection',
-          selectionReason: reason,
-          timestamp: new Date().toISOString(),
-          gameTitle: game.name,
-          prizeValue: game.prizeValue
-        }
-      );
+      if (winner.userId) {
+        await this.createComplianceLog(
+          winner.userId,
+          gameId,
+          'winner_selection',
+          {
+            winningNumber: winnerSpin.spunNumber,
+            totalParticipants: new Set(spinResults.map(spin => spin.playerId)).size,
+            totalSpins: spinResults.length,
+            selectionMethod: 'manual_admin_selection',
+            selectionReason: reason,
+            timestamp: new Date().toISOString(),
+            gameTitle: game.name,
+            prizeValue: game.prizeValue
+          }
+        );
+      }
 
       console.log(`👑 Manual winner selected for game ${gameId}: Player ${playerId} (${winner.playerName}) with number ${winnerSpin.spunNumber}. Reason: ${reason}`);
       
@@ -747,7 +774,7 @@ export class DatabaseStorage implements IStorage {
           game.name,
           gameResult.winningNumber || 0,
           game.prizeValue?.toString() || '0',
-          game.prize || game.description
+          game.prize || game.description || ''
         );
       }
 
@@ -757,7 +784,7 @@ export class DatabaseStorage implements IStorage {
           game.name,
           `${winnerUser.firstName} ${winnerUser.lastName}`,
           gameResult.winningNumber || 0,
-          game.prize || game.description,
+          game.prize || game.description || '',
           participantEmails
         );
       }
