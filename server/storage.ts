@@ -435,15 +435,18 @@ export class DatabaseStorage implements IStorage {
     }
 
     // CRITICAL FIX: Ensure player record exists for automatic winner selection to work
-    let player = await this.getPlayer(playerId);
+    // Check if user already has a player record for this specific game
+    const existingPlayers = await this.getPlayersByGameId(gameId);
+    let player = existingPlayers.find(p => p.userId === playerId);
+    
     if (!player) {
       // Create player record if it doesn't exist (this happens when user spins without joining via old API)
-      const user = await this.getUser(playerId); // Assuming playerId matches userId for authenticated users
+      const user = await this.getUser(playerId); // playerId is actually userId for authenticated users
       if (user) {
         const newPlayer = await this.createPlayer({
           gameId,
-          playerName: `${user.firstName} ${user.lastName}`,
-          email: user.email,
+          playerName: `${user.firstName || ''} ${user.lastName || ''}`.trim(),
+          email: user.email || '',
           phone: user.phone || '',
           ipAddress: '127.0.0.1', // Default IP
           userAgent: 'Auto-created',
@@ -460,10 +463,10 @@ export class DatabaseStorage implements IStorage {
       }
     }
 
-    // Create spin result (payment already processed)
+    // Create spin result (payment already processed) - use player.id, not userId
     const spinResult = await this.createSpinResult({
       gameId,
-      playerId,
+      playerId: player.id, // Use the actual player ID from the players table
       spunNumber,
       isFreePlay: false, // All paid spins
       amountCharged,
@@ -474,7 +477,7 @@ export class DatabaseStorage implements IStorage {
       const newOwnedNumbers = [...(player.ownedNumbers || []), spunNumber.toString()];
       const newTotalSpent = parseFloat(player.totalSpent || "0") + parseFloat(amountCharged);
       
-      await this.updatePlayer(playerId, {
+      await this.updatePlayer(player.id, {
         ownedNumbers: newOwnedNumbers,
         totalSpent: newTotalSpent.toString(),
         freeSpins: player.freeSpins, // No change for paid spins
