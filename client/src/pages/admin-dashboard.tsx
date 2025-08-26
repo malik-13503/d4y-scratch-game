@@ -223,7 +223,27 @@ export default function AdminDashboard() {
   } = useQuery<any[]>({
     queryKey: ["/api/admin/games"],
     enabled: !!currentAdmin,
+    refetchInterval: 5000, // Refresh every 5 seconds for real-time updates
+    staleTime: 0, // Always consider data stale for real-time updates
   });
+
+  // For real-time numbers left calculation, we'll fetch available numbers for each game
+  // This will give us the accurate count of remaining numbers
+  const gameAvailableNumbers = {};
+  if (games) {
+    games.forEach(game => {
+      // Use a separate query for each game's available numbers
+      const { data: availableData } = useQuery({
+        queryKey: [`/api/games/${game.id}/available-numbers`],
+        refetchInterval: 5000,
+        staleTime: 0,
+        enabled: !!game.id && !!currentAdmin
+      });
+      if (availableData) {
+        gameAvailableNumbers[game.id] = availableData.availableNumbers?.length || 0;
+      }
+    });
+  }
 
   // System settings
   const { data: settings, refetch: refetchSettings } = useQuery<any[]>({
@@ -2699,14 +2719,16 @@ export default function AdminDashboard() {
                         <div className="flex justify-between text-sm">
                           <span className="text-gray-400">Numbers Left:</span>
                           <span className="text-white">
-                            {game.numbersLeft} / {game.totalNumbers}
+                            {gameAvailableNumbers[game.id] !== undefined 
+                              ? gameAvailableNumbers[game.id] 
+                              : game.numbersLeft} / {game.totalNumbers}
                           </span>
                         </div>
                         <Progress
                           value={
-                            ((game.totalNumbers - game.numbersLeft) /
-                              game.totalNumbers) *
-                            100
+                            gameAvailableNumbers[game.id] !== undefined
+                              ? ((game.totalNumbers - gameAvailableNumbers[game.id]) / game.totalNumbers) * 100
+                              : ((game.totalNumbers - game.numbersLeft) / game.totalNumbers) * 100
                           }
                           className="bg-white/20"
                         />
