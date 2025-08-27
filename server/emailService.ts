@@ -5,7 +5,7 @@ if (!process.env.RESEND_API_KEY) {
 }
 
 const resend = new Resend(process.env.RESEND_API_KEY);
-const FROM_EMAIL = 'Hit The Road Jackpot <noreply@hittheroadjackpot.com>';
+const FROM_EMAIL = 'Hit The Road Jackpot <onboarding@resend.dev>';
 
 export interface EmailService {
   sendWelcomeEmail(userEmail: string, userName: string): Promise<void>;
