@@ -227,23 +227,48 @@ export default function AdminDashboard() {
     staleTime: 0, // Always consider data stale for real-time updates
   });
 
-  // For real-time numbers left calculation, we'll fetch available numbers for each game
-  // This will give us the accurate count of remaining numbers
-  const gameAvailableNumbers = {};
-  if (games) {
-    games.forEach(game => {
-      // Use a separate query for each game's available numbers
-      const { data: availableData } = useQuery({
-        queryKey: [`/api/games/${game.id}/available-numbers`],
-        refetchInterval: 5000,
-        staleTime: 0,
-        enabled: !!game.id && !!currentAdmin
-      });
-      if (availableData) {
-        gameAvailableNumbers[game.id] = availableData.availableNumbers?.length || 0;
-      }
-    });
-  }
+  // Custom hook to fetch real-time available numbers for games
+  const useGameAvailableNumbers = (games: any[]) => {
+    const [gameAvailableNumbers, setGameAvailableNumbers] = useState<{[key: number]: number}>({});
+    
+    useEffect(() => {
+      if (!games || games.length === 0 || !currentAdmin) return;
+      
+      const fetchAllAvailableNumbers = async () => {
+        try {
+          const promises = games.map(async (game) => {
+            const response = await fetch(`/api/games/${game.id}/available-numbers`);
+            const data = await response.json();
+            return { gameId: game.id, count: data.availableNumbers?.length || 0 };
+          });
+          
+          const results = await Promise.all(promises);
+          const numbersMap: {[key: number]: number} = {};
+          results.forEach(result => {
+            numbersMap[result.gameId] = result.count;
+          });
+          
+          setGameAvailableNumbers(numbersMap);
+          console.log('🔄 Real-time numbers updated:', numbersMap);
+        } catch (error) {
+          console.error('Error fetching available numbers:', error);
+        }
+      };
+      
+      // Fetch immediately
+      fetchAllAvailableNumbers();
+      
+      // Set up interval for real-time updates
+      const interval = setInterval(fetchAllAvailableNumbers, 5000);
+      
+      return () => clearInterval(interval);
+    }, [games, currentAdmin]);
+    
+    return gameAvailableNumbers;
+  };
+  
+  // Use the custom hook
+  const gameAvailableNumbers = useGameAvailableNumbers(games || []);
 
   // System settings
   const { data: settings, refetch: refetchSettings } = useQuery<any[]>({
@@ -2722,6 +2747,10 @@ export default function AdminDashboard() {
                             {gameAvailableNumbers[game.id] !== undefined 
                               ? gameAvailableNumbers[game.id] 
                               : game.numbersLeft} / {game.totalNumbers}
+                            {/* Debug info - remove in production */}
+                            {gameAvailableNumbers[game.id] !== undefined && (
+                              <span className="text-xs text-green-400 ml-1">●</span>
+                            )}
                           </span>
                         </div>
                         <Progress
