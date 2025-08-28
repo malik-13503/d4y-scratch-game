@@ -581,6 +581,10 @@ export default function AdminDashboard() {
       });
     }
 
+    // Calculate start and end times based on duration
+    const startTime = new Date();
+    const endTime = new Date(startTime.getTime() + durationHours * 60 * 60 * 1000);
+
     const gameData = {
       name: formData.get("name") as string,
       code: `G${Date.now().toString().slice(-6)}`,
@@ -603,6 +607,9 @@ export default function AdminDashboard() {
       maxWinners: 1,
       isScheduled: false,
       emoji: (formData.get("emoji") as string) || "🎮",
+      startTime: startTime.toISOString(),
+      endTime: endTime.toISOString(),
+      durationHours: durationHours,
     };
 
     createGameMutation.mutate(gameData);
@@ -1615,6 +1622,8 @@ export default function AdminDashboard() {
                                   id="duration"
                                   name="duration"
                                   type="number"
+                                  min="1"
+                                  max="720"
                                   value={previewData.duration}
                                   onChange={(e) =>
                                     setPreviewData({
@@ -1623,6 +1632,7 @@ export default function AdminDashboard() {
                                     })
                                   }
                                   className="bg-white/10 border-purple-500/30"
+                                  placeholder="24"
                                 />
                               </div>
                             </div>
