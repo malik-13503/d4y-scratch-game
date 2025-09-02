@@ -110,7 +110,7 @@ export default function AdminDashboard() {
     prize: "Premium Travel Mug",
     prizeValue: "50.00",
     totalNumbers: "125",
-    duration: "24",
+    duration: "240",
     prizeImageUrl: "", // Add prize image URL
     freePlayEnabled: false, // Free play toggle
     freePlayNumbers: "", // Individual free play numbers (e.g., "1,5,10,25,50")
@@ -564,7 +564,7 @@ export default function AdminDashboard() {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
 
-    const durationHours = parseInt(formData.get("duration") as string) || 24;
+    const durationHours = parseInt(formData.get("duration") as string) || 240;
     const prizeValue = formData.get("prizeValue") as string;
     const totalNumbers =
       parseInt(formData.get("totalNumbers") as string) || 125;
@@ -626,7 +626,7 @@ export default function AdminDashboard() {
       prize: game.prize || "",
       prizeValue: game.prizeValue?.toString() || "100",
       totalNumbers: game.totalNumbers?.toString() || "200",
-      duration: "24",
+      duration: "240",
       prizeImageUrl: game.prizeImageUrl || "",
     };
     console.log("📝 Setting edit form data:", formData);

@@ -740,7 +740,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/admin/games", requireAuth, async (req, res) => {
     try {
-      const durationHours = req.body.durationHours || 24; // Default to 24 hours if not specified
+      const durationHours = req.body.durationHours || 240; // Default to 240 hours if not specified
       const startTime = req.body.startTime ? new Date(req.body.startTime) : new Date();
       const endTime = req.body.endTime 
         ? new Date(req.body.endTime) 
