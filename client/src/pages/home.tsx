@@ -23,6 +23,7 @@ import {
   LogOut,
 } from "lucide-react";
 import { logout } from "@/lib/auth";
+import { formatTimeRemaining } from "@/lib/utils";
 import type { Game } from "@shared/schema";
 import logoPath from "@assets/logo_1751918412862.png";
 
