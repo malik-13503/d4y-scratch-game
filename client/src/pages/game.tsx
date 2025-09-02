@@ -419,10 +419,10 @@ export default function GamePage() {
                         <img 
                           src={game.prizeImageUrl} 
                           alt={game.name}
-                          className="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 xl:w-16 xl:h-16 object-contain object-center rounded-lg relative z-10 drop-shadow-lg"
+                          className="w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 xl:w-20 xl:h-20 object-contain object-center rounded-lg relative z-10 drop-shadow-lg"
                         />
                       ) : (
-                        <span className="text-xl sm:text-2xl lg:text-3xl xl:text-4xl relative z-10 drop-shadow-lg">
+                        <span className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl relative z-10 drop-shadow-lg">
                           {game.emoji}
                         </span>
                       )}
