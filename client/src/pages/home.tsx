@@ -369,7 +369,7 @@ export default function Home() {
                   // Format time remaining
                   const timeRemaining =
                     new Date(game.endTime) > new Date()
-                      ? new Date(game.endTime).toLocaleString()
+                      ? formatTimeRemaining(game.endTime)
                       : "Ended";
 
                   return (
