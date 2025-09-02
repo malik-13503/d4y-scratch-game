@@ -446,7 +446,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           emoji: "☕",
           totalNumbers: 125,
           numbersLeft: 73,
-          endTime: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+          endTime: new Date(Date.now() + 240 * 60 * 60 * 1000).toISOString(),
           isActive: true,
           isFreePlay: false,
           playersCount: Math.floor(Math.random() * 50) + 10

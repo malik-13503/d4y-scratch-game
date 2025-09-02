@@ -1623,7 +1623,7 @@ export default function AdminDashboard() {
                                   name="duration"
                                   type="number"
                                   min="1"
-                                  max="720"
+                                  max="730"
                                   value={previewData.duration}
                                   onChange={(e) =>
                                     setPreviewData({
@@ -1632,7 +1632,7 @@ export default function AdminDashboard() {
                                     })
                                   }
                                   className="bg-white/10 border-purple-500/30"
-                                  placeholder="24"
+                                  placeholder="240"
                                 />
                               </div>
                             </div>
