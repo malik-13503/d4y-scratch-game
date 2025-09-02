@@ -1412,8 +1412,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
             playerName: player.playerName,
             email: user?.email || "No email",
             spunNumber: spin.spunNumber,
-            amountPaid: spin.amount,
-            spunAt: spin.spunAt,
+            amountPaid: spin.amountCharged,
+            spunAt: spin.createdAt,
             isWinner: player.isWinner || false,
             spinResultId: spin.id
           });
@@ -1466,9 +1466,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           winnerUser.email,
           winnerUser.firstName || winner.playerName,
           game.name,
-          gameResult.winningNumber,
+          gameResult.winningNumber || 0,
           game.prizeValue.toString(),
-          game.prizeDescription
+          game.prizeDescription || ""
         );
         console.log(`✅ Winner notification sent to: ${winnerUser.email}`);
       }
@@ -1486,9 +1486,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
               user.email,
               user.firstName || player.playerName,
               game.name,
-              gameResult.winningNumber,
+              gameResult.winningNumber || 0,
               winner.playerName,
-              game.prizeDescription
+              game.prizeDescription || ""
             );
             console.log(`✅ Completion notification sent to: ${user.email}`);
             participantEmailCount++;

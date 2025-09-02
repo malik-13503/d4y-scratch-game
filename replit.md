@@ -3,7 +3,7 @@
 ## Overview
 This project is a real-time web application for interactive prize games, primarily focusing on wheel-spinning mechanics. Its purpose is to provide an engaging and fair platform for live game participation and prize winning, supported by robust administrative controls. The business vision is to create a leading, entertaining online gaming experience with high market potential in casual gaming and online sweepstakes, aiming for widespread user adoption and a reputation for transparent, exciting gameplay.
 
-### Recent Updates (January 2025)
+### Recent Updates (September 2025)
 - **Payment Failure Handling Complete**: System now correctly handles payment failures with proper error popups and number protection
 - **Production Mode Enabled**: System processes real payments instead of simulated transactions - actual card charges occur on spin
 - **React Object Error Fixed**: Resolved critical rendering error in professional wheel component that prevented proper number display
@@ -29,6 +29,8 @@ This project is a real-time web application for interactive prize games, primari
 - **Email Service Configuration Fixed**: Resolved Resend API integration issue - system now properly sends winner and completion emails using verified domain address (onboarding@resend.dev) - confirmed working with test deliveries (August 27, 2025)
 - **Production Email Configuration Completed**: Updated FROM email to use admin@hittheroadjackpot.com and configured system to send winner emails directly to user email addresses (ahsanglobalbusiness@gmail.com) - verified working with email ID 7ce869b4 and confirmed by user receipt (August 27, 2025)
 - **New Game Email System Verified**: Successfully created and completed "New Game Email Test" (NEWGAME1) with $20 Amazon Gift Card prize - confirmed automatic winner selection and email delivery (IDs: 22473eb8, 22625e5c) working perfectly with newly created games - user confirmed satisfaction with complete system functionality (August 27, 2025)
+- **Critical Game Duration Bug Fixed**: Resolved persistent issue where game duration always defaulted to 24 hours regardless of admin configuration - eliminated all hardcoded defaults and updated system to respect admin-configured duration values, now defaulting to 240 hours (10 days) as requested (September 2, 2025)
+- **API System Stabilized**: Fixed all TypeScript compilation errors and ensured proper API functionality across all endpoints - server now runs cleanly without type errors and maintains stable connection (September 2, 2025)
 
 ## User Preferences
 Preferred communication style: Simple, everyday language.
