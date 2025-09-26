@@ -100,18 +100,15 @@ export function TokenPurchase() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-indigo-900 relative overflow-hidden">
-      {/* Gaming-themed Animated Background */}
+      {/* Subtle Gaming Background */}
       <div className="absolute inset-0">
-        {/* Floating geometric shapes */}
-        <div className="absolute top-32 left-32 w-16 h-16 bg-yellow-400/20 rotate-45 animate-spin"></div>
-        <div className="absolute top-64 right-48 w-12 h-12 bg-green-400/20 rounded-full animate-bounce"></div>
-        <div className="absolute bottom-32 left-48 w-20 h-20 bg-purple-400/15 rotate-12 animate-pulse"></div>
-        <div className="absolute bottom-64 right-32 w-8 h-8 bg-blue-400/25 animate-ping"></div>
+        {/* Minimal background effects */}
+        <div className="absolute top-32 left-32 w-12 h-12 bg-yellow-400/10 rotate-45"></div>
+        <div className="absolute bottom-32 right-48 w-16 h-16 bg-purple-400/10 rounded-full"></div>
         
-        {/* Large background orbs */}
-        <div className="absolute top-20 left-20 w-96 h-96 bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-20 right-20 w-80 h-80 bg-gradient-to-r from-blue-500/10 to-cyan-500/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-gradient-to-r from-yellow-500/5 to-orange-500/5 rounded-full blur-3xl animate-pulse delay-2000"></div>
+        {/* Subtle background orbs */}
+        <div className="absolute top-20 left-20 w-96 h-96 bg-gradient-to-r from-purple-500/5 to-pink-500/5 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-20 right-20 w-80 h-80 bg-gradient-to-r from-blue-500/5 to-cyan-500/5 rounded-full blur-3xl"></div>
       </div>
 
       <div className="relative z-10 container mx-auto px-4 py-8 max-w-7xl">
@@ -180,8 +177,8 @@ export function TokenPurchase() {
           </div>
         </div>
 
-        {/* Gaming Token Packages */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
+        {/* Gaming Token Packages - Improved Grid Layout */}
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8 mb-16 px-4">
           {tokenPackages.map((pkg, index) => {
             // Gaming-themed color schemes
             const gameThemes = [
@@ -224,99 +221,90 @@ export function TokenPurchase() {
             return (
               <Card
                 key={pkg.id}
-                className={`relative overflow-hidden bg-gradient-to-br ${theme.bg} backdrop-blur-xl border-3 ${theme.border} transition-all duration-700 hover:scale-105 hover:shadow-2xl group cursor-pointer transform hover:rotate-1`}
+                className={`relative overflow-hidden bg-slate-900/95 backdrop-blur-xl border-2 ${theme.border} transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl group cursor-pointer`}
               >
-                {/* Epic Background Effects */}
-                <div className={`absolute inset-0 bg-gradient-to-br ${theme.bg} opacity-60 group-hover:opacity-90 transition-all duration-500`}></div>
-                <div className="absolute inset-0 bg-gradient-to-r from-white/5 to-transparent opacity-10"></div>
+                {/* Cleaner Background with Better Contrast */}
+                <div className={`absolute inset-0 bg-gradient-to-br ${theme.bg} opacity-30`}></div>
+                <div className="absolute inset-0 bg-slate-900/80"></div>
                 
-                {/* Ultra Popular Badge */}
+                {/* Subtle Popular Badge */}
                 {pkg.popular && (
-                  <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 z-20">
-                    <div className="relative group">
-                      <Badge className="bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 text-black font-black px-8 py-3 text-base rounded-full shadow-2xl border-3 border-yellow-300 animate-bounce">
-                        🔥 HOTTEST DEAL! 🔥
-                      </Badge>
-                      <div className="absolute -inset-2 bg-gradient-to-r from-yellow-400/60 to-red-500/60 rounded-full blur-xl animate-pulse"></div>
-                    </div>
+                  <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 z-20">
+                    <Badge className="bg-gradient-to-r from-yellow-500 to-orange-500 text-white font-bold px-6 py-2 text-sm rounded-full shadow-xl border border-yellow-400">
+                      🔥 HOTTEST DEAL!
+                    </Badge>
                   </div>
                 )}
 
                 {/* Gaming Class Badge */}
                 <div className="absolute top-4 right-4 z-10">
-                  <div className={`bg-black/50 backdrop-blur-sm rounded-full px-3 py-1 border ${theme.border.split(' ')[0]}`}>
+                  <div className={`bg-slate-800/90 backdrop-blur-sm rounded-lg px-3 py-1 border ${theme.border.split(' ')[0]}`}>
                     <span className="text-white font-bold text-xs">{theme.icon} {theme.name}</span>
                   </div>
                 </div>
 
-                <CardHeader className="relative z-10 text-center pt-12 pb-8">
-                  <CardTitle className="text-white text-2xl font-black mb-6 drop-shadow-2xl uppercase tracking-wider">
+                <CardHeader className="relative z-10 text-center pt-12 pb-6">
+                  <CardTitle className="text-white text-2xl font-bold mb-4 drop-shadow-lg uppercase tracking-wide">
                     {pkg.name}
                   </CardTitle>
                   
-                  {/* Massive Token Display */}
-                  <div className="space-y-6">
-                    <div className={`flex items-center justify-center space-x-4 ${theme.accent}`}>
+                  {/* Clear Token Display */}
+                  <div className="space-y-4">
+                    <div className={`flex items-center justify-center space-x-3 text-white`}>
                       <div className="relative">
-                        <Coins className="h-16 w-16 text-yellow-400 drop-shadow-2xl animate-bounce" />
-                        <div className="absolute -inset-3 bg-yellow-400/40 rounded-full blur-xl animate-pulse"></div>
+                        <Coins className="h-12 w-12 text-yellow-400 drop-shadow-lg" />
                       </div>
-                      <div className="text-6xl font-black drop-shadow-2xl">
+                      <div className="text-5xl font-bold text-white drop-shadow-lg">
                         {pkg.tokens}
                       </div>
                     </div>
-                    <div className="text-white text-xl font-black uppercase tracking-widest">TOKENS</div>
+                    <div className="text-gray-200 text-lg font-bold uppercase tracking-wider">TOKENS</div>
                     
-                    {/* Epic Bonus Display */}
+                    {/* Clean Bonus Display */}
                     {pkg.bonus > 0 && (
-                      <div className="relative mx-auto w-fit">
-                        <div className="bg-gradient-to-r from-yellow-400/20 via-orange-500/30 to-red-400/20 rounded-2xl py-3 px-6 border-2 border-yellow-400/60 backdrop-blur-sm">
-                          <div className="text-yellow-300 font-black text-lg animate-pulse">
-                            ⚡ +{pkg.bonus} BONUS TOKENS! ⚡
+                      <div className="mx-auto w-fit">
+                        <div className="bg-yellow-500/20 rounded-lg py-2 px-4 border border-yellow-400/60">
+                          <div className="text-yellow-200 font-bold text-sm">
+                            ⚡ +{pkg.bonus} BONUS TOKENS!
                           </div>
                         </div>
-                        <div className="absolute -inset-2 bg-gradient-to-r from-yellow-400/30 to-orange-500/30 rounded-2xl blur-lg animate-pulse"></div>
                       </div>
                     )}
                     
-                    {/* Price Display */}
-                    <div className="space-y-2">
-                      <div className="text-5xl font-black text-white drop-shadow-2xl">
+                    {/* Clear Price Display */}
+                    <div className="space-y-1">
+                      <div className="text-4xl font-bold text-white drop-shadow-lg">
                         ${pkg.price.toFixed(2)}
                       </div>
-                      <div className="text-gray-300 text-sm font-bold">
-                        Only ${(pkg.price / pkg.tokens).toFixed(3)} per token!
+                      <div className="text-gray-300 text-sm font-medium">
+                        ${(pkg.price / pkg.tokens).toFixed(3)} per token
                       </div>
                     </div>
                   </div>
                 </CardHeader>
 
-                <CardContent className="relative z-10 px-6 pb-8">
-                  {/* Epic Purchase Button */}
+                <CardContent className="relative z-10 px-6 pb-6">
+                  {/* Clean Purchase Button */}
                   <Button
                     onClick={() => handlePurchase(pkg)}
                     disabled={isProcessing && selectedPackage?.id === pkg.id}
-                    className={`w-full bg-gradient-to-r ${theme.button} text-white font-black py-6 px-8 rounded-2xl shadow-2xl hover:shadow-3xl transition-all duration-500 border-3 border-white/30 hover:border-white/60 text-xl uppercase tracking-wider group-hover:animate-pulse`}
+                    className={`w-full bg-gradient-to-r ${theme.button} text-white font-bold py-4 px-6 rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 border border-white/20 hover:border-white/40 text-lg uppercase tracking-wide hover:scale-[1.02]`}
                     data-testid={`button-purchase-${pkg.id}`}
                   >
                     {isProcessing && selectedPackage?.id === pkg.id ? (
-                      <div className="flex items-center justify-center space-x-4">
-                        <div className="animate-spin rounded-full h-8 w-8 border-4 border-white border-t-transparent"></div>
-                        <span className="text-xl font-black">PROCESSING...</span>
+                      <div className="flex items-center justify-center space-x-3">
+                        <div className="animate-spin rounded-full h-6 w-6 border-2 border-white border-t-transparent"></div>
+                        <span className="text-lg font-bold">PROCESSING...</span>
                       </div>
                     ) : (
-                      <div className="flex items-center justify-center space-x-4">
-                        <CreditCard className="h-8 w-8" />
-                        <span className="text-xl font-black">BUY NOW!</span>
-                        <Zap className="h-8 w-8 animate-bounce" />
+                      <div className="flex items-center justify-center space-x-3">
+                        <CreditCard className="h-6 w-6" />
+                        <span className="text-lg font-bold">BUY NOW!</span>
+                        <Zap className="h-6 w-6" />
                       </div>
                     )}
                   </Button>
                 </CardContent>
-                
-                {/* Corner Effects */}
-                <div className="absolute top-2 left-2 w-4 h-4 bg-white/20 rounded-full animate-ping"></div>
-                <div className="absolute bottom-2 right-2 w-4 h-4 bg-white/20 rounded-full animate-ping delay-500"></div>
               </Card>
             );
           })}
