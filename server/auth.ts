@@ -289,7 +289,14 @@ export async function requireAuth(req: any, res: any, next: any) {
   if (req.session?.passport?.user) {
     console.log("Manual session check - user ID from session:", req.session.passport.user);
     try {
-      const user = await storage.getAdminUser(req.session.passport.user);
+      // Try regular user first (for token purchase, game play, etc.)
+      let user = await storage.getUser(req.session.passport.user);
+      
+      // If not a regular user, try admin user (for admin dashboard, etc.)
+      if (!user) {
+        user = await storage.getAdminUser(req.session.passport.user);
+      }
+      
       if (user && user.isActive) {
         req.user = user;
         console.log("Manual user population successful for user:", user.email);
