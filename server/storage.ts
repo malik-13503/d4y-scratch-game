@@ -1,11 +1,12 @@
 import { 
   games, players, gameResults, adminUsers, wheelSegments, systemSettings, adminSessions, notifications, spinResults,
-  users, transactions, userSessions, complianceLogs, freePlayUsage, paymentCards,
+  users, transactions, userSessions, complianceLogs, freePlayUsage, paymentCards, tokenTransactions, userFreeEntries,
   type Game, type InsertGame, type Player, type InsertPlayer, type GameResult, type InsertGameResult, 
   type AdminUser, type InsertAdminUser, type WheelSegment, type InsertWheelSegment,
   type SystemSetting, type InsertSystemSetting, type InsertNotification, type Notification,
   type SpinResult, type InsertSpinResult, type User, type InsertUser, type Transaction, type InsertTransaction,
-  type FreePlayUsage, type InsertFreePlayUsage, type PaymentCard, type InsertPaymentCard
+  type FreePlayUsage, type InsertFreePlayUsage, type PaymentCard, type InsertPaymentCard,
+  type TokenTransaction, type InsertTokenTransaction, type UserFreeEntry, type InsertUserFreeEntry
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, sql, asc, and, isNotNull } from "drizzle-orm";
@@ -111,6 +112,26 @@ export interface IStorage {
   
   // Winner notification
   notifyWinner(gameId: number, winnerId: number): Promise<void>;
+
+  // Token transaction methods
+  createTokenTransaction(transaction: InsertTokenTransaction): Promise<TokenTransaction>;
+  getTokenTransactionsByUserId(userId: number): Promise<TokenTransaction[]>;
+  getTokenTransaction(id: number): Promise<TokenTransaction | undefined>;
+  updateTokenTransaction(id: number, updates: Partial<TokenTransaction>): Promise<TokenTransaction | undefined>;
+
+  // User free entry methods
+  createUserFreeEntry(entry: InsertUserFreeEntry): Promise<UserFreeEntry>;
+  hasUserUsedFreeEntry(userId: number, gameId: number): Promise<boolean>;
+  getUserFreeEntriesByUserId(userId: number): Promise<UserFreeEntry[]>;
+
+  // Token balance operations
+  updateUserTokenBalance(userId: number, tokensToAdd: number): Promise<User | undefined>;
+  deductUserTokens(userId: number, tokensToDeduct: number): Promise<User | undefined>;
+  getUserTokenBalance(userId: number): Promise<number>;
+
+  // Token game operations  
+  addTokensToGame(gameId: number, tokens: number): Promise<Game | undefined>;
+  isGameTokenThresholdMet(gameId: number): Promise<boolean>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -393,6 +414,103 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
+  // Token transaction methods implementation
+  async createTokenTransaction(transaction: InsertTokenTransaction): Promise<TokenTransaction> {
+    const [result] = await db.insert(tokenTransactions).values(transaction).returning();
+    return result;
+  }
+
+  async getTokenTransactionsByUserId(userId: number): Promise<TokenTransaction[]> {
+    return db.select().from(tokenTransactions).where(eq(tokenTransactions.userId, userId)).orderBy(desc(tokenTransactions.createdAt));
+  }
+
+  async getTokenTransaction(id: number): Promise<TokenTransaction | undefined> {
+    const [transaction] = await db.select().from(tokenTransactions).where(eq(tokenTransactions.id, id));
+    return transaction || undefined;
+  }
+
+  async updateTokenTransaction(id: number, updates: Partial<TokenTransaction>): Promise<TokenTransaction | undefined> {
+    const [updated] = await db.update(tokenTransactions).set(updates).where(eq(tokenTransactions.id, id)).returning();
+    return updated || undefined;
+  }
+
+  // User free entry methods implementation
+  async createUserFreeEntry(entry: InsertUserFreeEntry): Promise<UserFreeEntry> {
+    const [result] = await db.insert(userFreeEntries).values(entry).returning();
+    return result;
+  }
+
+  async hasUserUsedFreeEntry(userId: number, gameId: number): Promise<boolean> {
+    const [entry] = await db.select().from(userFreeEntries)
+      .where(and(eq(userFreeEntries.userId, userId), eq(userFreeEntries.gameId, gameId)));
+    return !!entry;
+  }
+
+  async getUserFreeEntriesByUserId(userId: number): Promise<UserFreeEntry[]> {
+    return db.select().from(userFreeEntries).where(eq(userFreeEntries.userId, userId));
+  }
+
+  // Token balance operations implementation
+  async updateUserTokenBalance(userId: number, tokensToAdd: number): Promise<User | undefined> {
+    const user = await this.getUser(userId);
+    if (!user) return undefined;
+
+    const newBalance = (user.tokenBalance || 0) + tokensToAdd;
+    const newTotalPurchased = tokensToAdd > 0 ? (user.totalTokensPurchased || 0) + tokensToAdd : user.totalTokensPurchased;
+    const newTotalUsed = tokensToAdd < 0 ? (user.totalTokensUsed || 0) + Math.abs(tokensToAdd) : user.totalTokensUsed;
+
+    const [updated] = await db.update(users)
+      .set({
+        tokenBalance: newBalance,
+        totalTokensPurchased: newTotalPurchased,
+        totalTokensUsed: newTotalUsed,
+        updatedAt: new Date()
+      })
+      .where(eq(users.id, userId))
+      .returning();
+    
+    return updated || undefined;
+  }
+
+  async deductUserTokens(userId: number, tokensToDeduct: number): Promise<User | undefined> {
+    const user = await this.getUser(userId);
+    if (!user || (user.tokenBalance || 0) < tokensToDeduct) {
+      throw new Error(`Insufficient token balance. User has ${user?.tokenBalance || 0} tokens, needs ${tokensToDeduct}`);
+    }
+
+    return this.updateUserTokenBalance(userId, -tokensToDeduct);
+  }
+
+  async getUserTokenBalance(userId: number): Promise<number> {
+    const user = await this.getUser(userId);
+    return user?.tokenBalance || 0;
+  }
+
+  // Token game operations implementation
+  async addTokensToGame(gameId: number, tokens: number): Promise<Game | undefined> {
+    const game = await this.getGame(gameId);
+    if (!game) return undefined;
+
+    const newTokensCollected = (game.tokensCollected || 0) + tokens;
+    
+    const [updated] = await db.update(games)
+      .set({
+        tokensCollected: newTokensCollected,
+        updatedAt: new Date()
+      })
+      .where(eq(games.id, gameId))
+      .returning();
+    
+    return updated || undefined;
+  }
+
+  async isGameTokenThresholdMet(gameId: number): Promise<boolean> {
+    const game = await this.getGame(gameId);
+    if (!game) return false;
+    
+    return (game.tokensCollected || 0) >= (game.tokenThreshold || 0);
+  }
+
   async ensureDefaultAdminUser(): Promise<void> {
     // No default admin creation - all admin users must be properly registered
     console.log("Default admin creation disabled - admin accounts must be registered through proper channels");
@@ -445,16 +563,14 @@ export class DatabaseStorage implements IStorage {
       if (user) {
         const newPlayer = await this.createPlayer({
           gameId,
+          userId: user.id,
           playerName: `${user.firstName || ''} ${user.lastName || ''}`.trim(),
-          email: user.email || '',
-          phone: user.phone || '',
           ipAddress: '127.0.0.1', // Default IP
           userAgent: 'Auto-created',
           ownedNumbers: [],
           totalSpent: '0',
           freeSpins: 0,
-          referralCount: 0,
-          userId: user.id
+          referralCount: 0
         });
         player = newPlayer;
         console.log(`🔧 Auto-created player record for user ${user.email} in game ${game.name}`);

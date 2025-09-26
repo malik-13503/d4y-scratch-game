@@ -2224,6 +2224,225 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // TOKEN PURCHASE SYSTEM ENDPOINTS
+
+  // Get token packages/pricing endpoint
+  app.get("/api/token-packages", async (req, res) => {
+    try {
+      // Define token packages based on PDF brief ($5 = 20 tokens, etc.)
+      const tokenPackages = [
+        {
+          id: "package_5",
+          name: "Starter Pack",
+          tokens: 20,
+          price: 5.00,
+          bonus: 0,
+          popular: false
+        },
+        {
+          id: "package_10", 
+          name: "Value Pack",
+          tokens: 40,
+          price: 10.00,
+          bonus: 0,
+          popular: true
+        },
+        {
+          id: "package_25",
+          name: "Super Pack",
+          tokens: 100,
+          price: 25.00,
+          bonus: 5,
+          popular: false
+        },
+        {
+          id: "package_50",
+          name: "Mega Pack",
+          tokens: 200,
+          price: 50.00,
+          bonus: 15,
+          popular: false
+        }
+      ];
+
+      res.json(tokenPackages);
+    } catch (error: any) {
+      console.error("Get token packages error:", error);
+      res.status(500).json({ message: "Failed to get token packages" });
+    }
+  });
+
+  // Purchase tokens endpoint
+  app.post("/api/purchase-tokens", requireAuth, async (req, res) => {
+    try {
+      const userId = (req.session as any)?.userId;
+      const { packageId, cardId } = req.body;
+
+      if (!userId) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+
+      if (!packageId) {
+        return res.status(400).json({ message: "Package ID is required" });
+      }
+
+      // Get token package details
+      const packages = {
+        "package_5": { tokens: 20, price: 5.00, name: "Starter Pack" },
+        "package_10": { tokens: 40, price: 10.00, name: "Value Pack" },
+        "package_25": { tokens: 100 + 5, price: 25.00, name: "Super Pack" }, // Include bonus
+        "package_50": { tokens: 200 + 15, price: 50.00, name: "Mega Pack" } // Include bonus
+      };
+
+      const tokenPackage = packages[packageId as keyof typeof packages];
+      if (!tokenPackage) {
+        return res.status(400).json({ message: "Invalid package selected" });
+      }
+
+      // Get user and validate
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      // Get payment card
+      let paymentCard;
+      if (cardId) {
+        paymentCard = await storage.getPaymentCard(cardId);
+        if (!paymentCard || paymentCard.userId !== userId) {
+          return res.status(404).json({ message: "Payment card not found" });
+        }
+      } else {
+        // Use default card
+        const cards = await storage.getPaymentCardsByUserId(userId);
+        paymentCard = cards.find(card => card.isDefault);
+        if (!paymentCard) {
+          return res.status(400).json({ message: "No default payment card found" });
+        }
+      }
+
+      // Create pending token transaction
+      const tokenTransaction = await storage.createTokenTransaction({
+        userId,
+        transactionType: 'purchase',
+        amount: tokenPackage.tokens,
+        dollarAmount: tokenPackage.price.toString(),
+        paymentCardId: paymentCard.id,
+        description: `Purchased ${tokenPackage.name} (${tokenPackage.tokens} tokens)`,
+        status: 'pending'
+      });
+
+      // Process payment through Square
+      let paymentResult;
+      try {
+        if (process.env.NODE_ENV === "production" || process.env.SQUARE_ENVIRONMENT === "production") {
+          // Production payment processing using stored card
+          paymentResult = await squareService.chargeStoredCard(
+            tokenPackage.price,
+            "USD",
+            paymentCard.squareCardId!,
+            user.squareCustomerId!,
+            `Token purchase: ${tokenPackage.name}`
+          );
+        } else {
+          // Sandbox mode - simulate payment
+          paymentResult = {
+            id: `sandbox_token_payment_${Date.now()}`,
+            status: "COMPLETED",
+            receiptUrl: null
+          };
+        }
+
+        // Update transaction with payment details
+        await storage.updateTokenTransaction(tokenTransaction.id, {
+          squarePaymentId: paymentResult.id,
+          status: 'completed'
+        });
+
+        // Add tokens to user's balance
+        const updatedUser = await storage.updateUserTokenBalance(userId, tokenPackage.tokens);
+
+        console.log(`✅ Token purchase completed: User ${user.email} purchased ${tokenPackage.tokens} tokens for $${tokenPackage.price}`);
+
+        res.json({
+          success: true,
+          message: `Successfully purchased ${tokenPackage.tokens} tokens!`,
+          transaction: {
+            id: tokenTransaction.id,
+            tokens: tokenPackage.tokens,
+            amount: tokenPackage.price,
+            paymentId: paymentResult.id
+          },
+          newBalance: updatedUser?.tokenBalance || 0
+        });
+
+      } catch (paymentError: any) {
+        console.error("Token purchase payment failed:", paymentError);
+        
+        // Update transaction status
+        await storage.updateTokenTransaction(tokenTransaction.id, {
+          status: 'failed'
+        });
+
+        return res.status(400).json({
+          success: false,
+          message: "Payment failed. Please check your payment method and try again.",
+          error: paymentError.message || "Payment processing failed"
+        });
+      }
+
+    } catch (error: any) {
+      console.error("Purchase tokens error:", error);
+      res.status(500).json({ message: "Failed to purchase tokens", error: error.message });
+    }
+  });
+
+  // Get user token balance endpoint
+  app.get("/api/user/token-balance", requireAuth, async (req, res) => {
+    try {
+      const userId = (req.session as any)?.userId;
+      if (!userId) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+
+      const balance = await storage.getUserTokenBalance(userId);
+      res.json({ tokenBalance: balance });
+    } catch (error: any) {
+      console.error("Get token balance error:", error);
+      res.status(500).json({ message: "Failed to get token balance" });
+    }
+  });
+
+  // Get user token transaction history endpoint  
+  app.get("/api/user/token-transactions", requireAuth, async (req, res) => {
+    try {
+      const userId = (req.session as any)?.userId;
+      if (!userId) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+
+      const transactions = await storage.getTokenTransactionsByUserId(userId);
+      
+      // Format transactions for frontend
+      const formattedTransactions = transactions.map(tx => ({
+        id: tx.id,
+        type: tx.transactionType,
+        amount: tx.amount,
+        dollarAmount: tx.dollarAmount ? parseFloat(tx.dollarAmount) : null,
+        description: tx.description,
+        status: tx.status,
+        gameId: tx.gameId,
+        createdAt: tx.createdAt,
+        squarePaymentId: tx.squarePaymentId
+      }));
+
+      res.json(formattedTransactions);
+    } catch (error: any) {
+      console.error("Get token transactions error:", error);
+      res.status(500).json({ message: "Failed to get token transactions" });
+    }
+  });
+
   // Check free play status endpoint
   app.get("/api/games/:gameId/free-play-status", async (req, res) => {
     try {
