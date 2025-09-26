@@ -2443,21 +2443,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Check free play status endpoint
+  // Check free play status endpoint (USER-BASED)
   app.get("/api/games/:gameId/free-play-status", async (req, res) => {
     try {
       const { gameId } = req.params;
-      const ipAddress = req.ip || (req.connection as any)?.remoteAddress || 'unknown';
+      const userId = (req.session as any)?.userId;
 
       if (!gameId) {
         return res.status(400).json({ message: "Game ID is required" });
       }
 
-      const hasUsed = await storage.hasUsedFreePlay(ipAddress, parseInt(gameId));
+      // If user is not authenticated, they can't use free play
+      if (!userId) {
+        return res.json({
+          hasUsedFreePlay: true, // Treat as used so they need to register
+          canUseFreePlay: false,
+          requiresAuth: true,
+          message: "Please register to use your free entry"
+        });
+      }
+
+      const hasUsed = await storage.hasUserUsedFreeEntry(userId, parseInt(gameId));
       
       res.json({
         hasUsedFreePlay: hasUsed,
-        canUseFreePlay: !hasUsed
+        canUseFreePlay: !hasUsed,
+        requiresAuth: false
       });
     } catch (error: any) {
       console.error("Free play status check error:", error);
@@ -2468,24 +2479,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Free play spin endpoint (one-time per IP address per game)
+  // Free play spin endpoint (USER-BASED: one-time per registered user per game)
   app.post("/api/free-spin", async (req, res) => {
     try {
       const { gameId } = req.body;
-      const ipAddress = req.ip || (req.connection as any)?.remoteAddress || 'unknown';
+      const userId = (req.session as any)?.userId;
 
       if (!gameId) {
         return res.status(400).json({ message: "Game ID is required" });
       }
 
-      // Check if this IP has already used free play for this game
-      const hasUsed = await storage.hasUsedFreePlay(ipAddress, gameId);
+      // Require authentication for free play
+      if (!userId) {
+        return res.status(401).json({ 
+          message: "Authentication required", 
+          code: "AUTH_REQUIRED",
+          description: "Please register or log in to use your free entry" 
+        });
+      }
+
+      // Check if this user has already used their free entry for this game
+      const hasUsed = await storage.hasUserUsedFreeEntry(userId, gameId);
       if (hasUsed) {
         return res.status(400).json({ 
-          message: "Free play already used", 
-          code: "FREE_PLAY_EXHAUSTED",
-          description: "You have already used your free play for this game. Sign up to continue playing!" 
+          message: "Free entry already used", 
+          code: "FREE_ENTRY_EXHAUSTED",
+          description: "You have already used your free entry for this game. Purchase tokens to continue playing!" 
         });
+      }
+
+      // Get user info
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(400).json({ message: "User not found" });
       }
 
       // Get the game to ensure it exists and is active
@@ -2501,48 +2527,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "No numbers available in this game" });
       }
 
-      // Create a temporary guest player for this free spin
-      const guestPlayer = await storage.createPlayer({
-        gameId,
-        userId: 0, // Guest player (using 0 instead of null)
-        playerName: "Guest Player",
-        ownedNumbers: [],
-        totalSpent: "0",
-        freeSpins: 1,
-        referralCount: 0,
-        ipAddress: ipAddress,
-        userAgent: req.headers['user-agent'] || "",
-        createdAt: new Date()
-      });
+      // Create or get real player record for authenticated user
+      let player = await storage.getPlayer(userId);
+      if (!player) {
+        player = await storage.createPlayer({
+          gameId,
+          userId: userId,
+          playerName: `${user.firstName} ${user.lastName}`,
+          ownedNumbers: [],
+          totalSpent: "0",
+          freeSpins: 0,
+          referralCount: 0,
+          ipAddress: req.ip || 'unknown',
+          userAgent: req.headers['user-agent'] || "",
+          createdAt: new Date()
+        });
+      }
 
       // Perform the spin with any available numbers
       const randomIndex = Math.floor(Math.random() * availableNumbers.length);
       const spunNumber = availableNumbers[randomIndex];
 
-      // Create spin result
-      const spinResult = await storage.createSpinResult({
-        gameId,
-        playerId: guestPlayer.id,
-        spunNumber,
-        isFreePlay: true,
-        amountCharged: "0",
+      // Create spin result with $0 cost (free entry)
+      const spinResult = await storage.createSpinResultWithNumber(gameId, player.id, spunNumber, "0");
+
+      // Record user free entry usage to prevent reuse
+      await storage.createUserFreeEntry({
+        userId: userId,
+        gameId: gameId,
+        usedAt: new Date()
       });
 
-      // Update game numbers left
-      await storage.updateGame(gameId, {
-        numbersLeft: game.numbersLeft - 1,
-      });
-
-      // Record free play usage to prevent abuse
-      await storage.recordFreePlayUsage(ipAddress, gameId);
-
-      // Log for compliance (anonymous entry)
+      // Log for compliance with user information
       await storage.createComplianceLog(
-        null, // No user ID for free play
+        userId,
         gameId,
-        'free_spin_result',
+        'free_entry_used',
         {
-          ipAddress,
+          userName: `${user.firstName} ${user.lastName}`,
+          userEmail: user.email,
           spunNumber,
           timestamp: new Date().toISOString(),
           gameTitle: game.name
@@ -2555,7 +2578,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           number: spunNumber,
           isFreePlay: true,
           amountCharged: "0",
-          message: `Congratulations! You landed on ${spunNumber} - No Purchase Necessary: You get one free spin per game to enter this game!`
+          message: `Congratulations ${user.firstName}! You landed on ${spunNumber} - Free Entry Used: You get one free entry per game as a registered user!`
         }
       });
     } catch (error: any) {

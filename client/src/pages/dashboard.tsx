@@ -490,6 +490,36 @@ export default function Dashboard() {
           <TabsContent value="overview" className="space-y-8">
             {/* Enhanced Stats Overview with eye-catching gradients */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              
+          {/* Token Purchase Card - Featured */}
+          <Card className="relative overflow-hidden bg-gradient-to-br from-yellow-900/60 to-orange-900/60 border-yellow-400/40 backdrop-blur-xl shadow-2xl hover:shadow-yellow-500/20 hover:scale-105 transition-all duration-300 cursor-pointer group">
+            <div className="absolute inset-0 bg-gradient-to-br from-yellow-800/20 to-orange-800/20 blur-xl"></div>
+            <CardContent 
+              className="relative p-6 h-full flex flex-col justify-between"
+              onClick={() => window.location.href = '/tokens'}
+            >
+              <div className="flex items-center space-x-4">
+                <div className="p-3 bg-gradient-to-br from-yellow-500 to-orange-600 rounded-xl shadow-lg group-hover:scale-110 transition-transform duration-300">
+                  <Coins className="h-8 w-8 text-white drop-shadow-lg" />
+                </div>
+                <div>
+                  <p className="text-white text-lg font-black tracking-wide drop-shadow-lg">Buy Tokens</p>
+                  <p className="text-2xl font-black text-yellow-300 drop-shadow-lg">
+                    Get Started
+                  </p>
+                </div>
+              </div>
+              <div className="mt-4 text-center">
+                <Button 
+                  className="w-full bg-gradient-to-r from-yellow-500 to-orange-600 hover:from-yellow-600 hover:to-orange-700 text-white font-bold py-2 px-4 rounded-lg shadow-lg"
+                  data-testid="button-buy-tokens-dashboard"
+                >
+                  Purchase Tokens →
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
           {/* Low Numbers Card (1-50) */}
           <Card className="relative overflow-hidden bg-gradient-to-br from-emerald-900/60 to-green-900/60 border-emerald-400/40 backdrop-blur-xl shadow-2xl hover:shadow-emerald-500/20 transition-all duration-300">
             <div className="absolute inset-0 bg-gradient-to-br from-emerald-800/20 to-green-800/20 blur-xl"></div>

@@ -324,84 +324,42 @@ export const ProfessionalWheel = forwardRef<
 
       // Step 8: Complete the spin sequence after EXACTLY 8 seconds from animation start
       setTimeout(async () => {
-        console.log("🎯 8-second spin completed, now processing payment...");
+        console.log("🎯 8-second spin completed - TOKEN SYSTEM: Number already claimed!");
 
-        // Set the result number for display
+        // TOKEN SYSTEM: Set result data from the spin API response
         setResult(resultNumber);
-        setAmountCharged(resultNumber);
-
-        // NOW process payment for the spun number
-        let paymentSuccessful = false;
-        try {
-          console.log("💳 Processing payment for number", resultNumber);
-          
-          // Step 1: Generate fresh card nonce from Square for this payment
-          const cardNonce = await generateFreshCardNonce();
-          if (!cardNonce) {
-            throw new Error("Failed to generate payment token. Please update your payment method in your dashboard.");
-          }
-          
-          console.log("💳 Generated payment token for processing");
-          
-          // Step 2: Call the payment processing endpoint with fresh nonce
-          const paymentResponse = await fetch("/api/process-payment", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            credentials: "include",
-            body: JSON.stringify({
-              gameId: window.location.pathname.match(/\/game\/(\d+)/)?.[1],
-              number: resultNumber,
-              cardNonce: cardNonce // Include fresh nonce for this payment
-            })
-          });
-
-          if (paymentResponse.ok) {
-            const paymentResult = await paymentResponse.json();
-            if (paymentResult.success) {
-              paymentSuccessful = true;
-              setIsFreePlay(false);
-              console.log("💳 Payment successful for number", resultNumber);
-            } else {
-              throw new Error(paymentResult.message || "Payment failed");
-            }
-          } else {
-            const error = await paymentResponse.json();
-            throw new Error(error.message || "Payment failed");
-          }
-        } catch (paymentError) {
-          console.error("💳 Payment failed:", paymentError);
-          setPaymentFailed(true);
-          setIsFreePlay(false);
-          
-          // Check if this is a card update requirement
-          if (paymentError instanceof Error && paymentError.message.includes("update your payment")) {
-            setShowCardUpdate(true);
-          }
+        
+        // Extract token information from the spin result if available
+        if (typeof spinResult === 'object' && spinResult && 'tokensUsed' in spinResult) {
+          setAmountCharged((spinResult as any).tokensUsed || 0);
+          console.log("💰 Tokens consumed:", (spinResult as any).tokensUsed || 0);
+        } else {
+          setAmountCharged(0); // Default for free play or fallback
         }
 
-        // Show result modal with payment outcome
+        // TOKEN SYSTEM: No payment processing needed - tokens already deducted upfront
+        // The number is already claimed in the database when /api/spin returned successfully
+        console.log("✅ Token-based spin completed successfully - number already claimed");
+
+        // TOKEN SYSTEM: Show result modal - tokens already processed successfully
         setTimeout(() => {
           setShowResultModal(true);
-          if (!paymentSuccessful) {
-            console.log("⚠️ Showing payment failure modal");
-          }
+          console.log("✅ Showing token-based spin success modal");
         }, 500);
 
-        // Only after modal is shown, release the spinning state and refresh numbers
+        // TOKEN SYSTEM: Release spinning state and refresh numbers
         setTimeout(async () => {
           setIsSpinning(false);
 
-          // Refresh available numbers if payment was successful
-          if (paymentSuccessful) {
-            const path = window.location.pathname;
-            const gameIdMatch = path.match(/\/game\/(\d+)/);
-            if (gameIdMatch) {
-              const gameId = parseInt(gameIdMatch[1]);
-              await fetchAvailableNumbers(gameId);
-            }
+          // Always refresh available numbers since tokens were successfully deducted
+          const path = window.location.pathname;
+          const gameIdMatch = path.match(/\/game\/(\d+)/);
+          if (gameIdMatch) {
+            const gameId = parseInt(gameIdMatch[1]);
+            await fetchAvailableNumbers(gameId);
           }
 
-          console.log("🎯 Spin sequence fully completed");
+          console.log("🎯 Token-based spin sequence fully completed");
         }, 1000);
       }, 8000); // Exactly 8 seconds for animation completion
     }, 200); // Wait 200ms for rotation reset to fully take effect
