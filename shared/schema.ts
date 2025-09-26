@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, boolean, timestamp, decimal, json, varchar } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, timestamp, decimal, json, varchar, uniqueIndex } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -15,6 +15,11 @@ export const users = pgTable("users", {
   squareCustomerId: text("square_customer_id").unique(),
   cardOnFile: boolean("card_on_file").notNull().default(false),
   defaultCardId: integer("default_card_id"), // Reference to default payment card
+  // Token system fields
+  tokenBalance: integer("token_balance").notNull().default(0),
+  totalTokensPurchased: integer("total_tokens_purchased").notNull().default(0),
+  totalTokensUsed: integer("total_tokens_used").notNull().default(0),
+  // Legacy spending fields (kept for historical data)
   totalSpent: decimal("total_spent", { precision: 10, scale: 2 }).notNull().default("0"),
   totalWon: decimal("total_won", { precision: 10, scale: 2 }).notNull().default("0"),
   gamesPlayed: integer("games_played").notNull().default(0),
@@ -93,6 +98,11 @@ export const games = pgTable("games", {
   prizeDescription: text("prize_description"),
   totalNumbers: integer("total_numbers").notNull().default(200),
   numbersLeft: integer("numbers_left").notNull(),
+  // Token system fields
+  tokenCostPerEntry: integer("token_cost_per_entry").notNull().default(10), // Tokens needed to enter
+  tokenThreshold: integer("token_threshold").notNull().default(4000), // Total tokens needed to close game
+  tokensCollected: integer("tokens_collected").notNull().default(0), // Tokens collected so far
+  // Legacy free play fields (kept for backward compatibility)
   freePlayStart: integer("free_play_start").notNull().default(151), // Free play numbers start
   freePlayEnd: integer("free_play_end").notNull().default(200), // Free play numbers end  
 
@@ -150,13 +160,41 @@ export const complianceLogs = pgTable("compliance_logs", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
-// Track free play usage by IP address to prevent abuse
+// Track free play usage by IP address to prevent abuse (kept for legacy)
 export const freePlayUsage = pgTable("free_play_usage", {
   id: serial("id").primaryKey(),
   ipAddress: text("ip_address").notNull(),
   gameId: integer("game_id").notNull().references(() => games.id),
   usedAt: timestamp("used_at").notNull().defaultNow(),
 });
+
+// Token transactions table - tracks token purchases and usage
+export const tokenTransactions = pgTable("token_transactions", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  transactionType: text("transaction_type").notNull(), // 'purchase', 'game_entry', 'refund', 'bonus'
+  amount: integer("amount").notNull(), // Number of tokens (positive for purchase/bonus, negative for spending)
+  gameId: integer("game_id"), // Game ID if tokens were used for game entry
+  paymentCardId: integer("payment_card_id"), // Payment card used for token purchase
+  squarePaymentId: text("square_payment_id").unique(), // Square payment ID for purchases
+  dollarAmount: decimal("dollar_amount", { precision: 10, scale: 2 }), // Dollar amount for purchases
+  description: text("description").notNull(), // Description of the transaction
+  status: text("status").notNull().default("completed"), // 'pending', 'completed', 'failed', 'refunded'
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+// User free entries table - tracks free entries per user per game (replacing IP-based system)
+export const userFreeEntries = pgTable("user_free_entries", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  gameId: integer("game_id").notNull().references(() => games.id),
+  usedAt: timestamp("used_at").notNull().defaultNow(),
+  ipAddress: text("ip_address"), // Optional for tracking
+  userAgent: text("user_agent"), // Optional for tracking
+}, (table) => ({
+  uniqueUserGameFreeEntry: uniqueIndex('unique_user_game_free_entry').on(table.userId, table.gameId)
+}));
 
 // Game results with enhanced tracking
 export const gameResults = pgTable("game_results", {
@@ -315,3 +353,22 @@ export const insertPaymentCardSchema = createInsertSchema(paymentCards).omit({
 
 export type PaymentCard = typeof paymentCards.$inferSelect;
 export type InsertPaymentCard = z.infer<typeof insertPaymentCardSchema>;
+
+// Token transaction schema and types
+export const insertTokenTransactionSchema = createInsertSchema(tokenTransactions).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type TokenTransaction = typeof tokenTransactions.$inferSelect;
+export type InsertTokenTransaction = z.infer<typeof insertTokenTransactionSchema>;
+
+// User free entry schema and types
+export const insertUserFreeEntrySchema = createInsertSchema(userFreeEntries).omit({
+  id: true,
+  usedAt: true,
+});
+
+export type UserFreeEntry = typeof userFreeEntries.$inferSelect;
+export type InsertUserFreeEntry = z.infer<typeof insertUserFreeEntrySchema>;
