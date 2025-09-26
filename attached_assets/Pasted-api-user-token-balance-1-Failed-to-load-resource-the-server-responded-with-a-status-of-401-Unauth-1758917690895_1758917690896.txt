@@ -1,0 +1,105 @@
+api/user/token-balance:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)Understand this error
+queryClient.ts:37  GET https://f45475b4-a7c6-4031-bbbd-cffdcb6fa4d5-00-1aqxf2ubqm5iz.janeway.replit.dev/api/user/token-balance 401 (Unauthorized)
+(anonymous) @ queryClient.ts:37
+fetchFn @ @tanstack_react-query.js?v=f8613326:879
+run @ @tanstack_react-query.js?v=f8613326:507
+start @ @tanstack_react-query.js?v=f8613326:550
+fetch @ @tanstack_react-query.js?v=f8613326:918
+executeFetch_fn @ @tanstack_react-query.js?v=f8613326:2280
+(anonymous) @ @tanstack_react-query.js?v=f8613326:2314Understand this error
+token-purchase.tsx:43  POST https://f45475b4-a7c6-4031-bbbd-cffdcb6fa4d5-00-1aqxf2ubqm5iz.janeway.replit.dev/api/purchase-tokens 401 (Unauthorized)
+mutationFn @ token-purchase.tsx:43
+fn @ @tanstack_react-query.js?v=f8613326:1234
+run @ @tanstack_react-query.js?v=f8613326:507
+start @ @tanstack_react-query.js?v=f8613326:550
+execute @ @tanstack_react-query.js?v=f8613326:1270
+await in execute
+mutate @ @tanstack_react-query.js?v=f8613326:2692
+handlePurchase @ token-purchase.tsx:95
+onClick @ token-purchase.tsx:239
+callCallback2 @ chunk-WERSD76P.js?v=f8613326:3674
+invokeGuardedCallbackDev @ chunk-WERSD76P.js?v=f8613326:3699
+invokeGuardedCallback @ chunk-WERSD76P.js?v=f8613326:3733
+invokeGuardedCallbackAndCatchFirstError @ chunk-WERSD76P.js?v=f8613326:3736
+executeDispatch @ chunk-WERSD76P.js?v=f8613326:7014
+processDispatchQueueItemsInOrder @ chunk-WERSD76P.js?v=f8613326:7034
+processDispatchQueue @ chunk-WERSD76P.js?v=f8613326:7043
+dispatchEventsForPlugins @ chunk-WERSD76P.js?v=f8613326:7051
+(anonymous) @ chunk-WERSD76P.js?v=f8613326:7174
+batchedUpdates$1 @ chunk-WERSD76P.js?v=f8613326:18913
+batchedUpdates @ chunk-WERSD76P.js?v=f8613326:3579
+dispatchEventForPluginEventSystem @ chunk-WERSD76P.js?v=f8613326:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-WERSD76P.js?v=f8613326:5478
+dispatchEvent @ chunk-WERSD76P.js?v=f8613326:5472
+dispatchDiscreteEvent @ chunk-WERSD76P.js?v=f8613326:5449Understand this error
+token-purchase.tsx:71 Token purchase failed: Error: Authentication required
+    at Object.mutationFn (token-purchase.tsx:52:15)
+onError @ token-purchase.tsx:71
+execute @ @tanstack_react-query.js?v=f8613326:1299
+await in execute
+mutate @ @tanstack_react-query.js?v=f8613326:2692
+handlePurchase @ token-purchase.tsx:95
+onClick @ token-purchase.tsx:239
+callCallback2 @ chunk-WERSD76P.js?v=f8613326:3674
+invokeGuardedCallbackDev @ chunk-WERSD76P.js?v=f8613326:3699
+invokeGuardedCallback @ chunk-WERSD76P.js?v=f8613326:3733
+invokeGuardedCallbackAndCatchFirstError @ chunk-WERSD76P.js?v=f8613326:3736
+executeDispatch @ chunk-WERSD76P.js?v=f8613326:7014
+processDispatchQueueItemsInOrder @ chunk-WERSD76P.js?v=f8613326:7034
+processDispatchQueue @ chunk-WERSD76P.js?v=f8613326:7043
+dispatchEventsForPlugins @ chunk-WERSD76P.js?v=f8613326:7051
+(anonymous) @ chunk-WERSD76P.js?v=f8613326:7174
+batchedUpdates$1 @ chunk-WERSD76P.js?v=f8613326:18913
+batchedUpdates @ chunk-WERSD76P.js?v=f8613326:3579
+dispatchEventForPluginEventSystem @ chunk-WERSD76P.js?v=f8613326:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-WERSD76P.js?v=f8613326:5478
+dispatchEvent @ chunk-WERSD76P.js?v=f8613326:5472
+dispatchDiscreteEvent @ chunk-WERSD76P.js?v=f8613326:5449Understand this error
+queryClient.ts:37  GET https://f45475b4-a7c6-4031-bbbd-cffdcb6fa4d5-00-1aqxf2ubqm5iz.janeway.replit.dev/api/user/token-balance 401 (Unauthorized)
+(anonymous) @ queryClient.ts:37
+fetchFn @ @tanstack_react-query.js?v=f8613326:879
+run @ @tanstack_react-query.js?v=f8613326:507
+start @ @tanstack_react-query.js?v=f8613326:550
+fetch @ @tanstack_react-query.js?v=f8613326:918
+executeFetch_fn @ @tanstack_react-query.js?v=f8613326:2280
+(anonymous) @ @tanstack_react-query.js?v=f8613326:2314
+setInterval
+updateRefetchInterval_fn @ @tanstack_react-query.js?v=f8613326:2312
+updateTimers_fn @ @tanstack_react-query.js?v=f8613326:2319
+onQueryUpdate @ @tanstack_react-query.js?v=f8613326:2275
+(anonymous) @ @tanstack_react-query.js?v=f8613326:1040
+(anonymous) @ @tanstack_react-query.js?v=f8613326:1039
+batch @ @tanstack_react-query.js?v=f8613326:598
+dispatch_fn @ @tanstack_react-query.js?v=f8613326:1038
+setData @ @tanstack_react-query.js?v=f8613326:713
+fetch @ @tanstack_react-query.js?v=f8613326:927
+await in fetch
+executeFetch_fn @ @tanstack_react-query.js?v=f8613326:2280
+(anonymous) @ @tanstack_react-query.js?v=f8613326:2314Understand this error
+token-purchase.tsx:43  POST https://f45475b4-a7c6-4031-bbbd-cffdcb6fa4d5-00-1aqxf2ubqm5iz.janeway.replit.dev/api/purchase-tokens 401 (Unauthorized)
+mutationFn @ token-purchase.tsx:43
+fn @ @tanstack_react-query.js?v=f8613326:1234
+run @ @tanstack_react-query.js?v=f8613326:507
+start @ @tanstack_react-query.js?v=f8613326:550
+execute @ @tanstack_react-query.js?v=f8613326:1270
+await in execute
+mutate @ @tanstack_react-query.js?v=f8613326:2692
+handlePurchase @ token-purchase.tsx:95
+onClick @ token-purchase.tsx:239
+callCallback2 @ chunk-WERSD76P.js?v=f8613326:3674
+invokeGuardedCallbackDev @ chunk-WERSD76P.js?v=f8613326:3699
+invokeGuardedCallback @ chunk-WERSD76P.js?v=f8613326:3733
+invokeGuardedCallbackAndCatchFirstError @ chunk-WERSD76P.js?v=f8613326:3736
+executeDispatch @ chunk-WERSD76P.js?v=f8613326:7014
+processDispatchQueueItemsInOrder @ chunk-WERSD76P.js?v=f8613326:7034
+processDispatchQueue @ chunk-WERSD76P.js?v=f8613326:7043
+dispatchEventsForPlugins @ chunk-WERSD76P.js?v=f8613326:7051
+(anonymous) @ chunk-WERSD76P.js?v=f8613326:7174
+batchedUpdates$1 @ chunk-WERSD76P.js?v=f8613326:18913
+batchedUpdates @ chunk-WERSD76P.js?v=f8613326:3579
+dispatchEventForPluginEventSystem @ chunk-WERSD76P.js?v=f8613326:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-WERSD76P.js?v=f8613326:5478
+dispatchEvent @ chunk-WERSD76P.js?v=f8613326:5472
+dispatchDiscreteEvent @ chunk-WERSD76P.js?v=f8613326:5449Understand this error
+token-purchase.tsx:71 Token purchase failed: Error: Authentication required
+    at Object.mutationFn (token-purchase.tsx:52:15)
