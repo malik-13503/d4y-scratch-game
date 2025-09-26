@@ -278,6 +278,7 @@ export function setupAuth(app: Express) {
 
 // Middleware to require authentication  
 export async function requireAuth(req: any, res: any, next: any) {
+  console.log("RequireAuth debug - isAuthenticated:", req.isAuthenticated(), "hasUser:", !!req.user, "userActive:", req.user?.isActive);
   
   // Check if user session exists and is valid (standard passport auth)
   if (req.isAuthenticated() && req.user && req.user.isActive) {
@@ -290,7 +291,7 @@ export async function requireAuth(req: any, res: any, next: any) {
     console.log("Manual session check - user ID from session:", req.session.passport.user);
     try {
       // Try regular user first (for token purchase, game play, etc.)
-      let user = await storage.getUser(req.session.passport.user);
+      let user: any = await storage.getUser(req.session.passport.user);
       
       // If not a regular user, try admin user (for admin dashboard, etc.)
       if (!user) {

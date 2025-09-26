@@ -2273,7 +2273,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Purchase tokens endpoint
-  app.post("/api/purchase-tokens", requireAuth, async (req, res) => {
+  app.post("/api/purchase-tokens", async (req, res) => {
     try {
       const userId = (req.session as any)?.userId;
       const { packageId, cardId } = req.body;
@@ -2398,7 +2398,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get user token balance endpoint
-  app.get("/api/user/token-balance", requireAuth, async (req, res) => {
+  app.get("/api/user/token-balance", async (req, res) => {
     try {
       const userId = (req.session as any)?.userId;
       if (!userId) {
@@ -2414,7 +2414,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get user token transaction history endpoint  
-  app.get("/api/user/token-transactions", requireAuth, async (req, res) => {
+  app.get("/api/user/token-transactions", async (req, res) => {
     try {
       const userId = (req.session as any)?.userId;
       if (!userId) {
