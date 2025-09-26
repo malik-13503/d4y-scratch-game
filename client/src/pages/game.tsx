@@ -83,6 +83,13 @@ export default function GamePage() {
     retry: false,
   });
 
+  // Get user's token balance for display
+  const { data: tokenBalanceData } = useQuery<{ tokenBalance: number }>({
+    queryKey: ["/api/user/token-balance"],
+    enabled: !!user,
+    refetchInterval: 5000, // Refresh every 5 seconds to show real-time balance
+  });
+
   const gameId = game?.id;
 
   const { data: availableNumbersData } = useQuery<{availableNumbers: number[], totalAvailable: number}>({
@@ -355,9 +362,9 @@ export default function GamePage() {
     }
   };
 
-  // Calculate progress using real-time available numbers data
-  const progress = game && totalAvailable !== undefined
-    ? ((game.totalNumbers - totalAvailable) / game.totalNumbers) * 100 
+  // Calculate progress using token collection vs token threshold
+  const progress = game && game.tokenThreshold && game.tokensCollected !== undefined
+    ? (game.tokensCollected / game.tokenThreshold) * 100 
     : 0;
 
   return (
@@ -655,14 +662,30 @@ export default function GamePage() {
                   <span className="text-gray-400">Code</span>
                   <span className="text-white font-mono">{game.code}</span>
                 </div>
+                {user ? (
+                  <div className="flex items-center justify-between border-t border-purple-500/30 pt-3 mt-3">
+                    <span className="text-gray-400">Your Tokens</span>
+                    <div className="flex items-center space-x-2">
+                      <span className="text-green-400 font-bold text-lg">
+                        {tokenBalanceData?.tokenBalance || 0}
+                      </span>
+                      <span className="text-xs bg-purple-600/50 px-2 py-1 rounded-full">
+                        Cost: {(game as any)?.tokenCost || 1} per spin
+                      </span>
+                    </div>
+                  </div>
+                ) : null}
                 <div className="space-y-2">
                   <div className="flex items-center justify-between text-sm">
-                    <span className="text-gray-400">Numbers Available</span>
+                    <span className="text-gray-400">Tokens Collected</span>
                     <span className="text-white">
-                      {totalAvailable} / {game.totalNumbers}
+                      {game.tokensCollected || 0} / {game.tokenThreshold || 0}
                     </span>
                   </div>
                   <Progress value={progress} className="bg-white/20 h-3" />
+                  <div className="text-center text-xs text-gray-500">
+                    Game completes when token goal is reached
+                  </div>
                 </div>
               </CardContent>
             </Card>

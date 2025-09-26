@@ -2567,7 +2567,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get spin result (without payment processing)
+  // TOKEN-BASED SPIN SYSTEM: Check tokens, deduct, and claim number immediately
   app.post("/api/spin", async (req, res) => {
     try {
       const userId = (req.session as any)?.userId;
@@ -2596,95 +2596,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (availableNumbers.length === 0) {
         return res.status(400).json({ message: "Game complete! All numbers have been taken." });
       }
+
+      // Get token cost for this game (from tokenCost field)
+      const tokenCost = game.tokenCost || 1; // Default to 1 token if not set
       
+      // Check user's token balance
+      const userTokenBalance = await storage.getUserTokenBalance(userId);
+      if (userTokenBalance < tokenCost) {
+        return res.status(400).json({ 
+          message: "Insufficient tokens",
+          required: tokenCost,
+          current: userTokenBalance,
+          code: "INSUFFICIENT_TOKENS"
+        });
+      }
+
       // Randomly select a number from available numbers
       const randomIndex = Math.floor(Math.random() * availableNumbers.length);
       const spunNumber = availableNumbers[randomIndex];
-      
-      console.log(`User ${userId} spun number ${spunNumber} - payment will be processed after wheel stops`);
-      
-      // Return just the number - payment processing happens later
-      res.json({ number: spunNumber });
-    } catch (error: any) {
-      console.error("Spin error:", error);
-      res.status(400).json({ message: "Spin failed", error: error.message });
-    }
-  });
 
-  // Process payment after wheel stops
-  app.post("/api/process-payment", async (req, res) => {
-    try {
-      const userId = (req.session as any)?.userId;
-      if (!userId) {
-        return res.status(401).json({ message: "Not authenticated" });
-      }
-
-      const { gameId, number, cardNonce } = req.body;
+      // UPFRONT TOKEN DEDUCTION: Deduct tokens immediately when spinning
+      console.log(`Deducting ${tokenCost} tokens from user ${userId} for number ${spunNumber}`);
       
-      console.log(`💳 RAW REQUEST DEBUG:`, {
-        gameId,
-        number,
-        cardNonce: cardNonce ? `${cardNonce.substring(0, 15)}...` : 'null',
-        cardNonceType: typeof cardNonce,
-        cardNonceLength: cardNonce ? cardNonce.length : 0
-      });
-      
-      if (!gameId || !number) {
-        return res.status(400).json({ message: "Game ID and number are required" });
-      }
-
-      const user = await storage.getUser(userId);
-      if (!user) {
-        return res.status(400).json({ message: "User not found" });
-      }
-
-      // Force production mode for real payment processing
-      const isProduction = true;
-      console.log(`Payment processing - Production mode enabled for real payments: ${isProduction}`);
-      
-      // Require payment card
-      if (!user.cardOnFile) {
-        return res.status(400).json({ 
-          success: false,
-          message: "Payment method required. Please add a payment card before spinning." 
+      try {
+        await storage.deductUserTokens(userId, tokenCost);
+      } catch (tokenError: any) {
+        return res.status(400).json({
+          message: tokenError.message || "Failed to deduct tokens",
+          code: "TOKEN_DEDUCTION_FAILED"
         });
       }
 
-      // Validate user has sufficient payment method available
-      const userCards = await storage.getPaymentCardsByUserId(userId);
-      if (!userCards || userCards.length === 0) {
-        return res.status(400).json({ 
-          success: false,
-          message: "No payment cards found. Please add a payment card." 
-        });
-      }
-
-      // Get the most recent active card (don't rely on expired field for now)
-      const validCards = userCards.filter(card => card.isActive);
-      if (!validCards || validCards.length === 0) {
-        return res.status(400).json({ 
-          success: false,
-          message: "No active payment cards found. Please add a new payment card to continue playing." 
-        });
-      }
-
-      const defaultCard = validCards.find(card => card.isDefault) || validCards[0];
-      if (!defaultCard) {
-        return res.status(400).json({ 
-          success: false,
-          message: "No valid payment card available." 
-        });
-      }
-
-      const game = await storage.getGame(gameId);
-      if (!game || !game.isActive) {
-        return res.status(400).json({ 
-          success: false,
-          message: "Game not found or inactive" 
-        });
-      }
-
-      // Create or get player
+      // Create or get player record (using same logic as process-payment)
       let player = await storage.getPlayer(userId);
       if (!player) {
         player = await storage.createPlayer({
@@ -2695,153 +2638,65 @@ export async function registerRoutes(app: Express): Promise<Server> {
           totalSpent: "0",
           freeSpins: 0,
           referralCount: 0,
-          ipAddress: req.ip,
+          ipAddress: req.ip || 'unknown',
           userAgent: req.headers['user-agent'] || "",
           createdAt: new Date()
         });
       }
 
-      // Check if number is still available (prevent double-claiming)
-      const availableNumbers = await storage.getAvailableNumbers(gameId);
-      if (!availableNumbers.includes(number)) {
-        return res.status(400).json({
-          success: false,
-          message: "Number is no longer available"
-        });
-      }
-
-      const chargeAmount = number; // Cost equals the number value
-      console.log(`Processing payment for user ${userId}, number ${number}, charge $${chargeAmount}`);
+      // IMMEDIATE NUMBER CLAIMING: Create spin result and claim the number
+      const spinResult = await storage.createSpinResultWithNumber(gameId, player.id, spunNumber, "0"); // $0 since using tokens
       
-      // Attempt payment processing
-      let paymentResult = null;
-      let paymentSucceeded = false;
-      
-      // CHECK: Is this number still available before payment?
-      const availableBeforePayment = await storage.getAvailableNumbers(gameId);
-
-      try {
-        if (!isProduction) {
-          // Sandbox mode - simulate payment
-          paymentResult = {
-            id: `sandbox_payment_${Date.now()}`,
-            status: "COMPLETED", 
-            receiptUrl: null
-          };
-          paymentSucceeded = true;
-        } else {
-          // Production payment processing using stored card
-          console.log(`Using stored card for payment: ${defaultCard.squareCardId} for customer: ${user.squareCustomerId}`);
-          
-          // Use Square Card on File to charge the stored card
-          paymentResult = await squareService.chargeStoredCard(
-            chargeAmount,
-            "USD",
-            defaultCard.squareCardId,
-            user.squareCustomerId,
-            `Payment for number ${number} in game ${game.name}`
-          );
-
-          paymentSucceeded = true;
-          console.log(`Payment successful with stored card: ${paymentResult.id}`);
-        }
-      } catch (paymentError: any) {
-        console.error("Payment failed for number:", paymentError);
-        
-        // Check if it's a card token expired error
-        if (paymentError.message && (paymentError.message.includes('CARD_TOKEN_EXPIRED') || paymentError.message.includes('expired'))) {
-          console.log(`💳 Card token expired for user ${userId} - card needs refresh`);
-          
-          return res.status(400).json({ 
-            success: false,
-            message: "Your payment card token has expired. Please go to your dashboard and re-add your payment method to continue playing.",
-            requiresCardUpdate: true
-          });
-        }
-        
-        // CHECK: Is number still available after payment failed?
-        const availableAfterFailure = await storage.getAvailableNumbers(gameId);
-        console.log(`💳 AFTER PAYMENT FAILURE: Available numbers count: ${availableAfterFailure.length}, includes ${number}: ${availableAfterFailure.includes(number)}`);
-        
-        return res.status(400).json({ 
-          success: false,
-          message: "Payment failed. Please check your payment method and try again.",
-          error: paymentError.message || "Payment processing failed"
-        });
-      }
-      
-      // Payment succeeded - claim the number
-      console.log(`💳 PAYMENT SUCCESS: Now claiming number ${number} for user ${userId}`);
-      const spinResult = await storage.createSpinResultWithNumber(gameId, player.id, number, chargeAmount.toString());
-      
-      // CHECK: Number should now be unavailable
-      const availableAfterSuccess = await storage.getAvailableNumbers(gameId);
-      console.log(`💳 AFTER SUCCESSFUL CLAIM: Available numbers count: ${availableAfterSuccess.length}, includes ${number}: ${availableAfterSuccess.includes(number)}`);
-
-      // Get card details for transaction record  
-      let cardLast4 = "****";
-      let cardBrand = "Unknown";
-      
-      if (isProduction) {
-        cardLast4 = paymentResult.cardDetails?.last4 || defaultCard?.cardLast4 || "****";
-        cardBrand = paymentResult.cardDetails?.cardBrand || defaultCard?.cardBrand || "Unknown";
-      } else {
-        cardLast4 = "Test";
-        cardBrand = "Sandbox";
-      }
-
-      // Record transaction
-      const transaction = await storage.createTransaction({
-        userId: userId,
+      // Record token transaction for the spin
+      await storage.createTokenTransaction({
+        userId,
+        transactionType: 'spin',
+        amount: -tokenCost, // Negative amount for deduction
         gameId: gameId,
         spinResultId: spinResult.id,
-        squarePaymentId: paymentResult.id,
-        amount: chargeAmount.toString(),
-        currency: "USD",
-        status: paymentResult.status || "COMPLETED",
-        paymentMethod: "card",
-        cardLast4,
-        cardBrand,
-        squareReceiptUrl: paymentResult.receiptUrl || undefined
+        description: `Used ${tokenCost} token(s) for number ${spunNumber} in ${game.name}`,
+        status: 'completed'
       });
 
-      // Send payment success email
-      try {
-        const game = await storage.getGame(gameId);
-        await emailService.sendPaymentReceipt(
-          user.email,
-          `${user.firstName} ${user.lastName}`,
-          chargeAmount.toString(),
-          number,
-          paymentResult.id
-        );
-        console.log(`✅ Payment success email sent to ${user.email}`);
-      } catch (emailError) {
-        console.error('❌ Failed to send payment success email:', emailError);
-        // Don't fail the payment if email fails
-      }
+      // Add tokens to game's collection progress
+      await storage.addTokensToGame(gameId, tokenCost);
 
-      // Update user's total spent
+      // Update user stats
       await storage.updateUser(userId, {
-        totalSpent: (parseFloat(user.totalSpent) + chargeAmount).toString(),
+        totalSpent: (parseFloat(user.totalSpent || "0") + tokenCost).toString(),
         gamesPlayed: user.gamesPlayed + 1
       });
 
-      // Send success response
-      res.json({
-        success: true,
-        number: number,
-        amount: chargeAmount,
-        transactionId: paymentResult.id
+      // Get updated token balance for response
+      const newTokenBalance = await storage.getUserTokenBalance(userId);
+
+      console.log(`✅ Token-based spin completed: User ${userId} claimed number ${spunNumber} using ${tokenCost} tokens`);
+      
+      // Return success with token information
+      res.json({ 
+        number: spunNumber,
+        tokensUsed: tokenCost,
+        newTokenBalance: newTokenBalance,
+        success: true
       });
 
     } catch (error: any) {
-      console.error("Payment processing error:", error);
-      res.status(500).json({ 
-        success: false,
-        message: "Internal server error during payment processing"
-      });
+      console.error("Token-based spin error:", error);
+      res.status(400).json({ message: "Spin failed", error: error.message });
     }
+  });
+
+  // DEPRECATED: Process payment after wheel stops (REPLACED BY TOKEN SYSTEM)
+  app.post("/api/process-payment", async (req, res) => {
+    // TOKEN SYSTEM MIGRATION: This endpoint is no longer used since tokens are deducted upfront in /api/spin
+    console.log("⚠️ DEPRECATED: /api/process-payment called - token system handles payment in /api/spin");
+    
+    return res.status(400).json({ 
+      success: false,
+      message: "Payment processing has been replaced by the token system. Tokens are deducted when spinning.",
+      deprecated: true,
+      migrationInfo: "Use the token purchase system to buy tokens, then spin to consume them."
+    });
   });
 
   // Get user's transaction history
