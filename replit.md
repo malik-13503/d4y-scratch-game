@@ -1,7 +1,7 @@
-# Real-Time Prize Game Web Application
+# Prize Plugz - Real-Time Prize Game Web Application
 
 ## Overview
-This project is a real-time web application for interactive prize games, primarily focusing on wheel-spinning mechanics. Its purpose is to provide an engaging and fair platform for live game participation and prize winning, supported by robust administrative controls. The business vision is to create a leading, entertaining online gaming experience with high market potential in casual gaming and online sweepstakes, aiming for widespread user adoption and a reputation for transparent, exciting gameplay.
+Prize Plugz is a real-time web application for interactive prize games, primarily focusing on wheel-spinning mechanics. Its purpose is to provide an engaging and fair platform for live game participation and prize winning, supported by robust administrative controls. The business vision is to create a leading, entertaining online gaming experience with high market potential in casual gaming and online sweepstakes, aiming for widespread user adoption and a reputation for transparent, exciting gameplay.
 
 ### Recent Updates (September 2025)
 - **Payment Failure Handling Complete**: System now correctly handles payment failures with proper error popups and number protection

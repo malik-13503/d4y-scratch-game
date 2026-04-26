@@ -10,7 +10,7 @@ import { Confetti } from "@/components/confetti";
 import { DisclaimerPopup } from "@/components/disclaimer-popup";
 import { AuthRequiredPopup } from "@/components/auth-required-popup";
 import { PaymentRequiredPopup } from "@/components/payment-required-popup";
-import logoPath from "@assets/logo_1751918412862.png";
+import logoPath from "@assets/logo_1777237644041.png";
 import {
   Clock,
   Users,
@@ -409,7 +409,7 @@ export default function GamePage() {
               </Button>
               <img
                 src={logoPath}
-                alt="Hit The Road Jackpot"
+                alt="Prize Plugz"
                 className="h-6 w-auto object-contain sm:h-8 md:h-10 lg:h-12 xl:h-14 drop-shadow-lg"
               />
             </div>

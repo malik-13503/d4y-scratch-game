@@ -75,7 +75,7 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { DeleteUserDialog } from "@/components/delete-user-dialog";
 import { WinnerSelectionModal } from "@/components/admin/winner-selection-modal";
-import logoPath from "@assets/logo_1751918412862.png";
+import logoPath from "@assets/logo_1777237644041.png";
 
 export default function AdminDashboard() {
   const [, setLocation] = useLocation();
@@ -727,7 +727,7 @@ export default function AdminDashboard() {
               <div className="flex items-center space-x-2 sm:space-x-3">
                 <img
                   src={logoPath}
-                  alt="Hit The Road Jackpot"
+                  alt="Prize Plugz"
                   className="h-8 sm:h-12 md:h-16 lg:h-20 w-auto object-contain"
                 />
                 <div className="hidden sm:block">
@@ -4512,7 +4512,7 @@ export default function AdminDashboard() {
                   <div className="space-y-2">
                     <Label className="text-gray-300">Site Name</Label>
                     <Input
-                      defaultValue="Hit The Road Jackpot"
+                      defaultValue="Prize Plugz"
                       className="bg-white/5 border-white/20 text-white"
                     />
                   </div>

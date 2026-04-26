@@ -16,7 +16,7 @@ import { Gift, DollarSign, Sparkles, Play } from "lucide-react";
 import { Confetti } from "./confetti";
 import { WheelPointer } from "./wheel-pointer";
 import { QuickCardUpdate } from "./payment/quick-card-update";
-import logoPath from "@assets/logo_1751956932645.png";
+import logoPath from "@assets/logo_1777237644041.png";
 
 interface ProfessionalWheelProps {
   onSpin: () => Promise<number>;
@@ -624,7 +624,7 @@ export const ProfessionalWheel = forwardRef<
                     <div className="w-12 h-12 sm:w-28 sm:h-28 md:w-32 md:h-32 lg:w-36 lg:h-36 bg-black rounded-full border-2 border-orange-400 flex items-center justify-center p-2">
                       <img
                         src={logoPath}
-                        alt="Hit The Road Jackpot"
+                        alt="Prize Plugz"
                         className="w-full h-full object-contain filter brightness-125 contrast-110"
                       />
                     </div>

@@ -13,7 +13,7 @@ import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import logoPath from "@assets/logo_1751918412862.png";
+import logoPath from "@assets/logo_1777237644041.png";
 
 export default function OfficialRules() {
   return (
@@ -46,7 +46,7 @@ export default function OfficialRules() {
             <div className="flex items-center space-x-3">
               <img
                 src={logoPath}
-                alt="Hit The Road Jackpot"
+                alt="Prize Plugz"
                 className="h-8 w-8 sm:h-10 sm:w-10 object-contain"
               />
               <h1 className="text-xl sm:text-2xl font-bold text-white">
@@ -71,7 +71,7 @@ export default function OfficialRules() {
             Official Rules
           </h2>
           <h3 className="text-2xl sm:text-3xl font-bold text-white mb-4">
-            Hit The Road Jackpot™ Giveaway
+            Prize Plugz™ Giveaway
           </h3>
           <div className="bg-black-500/20 border border-red-500/30 rounded-lg p-4 max-w-3xl mx-auto mb-6">
             <p className="text-red-200 font-semibold text-lg">
@@ -247,7 +247,7 @@ export default function OfficialRules() {
                   </div>
                   <p className="text-red-200 text-sm mt-4">
                     Residents of these states are not eligible to enter or win
-                    any Giveaway or prize offered by Hit The Road Jackpot™.
+                    any Giveaway or prize offered by Prize Plugz™.
                   </p>
                 </div>
               </div>
@@ -266,12 +266,12 @@ export default function OfficialRules() {
           <CardContent className="space-y-4">
             <ul className="space-y-3 text-white/90">
               <li>
-                • Hit The Road Jackpot™ may cancel or modify any game due to
+                • Prize Plugz™ may cancel or modify any game due to
                 fraud or issues affecting fairness
               </li>
               <li>• Tampering or bot usage leads to disqualification</li>
               <li>
-                • Entrants release Hit The Road Jackpot™ from any liability
+                • Entrants release Prize Plugz™ from any liability
                 arising from participation or prize acceptance
               </li>
               <li>

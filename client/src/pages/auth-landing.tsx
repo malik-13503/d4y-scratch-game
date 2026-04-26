@@ -10,7 +10,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { getQueryFn } from "@/lib/queryClient";
-import logoPath from "@assets/logo_1751918412862.png";
+import logoPath from "@assets/logo_1777237644041.png";
 import {
   Trophy,
   Star,
@@ -128,7 +128,7 @@ export default function AuthLandingPage() {
                 <div className="absolute inset-0 bg-gradient-to-r from-purple-500/30 to-red-500/30 blur-2xl rounded-full"></div>
                 <img
                   src={logoPath}
-                  alt="Hit The Road Jackpot"
+                  alt="Prize Plugz"
                   className="relative h-16 sm:h-20 w-auto mx-auto drop-shadow-2xl"
                 />
               </div>
@@ -138,11 +138,8 @@ export default function AuthLandingPage() {
               <div className="absolute -inset-12 bg-gradient-to-r from-yellow-400/30 via-red-500/30 to-purple-600/30 blur-3xl rounded-full animate-pulse"></div>
               <div className="relative">
                 <h1 className="text-4xl sm:text-6xl md:text-8xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-red-500 to-purple-600 leading-tight drop-shadow-2xl">
-                  HIT THE ROAD
+                  PRIZE PLUGZ
                 </h1>
-                <div className="text-3xl sm:text-5xl md:text-7xl font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-500 via-blue-500 to-cyan-500 mt-2 drop-shadow-2xl">
-                  JACKPOT
-                </div>
                 <div className="absolute top-0 left-0 right-0 bottom-0 bg-gradient-to-r from-yellow-400/20 via-red-500/20 to-purple-600/20 blur-xl rounded-full -z-10"></div>
               </div>
             </div>

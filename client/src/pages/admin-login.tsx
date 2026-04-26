@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import logoPath from "@assets/logo_1751918412862.png";
+import logoPath from "@assets/logo_1777237644041.png";
 
 export default function AdminLoginPage() {
   const [, setLocation] = useLocation();
@@ -62,7 +62,7 @@ export default function AdminLoginPage() {
             <div className="mx-auto mb-4 flex items-center justify-center">
               <img 
                 src={logoPath} 
-                alt="Hit The Road Jackpot" 
+                alt="Prize Plugz" 
                 className="h-20 w-auto object-contain sm:h-24 md:h-28"
               />
             </div>

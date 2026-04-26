@@ -17,7 +17,7 @@ import {
   Coffee,
   DollarSign
 } from "lucide-react";
-import logoPath from "@assets/logo_1751956932645.png";
+import logoPath from "@assets/logo_1777237644041.png";
 
 export default function RealPrizes() {
   const prizeCategories = [
@@ -74,9 +74,9 @@ export default function RealPrizes() {
             </Link>
             
             <div className="flex items-center space-x-4">
-              <img src={logoPath} alt="Hit The Road Jackpot" className="h-10 w-auto" />
+              <img src={logoPath} alt="Prize Plugz" className="h-10 w-auto" />
               <div className="hidden sm:block">
-                <h1 className="text-xl font-bold text-white">Hit The Road Jackpot</h1>
+                <h1 className="text-xl font-bold text-white">Prize Plugz</h1>
                 <p className="text-sm text-purple-200">Win Big, Play Smart</p>
               </div>
             </div>

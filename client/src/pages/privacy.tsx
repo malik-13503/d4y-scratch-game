@@ -2,7 +2,7 @@ import { ArrowLeft, Shield, Eye, Lock, Database, Users, Globe, FileText, AlertCi
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import logoPath from "@assets/logo_1751918412862.png";
+import logoPath from "@assets/logo_1777237644041.png";
 
 export default function Privacy() {
   return (
@@ -32,7 +32,7 @@ export default function Privacy() {
             <div className="flex items-center space-x-3">
               <img 
                 src={logoPath} 
-                alt="Hit The Road Jackpot" 
+                alt="Prize Plugz" 
                 className="h-8 w-8 sm:h-10 sm:w-10 object-contain"
               />
               <h1 className="text-xl sm:text-2xl font-bold text-white">Privacy Policy</h1>

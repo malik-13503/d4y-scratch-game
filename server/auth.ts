@@ -278,7 +278,6 @@ export function setupAuth(app: Express) {
 
 // Middleware to require authentication  
 export async function requireAuth(req: any, res: any, next: any) {
-  console.log("RequireAuth debug - isAuthenticated:", req.isAuthenticated(), "hasUser:", !!req.user, "userActive:", req.user?.isActive);
   
   // Check if user session exists and is valid (standard passport auth)
   if (req.isAuthenticated() && req.user && req.user.isActive) {

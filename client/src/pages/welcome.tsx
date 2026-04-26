@@ -86,7 +86,7 @@ export default function WelcomePage() {
       <div className="container mx-auto px-4 py-8">
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-white mb-2">
-            Hit the Road Jackpot
+            Prize Plugz
           </h1>
           <p className="text-white/80 text-lg">Your adventure starts here!</p>
         </div>

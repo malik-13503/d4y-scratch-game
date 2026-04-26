@@ -44,7 +44,7 @@ export function SignupSuccessPopup({
             </div>
 
             <AlertDialogTitle className="text-xl sm:text-2xl lg:text-3xl font-bold bg-gradient-to-r from-green-400 via-emerald-400 to-teal-400 bg-clip-text text-transparent px-2">
-              Welcome to Hit The Road Jackpot!
+              Welcome to Prize Plugz!
             </AlertDialogTitle>
 
             <AlertDialogDescription className="text-gray-300 text-sm sm:text-base lg:text-lg leading-relaxed px-2">

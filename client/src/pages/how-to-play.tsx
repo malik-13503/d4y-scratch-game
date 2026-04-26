@@ -14,7 +14,7 @@ import {
   Star,
   Zap
 } from "lucide-react";
-import logoPath from "@assets/logo_1751956932645.png";
+import logoPath from "@assets/logo_1777237644041.png";
 
 export default function HowToPlay() {
   return (
@@ -45,7 +45,7 @@ export default function HowToPlay() {
             <div className="flex items-center space-x-3">
               <img 
                 src={logoPath} 
-                alt="Hit The Road Jackpot" 
+                alt="Prize Plugz" 
                 className="h-8 w-8 sm:h-10 sm:w-10 object-contain"
               />
               <h1 className="text-xl sm:text-2xl font-bold text-white">How to Play</h1>
@@ -80,7 +80,7 @@ export default function HowToPlay() {
           </CardHeader>
           <CardContent className="space-y-4 text-gray-200">
             <p className="text-lg">
-              Hit The Road Jackpot is a thrilling spinning wheel game where you spin to win numbers from 1 to 200. 
+              Prize Plugz is a thrilling spinning wheel game where you spin to win numbers from 1 to 200. 
               Each number has a cost equal to its value, except for our special free play zone!
             </p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">

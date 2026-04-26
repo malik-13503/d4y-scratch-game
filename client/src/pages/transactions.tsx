@@ -17,7 +17,7 @@ import {
   Download,
   Filter
 } from "lucide-react";
-import logoPath from "@assets/logo_1751918412862.png";
+import logoPath from "@assets/logo_1777237644041.png";
 
 export default function Transactions() {
   const [, setLocation] = useLocation();
@@ -76,7 +76,7 @@ export default function Transactions() {
                   <ArrowLeft className="h-4 w-4 sm:mr-2" />
                   <span className="hidden sm:inline">Back to Dashboard</span>
                 </Button>
-                <img src={logoPath} alt="Hit The Road Jackpot" className="h-6 w-auto sm:h-8" />
+                <img src={logoPath} alt="Prize Plugz" className="h-6 w-auto sm:h-8" />
                 <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-white drop-shadow-lg">
                   Transaction History
                 </h1>

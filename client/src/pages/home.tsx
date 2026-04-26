@@ -25,7 +25,7 @@ import {
 import { logout } from "@/lib/auth";
 import { formatTimeRemaining } from "@/lib/utils";
 import type { Game } from "@shared/schema";
-import logoPath from "@assets/logo_1751918412862.png";
+import logoPath from "@assets/logo_1777237644041.png";
 
 export default function Home() {
   const [, setLocation] = useLocation();
@@ -192,7 +192,7 @@ export default function Home() {
                 <div className="absolute -inset-4 bg-gradient-to-r from-yellow-400/40 via-orange-400/40 to-red-400/40 rounded-2xl blur-2xl group-hover:blur-3xl transition-all duration-500"></div>
                 <img
                   src={logoPath}
-                  alt="Hit The Road Jackpot"
+                  alt="Prize Plugz"
                   className="relative h-16 w-auto object-contain sm:h-20 md:h-24 lg:h-28 drop-shadow-2xl transform group-hover:scale-105 transition-transform duration-300"
                 />
               </div>
@@ -221,7 +221,7 @@ export default function Home() {
             <div className="text-center py-2 sm:py-3">
               <div className="relative">
                 <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-white via-purple-200 to-white bg-clip-text text-transparent drop-shadow-lg tracking-tight">
-                  HIT THE ROAD JACKPOT
+                  PRIZE PLUGZ
                 </h1>
                 <div className="absolute -inset-2 bg-gradient-to-r from-purple-500/15 to-blue-500/15 blur-lg -z-10"></div>
               </div>
@@ -579,12 +579,12 @@ export default function Home() {
                 <div className="flex items-center space-x-4 mb-6">
                   <img
                     src={logoPath}
-                    alt="Hit The Road Jackpot"
+                    alt="Prize Plugz"
                     className="h-12 w-auto"
                   />
                   <div>
                     <h4 className="text-xl font-black text-white">
-                      Hit The Road Jackpot
+                      Prize Plugz
                     </h4>
                     <p className="text-gray-400 text-sm">Win Big, Play Smart</p>
                   </div>
@@ -695,7 +695,7 @@ export default function Home() {
 
             <div className="mt-12 pt-8 border-t border-white/10 text-center">
               <p className="text-gray-400 text-sm">
-                © 2025 Hit The Road Jackpot. All rights reserved.
+                © 2025 Prize Plugz. All rights reserved.
                 <span className="text-yellow-400 ml-2">Play responsibly.</span>
               </p>
             </div>

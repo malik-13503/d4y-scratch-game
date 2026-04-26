@@ -496,7 +496,7 @@ export function SpinningWheel({
         onClose={() => setShowDisclaimerModal(false)}
         onAgree={handleDisclaimerAgree}
         gameInfo={{
-          name: "Hit the Road Jackpot",
+          name: "Prize Plugz",
           prizeValue: 200,
           chargeAmount: result || 0
         }}

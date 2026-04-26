@@ -5,7 +5,7 @@ if (!process.env.RESEND_API_KEY) {
 }
 
 const resend = new Resend(process.env.RESEND_API_KEY);
-const FROM_EMAIL = 'Hit The Road Jackpot <admin@hittheroadjackpot.com>';
+const FROM_EMAIL = 'Prize Plugz <admin@prizeplugz.com>';
 
 export interface EmailService {
   sendWelcomeEmail(userEmail: string, userName: string): Promise<void>;
@@ -22,7 +22,7 @@ class ResendEmailService implements EmailService {
       await resend.emails.send({
         from: FROM_EMAIL,
         to: userEmail,
-        subject: '🎉 Welcome to Hit The Road Jackpot - Start Your Gaming Adventure!',
+        subject: '🎉 Welcome to Prize Plugz - Start Your Gaming Adventure!',
         html: this.getWelcomeEmailTemplate(userName),
       });
       console.log(`Welcome email sent to ${userEmail}`);
@@ -69,7 +69,7 @@ class ResendEmailService implements EmailService {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Welcome to Hit the Road Jackpot</title>
+  <title>Welcome to Prize Plugz</title>
   <style>
     body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; background-color: #f8fafc; }
     .container { max-width: 600px; margin: 0 auto; background-color: white; }
@@ -88,14 +88,14 @@ class ResendEmailService implements EmailService {
 <body>
   <div class="container">
     <div class="header">
-      <h1>🎯 Hit The Road Jackpot</h1>
+      <h1>🎯 Prize Plugz</h1>
       <p style="color: rgba(255,255,255,0.9); margin: 10px 0 0 0; font-size: 16px;">Welcome to the Ultimate Gaming Experience!</p>
     </div>
     
     <div class="content">
       <div class="welcome-message">
         <h2 style="color: #1e293b; margin-top: 0;">Welcome, ${userName}! 🎉</h2>
-        <p>Congratulations on joining Hit The Road Jackpot! You're now part of an exclusive community where excitement meets opportunity.</p>
+        <p>Congratulations on joining Prize Plugz! You're now part of an exclusive community where excitement meets opportunity.</p>
       </div>
       
       <div class="features">
@@ -119,7 +119,7 @@ class ResendEmailService implements EmailService {
       </div>
       
       <div style="text-align: center; margin: 30px 0;">
-        <a href="https://hittheroadjackpot.com" class="cta-button">Start Playing Now!</a>
+        <a href="https://prizeplugz.com" class="cta-button">Start Playing Now!</a>
       </div>
       
       <div class="security-notice">
@@ -128,9 +128,9 @@ class ResendEmailService implements EmailService {
     </div>
     
     <div class="footer">
-      <p><strong>Hit The Road Jackpot Team</strong></p>
-      <p>Questions? Reply to this email or contact us at admin@hittheroadjackpot.com</p>
-      <p style="margin-top: 20px; color: #94a3b8; font-size: 12px;">This email was sent because you created an account with Hit The Road Jackpot.</p>
+      <p><strong>Prize Plugz Team</strong></p>
+      <p>Questions? Reply to this email or contact us at admin@prizeplugz.com</p>
+      <p style="margin-top: 20px; color: #94a3b8; font-size: 12px;">This email was sent because you created an account with Prize Plugz.</p>
     </div>
   </div>
 </body>
@@ -160,7 +160,7 @@ class ResendEmailService implements EmailService {
 <body>
   <div class="container">
     <div class="header">
-      <h1>💳 Hit The Road Jackpot</h1>
+      <h1>💳 Prize Plugz</h1>
       <p style="color: rgba(255,255,255,0.9); margin: 10px 0 0 0; font-size: 16px;">Payment Method Successfully Added!</p>
     </div>
     
@@ -187,13 +187,13 @@ class ResendEmailService implements EmailService {
       </div>
       
       <div style="text-align: center; margin: 30px 0;">
-        <a href="https://hittheroadjackpot.com/games" style="display: inline-block; background: linear-gradient(135deg, #10b981, #059669); color: white; padding: 16px 32px; text-decoration: none; border-radius: 8px; font-weight: bold;">Start Playing Now!</a>
+        <a href="https://prizeplugz.com/games" style="display: inline-block; background: linear-gradient(135deg, #10b981, #059669); color: white; padding: 16px 32px; text-decoration: none; border-radius: 8px; font-weight: bold;">Start Playing Now!</a>
       </div>
     </div>
     
     <div class="footer">
-      <p><strong>Hit The Road Jackpot Team</strong></p>
-      <p>Need help? Contact us at admin@hittheroadjackpot.com</p>
+      <p><strong>Prize Plugz Team</strong></p>
+      <p>Need help? Contact us at admin@prizeplugz.com</p>
       <p style="margin-top: 20px; color: #94a3b8; font-size: 12px;">Your payment information is encrypted and secure. We never store your full card details.</p>
     </div>
   </div>
@@ -233,7 +233,7 @@ class ResendEmailService implements EmailService {
 <body>
   <div class="container">
     <div class="header">
-      <h1>🎯 Hit The Road Jackpot</h1>
+      <h1>🎯 Prize Plugz</h1>
       <p style="color: rgba(255,255,255,0.9); margin: 10px 0 0 0; font-size: 16px;">Game Spin Receipt - Thank You for Playing!</p>
     </div>
     
@@ -274,7 +274,7 @@ class ResendEmailService implements EmailService {
         <h3 style="color: #0369a1; margin-top: 0;">Keep Playing!</h3>
         <p style="color: #374151; margin-bottom: 15px;">Want to try your luck again? There are more numbers available to play.</p>
         <div style="text-align: center;">
-          <a href="https://hittheroadjackpot.com/games" style="display: inline-block; background: linear-gradient(135deg, #3b82f6, #6366f1); color: white; padding: 16px 32px; text-decoration: none; border-radius: 8px; font-weight: bold;">Play More Games</a>
+          <a href="https://prizeplugz.com/games" style="display: inline-block; background: linear-gradient(135deg, #3b82f6, #6366f1); color: white; padding: 16px 32px; text-decoration: none; border-radius: 8px; font-weight: bold;">Play More Games</a>
         </div>
       </div>
       
@@ -284,8 +284,8 @@ class ResendEmailService implements EmailService {
     </div>
     
     <div class="footer">
-      <p><strong>Hit The Road Jackpot Team</strong></p>
-      <p>Questions about this transaction? Contact us at admin@hittheroadjackpot.com</p>
+      <p><strong>Prize Plugz Team</strong></p>
+      <p>Questions about this transaction? Contact us at admin@prizeplugz.com</p>
       <p style="margin-top: 20px; color: #94a3b8; font-size: 12px;">This is an automated receipt. All payments are processed securely through Square.</p>
     </div>
   </div>
@@ -300,7 +300,7 @@ class ResendEmailService implements EmailService {
         to: userEmail,
         subject: `Account notification - ${gameName}`,
         html: this.getWinnerNotificationTemplate(userName, gameName, winningNumber, prizeValue, prizeDescription),
-        text: `Dear ${userName}, This notification confirms an account update for ${gameName}. Number ${winningNumber} has been selected. Item details: ${prizeDescription} (Value: $${prizeValue}). Our team will contact you within 48 hours. Please have identification ready. For questions contact admin@hittheroadjackpot.com`,
+        text: `Dear ${userName}, This notification confirms an account update for ${gameName}. Number ${winningNumber} has been selected. Item details: ${prizeDescription} (Value: $${prizeValue}). Our team will contact you within 48 hours. Please have identification ready. For questions contact admin@prizeplugz.com`,
       });
       console.log(`Winner notification sent to ${userEmail}`);
     } catch (error) {
@@ -316,7 +316,7 @@ class ResendEmailService implements EmailService {
         to: userEmail,
         subject: `${gameName} - Status update`,
         html: this.getGameCompletionTemplate(userName, gameName, winningNumber, winnerName, prizeDescription),
-        text: `Hello ${userName}, This confirms ${gameName} has completed. Selected participant: ${winnerName}, Number: ${winningNumber}, Prize: ${prizeDescription}. Thank you for your participation. Questions? Contact admin@hittheroadjackpot.com`,
+        text: `Hello ${userName}, This confirms ${gameName} has completed. Selected participant: ${winnerName}, Number: ${winningNumber}, Prize: ${prizeDescription}. Thank you for your participation. Questions? Contact admin@prizeplugz.com`,
       });
       console.log(`Game completion notification sent to ${userEmail}`);
     } catch (error) {
@@ -338,7 +338,7 @@ class ResendEmailService implements EmailService {
   <table style="max-width: 600px; margin: 0 auto; background-color: white; border: 1px solid #dddddd;">
     <tr>
       <td style="background-color: #4a5568; padding: 20px; text-align: center;">
-        <h1 style="color: white; margin: 0; font-size: 20px; font-weight: normal;">Hit The Road Jackpot</h1>
+        <h1 style="color: white; margin: 0; font-size: 20px; font-weight: normal;">Prize Plugz</h1>
       </td>
     </tr>
     <tr>
@@ -379,12 +379,12 @@ class ResendEmailService implements EmailService {
         </ul>
         
         <p style="color: #333333; font-size: 16px; line-height: 1.5; margin: 20px 0;">
-          You can view your account details at: https://hittheroadjackpot.com/dashboard
+          You can view your account details at: https://prizeplugz.com/dashboard
         </p>
         
         <p style="color: #666666; font-size: 14px; margin: 30px 0 0 0; padding-top: 20px; border-top: 1px solid #eeeeee;">
-          This is an automated message from Hit The Road Jackpot. Please keep this email for your records.<br>
-          For assistance, contact: admin@hittheroadjackpot.com
+          This is an automated message from Prize Plugz. Please keep this email for your records.<br>
+          For assistance, contact: admin@prizeplugz.com
         </p>
       </td>
     </tr>
@@ -461,16 +461,16 @@ class ResendEmailService implements EmailService {
         </div>
         
         <p style="color: #333333; font-size: 16px; line-height: 1.5; margin: 25px 0;">
-          Congratulations to our winner! Thank you for being part of the Hit the Road Jackpot community.
+          Congratulations to our winner! Thank you for being part of the Prize Plugz community.
         </p>
         
         <div style="text-align: center; margin: 30px 0;">
-          <a href="https://hittheroadjackpot.com/games" style="display: inline-block; background: linear-gradient(135deg, #6366f1, #8b5cf6); color: white; padding: 15px 25px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px;">Play More Games</a>
+          <a href="https://prizeplugz.com/games" style="display: inline-block; background: linear-gradient(135deg, #6366f1, #8b5cf6); color: white; padding: 15px 25px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px;">Play More Games</a>
         </div>
         
         <p style="color: #64748b; font-size: 14px; margin: 30px 0 0 0; padding-top: 20px; border-top: 1px solid #e2e8f0; text-align: center;">
-          This is an automated message from Hit The Road Jackpot.<br>
-          For questions, contact: admin@hittheroadjackpot.com
+          This is an automated message from Prize Plugz.<br>
+          For questions, contact: admin@prizeplugz.com
         </p>
       </td>
     </tr>
@@ -492,7 +492,7 @@ class ResendEmailService implements EmailService {
   <table style="max-width: 600px; margin: 0 auto; background-color: white; border: 1px solid #dddddd;">
     <tr>
       <td style="background-color: #4a5568; padding: 20px; text-align: center;">
-        <h1 style="color: white; margin: 0; font-size: 20px; font-weight: normal;">Hit The Road Jackpot</h1>
+        <h1 style="color: white; margin: 0; font-size: 20px; font-weight: normal;">Prize Plugz</h1>
       </td>
     </tr>
     <tr>
@@ -528,12 +528,12 @@ class ResendEmailService implements EmailService {
         </p>
         
         <p style="color: #333333; font-size: 16px; line-height: 1.5; margin: 20px 0;">
-          You can view available activities at: https://hittheroadjackpot.com/games
+          You can view available activities at: https://prizeplugz.com/games
         </p>
         
         <p style="color: #666666; font-size: 14px; margin: 30px 0 0 0; padding-top: 20px; border-top: 1px solid #eeeeee;">
-          This is an automated message from Hit The Road Jackpot.<br>
-          For assistance, contact: admin@hittheroadjackpot.com
+          This is an automated message from Prize Plugz.<br>
+          For assistance, contact: admin@prizeplugz.com
         </p>
       </td>
     </tr>

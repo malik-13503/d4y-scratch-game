@@ -1986,7 +1986,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             0.01, // 1 cent test charge
             "USD",
             cardNonce,
-            "Card verification - Hit the Road Jackpot"
+            "Card verification - Prize Plugz"
           );
           
           console.log("Card verification successful:", testResult);

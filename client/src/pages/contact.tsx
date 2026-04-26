@@ -20,7 +20,7 @@ import {
   Twitter,
   Instagram
 } from "lucide-react";
-import logoPath from "@assets/logo_1751956932645.png";
+import logoPath from "@assets/logo_1777237644041.png";
 
 export default function Contact() {
   const [formData, setFormData] = useState({
@@ -84,7 +84,7 @@ export default function Contact() {
             <div className="flex items-center space-x-3">
               <img 
                 src={logoPath} 
-                alt="Hit The Road Jackpot" 
+                alt="Prize Plugz" 
                 className="h-8 w-8 sm:h-10 sm:w-10 object-contain"
               />
               <h1 className="text-xl sm:text-2xl font-bold text-white">Contact Us</h1>

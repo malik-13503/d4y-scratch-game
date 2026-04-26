@@ -213,7 +213,7 @@ export class SquareService {
         autocomplete: true,
         note: note || "Game spin payment",
         accept_partial_authorization: false,
-        buyer_email_address: "player@hittheroadjackpot.com",
+        buyer_email_address: "player@prizeplugz.com",
         billing_address: {
           address_line_1: "123 Main Street",
           locality: "San Francisco",

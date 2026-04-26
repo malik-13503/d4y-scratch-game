@@ -12,7 +12,7 @@ import {
   Globe,
   UserCheck
 } from "lucide-react";
-import logoPath from "@assets/logo_1751956932645.png";
+import logoPath from "@assets/logo_1777237644041.png";
 
 export default function Terms() {
   return (
@@ -43,7 +43,7 @@ export default function Terms() {
             <div className="flex items-center space-x-3">
               <img 
                 src={logoPath} 
-                alt="Hit The Road Jackpot" 
+                alt="Prize Plugz" 
                 className="h-8 w-8 sm:h-10 sm:w-10 object-contain"
               />
               <h1 className="text-xl sm:text-2xl font-bold text-white">Terms & Conditions</h1>
@@ -81,7 +81,7 @@ export default function Terms() {
           </CardHeader>
           <CardContent className="space-y-4 text-white/90">
             <p className="text-lg">
-              By accessing and using Hit The Road Jackpot ("the Service"), you accept and agree to be bound by 
+              By accessing and using Prize Plugz ("the Service"), you accept and agree to be bound by 
               the terms and provision of this agreement.
             </p>
             <div className="bg-yellow-500/20 border border-yellow-500/30 rounded-lg p-4">
@@ -282,7 +282,7 @@ export default function Terms() {
           <CardContent className="space-y-4">
             <div className="prose prose-invert max-w-none">
               <p className="text-white/90 mb-4">
-                Hit The Road Jackpot and its affiliates shall not be liable for any indirect, incidental, 
+                Prize Plugz and its affiliates shall not be liable for any indirect, incidental, 
                 special, consequential, or punitive damages, including without limitation, loss of profits, 
                 data, use, goodwill, or other intangible losses.
               </p>

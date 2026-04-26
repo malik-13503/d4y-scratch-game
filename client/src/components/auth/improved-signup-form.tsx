@@ -83,7 +83,7 @@ export function ImprovedSignupForm({ onSuccess, onSwitchToLogin }: ImprovedSignu
       
       toast({
         title: "Account Created Successfully!",
-        description: "Welcome to Hit The Road Jackpot! Please log in to continue.",
+        description: "Welcome to Prize Plugz! Please log in to continue.",
         className: "bg-gradient-to-r from-green-500 to-emerald-600 text-white border-green-400",
       });
       
