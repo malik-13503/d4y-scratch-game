@@ -22,6 +22,7 @@ import {
   Crown,
   Gift,
   Sparkles,
+  Coins,
 } from "lucide-react";
 import { formatTimeRemaining, formatCountdownObject } from "@/lib/utils";
 import { useCountdown } from "@/hooks/useCountdown";
@@ -363,9 +364,14 @@ export default function GamePage() {
   };
 
   // Calculate progress using token collection vs token threshold
-  const progress = game && game.tokenThreshold && game.tokensCollected !== undefined
-    ? (game.tokensCollected / game.tokenThreshold) * 100 
-    : 0;
+  const tokenThreshold = (game as any)?.tokenThreshold || 0;
+  const tokensCollected = (game as any)?.tokensCollected || 0;
+  const tokenCostPerEntry = (game as any)?.tokenCostPerEntry || 10;
+  const progress = tokenThreshold > 0 ? Math.min((tokensCollected / tokenThreshold) * 100, 100) : 0;
+  const tokensRemaining = Math.max(tokenThreshold - tokensCollected, 0);
+  const playsRemaining = tokenCostPerEntry > 0 ? Math.ceil(tokensRemaining / tokenCostPerEntry) : 0;
+  const isAlmostFull = progress >= 80;
+  const isCritical = progress >= 95;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 relative overflow-hidden">
@@ -675,16 +681,48 @@ export default function GamePage() {
                     </div>
                   </div>
                 ) : null}
+                {/* Token Progress Bar */}
                 <div className="space-y-2">
+                  {/* Almost Full Alert */}
+                  {isCritical && (
+                    <div className="flex items-center space-x-2 bg-red-500/20 border border-red-400/50 rounded-lg px-3 py-2 animate-pulse">
+                      <Zap className="h-4 w-4 text-red-400 flex-shrink-0" />
+                      <span className="text-red-300 text-xs font-bold uppercase tracking-wide">ALMOST GONE! Only {playsRemaining} plays left!</span>
+                    </div>
+                  )}
+                  {isAlmostFull && !isCritical && (
+                    <div className="flex items-center space-x-2 bg-orange-500/20 border border-orange-400/50 rounded-lg px-3 py-2">
+                      <Star className="h-4 w-4 text-orange-400 flex-shrink-0" />
+                      <span className="text-orange-300 text-xs font-bold">Almost full! {playsRemaining} plays remaining</span>
+                    </div>
+                  )}
                   <div className="flex items-center justify-between text-sm">
-                    <span className="text-gray-400">Tokens Collected</span>
-                    <span className="text-white">
-                      {game.tokensCollected || 0} / {game.tokenThreshold || 0}
+                    <span className="text-gray-400">Game Progress</span>
+                    <span className={`font-bold ${isCritical ? 'text-red-400' : isAlmostFull ? 'text-orange-400' : 'text-white'}`}>
+                      {tokensCollected} / {tokenThreshold} tokens
                     </span>
                   </div>
-                  <Progress value={progress} className="bg-white/20 h-3" />
-                  <div className="text-center text-xs text-gray-500">
-                    Game completes when token goal is reached
+                  <div className="relative">
+                    <Progress
+                      value={progress}
+                      className={`h-4 ${isCritical ? 'bg-red-950' : isAlmostFull ? 'bg-orange-950' : 'bg-white/10'}`}
+                    />
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <span className="text-white text-xs font-bold drop-shadow">{Math.round(progress)}%</span>
+                    </div>
+                  </div>
+                  <div className="flex justify-between text-xs text-gray-500">
+                    <span>{tokensRemaining} tokens to go</span>
+                    <span className={`font-semibold ${isCritical ? 'text-red-400' : 'text-gray-400'}`}>
+                      {playsRemaining} plays left
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between border-t border-white/10 pt-2 mt-1">
+                    <span className="text-gray-400 text-xs">Cost per play</span>
+                    <div className="flex items-center space-x-1">
+                      <span className="text-yellow-400 font-bold text-sm">{tokenCostPerEntry}</span>
+                      <span className="text-gray-400 text-xs">tokens</span>
+                    </div>
                   </div>
                 </div>
               </CardContent>

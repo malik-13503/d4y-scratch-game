@@ -3,6 +3,15 @@
 ## Overview
 Prize Plugz is a real-time web application for interactive prize games, primarily focusing on wheel-spinning mechanics. Its purpose is to provide an engaging and fair platform for live game participation and prize winning, supported by robust administrative controls. The business vision is to create a leading, entertaining online gaming experience with high market potential in casual gaming and online sweepstakes, aiming for widespread user adoption and a reputation for transparent, exciting gameplay.
 
+### Recent Updates (May 2026)
+- **Token Pricing Overhauled**: Updated 5-tier package system — $5=5, $10=12, $20=26, $50=70, $100=150 tokens with clear value-per-token labels.
+- **New User Welcome Tokens**: Registration now automatically grants 3 free tokens to every new user.
+- **Game Auto-Close on Token Threshold**: `/api/spin` now checks `tokensCollected >= tokenThreshold` after every play; when reached, game is deactivated and winner is automatically selected with email notifications sent.
+- **Admin Game Creation Enhanced**: Added `Target Revenue ($)` and `Tokens Per Play` (5/10/20) fields to game creation form; `tokenThreshold` is derived from `targetRevenue` (1 token = $1).
+- **`target_revenue` Column Added**: New `DECIMAL(10,2)` column added to `games` table via direct SQL migration.
+- **Token Shop Redesigned**: 5-column responsive grid with per-package value bars, bonus token badges, and value comparison table.
+- **Urgency UX on Game Progress Bar**: Progress bar now shows orange "Almost full!" at ≥80% and red pulsing "ALMOST GONE!" at ≥95%, plus per-play token cost display.
+
 ### Recent Updates (September 2025)
 - **Payment Failure Handling Complete**: System now correctly handles payment failures with proper error popups and number protection
 - **Production Mode Enabled**: System processes real payments instead of simulated transactions - actual card charges occur on spin

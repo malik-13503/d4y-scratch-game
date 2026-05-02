@@ -107,6 +107,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
         squareCustomerId
       });
 
+      // Grant 3 free welcome tokens to new users
+      try {
+        await storage.createTokenTransaction({
+          userId: user.id,
+          transactionType: 'bonus',
+          amount: 3,
+          description: 'Welcome bonus: 3 free tokens for new user',
+          status: 'completed'
+        });
+        await storage.updateUserTokenBalance(user.id, 3);
+        console.log(`✅ Granted 3 free welcome tokens to: ${user.email}`);
+      } catch (tokenErr) {
+        console.error("Failed to grant welcome tokens:", tokenErr);
+      }
+
       // Create compliance log for new user registration
       await storage.createComplianceLog(
         user.id,
@@ -747,11 +762,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
         : new Date(startTime.getTime() + durationHours * 60 * 60 * 1000);
 
       // Convert string dates to Date objects if they exist
+      // Derive tokenThreshold from targetRevenue (1 token = $1 of revenue)
+      const targetRevenue = req.body.targetRevenue ? parseFloat(req.body.targetRevenue) : null;
+      const tokenCostPerEntry = req.body.tokenCostPerEntry ? parseInt(req.body.tokenCostPerEntry) : 10;
+      const tokenThreshold = targetRevenue ? Math.round(targetRevenue) : (req.body.tokenThreshold || 4000);
+
       const processedBody = {
         ...req.body,
         createdBy: req.user!.id,
         startTime: startTime,
         endTime: endTime,
+        tokenCostPerEntry,
+        tokenThreshold,
+        targetRevenue: targetRevenue ? targetRevenue.toFixed(2) : "0",
       };
       
       const gameData = insertGameSchema.parse(processedBody);
@@ -2229,39 +2252,51 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get token packages/pricing endpoint
   app.get("/api/token-packages", async (req, res) => {
     try {
-      // Define token packages based on PDF brief ($5 = 20 tokens, etc.)
       const tokenPackages = [
         {
           id: "package_5",
           name: "Starter Pack",
-          tokens: 20,
+          tokens: 5,
           price: 5.00,
           bonus: 0,
-          popular: false
+          popular: false,
+          valueLabel: "$1.00 per token"
         },
         {
-          id: "package_10", 
+          id: "package_10",
           name: "Value Pack",
-          tokens: 40,
+          tokens: 12,
           price: 10.00,
-          bonus: 0,
-          popular: true
+          bonus: 2,
+          popular: false,
+          valueLabel: "$0.83 per token"
         },
         {
-          id: "package_25",
+          id: "package_20",
           name: "Super Pack",
-          tokens: 100,
-          price: 25.00,
-          bonus: 5,
-          popular: false
+          tokens: 26,
+          price: 20.00,
+          bonus: 6,
+          popular: true,
+          valueLabel: "$0.77 per token"
         },
         {
           id: "package_50",
           name: "Mega Pack",
-          tokens: 200,
+          tokens: 70,
           price: 50.00,
-          bonus: 15,
-          popular: false
+          bonus: 20,
+          popular: false,
+          valueLabel: "$0.71 per token"
+        },
+        {
+          id: "package_100",
+          name: "Ultimate Pack",
+          tokens: 150,
+          price: 100.00,
+          bonus: 50,
+          popular: false,
+          valueLabel: "$0.67 per token"
         }
       ];
 
@@ -2288,10 +2323,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Get token package details
       const packages = {
-        "package_5": { tokens: 20, price: 5.00, name: "Starter Pack" },
-        "package_10": { tokens: 40, price: 10.00, name: "Value Pack" },
-        "package_25": { tokens: 100 + 5, price: 25.00, name: "Super Pack" }, // Include bonus
-        "package_50": { tokens: 200 + 15, price: 50.00, name: "Mega Pack" } // Include bonus
+        "package_5":   { tokens: 5,   price: 5.00,   name: "Starter Pack" },
+        "package_10":  { tokens: 12,  price: 10.00,  name: "Value Pack" },
+        "package_20":  { tokens: 26,  price: 20.00,  name: "Super Pack" },
+        "package_50":  { tokens: 70,  price: 50.00,  name: "Mega Pack" },
+        "package_100": { tokens: 150, price: 100.00, name: "Ultimate Pack" }
       };
 
       const tokenPackage = packages[packageId as keyof typeof packages];
@@ -2693,6 +2729,61 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Get updated token balance for response
       const newTokenBalance = await storage.getUserTokenBalance(userId);
 
+      // AUTO-CLOSE GAME: Check if token threshold has been reached
+      const updatedGame = await storage.getGame(gameId);
+      let gameCompleted = false;
+      if (updatedGame && updatedGame.tokenThreshold > 0 &&
+          updatedGame.tokensCollected >= updatedGame.tokenThreshold) {
+        console.log(`🏁 Game "${game.name}" reached token threshold (${updatedGame.tokensCollected}/${updatedGame.tokenThreshold})! Auto-closing...`);
+        await storage.updateGame(gameId, { isActive: false });
+        gameCompleted = true;
+
+        // Trigger automatic winner selection
+        try {
+          const gamePlayers = await storage.getPlayersByGameId(gameId);
+          if (gamePlayers.length > 0) {
+            const winnerIndex = Math.floor(Math.random() * gamePlayers.length);
+            const winner = gamePlayers[winnerIndex];
+            await storage.updatePlayer(winner.id, { isWinner: true });
+            await storage.createGameResult({
+              gameId,
+              winningNumber: winner.selectedNumber || spunNumber,
+              winnerId: winner.id,
+              totalParticipants: gamePlayers.length,
+              totalSpins: gamePlayers.length
+            });
+            // Send winner and completion emails
+            try {
+              const winnerUser = await storage.getUser(winner.userId);
+              if (winnerUser) {
+                await emailService.sendWinnerEmail(
+                  winnerUser.email,
+                  winnerUser.firstName,
+                  game.name,
+                  game.prize,
+                  winner.selectedNumber || spunNumber
+                );
+                for (const p of gamePlayers) {
+                  if (p.userId !== winner.userId) {
+                    const pUser = await storage.getUser(p.userId);
+                    if (pUser) {
+                      await emailService.sendGameCompletionEmail(
+                        pUser.email, pUser.firstName, game.name, game.prize,
+                        winnerUser.firstName + " " + winnerUser.lastName
+                      );
+                    }
+                  }
+                }
+              }
+            } catch (emailErr) {
+              console.error("Auto-close winner email error:", emailErr);
+            }
+          }
+        } catch (winnerErr) {
+          console.error("Auto-close winner selection error:", winnerErr);
+        }
+      }
+
       console.log(`✅ Token-based spin completed: User ${userId} claimed number ${spunNumber} using ${tokenCost} tokens`);
       
       // Return success with token information
@@ -2700,6 +2791,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         number: spunNumber,
         tokensUsed: tokenCost,
         newTokenBalance: newTokenBalance,
+        gameCompleted,
         success: true
       });
 

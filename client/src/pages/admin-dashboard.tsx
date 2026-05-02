@@ -111,9 +111,11 @@ export default function AdminDashboard() {
     prizeValue: "50.00",
     totalNumbers: "125",
     duration: "240",
-    prizeImageUrl: "", // Add prize image URL
-    freePlayEnabled: false, // Free play toggle
-    freePlayNumbers: "", // Individual free play numbers (e.g., "1,5,10,25,50")
+    prizeImageUrl: "",
+    freePlayEnabled: false,
+    freePlayNumbers: "",
+    targetRevenue: "800",
+    tokenCostPerEntry: "10",
   });
 
   // Prize image upload state
@@ -585,6 +587,9 @@ export default function AdminDashboard() {
     const startTime = new Date();
     const endTime = new Date(startTime.getTime() + durationHours * 60 * 60 * 1000);
 
+    const targetRevenue = parseFloat(previewData.targetRevenue || "800");
+    const tokenCostPerEntry = parseInt(previewData.tokenCostPerEntry || "10");
+
     const gameData = {
       name: formData.get("name") as string,
       code: `G${Date.now().toString().slice(-6)}`,
@@ -593,7 +598,7 @@ export default function AdminDashboard() {
       prize: formData.get("prize") as string,
       prizeValue: prizeValue,
       prizeDescription: formData.get("description") as string,
-      prizeImageUrl: prizeImageUrl, // Add the uploaded image
+      prizeImageUrl: prizeImageUrl,
       totalNumbers: totalNumbers,
       numbersLeft: totalNumbers,
       freePlayStart:
@@ -610,6 +615,9 @@ export default function AdminDashboard() {
       startTime: startTime.toISOString(),
       endTime: endTime.toISOString(),
       durationHours: durationHours,
+      targetRevenue: targetRevenue.toFixed(2),
+      tokenCostPerEntry: tokenCostPerEntry,
+      tokenThreshold: Math.round(targetRevenue),
     };
 
     createGameMutation.mutate(gameData);
@@ -1565,6 +1573,71 @@ export default function AdminDashboard() {
                                   </div>
                                 </div>
                               </div>
+                            </div>
+
+                            {/* Token Economy Settings */}
+                            <div className="bg-purple-500/10 border border-purple-400/30 rounded-xl p-4 space-y-4">
+                              <div className="flex items-center space-x-2">
+                                <DollarSign className="h-4 w-4 text-purple-400" />
+                                <Label className="text-purple-300 font-bold text-sm">Token Economy</Label>
+                              </div>
+                              <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                  <Label htmlFor="targetRevenue" className="text-gray-300 text-sm">
+                                    Target Revenue ($)
+                                  </Label>
+                                  <Input
+                                    id="targetRevenue"
+                                    name="targetRevenue"
+                                    type="number"
+                                    min="1"
+                                    step="1"
+                                    value={previewData.targetRevenue}
+                                    onChange={(e) =>
+                                      setPreviewData({ ...previewData, targetRevenue: e.target.value })
+                                    }
+                                    className="bg-white/10 border-purple-500/30"
+                                    placeholder="800"
+                                  />
+                                  <p className="text-gray-500 text-xs mt-1">How much revenue before game closes</p>
+                                </div>
+                                <div>
+                                  <Label htmlFor="tokenCostPerEntry" className="text-gray-300 text-sm">
+                                    Tokens Per Play
+                                  </Label>
+                                  <Select
+                                    value={previewData.tokenCostPerEntry}
+                                    onValueChange={(val) =>
+                                      setPreviewData({ ...previewData, tokenCostPerEntry: val })
+                                    }
+                                  >
+                                    <SelectTrigger className="bg-white/10 border-purple-500/30">
+                                      <SelectValue placeholder="Select tokens" />
+                                    </SelectTrigger>
+                                    <SelectContent className="bg-slate-800 border-purple-500/30">
+                                      <SelectItem value="5">5 tokens per play</SelectItem>
+                                      <SelectItem value="10">10 tokens per play</SelectItem>
+                                      <SelectItem value="20">20 tokens per play</SelectItem>
+                                    </SelectContent>
+                                  </Select>
+                                  <p className="text-gray-500 text-xs mt-1">Cost for each spin</p>
+                                </div>
+                              </div>
+                              {/* Calculated stats */}
+                              {previewData.targetRevenue && previewData.tokenCostPerEntry && (
+                                <div className="grid grid-cols-2 gap-3 bg-white/5 rounded-lg p-3">
+                                  <div className="text-center">
+                                    <p className="text-gray-400 text-xs">Required Tokens</p>
+                                    <p className="text-white font-bold text-lg">{Math.round(parseFloat(previewData.targetRevenue || "0"))}</p>
+                                  </div>
+                                  <div className="text-center">
+                                    <p className="text-gray-400 text-xs">Total Plays to Fill</p>
+                                    <p className="text-white font-bold text-lg">
+                                      {previewData.tokenCostPerEntry ? Math.ceil(parseFloat(previewData.targetRevenue || "0") / parseInt(previewData.tokenCostPerEntry)) : 0}
+                                    </p>
+                                  </div>
+                                </div>
+                              )}
                             </div>
 
                             <div className="grid grid-cols-3 gap-4">

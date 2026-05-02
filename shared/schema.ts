@@ -102,6 +102,7 @@ export const games = pgTable("games", {
   tokenCostPerEntry: integer("token_cost_per_entry").notNull().default(10), // Tokens needed to enter
   tokenThreshold: integer("token_threshold").notNull().default(4000), // Total tokens needed to close game
   tokensCollected: integer("tokens_collected").notNull().default(0), // Tokens collected so far
+  targetRevenue: decimal("target_revenue", { precision: 10, scale: 2 }).notNull().default("0"), // Admin-set revenue target; tokenThreshold is derived from this
   // Legacy free play fields (kept for backward compatibility)
   freePlayStart: integer("free_play_start").notNull().default(151), // Free play numbers start
   freePlayEnd: integer("free_play_end").notNull().default(200), // Free play numbers end  
