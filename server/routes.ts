@@ -11,6 +11,7 @@ import {
 } from "@shared/schema";
 import { z } from "zod";
 import { emailService } from "./emailService";
+import { chargeCreditCard } from "./authorizeNetService";
 import session from "express-session";
 import connectPgSimple from "connect-pg-simple";
 import { db } from "./db";
@@ -1995,9 +1996,52 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "User not found" });
       }
 
-      return res.status(503).json({
-        success: false,
-        message: "Token purchase is temporarily unavailable. A new payment system is coming soon."
+      const { opaqueDataDescriptor, opaqueDataValue } = req.body;
+      if (!opaqueDataDescriptor || !opaqueDataValue) {
+        return res.status(400).json({ message: "Payment data is required" });
+      }
+
+      // Charge the card via Authorize.net
+      const chargeResult = await chargeCreditCard(
+        opaqueDataDescriptor,
+        opaqueDataValue,
+        tokenPackage.price,
+        `Prize Plugz: ${tokenPackage.name} (${tokenPackage.tokens} tokens)`,
+        user.email
+      );
+
+      if (!chargeResult.success) {
+        return res.status(400).json({
+          success: false,
+          message: chargeResult.message || "Payment declined. Please check your card and try again.",
+        });
+      }
+
+      // Record the token transaction
+      const tokenTransaction = await storage.createTokenTransaction({
+        userId,
+        transactionType: "purchase",
+        amount: tokenPackage.tokens,
+        dollarAmount: tokenPackage.price.toString(),
+        description: `Purchased ${tokenPackage.name} (${tokenPackage.tokens} tokens) — txn ${chargeResult.transactionId}`,
+        status: "completed",
+      });
+
+      // Credit tokens to user balance
+      const updatedUser = await storage.updateUserTokenBalance(userId, tokenPackage.tokens);
+
+      console.log(`✅ Token purchase: user ${user.email} bought ${tokenPackage.tokens} tokens for $${tokenPackage.price} | txn ${chargeResult.transactionId}`);
+
+      res.json({
+        success: true,
+        message: `Successfully purchased ${tokenPackage.tokens} tokens!`,
+        transaction: {
+          id: tokenTransaction.id,
+          tokens: tokenPackage.tokens,
+          amount: tokenPackage.price,
+          transactionId: chargeResult.transactionId,
+        },
+        newBalance: updatedUser?.tokenBalance || 0,
       });
 
     } catch (error: any) {
