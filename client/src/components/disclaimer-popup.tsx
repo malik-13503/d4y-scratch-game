@@ -46,7 +46,7 @@ export function DisclaimerPopup({
           <DialogDescription className="text-gray-300 text-base leading-relaxed mt-4">
             {isFreePlay
               ? "You get one free spin per game to enter this game. This lets you experience the game mechanics and see how the wheel works without any charge."
-              : "Just a heads up — once you spin the wheel, your card will be instantly charged based on your pull. There are no refunds, so spin wisely and have fun!"
+              : "Just a heads up — once you spin the wheel, tokens will be deducted from your balance. There are no refunds, so spin wisely and have fun!"
             }
           </DialogDescription>
           <div className="mt-4 p-4 bg-slate-700/50 rounded-lg border border-slate-600">

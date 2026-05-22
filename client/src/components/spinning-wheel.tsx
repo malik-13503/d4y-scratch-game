@@ -398,11 +398,10 @@ export function SpinningWheel({
                 ) : isFreePlay ? (
                   <div className="text-center space-y-2">
                     <div className="text-2xl font-bold text-green-300">
-                      💰 $0.00 CHARGED
+                      🎁 FREE SPIN — 0 TOKENS
                     </div>
                     <p className="text-green-200 text-sm">
-                      This number is in the free play range - no payment
-                      required!
+                      Free spin — no tokens used!
                     </p>
                     <p className="text-white/70 text-xs">
                       Number {result} has been added to your entry list
@@ -410,11 +409,11 @@ export function SpinningWheel({
                   </div>
                 ) : (
                   <div className="text-center space-y-2">
-                    <div className="text-2xl font-bold text-blue-300">
-                      💳 ${amountCharged}.00 CHARGED
+                    <div className="text-2xl font-bold text-yellow-300">
+                      🪙 {amountCharged} TOKENS USED
                     </div>
-                    <p className="text-blue-200 text-sm">
-                      Your card has been charged the exact number amount
+                    <p className="text-yellow-200 text-sm">
+                      Number {result} claimed using {amountCharged} token{amountCharged !== 1 ? "s" : ""}
                     </p>
                     <p className="text-white/70 text-xs">
                       Number {result} has been added to your entry list

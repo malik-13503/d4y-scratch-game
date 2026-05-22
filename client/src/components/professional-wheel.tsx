@@ -12,7 +12,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
-import { Gift, DollarSign, Sparkles, Play } from "lucide-react";
+import { Gift, Coins, Sparkles, Play } from "lucide-react";
 import { Confetti } from "./confetti";
 import { WheelPointer } from "./wheel-pointer";
 import logoPath from "@assets/logo_1777237644041.png";
@@ -662,8 +662,8 @@ export const ProfessionalWheel = forwardRef<
           </DialogTitle>
           <DialogDescription className="sr-only">
             {isFreePlay
-              ? `You got number ${result} as a free play - no charge!`
-              : `You got number ${result} and were charged $${amountCharged.toFixed(2)}`}
+              ? `You got number ${result} as a free play - no tokens used!`
+              : `You got number ${result} — ${amountCharged} token(s) used`}
           </DialogDescription>
 
           <div className="relative p-6 text-center">
@@ -680,7 +680,7 @@ export const ProfessionalWheel = forwardRef<
                   {isFreePlay ? (
                     <Gift className="h-16 w-16 text-green-400 animate-bounce" />
                   ) : (
-                    <DollarSign className="h-16 w-16 text-blue-400 animate-bounce" />
+                    <Coins className="h-16 w-16 text-yellow-400 animate-bounce" />
                   )}
                   <div className="absolute inset-0 bg-current blur-xl opacity-30 animate-pulse"></div>
                 </div>
@@ -731,16 +731,15 @@ export const ProfessionalWheel = forwardRef<
                   </div>
                 ) : (
                   <div className="text-center space-y-3">
-                    <div className="text-2xl font-bold text-blue-300">
-                      💳 ${amountCharged.toFixed(2)} CHARGED
+                    <div className="text-2xl font-bold text-yellow-300">
+                      🪙 {amountCharged} TOKENS USED
                     </div>
-                    <p className="text-blue-200 text-sm">
-                      You selected number {result} - charged exactly $
-                      {amountCharged.toFixed(2)}
+                    <p className="text-yellow-200 text-sm">
+                      You claimed number {result} using {amountCharged} token{amountCharged !== 1 ? "s" : ""}
                     </p>
-                    <div className="bg-blue-500/20 rounded-lg p-3 mt-3">
-                      <p className="text-blue-100 text-sm font-semibold">
-                        💰 Payment processed successfully
+                    <div className="bg-yellow-500/20 rounded-lg p-3 mt-3">
+                      <p className="text-yellow-100 text-sm font-semibold">
+                        🎯 Number successfully claimed!
                       </p>
                     </div>
                   </div>
