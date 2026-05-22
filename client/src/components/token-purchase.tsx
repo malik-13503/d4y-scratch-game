@@ -1,12 +1,13 @@
 import { useState } from "react";
-import { useQuery, useMutation } from "@tanstack/react-query";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useQuery } from "@tanstack/react-query";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Coins, CreditCard, Zap, Star, TrendingUp } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { queryClient, apiRequest } from "@/lib/queryClient";
+import { queryClient } from "@/lib/queryClient";
+import { AuthorizeNetForm } from "@/components/authorize-net-form";
 
 interface TokenPackage {
   id: string;
@@ -32,61 +33,55 @@ export function TokenPurchase() {
     refetchInterval: 5000,
   });
 
-  const { data: paymentCards = [] } = useQuery<any[]>({
-    queryKey: ["/api/payment-cards"],
-  });
+  const currentBalance = tokenBalanceData?.tokenBalance || 0;
 
-  const purchaseTokensMutation = useMutation({
-    mutationFn: async (packageId: string) => {
+  const handlePackageSelect = (pkg: TokenPackage) => {
+    setSelectedPackage(pkg);
+  };
+
+  const handlePaymentSuccess = async (
+    opaqueDataDescriptor: string,
+    opaqueDataValue: string
+  ) => {
+    if (!selectedPackage) return;
+    setIsProcessing(true);
+
+    try {
       const response = await fetch("/api/purchase-tokens", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({ packageId }),
+        body: JSON.stringify({
+          packageId: selectedPackage.id,
+          opaqueDataDescriptor,
+          opaqueDataValue,
+        }),
       });
+
+      const data = await response.json();
+
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || "Purchase failed");
+        throw new Error(data.message || "Purchase failed");
       }
-      return response.json();
-    },
-    onSuccess: (data: any) => {
+
       toast({
         title: "Tokens Purchased!",
-        description: `Successfully added ${data.transaction.tokens} tokens to your balance.`,
+        description: `${data.transaction.tokens} tokens added to your balance.`,
       });
+
       queryClient.invalidateQueries({ queryKey: ["/api/user/token-balance"] });
       queryClient.invalidateQueries({ queryKey: ["/api/user/token-transactions"] });
       setSelectedPackage(null);
-      setIsProcessing(false);
-    },
-    onError: (error: any) => {
+    } catch (error: any) {
       toast({
         title: "Purchase Failed",
-        description: error.message || "Failed to purchase tokens. Please try again.",
+        description: error.message || "Payment failed. Please try again.",
         variant: "destructive",
       });
+    } finally {
       setIsProcessing(false);
-    },
-  });
-
-  const handlePurchase = async (tokenPackage: TokenPackage) => {
-    if (paymentCards.length === 0) {
-      toast({
-        title: "Payment Card Required",
-        description: "Please add a payment card before purchasing tokens.",
-        variant: "destructive",
-      });
-      return;
     }
-    setSelectedPackage(tokenPackage);
-    setIsProcessing(true);
-    try {
-      await purchaseTokensMutation.mutateAsync(tokenPackage.id);
-    } catch (_) {}
   };
-
-  const currentBalance = tokenBalanceData?.tokenBalance || 0;
 
   const packageStyles = [
     { gradient: "from-slate-700 to-slate-800", accent: "border-slate-500", badge: "bg-slate-600", btn: "from-slate-600 to-slate-700" },
@@ -110,9 +105,7 @@ export function TokenPurchase() {
             <div className="p-3 bg-yellow-500/20 rounded-2xl border border-yellow-400/30">
               <Coins className="h-8 w-8 text-yellow-400" />
             </div>
-            <h1 className="text-4xl md:text-5xl font-black text-white">
-              Token Shop
-            </h1>
+            <h1 className="text-4xl md:text-5xl font-black text-white">Token Shop</h1>
           </div>
           <p className="text-gray-300 text-lg max-w-xl mx-auto">
             Buy tokens to play games and win real prizes. Larger packs give you more tokens per dollar.
@@ -145,7 +138,6 @@ export function TokenPurchase() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 mb-10">
           {tokenPackages.map((pkg, index) => {
             const style = packageStyles[index % packageStyles.length];
-            const isPurchasing = isProcessing && selectedPackage?.id === pkg.id;
             const totalTokens = pkg.tokens + pkg.bonus;
 
             return (
@@ -186,7 +178,6 @@ export function TokenPurchase() {
                 </CardHeader>
 
                 <CardContent className="px-4 pb-5">
-                  {/* Value bar showing relative value */}
                   <div className="mb-4">
                     <Progress
                       value={((5 - index) / 5) * 100 + (index * 20)}
@@ -195,21 +186,13 @@ export function TokenPurchase() {
                   </div>
 
                   <Button
-                    onClick={() => handlePurchase(pkg)}
-                    disabled={isPurchasing || isProcessing}
+                    onClick={() => handlePackageSelect(pkg)}
                     className={`w-full bg-gradient-to-r ${style.btn} hover:opacity-90 text-white font-bold py-2.5 rounded-lg shadow-lg transition-all duration-200 text-sm`}
                   >
-                    {isPurchasing ? (
-                      <div className="flex items-center justify-center space-x-2">
-                        <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
-                        <span>Processing...</span>
-                      </div>
-                    ) : (
-                      <div className="flex items-center justify-center space-x-2">
-                        <CreditCard className="h-4 w-4" />
-                        <span>Buy ${pkg.price}</span>
-                      </div>
-                    )}
+                    <div className="flex items-center justify-center space-x-2">
+                      <CreditCard className="h-4 w-4" />
+                      <span>Buy ${pkg.price}</span>
+                    </div>
                   </Button>
                 </CardContent>
               </Card>
@@ -235,31 +218,28 @@ export function TokenPurchase() {
           </div>
         </div>
 
-        {/* Payment Card Status */}
+        {/* Payment security note */}
         <div className="text-center">
-          {paymentCards.length === 0 ? (
-            <div className="p-5 bg-red-500/10 border border-red-500/30 rounded-xl inline-flex flex-col items-center space-y-3">
-              <p className="text-red-400 font-medium">
-                No payment card on file. Add a card to purchase tokens.
-              </p>
-              <Button
-                variant="outline"
-                onClick={() => window.location.href = "/dashboard"}
-                className="border-red-500/50 text-red-400 hover:bg-red-500/10"
-              >
-                Add Payment Card
-              </Button>
-            </div>
-          ) : (
-            <div className="p-4 bg-green-500/10 border border-green-500/30 rounded-xl inline-flex items-center space-x-2">
-              <Zap className="h-4 w-4 text-green-400" />
-              <p className="text-green-400 font-medium">
-                Payment card ready — tokens are added instantly after purchase.
-              </p>
-            </div>
-          )}
+          <div className="p-4 bg-green-500/10 border border-green-500/30 rounded-xl inline-flex items-center space-x-2">
+            <Zap className="h-4 w-4 text-green-400 flex-shrink-0" />
+            <p className="text-green-400 font-medium text-sm">
+              Payments secured by Authorize.net — tokens are added instantly after purchase.
+            </p>
+          </div>
         </div>
       </div>
+
+      {/* Authorize.net Payment Modal */}
+      {selectedPackage && (
+        <AuthorizeNetForm
+          packageName={selectedPackage.name}
+          packagePrice={selectedPackage.price}
+          packageTokens={selectedPackage.tokens + selectedPackage.bonus}
+          onSuccess={handlePaymentSuccess}
+          onClose={() => !isProcessing && setSelectedPackage(null)}
+          isProcessing={isProcessing}
+        />
+      )}
     </div>
   );
 }

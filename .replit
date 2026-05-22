@@ -37,3 +37,10 @@ waitForPort = 5000
 
 [agent]
 integrations = ["javascript_sendgrid:1.0.0"]
+
+[userenv]
+
+[userenv.shared]
+VITE_AUTHORIZE_NET_API_LOGIN_ID = "4haRx63PF"
+VITE_AUTHORIZE_NET_CLIENT_KEY = "87wXkh5N2FtN2T5pJ66J994QLDF59dSvwZLn2H45xQQVE8weeqc6LBJdMRX8Wbp5"
+VITE_AUTHORIZE_NET_ENV = "sandbox"
