@@ -208,14 +208,7 @@ export default function GamePage() {
       return;
     }
 
-    // Check if user has payment method or needs card selection
-    if (!(user as any)?.cardOnFile) {
-      setShowCardSelector(true);
-      setShowPaymentPopup(true);
-      return;
-    }
-
-    // User is authenticated and has payment method - proceed with game
+    // User is authenticated - proceed with game (tokens are deducted on the server during spin)
     setIsFreePlay(false);
     setShowDisclaimer(true);
   };
