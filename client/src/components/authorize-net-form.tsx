@@ -44,8 +44,7 @@ export function AuthorizeNetForm({
   isProcessing,
 }: AuthorizeNetFormProps) {
   const [cardNumber, setCardNumber] = useState("");
-  const [expiryMonth, setExpiryMonth] = useState("");
-  const [expiryYear, setExpiryYear] = useState("");
+  const [expiry, setExpiry] = useState("");
   const [cvv, setCvv] = useState("");
   const [cardholderName, setCardholderName] = useState("");
   const [scriptLoaded, setScriptLoaded] = useState(false);
@@ -87,6 +86,27 @@ export function AuthorizeNetForm({
     return digits.replace(/(\d{4})(?=\d)/g, "$1 ");
   };
 
+  const formatExpiry = (value: string) => {
+    const digits = value.replace(/\D/g, "").slice(0, 4);
+    if (digits.length >= 3) {
+      return `${digits.slice(0, 2)}/${digits.slice(2)}`;
+    }
+    if (digits.length === 2 && value.endsWith("/")) {
+      return `${digits}/`;
+    }
+    return digits;
+  };
+
+  const handleExpiryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const raw = e.target.value;
+    // Allow backspace to remove the slash naturally
+    if (raw.length < expiry.length && expiry.endsWith("/")) {
+      setExpiry(raw.slice(0, -1));
+      return;
+    }
+    setExpiry(formatExpiry(raw));
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setFormError("");
@@ -97,16 +117,39 @@ export function AuthorizeNetForm({
     }
 
     const rawCard = cardNumber.replace(/\s/g, "");
-    if (rawCard.length < 13) { setFormError("Please enter a valid card number."); return; }
-    if (!expiryMonth || !expiryYear) { setFormError("Please enter the expiry date."); return; }
-    if (cvv.length < 3) { setFormError("Please enter a valid CVV."); return; }
+    if (rawCard.length < 13) {
+      setFormError("Please enter a valid card number.");
+      return;
+    }
+
+    // Parse MM/YY expiry
+    const expiryParts = expiry.replace(/\s/g, "").split("/");
+    if (expiryParts.length !== 2 || expiryParts[0].length !== 2 || expiryParts[1].length < 2) {
+      setFormError("Please enter expiry in MM/YY format (e.g. 08/27).");
+      return;
+    }
+
+    const monthNum = parseInt(expiryParts[0], 10);
+    if (monthNum < 1 || monthNum > 12) {
+      setFormError("Expiry month must be between 01 and 12.");
+      return;
+    }
+
+    const month = expiryParts[0]; // already 2 digits
+    const yearRaw = expiryParts[1];
+    const year = yearRaw.length === 2 ? `20${yearRaw}` : yearRaw;
+
+    if (cvv.length < 3) {
+      setFormError("Please enter a valid CVV (3 or 4 digits).");
+      return;
+    }
 
     const secureData = {
       authData: { clientKey, apiLoginID: apiLoginId },
       cardData: {
         cardNumber: rawCard,
-        month: expiryMonth.padStart(2, "0"),
-        year: expiryYear.length === 2 ? `20${expiryYear}` : expiryYear,
+        month,
+        year,
         cardCode: cvv,
         ...(cardholderName ? { fullName: cardholderName } : {}),
       },
@@ -157,6 +200,7 @@ export function AuthorizeNetForm({
               <label className="block text-gray-300 text-sm font-medium mb-1">Cardholder Name</label>
               <input
                 type="text"
+                autoComplete="cc-name"
                 value={cardholderName}
                 onChange={(e) => setCardholderName(e.target.value)}
                 placeholder="Jane Smith"
@@ -170,45 +214,38 @@ export function AuthorizeNetForm({
               <input
                 type="text"
                 inputMode="numeric"
+                autoComplete="cc-number"
                 value={cardNumber}
                 onChange={(e) => setCardNumber(formatCardNumber(e.target.value))}
                 placeholder="1234 5678 9012 3456"
                 maxLength={19}
-                className="w-full bg-slate-700/60 border border-slate-600 text-white rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-purple-500 transition-colors placeholder-gray-500 font-mono"
+                className="w-full bg-slate-700/60 border border-slate-600 text-white rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-purple-500 transition-colors placeholder-gray-500 font-mono tracking-widest"
               />
             </div>
 
-            {/* Expiry + CVV */}
-            <div className="grid grid-cols-3 gap-3">
+            {/* Expiry (MM/YY) + CVV */}
+            <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-gray-300 text-sm font-medium mb-1">Month</label>
+                <label className="block text-gray-300 text-sm font-medium mb-1">
+                  Expiry <span className="text-gray-500 font-normal">(MM/YY)</span>
+                </label>
                 <input
                   type="text"
                   inputMode="numeric"
-                  value={expiryMonth}
-                  onChange={(e) => setExpiryMonth(e.target.value.replace(/\D/g, "").slice(0, 2))}
-                  placeholder="MM"
-                  maxLength={2}
-                  className="w-full bg-slate-700/60 border border-slate-600 text-white rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-purple-500 transition-colors placeholder-gray-500 text-center font-mono"
-                />
-              </div>
-              <div>
-                <label className="block text-gray-300 text-sm font-medium mb-1">Year</label>
-                <input
-                  type="text"
-                  inputMode="numeric"
-                  value={expiryYear}
-                  onChange={(e) => setExpiryYear(e.target.value.replace(/\D/g, "").slice(0, 4))}
-                  placeholder="YY"
-                  maxLength={4}
-                  className="w-full bg-slate-700/60 border border-slate-600 text-white rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-purple-500 transition-colors placeholder-gray-500 text-center font-mono"
+                  autoComplete="cc-exp"
+                  value={expiry}
+                  onChange={handleExpiryChange}
+                  placeholder="08/27"
+                  maxLength={5}
+                  className="w-full bg-slate-700/60 border border-slate-600 text-white rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-purple-500 transition-colors placeholder-gray-500 text-center font-mono tracking-widest"
                 />
               </div>
               <div>
                 <label className="block text-gray-300 text-sm font-medium mb-1">CVV</label>
                 <input
-                  type="text"
+                  type="password"
                   inputMode="numeric"
+                  autoComplete="cc-csc"
                   value={cvv}
                   onChange={(e) => setCvv(e.target.value.replace(/\D/g, "").slice(0, 4))}
                   placeholder="•••"
