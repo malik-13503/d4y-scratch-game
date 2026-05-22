@@ -100,6 +100,7 @@ export default function AdminDashboard() {
     description: "",
     prizeValue: "100",
     totalNumbers: "200",
+    tokenCostPerEntry: "10",
   });
 
   // Live preview state
@@ -132,6 +133,7 @@ export default function AdminDashboard() {
     totalNumbers: "",
     duration: "",
     prizeImageUrl: "",
+    tokenCostPerEntry: "10",
   });
 
   // Edit image upload state
@@ -637,6 +639,7 @@ export default function AdminDashboard() {
       totalNumbers: game.totalNumbers?.toString() || "200",
       duration: "240",
       prizeImageUrl: game.prizeImageUrl || "",
+      tokenCostPerEntry: game.tokenCostPerEntry?.toString() || "10",
     };
     console.log("📝 Setting edit form data:", formData);
     setEditFormData(formData);
@@ -694,14 +697,16 @@ export default function AdminDashboard() {
       });
     }
 
+    const tokenCostPerEntry = parseInt(formData.get("tokenCostPerEntry") as string) || 10;
     const gameData = {
       name: formData.get("name") as string,
       description: formData.get("description") as string,
       prize: formData.get("prize") as string,
       prizeValue: prizeValue,
       prizeDescription: formData.get("description") as string,
-      prizeImageUrl: prizeImageUrl, // Include the image data
+      prizeImageUrl: prizeImageUrl,
       totalNumbers: totalNumbers,
+      tokenCostPerEntry: tokenCostPerEntry,
       freePlayStart: Math.ceil(totalNumbers * 0.75),
       freePlayEnd: totalNumbers,
       gameType: "wheel_spin",
@@ -2297,6 +2302,30 @@ export default function AdminDashboard() {
                             </div>
                             <div>
                               <Label
+                                htmlFor="edit-tokenCostPerEntry"
+                                className="text-gray-300"
+                              >
+                                Tokens Per Play
+                              </Label>
+                              <select
+                                id="edit-tokenCostPerEntry"
+                                name="tokenCostPerEntry"
+                                value={editData.tokenCostPerEntry}
+                                onChange={(e) =>
+                                  handleEditFieldChange(
+                                    "tokenCostPerEntry",
+                                    e.target.value,
+                                  )
+                                }
+                                className="w-full h-10 rounded-md border border-purple-500/30 bg-white/10 px-3 py-2 text-sm text-white"
+                              >
+                                <option value="5" className="bg-gray-800">5 tokens</option>
+                                <option value="10" className="bg-gray-800">10 tokens</option>
+                                <option value="20" className="bg-gray-800">20 tokens</option>
+                              </select>
+                            </div>
+                            <div>
+                              <Label
                                 htmlFor="edit-duration"
                                 className="text-gray-300"
                               >
@@ -2661,6 +2690,30 @@ export default function AdminDashboard() {
                                 }
                                 className="bg-white/10 border-purple-500/30"
                               />
+                            </div>
+                            <div>
+                              <Label
+                                htmlFor="edit-tokenCostPerEntry"
+                                className="text-gray-300"
+                              >
+                                Tokens Per Play
+                              </Label>
+                              <select
+                                id="edit-tokenCostPerEntry"
+                                name="tokenCostPerEntry"
+                                value={editData.tokenCostPerEntry}
+                                onChange={(e) =>
+                                  handleEditFieldChange(
+                                    "tokenCostPerEntry",
+                                    e.target.value,
+                                  )
+                                }
+                                className="w-full h-10 rounded-md border border-purple-500/30 bg-white/10 px-3 py-2 text-sm text-white"
+                              >
+                                <option value="5" className="bg-gray-800">5 tokens</option>
+                                <option value="10" className="bg-gray-800">10 tokens</option>
+                                <option value="20" className="bg-gray-800">20 tokens</option>
+                              </select>
                             </div>
                             <div>
                               <Label

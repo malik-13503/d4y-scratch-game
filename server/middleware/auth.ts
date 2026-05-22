@@ -10,11 +10,15 @@ export function requireAuth(req: Request, res: Response, next: NextFunction) {
     cookies: req.headers.cookie ? 'present' : 'missing'
   });
 
-  if (!(req.session as any)?.userId) {
+  const hasUserSession = !!(req.session as any)?.userId;
+  const hasAdminPassportSession = req.isAuthenticated && req.isAuthenticated();
+
+  if (!hasUserSession && !hasAdminPassportSession) {
     console.log("Authentication failed - redirecting to login");
     return res.status(401).json({ message: "Authentication required" });
   }
 
-  console.log(`Authenticated user ID: ${(req.session as any).userId} from IP: ${req.ip}`);
+  const uid = (req.session as any)?.userId || (req.user as any)?.id;
+  console.log(`Authenticated user: ${(req.user as any)?.email || uid} from IP: ${req.ip}`);
   next();
 }
