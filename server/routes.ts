@@ -2272,8 +2272,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Game complete! All numbers have been taken." });
       }
 
-      // Get token cost for this game (from tokenCost field)
-      const tokenCost = game.tokenCost || 1; // Default to 1 token if not set
+      // Get token cost for this game (from tokenCostPerEntry field)
+      const tokenCost = game.tokenCostPerEntry || 5; // Default to 5 tokens if not set
       
       // Check user's token balance
       const userTokenBalance = await storage.getUserTokenBalance(userId);
