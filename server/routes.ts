@@ -2345,12 +2345,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Get updated token balance for response
       const newTokenBalance = await storage.getUserTokenBalance(userId);
 
-      // AUTO-CLOSE GAME: Check if token threshold has been reached
+      // AUTO-CLOSE GAME: Check if token threshold reached OR all spots are taken
       const updatedGame = await storage.getGame(gameId);
+      const remainingNumbers = await storage.getAvailableNumbers(gameId);
       let gameCompleted = false;
-      if (updatedGame && updatedGame.tokenThreshold > 0 &&
-          updatedGame.tokensCollected >= updatedGame.tokenThreshold) {
-        console.log(`🏁 Game "${game.name}" reached token threshold (${updatedGame.tokensCollected}/${updatedGame.tokenThreshold})! Auto-closing...`);
+      const allSpotsTaken = remainingNumbers.length === 0;
+      const thresholdReached = updatedGame && updatedGame.tokenThreshold > 0 &&
+          updatedGame.tokensCollected >= updatedGame.tokenThreshold;
+      if (allSpotsTaken || thresholdReached) {
+        console.log(`🏁 Game "${game.name}" complete (spots taken: ${allSpotsTaken}, threshold: ${thresholdReached})! Auto-closing...`);
         await storage.updateGame(gameId, { isActive: false });
         gameCompleted = true;
 

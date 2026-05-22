@@ -587,8 +587,9 @@ export default function AdminDashboard() {
     const startTime = new Date();
     const endTime = new Date(startTime.getTime() + durationHours * 60 * 60 * 1000);
 
-    const targetRevenue = parseFloat(previewData.targetRevenue || "800");
     const tokenCostPerEntry = parseInt(previewData.tokenCostPerEntry || "10");
+    // Auto-calculate revenue: every spot filled = 1 spin = tokenCostPerEntry tokens
+    const targetRevenue = totalNumbers * tokenCostPerEntry;
 
     const gameData = {
       name: formData.get("name") as string,
@@ -617,7 +618,7 @@ export default function AdminDashboard() {
       durationHours: durationHours,
       targetRevenue: targetRevenue.toFixed(2),
       tokenCostPerEntry: tokenCostPerEntry,
-      tokenThreshold: Math.round(targetRevenue),
+      tokenThreshold: targetRevenue,
     };
 
     createGameMutation.mutate(gameData);
@@ -1583,25 +1584,6 @@ export default function AdminDashboard() {
                               </div>
                               <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                  <Label htmlFor="targetRevenue" className="text-gray-300 text-sm">
-                                    Target Revenue ($)
-                                  </Label>
-                                  <Input
-                                    id="targetRevenue"
-                                    name="targetRevenue"
-                                    type="number"
-                                    min="1"
-                                    step="1"
-                                    value={previewData.targetRevenue}
-                                    onChange={(e) =>
-                                      setPreviewData({ ...previewData, targetRevenue: e.target.value })
-                                    }
-                                    className="bg-white/10 border-purple-500/30"
-                                    placeholder="800"
-                                  />
-                                  <p className="text-gray-500 text-xs mt-1">How much revenue before game closes</p>
-                                </div>
-                                <div>
                                   <Label htmlFor="tokenCostPerEntry" className="text-gray-300 text-sm">
                                     Tokens Per Play
                                   </Label>
@@ -1615,16 +1597,24 @@ export default function AdminDashboard() {
                                       setPreviewData({ ...previewData, tokenCostPerEntry: e.target.value })
                                     }
                                     className="bg-white/10 border-purple-500/30"
-                                    placeholder="e.g. 5"
+                                    placeholder="e.g. 10"
                                   />
-                                  <p className="text-gray-500 text-xs mt-1">Any amount — 1 token = $1</p>
+                                  <p className="text-gray-500 text-xs mt-1">Tokens charged per spin — 1 token = $1</p>
+                                </div>
+                                <div className="flex flex-col justify-center bg-white/5 rounded-lg px-4 py-3 border border-white/10">
+                                  <p className="text-gray-400 text-xs mb-1">Auto-calculated revenue</p>
+                                  <p className="text-yellow-400 font-black text-xl">
+                                    {"$" + (parseInt(previewData.totalNumbers || "0") * parseInt(previewData.tokenCostPerEntry || "0")).toLocaleString()}
+                                  </p>
+                                  <p className="text-gray-500 text-xs mt-1">
+                                    {previewData.totalNumbers || "0"} spots &times; {previewData.tokenCostPerEntry || "0"} tokens
+                                  </p>
                                 </div>
                               </div>
                               {/* Revenue Calculator */}
-                              {previewData.targetRevenue && previewData.tokenCostPerEntry && (() => {
-                                const revenue = parseFloat(previewData.targetRevenue || "0");
+                              {previewData.totalNumbers && previewData.tokenCostPerEntry && (() => {
+                                const totalSpots = parseInt(previewData.totalNumbers || "0");
                                 const tokensPerPlay = parseInt(previewData.tokenCostPerEntry || "5");
-                                const totalSpots = Math.ceil(revenue / tokensPerPlay);
                                 const pricePerSpin = tokensPerPlay; // 1 token = $1
                                 const totalRevenue = totalSpots * pricePerSpin;
 

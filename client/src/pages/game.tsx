@@ -669,7 +669,7 @@ export default function GamePage() {
                         {tokenBalanceData?.tokenBalance || 0}
                       </span>
                       <span className="text-xs bg-purple-600/50 px-2 py-1 rounded-full">
-                        Cost: {(game as any)?.tokenCost || 1} per spin
+                        Cost: {(game as any)?.tokenCostPerEntry || 5} tokens per spin
                       </span>
                     </div>
                   </div>
