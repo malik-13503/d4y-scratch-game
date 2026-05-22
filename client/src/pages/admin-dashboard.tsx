@@ -1623,21 +1623,65 @@ export default function AdminDashboard() {
                                   <p className="text-gray-500 text-xs mt-1">Cost for each spin</p>
                                 </div>
                               </div>
-                              {/* Calculated stats */}
-                              {previewData.targetRevenue && previewData.tokenCostPerEntry && (
-                                <div className="grid grid-cols-2 gap-3 bg-white/5 rounded-lg p-3">
-                                  <div className="text-center">
-                                    <p className="text-gray-400 text-xs">Required Tokens</p>
-                                    <p className="text-white font-bold text-lg">{Math.round(parseFloat(previewData.targetRevenue || "0"))}</p>
+                              {/* Revenue Calculator */}
+                              {previewData.targetRevenue && previewData.tokenCostPerEntry && (() => {
+                                const revenue = parseFloat(previewData.targetRevenue || "0");
+                                const tokensPerPlay = parseInt(previewData.tokenCostPerEntry || "5");
+                                const totalSpots = Math.ceil(revenue / tokensPerPlay);
+                                const pricePerSpin = tokensPerPlay; // 1 token = $1
+                                const totalRevenue = totalSpots * pricePerSpin;
+
+                                return (
+                                  <div className="rounded-xl border border-purple-500/30 bg-purple-900/20 overflow-hidden">
+                                    {/* Header */}
+                                    <div className="bg-purple-600/30 px-4 py-2 flex items-center space-x-2">
+                                      <span className="text-purple-200 text-xs font-bold uppercase tracking-widest">📊 Revenue Calculator</span>
+                                    </div>
+
+                                    {/* Main stats row */}
+                                    <div className="grid grid-cols-3 divide-x divide-white/10 p-0">
+                                      <div className="text-center py-4 px-3">
+                                        <p className="text-gray-400 text-xs mb-1">Total Spots</p>
+                                        <p className="text-white font-black text-2xl">{totalSpots}</p>
+                                        <p className="text-gray-500 text-xs mt-1">players needed</p>
+                                      </div>
+                                      <div className="text-center py-4 px-3">
+                                        <p className="text-gray-400 text-xs mb-1">Price Per Spin</p>
+                                        <p className="text-green-400 font-black text-2xl">${pricePerSpin}</p>
+                                        <p className="text-gray-500 text-xs mt-1">per player</p>
+                                      </div>
+                                      <div className="text-center py-4 px-3">
+                                        <p className="text-gray-400 text-xs mb-1">Total Revenue</p>
+                                        <p className="text-yellow-400 font-black text-2xl">${totalRevenue.toLocaleString()}</p>
+                                        <p className="text-gray-500 text-xs mt-1">when full</p>
+                                      </div>
+                                    </div>
+
+                                    {/* Breakdown bar */}
+                                    <div className="px-4 pb-4 pt-1 space-y-2">
+                                      <div className="flex justify-between text-xs text-gray-400 mb-1">
+                                        <span>Fill progress example</span>
+                                        <span>100% = ${totalRevenue.toLocaleString()}</span>
+                                      </div>
+                                      <div className="h-2 bg-white/10 rounded-full overflow-hidden">
+                                        <div className="h-full bg-gradient-to-r from-purple-500 to-green-400 rounded-full w-full"></div>
+                                      </div>
+                                      <div className="grid grid-cols-2 gap-2 mt-3">
+                                        <div className="bg-white/5 rounded-lg p-2 text-center">
+                                          <p className="text-gray-400 text-xs">At 50% full</p>
+                                          <p className="text-white font-bold">${(totalRevenue * 0.5).toLocaleString()}</p>
+                                          <p className="text-gray-500 text-xs">{Math.ceil(totalSpots * 0.5)} spots claimed</p>
+                                        </div>
+                                        <div className="bg-white/5 rounded-lg p-2 text-center">
+                                          <p className="text-gray-400 text-xs">At 75% full</p>
+                                          <p className="text-white font-bold">${(totalRevenue * 0.75).toLocaleString()}</p>
+                                          <p className="text-gray-500 text-xs">{Math.ceil(totalSpots * 0.75)} spots claimed</p>
+                                        </div>
+                                      </div>
+                                    </div>
                                   </div>
-                                  <div className="text-center">
-                                    <p className="text-gray-400 text-xs">Total Plays to Fill</p>
-                                    <p className="text-white font-bold text-lg">
-                                      {previewData.tokenCostPerEntry ? Math.ceil(parseFloat(previewData.targetRevenue || "0") / parseInt(previewData.tokenCostPerEntry)) : 0}
-                                    </p>
-                                  </div>
-                                </div>
-                              )}
+                                );
+                              })()}
                             </div>
 
                             <div className="grid grid-cols-3 gap-4">
