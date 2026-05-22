@@ -15,7 +15,6 @@ import {
 import { Gift, DollarSign, Sparkles, Play } from "lucide-react";
 import { Confetti } from "./confetti";
 import { WheelPointer } from "./wheel-pointer";
-import { QuickCardUpdate } from "./payment/quick-card-update";
 import logoPath from "@assets/logo_1777237644041.png";
 
 interface ProfessionalWheelProps {
@@ -74,15 +73,8 @@ export const ProfessionalWheel = forwardRef<
       
 
       
-      // If we have Square customer and card IDs, use the stored card approach
-      if (cardData.squareCustomerId && cardData.squareCardId) {
-
-        return `stored_card:${cardData.squareCardId}:${cardData.squareCustomerId}`;
-      }
-
       // For cards with valid nonces, use them directly
       if (cardData.cardNonce && cardData.cardNonce.startsWith('cnon:')) {
-
         return cardData.cardNonce;
       }
 
@@ -767,15 +759,6 @@ export const ProfessionalWheel = forwardRef<
         </DialogContent>
       </Dialog>
 
-      {/* Quick Card Update Modal */}
-      <QuickCardUpdate 
-        isOpen={showCardUpdate}
-        onClose={() => setShowCardUpdate(false)}
-        onUpdateComplete={() => {
-          setShowCardUpdate(false);
-          // Optionally refresh the page or reset state
-        }}
-      />
     </div>
   );
 });

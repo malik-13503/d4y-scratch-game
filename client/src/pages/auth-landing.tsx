@@ -4,7 +4,6 @@ import { useLocation } from "wouter";
 import { ImprovedSignupForm } from "@/components/auth/improved-signup-form";
 import { ImprovedLoginForm } from "@/components/auth/improved-login-form";
 import { SignupSuccessPopup } from "@/components/auth/signup-success-popup";
-import { CardSetup } from "@/components/payment/card-setup";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -25,7 +24,7 @@ import {
   CheckCircle,
 } from "lucide-react";
 
-type FlowStep = "auth" | "card-setup" | "complete";
+type FlowStep = "auth" | "complete";
 
 export default function AuthLandingPage() {
   const [currentStep, setCurrentStep] = useState<FlowStep>("auth");
@@ -62,24 +61,14 @@ export default function AuthLandingPage() {
     setActiveTab("login");
   };
 
-  const handleCardSetupSuccess = () => {
-    refetch();
-    setCurrentStep("complete");
-  };
-
   const handleContinueToGames = () => {
     setLocation("/games");
   };
 
-  // Use useEffect to handle redirect to avoid render-time state updates
+  // Redirect to games when user is authenticated
   React.useEffect(() => {
     if (user && typeof user === "object") {
-      if ((user as any).cardOnFile) {
-        setLocation("/games");
-      } else {
-        // User logged in but no payment method - force card setup
-        setCurrentStep("card-setup");
-      }
+      setLocation("/games");
     }
   }, [user, setLocation]);
 
@@ -250,36 +239,6 @@ export default function AuthLandingPage() {
                 </div>
               )}
 
-              {currentStep === "card-setup" && (
-                <div className="relative">
-                  <div className="absolute -inset-6 bg-gradient-to-r from-green-500/30 via-blue-500/30 to-cyan-500/30 blur-2xl rounded-3xl animate-pulse"></div>
-
-                  <Card className="relative bg-gradient-to-br from-slate-900/98 via-slate-800/98 to-slate-900/98 backdrop-blur-xl border-2 border-white/30 shadow-2xl shadow-green-500/25 rounded-3xl overflow-hidden">
-                    <div className="absolute inset-0 bg-gradient-to-r from-green-500/20 via-blue-500/20 to-cyan-500/20 animate-pulse rounded-3xl"></div>
-
-                    <CardContent className="relative p-10">
-                      <div className="text-center mb-10">
-                        <div className="relative inline-block">
-                          <div className="absolute -inset-4 bg-gradient-to-r from-green-500/50 to-blue-500/50 blur-xl rounded-full animate-pulse"></div>
-                          <div className="relative inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-green-500 via-blue-500 to-cyan-500 rounded-full mb-6 shadow-2xl shadow-green-500/50">
-                            <CreditCard className="h-10 w-10 text-white drop-shadow-lg" />
-                          </div>
-                        </div>
-                        <h2 className="text-4xl font-black text-white mb-3 drop-shadow-lg">
-                          Payment Setup
-                        </h2>
-                        <p className="text-gray-300 text-lg font-medium">
-                          Add your payment method to start playing!
-                        </p>
-                      </div>
-                      <CardSetup
-                        user={user as any}
-                        onSuccess={handleCardSetupSuccess}
-                      />
-                    </CardContent>
-                  </Card>
-                </div>
-              )}
 
               {currentStep === "complete" && (
                 <div className="relative">

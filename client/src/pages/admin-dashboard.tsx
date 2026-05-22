@@ -3919,18 +3919,6 @@ export default function AdminDashboard() {
                           </div>
                           <div className="space-y-2">
                             <Label className="text-gray-300">
-                              Square Customer ID
-                            </Label>
-                            <Input
-                              value={
-                                selectedUser.squareCustomerId || "Not assigned"
-                              }
-                              readOnly
-                              className="bg-white/5 border-white/20 text-white font-mono text-xs"
-                            />
-                          </div>
-                          <div className="space-y-2">
-                            <Label className="text-gray-300">
                               Account Created
                             </Label>
                             <Input

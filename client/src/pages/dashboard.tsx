@@ -13,9 +13,6 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { logout } from "@/lib/auth";
-import { CardSetup } from "@/components/payment/card-setup";
-import EnhancedCardManagement from "@/components/payment/enhanced-card-management";
-import { RealCardManagement } from "@/components/payment/real-card-management";
 import { 
   User, 
   Trophy, 
@@ -214,9 +211,7 @@ export default function Dashboard() {
 
 
   const handleCardSetupSuccess = () => {
-    // Refetch user data to update payment status
     queryClient.invalidateQueries({ queryKey: ["/api/user"] });
-    // Switch back to overview tab
     handleTabChange('overview');
   };
 
@@ -982,7 +977,9 @@ export default function Dashboard() {
                       <h3 className="text-2xl font-bold text-white mb-4">No Payment Method</h3>
                       <p className="text-gray-300 text-lg mb-8">Add a payment method to start playing games and winning prizes!</p>
                     </div>
-                    <CardSetup user={user as any} onSuccess={handleCardSetupSuccess} />
+                    <div className="text-center p-6 bg-purple-900/20 border border-purple-500/30 rounded-xl">
+                      <p className="text-purple-300 font-medium">A new payment system is coming soon. Stay tuned!</p>
+                    </div>
                   </div>
                 )}
                 
@@ -1341,7 +1338,11 @@ export default function Dashboard() {
 
           {/* Cards Tab */}
           <TabsContent value="cards" className="mt-6">
-            <RealCardManagement />
+            <div className="text-center p-12 bg-slate-800/50 border border-purple-500/30 rounded-xl">
+              <CreditCard className="h-12 w-12 text-purple-400 mx-auto mb-4" />
+              <h3 className="text-white font-bold text-xl mb-2">Payment Methods</h3>
+              <p className="text-gray-300">A new payment system is being set up. Check back soon!</p>
+            </div>
           </TabsContent>
         </Tabs>
       </div>

@@ -3,13 +3,12 @@ import { useQuery } from "@tanstack/react-query";
 import { useLocation, useRoute } from "wouter";
 import { SignupForm } from "@/components/auth/signup-form";
 import { LoginForm } from "@/components/auth/login-form";
-import { CardSetup } from "@/components/payment/card-setup";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getQueryFn } from "@/lib/queryClient";
 
-type FlowStep = "auth" | "card-setup" | "complete";
+type FlowStep = "auth" | "complete";
 
 export default function WelcomePage() {
   const [currentStep, setCurrentStep] = useState<FlowStep>("auth");
@@ -31,7 +30,7 @@ export default function WelcomePage() {
 
   const handleAuthSuccess = () => {
     refetch();
-    setCurrentStep("card-setup");
+    setCurrentStep("complete");
   };
 
   const handleCardSetupSuccess = () => {
@@ -122,11 +121,6 @@ export default function WelcomePage() {
             </Tabs>
           )}
 
-          {currentStep === "card-setup" && user ? (
-            <div>
-              <CardSetup user={user as any} onSuccess={handleCardSetupSuccess} />
-            </div>
-          ) : null}
 
           {currentStep === "complete" && (
             <Card className="w-full max-w-md mx-auto">

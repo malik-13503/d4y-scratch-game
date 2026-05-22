@@ -1036,8 +1036,6 @@ export class DatabaseStorage implements IStorage {
           cardLast4: transactions.cardLast4,
           cardBrand: transactions.cardBrand,
           paymentCardId: transactions.paymentCardId,
-          squarePaymentId: transactions.squarePaymentId,
-          squareReceiptUrl: transactions.squareReceiptUrl,
           currency: transactions.currency,
           spunNumber: spinResults.spunNumber, // Add the actual spun number from spin_results
         })

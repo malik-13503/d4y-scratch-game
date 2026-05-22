@@ -12,7 +12,6 @@ export const users = pgTable("users", {
   password: text("password").notNull(),
   state: text("state"), // For state-based legal compliance
   isActive: boolean("is_active").notNull().default(true),
-  squareCustomerId: text("square_customer_id").unique(),
   cardOnFile: boolean("card_on_file").notNull().default(false),
   defaultCardId: integer("default_card_id"), // Reference to default payment card
   // Token system fields
@@ -35,8 +34,7 @@ export const users = pgTable("users", {
 export const paymentCards = pgTable("payment_cards", {
   id: serial("id").primaryKey(),
   userId: integer("user_id").notNull(),
-  squareCardId: text("square_card_id").unique(),
-  cardNonce: text("card_nonce"), // Store tokenized card nonce for payments
+  cardNonce: text("card_nonce"),
   cardLast4: text("card_last_4").notNull(),
   cardBrand: text("card_brand").notNull(),
   expiryMonth: integer("expiry_month"),
@@ -74,14 +72,12 @@ export const transactions = pgTable("transactions", {
   gameId: integer("game_id").notNull(),
   spinResultId: integer("spin_result_id"),
   paymentCardId: integer("payment_card_id"), // Reference to payment card used
-  squarePaymentId: text("square_payment_id").unique(),
   amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
   currency: text("currency").notNull().default("USD"),
-  status: text("status").notNull(), // pending, completed, failed, refunded
-  paymentMethod: text("payment_method").notNull(), // card, ach, etc.
+  status: text("status").notNull(),
+  paymentMethod: text("payment_method").notNull(),
   cardLast4: text("card_last_4"),
   cardBrand: text("card_brand"),
-  squareReceiptUrl: text("square_receipt_url"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
@@ -176,9 +172,8 @@ export const tokenTransactions = pgTable("token_transactions", {
   transactionType: text("transaction_type").notNull(), // 'purchase', 'game_entry', 'refund', 'bonus'
   amount: integer("amount").notNull(), // Number of tokens (positive for purchase/bonus, negative for spending)
   gameId: integer("game_id"), // Game ID if tokens were used for game entry
-  paymentCardId: integer("payment_card_id"), // Payment card used for token purchase
-  squarePaymentId: text("square_payment_id").unique(), // Square payment ID for purchases
-  dollarAmount: decimal("dollar_amount", { precision: 10, scale: 2 }), // Dollar amount for purchases
+  paymentCardId: integer("payment_card_id"),
+  dollarAmount: decimal("dollar_amount", { precision: 10, scale: 2 }),
   description: text("description").notNull(), // Description of the transaction
   status: text("status").notNull().default("completed"), // 'pending', 'completed', 'failed', 'refunded'
   createdAt: timestamp("created_at").notNull().defaultNow(),
