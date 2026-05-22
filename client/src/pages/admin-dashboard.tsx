@@ -1605,22 +1605,19 @@ export default function AdminDashboard() {
                                   <Label htmlFor="tokenCostPerEntry" className="text-gray-300 text-sm">
                                     Tokens Per Play
                                   </Label>
-                                  <Select
+                                  <Input
+                                    id="tokenCostPerEntry"
+                                    type="number"
+                                    min="1"
+                                    step="1"
                                     value={previewData.tokenCostPerEntry}
-                                    onValueChange={(val) =>
-                                      setPreviewData({ ...previewData, tokenCostPerEntry: val })
+                                    onChange={(e) =>
+                                      setPreviewData({ ...previewData, tokenCostPerEntry: e.target.value })
                                     }
-                                  >
-                                    <SelectTrigger className="bg-white/10 border-purple-500/30">
-                                      <SelectValue placeholder="Select tokens" />
-                                    </SelectTrigger>
-                                    <SelectContent className="bg-slate-800 border-purple-500/30">
-                                      <SelectItem value="5">5 tokens per play</SelectItem>
-                                      <SelectItem value="10">10 tokens per play</SelectItem>
-                                      <SelectItem value="20">20 tokens per play</SelectItem>
-                                    </SelectContent>
-                                  </Select>
-                                  <p className="text-gray-500 text-xs mt-1">Cost for each spin</p>
+                                    className="bg-white/10 border-purple-500/30"
+                                    placeholder="e.g. 5"
+                                  />
+                                  <p className="text-gray-500 text-xs mt-1">Any amount — 1 token = $1</p>
                                 </div>
                               </div>
                               {/* Revenue Calculator */}
