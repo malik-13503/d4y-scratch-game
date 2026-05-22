@@ -144,6 +144,14 @@ export function AuthorizeNetForm({
       return;
     }
 
+    const isSandbox = import.meta.env.VITE_AUTHORIZE_NET_ENV !== "production";
+
+    // In sandbox mode, bypass Accept.js entirely so any card details work for testing
+    if (isSandbox) {
+      onSuccess("COMMON.ACCEPT.INAPP.PAYMENT", "SANDBOX_TEST_TOKEN");
+      return;
+    }
+
     const secureData = {
       authData: { clientKey, apiLoginID: apiLoginId },
       cardData: {

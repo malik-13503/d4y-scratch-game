@@ -35,6 +35,15 @@ export async function chargeCreditCard(
   description: string,
   customerEmail?: string
 ): Promise<ChargeResult> {
+  // Sandbox bypass — frontend sends this dummy token when VITE_AUTHORIZE_NET_ENV !== "production"
+  if (opaqueDataValue === "SANDBOX_TEST_TOKEN") {
+    return {
+      success: true,
+      transactionId: `SANDBOX-${Date.now()}`,
+      message: "Sandbox test payment approved",
+    };
+  }
+
   return new Promise((resolve) => {
     const merchantAuth = getMerchantAuth();
 
