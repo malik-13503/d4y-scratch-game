@@ -34,7 +34,11 @@ import {
   Gauge,
   Crown,
   Shield,
-  LogOut
+  LogOut,
+  Gift,
+  Tag,
+  CheckCircle,
+  Timer,
 } from "lucide-react";
 import logoPath from "@assets/logo_1777237644041.png";
 
@@ -666,6 +670,9 @@ export default function Dashboard() {
             </CardContent>
           </Card>
         </div>
+
+        {/* Daily Tokens + Promo Code Section */}
+        <DailyTokensAndPromoSection />
 
         {/* Real-time Activity Feed */}
         <Card className="mb-8 relative overflow-hidden bg-gradient-to-br from-slate-800/80 to-slate-900/80 border-slate-600/40 backdrop-blur-xl shadow-2xl">
@@ -1346,6 +1353,141 @@ export default function Dashboard() {
           </TabsContent>
         </Tabs>
       </div>
+    </div>
+  );
+}
+
+// ── Daily Tokens + Promo Code Component ────────────────────────────────────
+function DailyTokensAndPromoSection() {
+  const { toast } = useToast();
+  const [promoInput, setPromoInput] = useState("");
+  const [promoLoading, setPromoLoading] = useState(false);
+
+  const { data: dailyStatus, isLoading: statusLoading, refetch: refetchStatus } = useQuery<{
+    canClaim: boolean;
+    nextClaimAt: string | null;
+    lastClaimedAt?: string;
+  }>({
+    queryKey: ["/api/user/daily-token-status"],
+    refetchInterval: 30000,
+  });
+
+  const claimMutation = useMutation({
+    mutationFn: () => apiRequest("POST", "/api/user/claim-daily-tokens"),
+    onSuccess: async (data: any) => {
+      await queryClient.invalidateQueries({ queryKey: ["/api/user/daily-token-status"] });
+      await queryClient.invalidateQueries({ queryKey: ["/api/user/token-balance"] });
+      await queryClient.invalidateQueries({ queryKey: ["/api/user/profile"] });
+      refetchStatus();
+      toast({ title: "🎉 Daily tokens claimed!", description: `+${data.tokensAdded} tokens added to your account!` });
+    },
+    onError: (e: any) => toast({ title: "Cannot claim", description: e.message, variant: "destructive" }),
+  });
+
+  const handleRedeemPromo = async () => {
+    if (!promoInput.trim()) {
+      toast({ title: "Enter a promo code", variant: "destructive" });
+      return;
+    }
+    setPromoLoading(true);
+    try {
+      const res = await apiRequest("POST", "/api/user/redeem-promo", { code: promoInput.trim().toUpperCase() });
+      await queryClient.invalidateQueries({ queryKey: ["/api/user/token-balance"] });
+      await queryClient.invalidateQueries({ queryKey: ["/api/user/profile"] });
+      setPromoInput("");
+      toast({ title: "🎁 Promo code applied!", description: res.message });
+    } catch (e: any) {
+      toast({ title: "Invalid code", description: e.message, variant: "destructive" });
+    } finally {
+      setPromoLoading(false);
+    }
+  };
+
+  const formatCountdown = (nextClaimAt: string) => {
+    const diff = new Date(nextClaimAt).getTime() - Date.now();
+    if (diff <= 0) return "Available now!";
+    const h = Math.floor(diff / 3600000);
+    const m = Math.floor((diff % 3600000) / 60000);
+    return `${h}h ${m}m`;
+  };
+
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+      {/* Daily Token Claim Card */}
+      <Card className="relative overflow-hidden bg-gradient-to-br from-violet-900/70 to-purple-900/70 border-violet-400/40 backdrop-blur-xl shadow-2xl">
+        <div className="absolute inset-0 bg-gradient-to-br from-violet-800/20 to-purple-800/20 blur-xl" />
+        <CardContent className="relative p-6">
+          <div className="flex items-start space-x-4">
+            <div className="p-3 bg-gradient-to-br from-violet-500 to-purple-600 rounded-xl shadow-lg shrink-0">
+              <Gift className="h-7 w-7 text-white" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <h3 className="text-lg font-bold text-white mb-1">Daily Free Tokens</h3>
+              <p className="text-violet-200 text-sm mb-4">Claim 3 free tokens every 24 hours — no purchase needed!</p>
+              {statusLoading ? (
+                <div className="h-10 bg-violet-700/40 rounded-lg animate-pulse" />
+              ) : dailyStatus?.canClaim ? (
+                <Button
+                  onClick={() => claimMutation.mutate()}
+                  disabled={claimMutation.isPending}
+                  className="w-full bg-gradient-to-r from-violet-500 to-purple-600 hover:from-violet-600 hover:to-purple-700 text-white font-bold shadow-lg transition-all duration-300"
+                >
+                  {claimMutation.isPending ? (
+                    <span className="flex items-center"><RefreshCw className="h-4 w-4 mr-2 animate-spin" />Claiming...</span>
+                  ) : (
+                    <span className="flex items-center"><Gift className="h-4 w-4 mr-2" />Claim 3 Free Tokens</span>
+                  )}
+                </Button>
+              ) : (
+                <div className="bg-violet-900/50 border border-violet-500/30 rounded-lg p-3">
+                  <div className="flex items-center space-x-2 mb-1">
+                    <CheckCircle className="h-4 w-4 text-green-400 shrink-0" />
+                    <span className="text-green-300 text-sm font-medium">Already claimed today!</span>
+                  </div>
+                  {dailyStatus?.nextClaimAt && (
+                    <div className="flex items-center space-x-2">
+                      <Timer className="h-4 w-4 text-violet-300 shrink-0" />
+                      <span className="text-violet-200 text-sm">Next claim in: <span className="font-bold text-white">{formatCountdown(dailyStatus.nextClaimAt)}</span></span>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Promo Code Card */}
+      <Card className="relative overflow-hidden bg-gradient-to-br from-emerald-900/70 to-teal-900/70 border-emerald-400/40 backdrop-blur-xl shadow-2xl">
+        <div className="absolute inset-0 bg-gradient-to-br from-emerald-800/20 to-teal-800/20 blur-xl" />
+        <CardContent className="relative p-6">
+          <div className="flex items-start space-x-4">
+            <div className="p-3 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl shadow-lg shrink-0">
+              <Tag className="h-7 w-7 text-white" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <h3 className="text-lg font-bold text-white mb-1">Redeem Promo Code</h3>
+              <p className="text-emerald-200 text-sm mb-4">Have a promo code? Enter it below to receive bonus tokens!</p>
+              <div className="flex space-x-2">
+                <input
+                  className="flex-1 min-w-0 bg-emerald-900/50 border border-emerald-500/40 rounded-lg px-3 py-2 text-white text-sm placeholder-emerald-300/50 focus:outline-none focus:border-emerald-400 uppercase tracking-widest"
+                  placeholder="ENTER CODE"
+                  value={promoInput}
+                  onChange={e => setPromoInput(e.target.value.toUpperCase())}
+                  onKeyDown={e => { if (e.key === "Enter") handleRedeemPromo(); }}
+                />
+                <Button
+                  onClick={handleRedeemPromo}
+                  disabled={promoLoading || !promoInput.trim()}
+                  className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold shadow-lg shrink-0 transition-all duration-300"
+                >
+                  {promoLoading ? <RefreshCw className="h-4 w-4 animate-spin" /> : "Apply"}
+                </Button>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

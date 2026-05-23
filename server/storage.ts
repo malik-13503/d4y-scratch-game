@@ -1,12 +1,14 @@
 import { 
   games, players, gameResults, adminUsers, wheelSegments, systemSettings, adminSessions, notifications, spinResults,
   users, transactions, userSessions, complianceLogs, freePlayUsage, paymentCards, tokenTransactions, userFreeEntries,
+  dailyTokenClaims, promoCodes, promoCodeRedemptions,
   type Game, type InsertGame, type Player, type InsertPlayer, type GameResult, type InsertGameResult, 
   type AdminUser, type InsertAdminUser, type WheelSegment, type InsertWheelSegment,
   type SystemSetting, type InsertSystemSetting, type InsertNotification, type Notification,
   type SpinResult, type InsertSpinResult, type User, type InsertUser, type Transaction, type InsertTransaction,
   type FreePlayUsage, type InsertFreePlayUsage, type PaymentCard, type InsertPaymentCard,
-  type TokenTransaction, type InsertTokenTransaction, type UserFreeEntry, type InsertUserFreeEntry
+  type TokenTransaction, type InsertTokenTransaction, type UserFreeEntry, type InsertUserFreeEntry,
+  type DailyTokenClaim, type PromoCode, type InsertPromoCode, type PromoCodeRedemption
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, sql, asc, and, isNotNull } from "drizzle-orm";
@@ -132,6 +134,21 @@ export interface IStorage {
   // Token game operations  
   addTokensToGame(gameId: number, tokens: number): Promise<Game | undefined>;
   isGameTokenThresholdMet(gameId: number): Promise<boolean>;
+
+  // Daily token claim methods
+  getLastDailyTokenClaim(userId: number): Promise<DailyTokenClaim | undefined>;
+  createDailyTokenClaim(userId: number): Promise<DailyTokenClaim>;
+
+  // Promo code methods
+  getPromoCodes(): Promise<PromoCode[]>;
+  getPromoCode(id: number): Promise<PromoCode | undefined>;
+  getPromoCodeByCode(code: string): Promise<PromoCode | undefined>;
+  createPromoCode(code: InsertPromoCode): Promise<PromoCode>;
+  updatePromoCode(id: number, updates: Partial<PromoCode>): Promise<PromoCode | undefined>;
+  deletePromoCode(id: number): Promise<boolean>;
+  incrementPromoCodeUses(id: number): Promise<void>;
+  hasUserRedeemedPromoCode(userId: number, promoCodeId: number): Promise<boolean>;
+  createPromoCodeRedemption(userId: number, promoCodeId: number): Promise<PromoCodeRedemption>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1417,6 +1434,95 @@ export class DatabaseStorage implements IStorage {
       console.error("Error fetching winners:", error);
       throw error;
     }
+  }
+
+  // ── Daily token claims ───────────────────────────────────────────────────
+
+  async getLastDailyTokenClaim(userId: number): Promise<DailyTokenClaim | undefined> {
+    const [claim] = await db
+      .select()
+      .from(dailyTokenClaims)
+      .where(eq(dailyTokenClaims.userId, userId))
+      .orderBy(desc(dailyTokenClaims.claimedAt))
+      .limit(1);
+    return claim;
+  }
+
+  async createDailyTokenClaim(userId: number): Promise<DailyTokenClaim> {
+    const [claim] = await db
+      .insert(dailyTokenClaims)
+      .values({ userId })
+      .returning();
+    return claim;
+  }
+
+  // ── Promo codes ──────────────────────────────────────────────────────────
+
+  async getPromoCodes(): Promise<PromoCode[]> {
+    return db.select().from(promoCodes).orderBy(desc(promoCodes.createdAt));
+  }
+
+  async getPromoCode(id: number): Promise<PromoCode | undefined> {
+    const [code] = await db.select().from(promoCodes).where(eq(promoCodes.id, id));
+    return code;
+  }
+
+  async getPromoCodeByCode(code: string): Promise<PromoCode | undefined> {
+    const [row] = await db
+      .select()
+      .from(promoCodes)
+      .where(eq(promoCodes.code, code.toUpperCase().trim()));
+    return row;
+  }
+
+  async createPromoCode(insertCode: InsertPromoCode): Promise<PromoCode> {
+    const [row] = await db
+      .insert(promoCodes)
+      .values({ ...insertCode, code: insertCode.code.toUpperCase().trim() })
+      .returning();
+    return row;
+  }
+
+  async updatePromoCode(id: number, updates: Partial<PromoCode>): Promise<PromoCode | undefined> {
+    const [row] = await db
+      .update(promoCodes)
+      .set(updates)
+      .where(eq(promoCodes.id, id))
+      .returning();
+    return row;
+  }
+
+  async deletePromoCode(id: number): Promise<boolean> {
+    const result = await db.delete(promoCodes).where(eq(promoCodes.id, id));
+    return (result.rowCount ?? 0) > 0;
+  }
+
+  async incrementPromoCodeUses(id: number): Promise<void> {
+    await db
+      .update(promoCodes)
+      .set({ usesCount: sql`${promoCodes.usesCount} + 1` })
+      .where(eq(promoCodes.id, id));
+  }
+
+  async hasUserRedeemedPromoCode(userId: number, promoCodeId: number): Promise<boolean> {
+    const [row] = await db
+      .select()
+      .from(promoCodeRedemptions)
+      .where(
+        and(
+          eq(promoCodeRedemptions.userId, userId),
+          eq(promoCodeRedemptions.promoCodeId, promoCodeId)
+        )
+      );
+    return !!row;
+  }
+
+  async createPromoCodeRedemption(userId: number, promoCodeId: number): Promise<PromoCodeRedemption> {
+    const [row] = await db
+      .insert(promoCodeRedemptions)
+      .values({ userId, promoCodeId })
+      .returning();
+    return row;
   }
 }
 

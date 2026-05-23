@@ -253,6 +253,36 @@ export const claimedNumbers = pgTable("claimed_numbers", {
   claimedAt: timestamp("claimed_at").notNull().defaultNow(),
 });
 
+// Daily token claims — one per user per day
+export const dailyTokenClaims = pgTable("daily_token_claims", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  claimedAt: timestamp("claimed_at").notNull().defaultNow(),
+});
+
+// Promo codes
+export const promoCodes = pgTable("promo_codes", {
+  id: serial("id").primaryKey(),
+  code: text("code").notNull().unique(),
+  tokenAmount: integer("token_amount").notNull(),
+  description: text("description"),
+  expiresAt: timestamp("expires_at"),
+  maxUses: integer("max_uses"), // null = unlimited
+  usesCount: integer("uses_count").notNull().default(0),
+  isActive: boolean("is_active").notNull().default(true),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+// Promo code redemptions — one per user per code
+export const promoCodeRedemptions = pgTable("promo_code_redemptions", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  promoCodeId: integer("promo_code_id").notNull(),
+  redeemedAt: timestamp("redeemed_at").notNull().defaultNow(),
+}, (table) => ({
+  uniqueUserCode: uniqueIndex("unique_user_promo_code").on(table.userId, table.promoCodeId),
+}));
+
 // Schema definitions
 export const insertAdminUserSchema = createInsertSchema(adminUsers).omit({
   id: true,
@@ -368,3 +398,28 @@ export const insertUserFreeEntrySchema = createInsertSchema(userFreeEntries).omi
 
 export type UserFreeEntry = typeof userFreeEntries.$inferSelect;
 export type InsertUserFreeEntry = z.infer<typeof insertUserFreeEntrySchema>;
+
+// Daily token claim schema and types
+export const insertDailyTokenClaimSchema = createInsertSchema(dailyTokenClaims).omit({
+  id: true,
+  claimedAt: true,
+});
+export type DailyTokenClaim = typeof dailyTokenClaims.$inferSelect;
+export type InsertDailyTokenClaim = z.infer<typeof insertDailyTokenClaimSchema>;
+
+// Promo code schema and types
+export const insertPromoCodeSchema = createInsertSchema(promoCodes).omit({
+  id: true,
+  usesCount: true,
+  createdAt: true,
+});
+export type PromoCode = typeof promoCodes.$inferSelect;
+export type InsertPromoCode = z.infer<typeof insertPromoCodeSchema>;
+
+// Promo code redemption schema and types
+export const insertPromoCodeRedemptionSchema = createInsertSchema(promoCodeRedemptions).omit({
+  id: true,
+  redeemedAt: true,
+});
+export type PromoCodeRedemption = typeof promoCodeRedemptions.$inferSelect;
+export type InsertPromoCodeRedemption = z.infer<typeof insertPromoCodeRedemptionSchema>;

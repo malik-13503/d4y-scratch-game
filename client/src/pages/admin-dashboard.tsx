@@ -70,6 +70,10 @@ import {
   XCircle,
   Check,
   X,
+  Tag,
+  Pencil,
+  ToggleLeft,
+  ToggleRight,
 } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -907,6 +911,19 @@ export default function AdminDashboard() {
                   </div>
                   <span className="hidden sm:inline font-semibold">Winners</span>
                   <span className="sm:hidden text-xs font-medium">Winners</span>
+                </div>
+              </TabsTrigger>
+              <TabsTrigger
+                value="promo-codes"
+                className="relative group data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-600 data-[state=active]:to-teal-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-green-500/50 text-gray-300 hover:text-white hover:bg-slate-700/50 transition-all duration-300 text-xs sm:text-sm p-3 sm:p-4 rounded-lg sm:rounded-xl border border-transparent data-[state=active]:border-green-400/60"
+              >
+                <div className="flex flex-col sm:flex-row items-center justify-center sm:justify-start space-y-1 sm:space-y-0 sm:space-x-2">
+                  <div className="relative">
+                    <Tag className="h-4 w-4 sm:h-5 sm:w-5 transition-transform duration-300 group-data-[state=active]:scale-110" />
+                    <div className="absolute -inset-1 bg-green-500/20 rounded-full scale-0 group-data-[state=active]:scale-100 transition-transform duration-300"></div>
+                  </div>
+                  <span className="hidden sm:inline font-semibold">Promo Codes</span>
+                  <span className="sm:hidden text-xs font-medium">Promos</span>
                 </div>
               </TabsTrigger>
             </TabsList>
@@ -4892,10 +4909,12 @@ export default function AdminDashboard() {
                 <TestEmailButton />
               </div>
             </div>
-
-            {/* Winners List */}
             <WinnersList />
           </TabsContent>
+
+          {/* ── Promo Codes Tab ────────────────────────────────────────── */}
+          <PromoCodesTab />
+
         </Tabs>
       </main>
 
@@ -5075,6 +5094,237 @@ function DeleteWinnerButton({ winnerId, winnerName, onDelete }: { winnerId: numb
       <Trash2 className="h-3 w-3 mr-1" />
       Delete
     </Button>
+  );
+}
+
+// Promo Codes Tab Component
+function PromoCodesTab() {
+  const { toast } = useToast();
+  const [showForm, setShowForm] = useState(false);
+  const [editCode, setEditCode] = useState<any>(null);
+  const [form, setForm] = useState({ code: "", tokenAmount: "", description: "", expiresAt: "", maxUses: "" });
+
+  const { data: promoCodes = [], isLoading } = useQuery({ queryKey: ["/api/admin/promo-codes"] });
+
+  const resetForm = () => {
+    setForm({ code: "", tokenAmount: "", description: "", expiresAt: "", maxUses: "" });
+    setEditCode(null);
+    setShowForm(false);
+  };
+
+  const createMutation = useMutation({
+    mutationFn: (data: any) => apiRequest("POST", "/api/admin/promo-codes", data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/promo-codes"] });
+      toast({ title: "Promo code created!" });
+      resetForm();
+    },
+    onError: (e: any) => toast({ title: "Error", description: e.message, variant: "destructive" }),
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: ({ id, data }: any) => apiRequest("PATCH", `/api/admin/promo-codes/${id}`, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/promo-codes"] });
+      toast({ title: "Promo code updated!" });
+      resetForm();
+    },
+    onError: (e: any) => toast({ title: "Error", description: e.message, variant: "destructive" }),
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: number) => apiRequest("DELETE", `/api/admin/promo-codes/${id}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/promo-codes"] });
+      toast({ title: "Promo code deleted!" });
+    },
+    onError: (e: any) => toast({ title: "Error", description: e.message, variant: "destructive" }),
+  });
+
+  const handleSubmit = () => {
+    if (!form.code || !form.tokenAmount) {
+      toast({ title: "Code and token amount are required", variant: "destructive" });
+      return;
+    }
+    const payload = {
+      code: form.code.toUpperCase().trim(),
+      tokenAmount: parseInt(form.tokenAmount),
+      description: form.description || null,
+      expiresAt: form.expiresAt || null,
+      maxUses: form.maxUses ? parseInt(form.maxUses) : null,
+    };
+    if (editCode) {
+      updateMutation.mutate({ id: editCode.id, data: payload });
+    } else {
+      createMutation.mutate(payload);
+    }
+  };
+
+  const startEdit = (code: any) => {
+    setEditCode(code);
+    setForm({
+      code: code.code,
+      tokenAmount: String(code.tokenAmount),
+      description: code.description || "",
+      expiresAt: code.expiresAt ? new Date(code.expiresAt).toISOString().slice(0, 16) : "",
+      maxUses: code.maxUses != null ? String(code.maxUses) : "",
+    });
+    setShowForm(true);
+  };
+
+  return (
+    <TabsContent value="promo-codes" className="space-y-4 sm:space-y-6 mt-20 px-2 sm:px-4">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 space-y-4 sm:space-y-0">
+        <div>
+          <h2 className="text-xl sm:text-2xl font-bold text-white flex items-center">
+            <Tag className="h-6 w-6 sm:h-8 sm:w-8 text-green-400 mr-3" />
+            Promo Codes
+          </h2>
+          <p className="text-gray-400 text-sm sm:text-base">Create and manage promotional token codes</p>
+        </div>
+        <Button
+          onClick={() => { setEditCode(null); setForm({ code: "", tokenAmount: "", description: "", expiresAt: "", maxUses: "" }); setShowForm(true); }}
+          className="bg-gradient-to-r from-green-600 to-teal-600 hover:from-green-700 hover:to-teal-700 text-white font-bold shadow-lg"
+        >
+          <Plus className="h-4 w-4 mr-2" /> New Promo Code
+        </Button>
+      </div>
+
+      {showForm && (
+        <div className="bg-gradient-to-br from-slate-800/80 to-slate-900/80 border border-green-500/30 rounded-2xl p-6 mb-6 space-y-4 backdrop-blur-xl">
+          <h3 className="text-lg font-bold text-white">{editCode ? "Edit Promo Code" : "Create Promo Code"}</h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="text-gray-300 text-sm font-medium block mb-1">Code *</label>
+              <input
+                className="w-full bg-slate-700/60 border border-slate-600 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-green-400 uppercase"
+                placeholder="e.g. WELCOME10"
+                value={form.code}
+                onChange={e => setForm(f => ({ ...f, code: e.target.value.toUpperCase() }))}
+              />
+            </div>
+            <div>
+              <label className="text-gray-300 text-sm font-medium block mb-1">Token Amount *</label>
+              <input
+                type="number"
+                min="1"
+                className="w-full bg-slate-700/60 border border-slate-600 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-green-400"
+                placeholder="e.g. 10"
+                value={form.tokenAmount}
+                onChange={e => setForm(f => ({ ...f, tokenAmount: e.target.value }))}
+              />
+            </div>
+            <div>
+              <label className="text-gray-300 text-sm font-medium block mb-1">Description</label>
+              <input
+                className="w-full bg-slate-700/60 border border-slate-600 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-green-400"
+                placeholder="Optional description"
+                value={form.description}
+                onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
+              />
+            </div>
+            <div>
+              <label className="text-gray-300 text-sm font-medium block mb-1">Max Uses (leave blank = unlimited)</label>
+              <input
+                type="number"
+                min="1"
+                className="w-full bg-slate-700/60 border border-slate-600 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-green-400"
+                placeholder="e.g. 100"
+                value={form.maxUses}
+                onChange={e => setForm(f => ({ ...f, maxUses: e.target.value }))}
+              />
+            </div>
+            <div className="sm:col-span-2">
+              <label className="text-gray-300 text-sm font-medium block mb-1">Expiry Date (leave blank = no expiry)</label>
+              <input
+                type="datetime-local"
+                className="w-full bg-slate-700/60 border border-slate-600 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-green-400"
+                value={form.expiresAt}
+                onChange={e => setForm(f => ({ ...f, expiresAt: e.target.value }))}
+              />
+            </div>
+          </div>
+          <div className="flex space-x-3 pt-2">
+            <Button
+              onClick={handleSubmit}
+              disabled={createMutation.isPending || updateMutation.isPending}
+              className="bg-gradient-to-r from-green-600 to-teal-600 hover:from-green-700 hover:to-teal-700 text-white font-bold"
+            >
+              {createMutation.isPending || updateMutation.isPending ? "Saving..." : editCode ? "Update Code" : "Create Code"}
+            </Button>
+            <Button onClick={resetForm} variant="outline" className="border-slate-500 text-gray-300 hover:text-white hover:bg-slate-700">
+              Cancel
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {isLoading ? (
+        <div className="space-y-3">
+          {[1,2,3].map(i => <div key={i} className="h-16 bg-slate-700/40 rounded-xl animate-pulse" />)}
+        </div>
+      ) : (promoCodes as any[]).length === 0 ? (
+        <div className="text-center py-16 text-gray-400">
+          <Tag className="h-16 w-16 mx-auto mb-4 opacity-20" />
+          <p className="text-lg">No promo codes yet. Create your first one!</p>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {(promoCodes as any[]).map((code: any) => {
+            const isExpired = code.expiresAt && new Date() > new Date(code.expiresAt);
+            const isExhausted = code.maxUses != null && code.usesCount >= code.maxUses;
+            return (
+              <div key={code.id} className="bg-gradient-to-br from-slate-800/60 to-slate-900/60 border border-slate-600/40 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 backdrop-blur-xl">
+                <div className="flex-1 min-w-0">
+                  <div className="flex flex-wrap items-center gap-2 mb-1">
+                    <span className="font-mono font-bold text-green-300 text-lg tracking-widest">{code.code}</span>
+                    <Badge className={`text-xs ${code.isActive && !isExpired && !isExhausted ? "bg-green-600/30 text-green-300 border-green-500/30" : "bg-red-600/30 text-red-300 border-red-500/30"}`}>
+                      {!code.isActive ? "Disabled" : isExpired ? "Expired" : isExhausted ? "Exhausted" : "Active"}
+                    </Badge>
+                    <Badge className="bg-purple-600/30 text-purple-300 border-purple-500/30 text-xs">
+                      🪙 {code.tokenAmount} tokens
+                    </Badge>
+                  </div>
+                  {code.description && <p className="text-gray-400 text-sm truncate">{code.description}</p>}
+                  <div className="flex flex-wrap gap-3 mt-1 text-xs text-gray-500">
+                    <span>Used: {code.usesCount}{code.maxUses != null ? ` / ${code.maxUses}` : " (unlimited)"}</span>
+                    {code.expiresAt && <span>Expires: {new Date(code.expiresAt).toLocaleDateString()}</span>}
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => updateMutation.mutate({ id: code.id, data: { isActive: !code.isActive } })}
+                    className="border-slate-600 text-gray-300 hover:text-white hover:bg-slate-700 text-xs"
+                  >
+                    {code.isActive ? <ToggleRight className="h-4 w-4 text-green-400" /> : <ToggleLeft className="h-4 w-4 text-gray-400" />}
+                    <span className="ml-1 hidden sm:inline">{code.isActive ? "Active" : "Inactive"}</span>
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => startEdit(code)}
+                    className="border-slate-600 text-gray-300 hover:text-white hover:bg-slate-700"
+                  >
+                    <Pencil className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => deleteMutation.mutate(code.id)}
+                    disabled={deleteMutation.isPending}
+                    className="border-red-500/40 text-red-400 hover:text-red-300 hover:bg-red-900/30"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </TabsContent>
   );
 }
 

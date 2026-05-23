@@ -2505,6 +2505,171 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.status(404).json({ message: "No payment cards configured" });
   });
 
+  // ── Daily Token Claim ────────────────────────────────────────────────────
+
+  app.get("/api/user/daily-token-status", async (req, res) => {
+    try {
+      const userId = (req.session as any)?.userId;
+      if (!userId) return res.status(401).json({ message: "Not authenticated" });
+
+      const lastClaim = await storage.getLastDailyTokenClaim(userId);
+      if (!lastClaim) return res.json({ canClaim: true, nextClaimAt: null });
+
+      const now = new Date();
+      const nextClaimAt = new Date(lastClaim.claimedAt.getTime() + 24 * 60 * 60 * 1000);
+      const canClaim = now >= nextClaimAt;
+
+      res.json({
+        canClaim,
+        nextClaimAt: canClaim ? null : nextClaimAt.toISOString(),
+        lastClaimedAt: lastClaim.claimedAt.toISOString(),
+      });
+    } catch (error) {
+      console.error("Daily token status error:", error);
+      res.status(500).json({ message: "Failed to check daily token status" });
+    }
+  });
+
+  app.post("/api/user/claim-daily-tokens", async (req, res) => {
+    try {
+      const userId = (req.session as any)?.userId;
+      if (!userId) return res.status(401).json({ message: "Not authenticated" });
+
+      const lastClaim = await storage.getLastDailyTokenClaim(userId);
+      if (lastClaim) {
+        const nextClaimAt = new Date(lastClaim.claimedAt.getTime() + 24 * 60 * 60 * 1000);
+        if (new Date() < nextClaimAt) {
+          return res.status(400).json({
+            message: "Daily tokens already claimed",
+            nextClaimAt: nextClaimAt.toISOString(),
+          });
+        }
+      }
+
+      const DAILY_TOKENS = 3;
+      await storage.updateUserTokenBalance(userId, DAILY_TOKENS);
+      await storage.createDailyTokenClaim(userId);
+      await storage.createTokenTransaction({
+        userId,
+        transactionType: "bonus",
+        amount: DAILY_TOKENS,
+        description: "Daily free tokens",
+        status: "completed",
+      });
+
+      const newBalance = await storage.getUserTokenBalance(userId);
+      res.json({ message: "Daily tokens claimed!", tokensAdded: DAILY_TOKENS, newBalance });
+    } catch (error) {
+      console.error("Claim daily tokens error:", error);
+      res.status(500).json({ message: "Failed to claim daily tokens" });
+    }
+  });
+
+  // ── Promo Code Redemption (user) ────────────────────────────────────────
+
+  app.post("/api/user/redeem-promo", async (req, res) => {
+    try {
+      const userId = (req.session as any)?.userId;
+      if (!userId) return res.status(401).json({ message: "Not authenticated" });
+
+      const { code } = req.body;
+      if (!code) return res.status(400).json({ message: "Promo code required" });
+
+      const promoCode = await storage.getPromoCodeByCode(code);
+      if (!promoCode || !promoCode.isActive) {
+        return res.status(404).json({ message: "Invalid or inactive promo code" });
+      }
+
+      if (promoCode.expiresAt && new Date() > new Date(promoCode.expiresAt)) {
+        return res.status(400).json({ message: "Promo code has expired" });
+      }
+
+      if (promoCode.maxUses !== null && promoCode.usesCount >= promoCode.maxUses) {
+        return res.status(400).json({ message: "Promo code has reached its usage limit" });
+      }
+
+      const alreadyRedeemed = await storage.hasUserRedeemedPromoCode(userId, promoCode.id);
+      if (alreadyRedeemed) {
+        return res.status(400).json({ message: "Promo code already redeemed" });
+      }
+
+      await storage.updateUserTokenBalance(userId, promoCode.tokenAmount);
+      await storage.createPromoCodeRedemption(userId, promoCode.id);
+      await storage.incrementPromoCodeUses(promoCode.id);
+      await storage.createTokenTransaction({
+        userId,
+        transactionType: "bonus",
+        amount: promoCode.tokenAmount,
+        description: `Promo code: ${promoCode.code}`,
+        status: "completed",
+      });
+
+      const newBalance = await storage.getUserTokenBalance(userId);
+      res.json({
+        message: `${promoCode.tokenAmount} tokens added to your account!`,
+        tokensAdded: promoCode.tokenAmount,
+        newBalance,
+      });
+    } catch (error) {
+      console.error("Redeem promo error:", error);
+      res.status(500).json({ message: "Failed to redeem promo code" });
+    }
+  });
+
+  // ── Admin Promo Code Management ─────────────────────────────────────────
+
+  app.get("/api/admin/promo-codes", requireAuth, async (req, res) => {
+    try {
+      const codes = await storage.getPromoCodes();
+      res.json(codes);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch promo codes" });
+    }
+  });
+
+  app.post("/api/admin/promo-codes", requireAuth, async (req, res) => {
+    try {
+      const { code, tokenAmount, description, expiresAt, maxUses } = req.body;
+      if (!code || !tokenAmount) {
+        return res.status(400).json({ message: "Code and token amount required" });
+      }
+      const created = await storage.createPromoCode({
+        code,
+        tokenAmount: parseInt(tokenAmount),
+        description: description || null,
+        expiresAt: expiresAt ? new Date(expiresAt) : null,
+        maxUses: maxUses ? parseInt(maxUses) : null,
+        isActive: true,
+      });
+      res.status(201).json(created);
+    } catch (error: any) {
+      if (error.code === "23505") return res.status(400).json({ message: "Promo code already exists" });
+      res.status(500).json({ message: "Failed to create promo code" });
+    }
+  });
+
+  app.patch("/api/admin/promo-codes/:id", requireAuth, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const updated = await storage.updatePromoCode(id, req.body);
+      if (!updated) return res.status(404).json({ message: "Promo code not found" });
+      res.json(updated);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update promo code" });
+    }
+  });
+
+  app.delete("/api/admin/promo-codes/:id", requireAuth, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const deleted = await storage.deletePromoCode(id);
+      if (!deleted) return res.status(404).json({ message: "Promo code not found" });
+      res.json({ message: "Promo code deleted" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete promo code" });
+    }
+  });
+
   const httpServer = createServer(app);
 
   return httpServer;
