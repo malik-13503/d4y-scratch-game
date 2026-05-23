@@ -1726,24 +1726,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // User session management and authentication
-  const pgSession = connectPgSimple(session);
-  
-  app.use(session({
-    store: new pgSession({
-      conString: process.env.DATABASE_URL,
-      tableName: 'user_sessions',
-      createTableIfMissing: true
-    }),
-    secret: process.env.SESSION_SECRET || 'your-secret-key',
-    resave: false,
-    saveUninitialized: false,
-    cookie: {
-      secure: process.env.NODE_ENV === 'production',
-      httpOnly: true,
-      maxAge: 30 * 24 * 60 * 60 * 1000 // 30 days
-    }
-  }));
+  // Session is already configured by setupAuth above - do not add a second session middleware
 
   // Get current user endpoint
   app.get("/api/user", async (req, res) => {
