@@ -16,7 +16,7 @@ function getMerchantAuth() {
 }
 
 function getEnvironment() {
-  return process.env.NODE_ENV === "production"
+  return process.env.AUTHORIZE_NET_ENV === "production"
     ? Constants.endpoint.production
     : Constants.endpoint.sandbox;
 }
