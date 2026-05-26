@@ -1,615 +1,617 @@
 import { useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
-  Home,
-  Gamepad2,
-  DollarSign,
-  Gift,
-  Trophy,
-  Bell,
-  User,
-  Zap,
-  ChevronRight,
-  Star,
-  Shield,
-  CheckCircle,
-  TrendingUp,
-  Users,
-  Coins,
-  Crown,
-  Flame,
-  Play,
-  HelpCircle,
-  LogOut,
-  ArrowRight,
-  Timer,
-  Sparkles,
+  Zap, Trophy, Gift, Users, Shield, CheckCircle,
+  Star, Crown, Flame, Bell, LogOut, Coins,
+  ArrowRight, ChevronRight, Gamepad2, DollarSign,
+  Home, User, TrendingUp, Lock, BarChart3, Timer,
+  Sparkles, Play, Hash, CreditCard,
 } from "lucide-react";
 import { logout } from "@/lib/auth";
 import type { Game } from "@shared/schema";
 import logoPath from "@assets/logo_1777237644041.png";
 
-// ── Dummy live winners ──────────────────────────────────────────────────────
-const DUMMY_WINNERS = [
-  { name: "PlugzKing",  prize: "$750 Cash",  ago: "1m ago",  color: "from-green-500 to-emerald-600" },
-  { name: "WinnerBoss", prize: "$500 Cash",  ago: "2m ago",  color: "from-green-500 to-emerald-600" },
-  { name: "LuckyAce",   prize: "$250 Cash",  ago: "5m ago",  color: "from-green-500 to-emerald-600" },
-  { name: "JackpotPro", prize: "$1,000",     ago: "8m ago",  color: "from-yellow-500 to-orange-500" },
-  { name: "SpinMaster", prize: "PS5",        ago: "12m ago", color: "from-blue-500 to-indigo-600" },
-  { name: "TokenKing",  prize: "$350 Cash",  ago: "15m ago", color: "from-green-500 to-emerald-600" },
-  { name: "PrizePro",   prize: "65\" TV",    ago: "18m ago", color: "from-purple-500 to-violet-600" },
+/* ─── DUMMY DATA ───────────────────────────────────────────────── */
+const TICKER_ITEMS = [
+  "🏆 PlugzKing just won $750 Cash!",
+  "🎮 SpinMaster won a PS5 Console!",
+  "💵 LuckyAce claimed $1,000!",
+  "📺 WinnerBoss won a 65\" 4K TV!",
+  "🎁 TokenPro won VIP Gift Pack!",
+  "💰 JackAce just won $500 Cash!",
+  "🔥 PrizePro claimed $250 Cash!",
 ];
 
-// ── Dummy featured prizes ───────────────────────────────────────────────────
-const DUMMY_PRIZES = [
-  {
-    tag: "CASH",
-    label: "$500",
-    sublabel: "CASH PRIZE",
-    bg: "from-green-900 to-green-800",
-    border: "border-green-500/50",
-    accent: "text-green-400",
-    badgeBg: "bg-green-500/20 border-green-500/40",
-    icon: DollarSign,
-    iconBg: "bg-green-500",
-    visual: "💵",
-  },
-  {
-    tag: "CASH",
-    label: "$250",
-    sublabel: "CASH PRIZE",
-    bg: "from-emerald-900 to-green-800",
-    border: "border-emerald-500/50",
-    accent: "text-emerald-400",
-    badgeBg: "bg-emerald-500/20 border-emerald-500/40",
-    icon: DollarSign,
-    iconBg: "bg-emerald-500",
-    visual: "💵",
-  },
-  {
-    tag: "PS5",
-    label: "PlayStation 5",
-    sublabel: "GAMING CONSOLE",
-    bg: "from-slate-900 to-blue-950",
-    border: "border-blue-500/40",
-    accent: "text-blue-300",
-    badgeBg: "bg-blue-500/20 border-blue-500/40",
-    icon: Gamepad2,
-    iconBg: "bg-blue-600",
-    visual: "🎮",
-  },
-  {
-    tag: "65\" TV",
-    label: "4K Smart TV",
-    sublabel: "65-INCH UHD",
-    bg: "from-purple-950 to-indigo-950",
-    border: "border-purple-500/40",
-    accent: "text-purple-300",
-    badgeBg: "bg-purple-500/20 border-purple-500/40",
-    icon: Zap,
-    iconBg: "bg-purple-600",
-    visual: "📺",
-  },
-  {
-    tag: "VIP PACK",
-    label: "Cash + Gift Cards",
-    sublabel: "VIP BUNDLE",
-    bg: "from-yellow-950 to-orange-950",
-    border: "border-yellow-500/50",
-    accent: "text-yellow-400",
-    badgeBg: "bg-yellow-500/20 border-yellow-500/40",
-    icon: Crown,
-    iconBg: "bg-yellow-500",
-    visual: "🎁",
-  },
+const LIVE_WINNERS = [
+  { name: "PlugzKing",  prize: "$750",    type: "Cash Prize",    color: "#10b981", emoji: "💵", ago: "Just now" },
+  { name: "SpinMaster", prize: "PS5",     type: "PlayStation 5", color: "#6366f1", emoji: "🎮", ago: "2 min ago" },
+  { name: "LuckyAce",   prize: "$1,000",  type: "Cash Prize",    color: "#10b981", emoji: "💵", ago: "5 min ago" },
+  { name: "WinnerBoss", prize: "$500",    type: "Cash Prize",    color: "#10b981", emoji: "💵", ago: "8 min ago" },
+  { name: "JackAce",    prize: "65\" TV", type: "Smart TV",      color: "#8b5cf6", emoji: "📺", ago: "12 min ago" },
+  { name: "TokenKing",  prize: "$250",    type: "Cash Prize",    color: "#10b981", emoji: "💵", ago: "15 min ago" },
 ];
 
-// ── Spinning Wheel component ────────────────────────────────────────────────
-function SpinningWheel({ spinning }: { spinning: boolean }) {
-  const segments = [
-    "#FF2D2D","#FF7A00","#FFD700","#00CC44",
-    "#00AAFF","#7B2FFF","#FF2D9A","#FF2D2D",
-    "#FF7A00","#FFD700","#00CC44","#00AAFF",
+const FEATURED_PRIZES = [
+  { emoji: "💵", tag: "CASH", title: "$500",    sub: "Cash Prize",    from: "#064e3b", to: "#065f46", border: "#10b981", glow: "rgba(16,185,129,0.3)" },
+  { emoji: "💵", tag: "CASH", title: "$250",    sub: "Cash Prize",    from: "#064e3b", to: "#047857", border: "#10b981", glow: "rgba(16,185,129,0.2)" },
+  { emoji: "🎮", tag: "PS5",  title: "PlayStation 5", sub: "Gaming Console", from: "#1e1b4b", to: "#1d2060", border: "#6366f1", glow: "rgba(99,102,241,0.3)" },
+  { emoji: "📺", tag: "TV",   title: "65\" Smart TV", sub: "4K UHD Display", from: "#2d1b69", to: "#3730a3", border: "#8b5cf6", glow: "rgba(139,92,246,0.3)" },
+  { emoji: "🎁", tag: "VIP",  title: "VIP Pack", sub: "Cash + Gift Cards", from: "#451a03", to: "#78350f", border: "#f59e0b", glow: "rgba(245,158,11,0.3)" },
+];
+
+const HOW_IT_WORKS = [
+  { step: "01", icon: Coins,     color: "#8b5cf6", label: "Buy Tokens",      desc: "Purchase token packs to fuel your entries." },
+  { step: "02", icon: BarChart3, color: "#10b981", label: "Track Progress",  desc: "Watch the token bar fill toward the jackpot." },
+  { step: "03", icon: Lock,      color: "#f59e0b", label: "Game Auto-Closes", desc: "When the goal is hit, entries close instantly." },
+  { step: "04", icon: Trophy,    color: "#ec4899", label: "Winner Picked",   desc: "A verified winner is chosen automatically." },
+];
+
+/* ─── PRIZE SHOWCASE (hero right panel) ────────────────────────── */
+function PrizeShowcase() {
+  const cards = [
+    { emoji: "💵", amount: "$1,000", label: "CASH PRIZE",    from: "#022c22", to: "#064e3b", border: "#10b981", glow: "rgba(16,185,129,0.5)", rotate: "-6deg", tx: "-24px", ty: "30px", z: 1 },
+    { emoji: "🎮", amount: "PS5",    label: "CONSOLE",       from: "#1e1b4b", to: "#2e1065", border: "#8b5cf6", glow: "rgba(139,92,246,0.5)", rotate: "5deg",  tx: "20px",  ty: "15px", z: 2 },
+    { emoji: "📺", amount: "65\" TV", label: "SMART TV",     from: "#172554", to: "#1e3a8a", border: "#3b82f6", glow: "rgba(59,130,246,0.5)", rotate: "-2deg", tx: "0px",   ty: "0px",  z: 3 },
   ];
+
   return (
-    <div className="relative flex items-center justify-center">
-      {/* Outer glow ring */}
-      <div className="absolute inset-0 rounded-full"
-           style={{ background: "radial-gradient(circle, rgba(255,200,0,0.25) 0%, transparent 70%)" }} />
-      {/* Wheel */}
-      <div
-        className="relative rounded-full shadow-2xl border-4 border-yellow-400/80 overflow-hidden"
-        style={{
-          width: 220, height: 220,
-          background: `conic-gradient(${segments.map((c, i) => `${c} ${(i/segments.length)*360}deg ${((i+1)/segments.length)*360}deg`).join(", ")})`,
-          animation: spinning ? "spin 1.5s linear infinite" : "spin 4s linear infinite",
-          boxShadow: "0 0 40px rgba(255,200,0,0.5), 0 0 80px rgba(120,0,255,0.3)",
-        }}
-      >
-        {/* Spoke lines */}
-        {segments.map((_, i) => (
-          <div key={i}
-               className="absolute top-1/2 left-1/2 w-px bg-black/30"
-               style={{
-                 height: "50%",
-                 transformOrigin: "top center",
-                 transform: `translateX(-50%) rotate(${(i / segments.length) * 360}deg)`,
-               }}
-          />
-        ))}
-        {/* Center hub */}
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="w-16 h-16 rounded-full bg-[#1a0a30] border-4 border-yellow-400 flex flex-col items-center justify-center shadow-xl">
-            <span className="text-yellow-400 font-black text-xs leading-none">SPIN</span>
-            <span className="text-yellow-300 font-black text-xs leading-none">TO WIN</span>
+    <div className="relative h-72 sm:h-80 w-full max-w-xs mx-auto">
+      <style>{`
+        @keyframes floatA { 0%,100%{transform:rotate(-6deg) translate(-24px,30px) translateY(0)} 50%{transform:rotate(-6deg) translate(-24px,30px) translateY(-10px)} }
+        @keyframes floatB { 0%,100%{transform:rotate(5deg) translate(20px,15px) translateY(0)} 50%{transform:rotate(5deg) translate(20px,15px) translateY(-14px)} }
+        @keyframes floatC { 0%,100%{transform:rotate(-2deg) translate(0px,0px) translateY(0)} 50%{transform:rotate(-2deg) translate(0px,0px) translateY(-8px)} }
+        @keyframes ticker { 0%{transform:translateX(0)} 100%{transform:translateX(-50%)} }
+        @keyframes shimmer { 0%{background-position:-200% center} 100%{background-position:200% center} }
+        @keyframes pulseGlow { 0%,100%{opacity:0.5} 50%{opacity:1} }
+        @keyframes fadeSlideUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+        @keyframes countUp { from{opacity:0;transform:scale(0.8)} to{opacity:1;transform:scale(1)} }
+        .float-a { animation: floatA 4s ease-in-out infinite; }
+        .float-b { animation: floatB 4.5s ease-in-out infinite 0.5s; }
+        .float-c { animation: floatC 3.8s ease-in-out infinite 1s; }
+        .ticker-track { animation: ticker 25s linear infinite; display:flex; width:max-content; }
+        .shimmer-text { background: linear-gradient(90deg,#fff 0%,#f59e0b 25%,#fff 50%,#f59e0b 75%,#fff 100%); background-size:200% auto; -webkit-background-clip:text; -webkit-text-fill-color:transparent; animation:shimmer 3s linear infinite; }
+        .card-glow-green { box-shadow: 0 0 30px rgba(16,185,129,0.4), 0 20px 60px rgba(0,0,0,0.5); }
+        .card-glow-violet { box-shadow: 0 0 30px rgba(139,92,246,0.4), 0 20px 60px rgba(0,0,0,0.5); }
+        .card-glow-blue   { box-shadow: 0 0 30px rgba(59,130,246,0.4), 0 20px 60px rgba(0,0,0,0.5); }
+        .card-glow-gold   { box-shadow: 0 0 30px rgba(245,158,11,0.4), 0 20px 60px rgba(0,0,0,0.5); }
+        .card-glow-pink   { box-shadow: 0 0 30px rgba(236,72,153,0.4), 0 20px 60px rgba(0,0,0,0.5); }
+        .neon-border-violet { box-shadow: 0 0 0 1px rgba(139,92,246,0.5), 0 0 20px rgba(139,92,246,0.2); }
+        .fade-up { animation: fadeSlideUp 0.6s ease both; }
+        .count-up { animation: countUp 0.8s cubic-bezier(0.34,1.56,0.64,1) both; }
+      `}</style>
+      {cards.map((c, i) => (
+        <div
+          key={i}
+          className={`absolute inset-0 rounded-2xl border overflow-hidden ${["float-a","float-b","float-c"][i]}`}
+          style={{
+            background: `linear-gradient(135deg, ${c.from}, ${c.to})`,
+            borderColor: c.border,
+            boxShadow: `0 0 25px ${c.glow}, 0 20px 50px rgba(0,0,0,0.6)`,
+            zIndex: c.z,
+          }}
+        >
+          <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent" />
+          <div className="relative h-full flex flex-col items-center justify-center p-6 text-center space-y-2">
+            <div className="text-6xl leading-none">{c.emoji}</div>
+            <div className="text-white font-black text-2xl sm:text-3xl leading-none">{c.amount}</div>
+            <div className="text-xs font-bold tracking-widest uppercase" style={{ color: c.border }}>{c.label}</div>
+            <div className="mt-1 px-4 py-1.5 rounded-full text-xs font-black text-black"
+                 style={{ background: c.border }}>ENTER NOW</div>
           </div>
         </div>
-      </div>
-      {/* Pointer */}
-      <div className="absolute -top-2 left-1/2 -translate-x-1/2 z-10">
-        <div className="w-0 h-0"
-             style={{ borderLeft: "10px solid transparent", borderRight: "10px solid transparent", borderTop: "22px solid #FFD700", filter: "drop-shadow(0 0 6px #FFD700)" }} />
-      </div>
-      {/* Lights around wheel */}
-      {[...Array(16)].map((_, i) => (
-        <div key={i}
-             className="absolute w-3 h-3 rounded-full animate-pulse"
-             style={{
-               background: i % 2 === 0 ? "#FFD700" : "#FF2D9A",
-               transform: `rotate(${i * 22.5}deg) translateY(-120px)`,
-               animationDelay: `${i * 0.1}s`,
-               boxShadow: `0 0 6px ${i % 2 === 0 ? "#FFD700" : "#FF2D9A"}`,
-             }}
-        />
       ))}
     </div>
   );
 }
 
+/* ─── GAME CARD ─────────────────────────────────────────────────── */
+function GameCard({ game, onPlay }: { game: Game; onPlay: () => void }) {
+  const pct = game.tokenThreshold > 0 ? Math.min((game.tokensCollected / game.tokenThreshold) * 100, 100) : 0;
+  const remaining = Math.max(game.tokenThreshold - game.tokensCollected, 0);
+  const isHot = pct >= 80;
+  const isAlmost = pct >= 95;
+
+  return (
+    <div
+      onClick={onPlay}
+      className="group relative bg-[#0e0d1f] border border-white/8 rounded-2xl overflow-hidden cursor-pointer hover:border-violet-500/40 transition-all duration-300 hover:scale-[1.02] hover:-translate-y-1"
+      style={{ boxShadow: isHot ? "0 0 25px rgba(139,92,246,0.2)" : "0 4px 30px rgba(0,0,0,0.4)" }}
+    >
+      {/* Top accent strip */}
+      <div className={`h-0.5 w-full ${isAlmost ? "bg-gradient-to-r from-red-500 via-orange-400 to-red-500" : isHot ? "bg-gradient-to-r from-orange-500 to-amber-400" : "bg-gradient-to-r from-violet-600 to-purple-500"}`} />
+
+      <div className="p-5">
+        {/* Header row */}
+        <div className="flex items-start justify-between mb-4">
+          <div className="flex-1 min-w-0 pr-3">
+            <div className="flex items-center space-x-2 mb-1.5">
+              <span className="flex items-center space-x-1 bg-green-500/15 border border-green-500/30 text-green-300 text-[10px] font-black px-2 py-0.5 rounded-full">
+                <span className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse inline-block" />
+                <span>LIVE</span>
+              </span>
+              <span className="text-gray-600 text-[10px] font-mono bg-white/5 px-2 py-0.5 rounded-full">{game.code}</span>
+            </div>
+            <h3 className="text-white font-black text-lg leading-tight truncate">{game.name}</h3>
+            {game.description && <p className="text-gray-500 text-xs mt-1 line-clamp-2">{game.description}</p>}
+          </div>
+          <div className="shrink-0 text-right">
+            <div className="text-yellow-400 font-black text-xl leading-none">${game.prizeValue}</div>
+            <div className="text-gray-600 text-xs">prize value</div>
+          </div>
+        </div>
+
+        {/* Prize image */}
+        {game.prizeImageUrl ? (
+          <div className="relative h-32 rounded-xl overflow-hidden bg-gradient-to-br from-slate-800 to-slate-900 mb-4 flex items-center justify-center border border-white/5 group-hover:border-violet-500/20 transition-colors">
+            <img src={game.prizeImageUrl} alt={game.name} className="h-full w-full object-contain p-3 drop-shadow-2xl" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
+          </div>
+        ) : (
+          <div className="h-24 rounded-xl bg-gradient-to-br from-violet-900/30 to-purple-900/30 border border-violet-500/10 mb-4 flex items-center justify-center">
+            <span className="text-5xl">🎁</span>
+          </div>
+        )}
+
+        {/* Progress */}
+        <div className="space-y-2 mb-4">
+          <div className="flex justify-between items-center text-xs">
+            <span className="text-gray-400 font-medium">{game.tokensCollected.toLocaleString()} tokens collected</span>
+            <span className={`font-bold ${isAlmost ? "text-red-400" : isHot ? "text-orange-400" : "text-violet-400"}`}>
+              {Math.round(pct)}%
+            </span>
+          </div>
+          <div className="relative h-3 bg-white/6 rounded-full overflow-hidden">
+            <div
+              className={`h-full rounded-full transition-all duration-700 relative overflow-hidden ${
+                isAlmost ? "bg-gradient-to-r from-red-600 to-orange-500" :
+                isHot    ? "bg-gradient-to-r from-orange-500 to-amber-400" :
+                           "bg-gradient-to-r from-violet-600 to-purple-400"
+              }`}
+              style={{ width: `${pct}%` }}
+            >
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-pulse" />
+            </div>
+          </div>
+          <div className="flex justify-between text-xs text-gray-600">
+            <span>{remaining.toLocaleString()} tokens until winner</span>
+            <span>{game.tokenThreshold.toLocaleString()} goal</span>
+          </div>
+        </div>
+
+        {/* Cost + CTA */}
+        <div className="flex items-center justify-between bg-white/3 border border-white/6 rounded-xl px-3 py-2 mb-3">
+          <div className="flex items-center space-x-1.5">
+            <Coins className="h-3.5 w-3.5 text-yellow-400" />
+            <span className="text-gray-400 text-xs">Each spin</span>
+          </div>
+          <span className="text-yellow-300 font-black text-sm">{game.tokensPerPlay} TOKENS</span>
+        </div>
+
+        <button
+          onClick={(e) => { e.stopPropagation(); onPlay(); }}
+          className="w-full py-3 rounded-xl font-black text-sm transition-all duration-200 group-hover:scale-[1.02]"
+          style={{
+            background: "linear-gradient(135deg, #7c3aed, #9333ea)",
+            boxShadow: "0 4px 20px rgba(124,58,237,0.4)",
+            color: "white",
+          }}
+        >
+          <Zap className="h-4 w-4 inline mr-1.5 -mt-0.5" />
+          SPIN NOW — {game.tokensPerPlay} TOKENS
+        </button>
+      </div>
+    </div>
+  );
+}
+
+/* ─── MAIN PAGE ──────────────────────────────────────────────────── */
 export default function HomePage() {
   const [, setLocation] = useLocation();
-  const [winnerIndex, setWinnerIndex] = useState(0);
-  const [liveWinners, setLiveWinners] = useState(DUMMY_WINNERS);
-  const [isSpinning, setIsSpinning] = useState(false);
+  const [winnerTick, setWinnerTick] = useState(0);
 
-  const { data: user } = useQuery<any>({ queryKey: ["/api/user"] });
-  const { data: tokenData } = useQuery<{ tokenBalance: number }>({
-    queryKey: ["/api/user/token-balance"],
-    refetchInterval: 15000,
-  });
-  const { data: games, isLoading } = useQuery<Game[]>({
-    queryKey: ["/api/games"],
-    refetchInterval: 20000,
-  });
+  const { data: user }      = useQuery<any>({ queryKey: ["/api/user"] });
+  const { data: tokenData } = useQuery<{ tokenBalance: number }>({ queryKey: ["/api/user/token-balance"], refetchInterval: 15000 });
+  const { data: games, isLoading } = useQuery<Game[]>({ queryKey: ["/api/games"], refetchInterval: 20000 });
 
-  const activeGames = games?.filter((g) => g.isActive) ?? [];
+  const activeGames  = games?.filter((g) => g.isActive) ?? [];
   const tokenBalance = tokenData?.tokenBalance ?? 0;
-  const username = (user as any)?.username ?? (user as any)?.email?.split("@")[0] ?? "Player";
+  const username     = (user as any)?.username ?? (user as any)?.email?.split("@")[0] ?? "Player";
   const avatarLetter = username[0]?.toUpperCase() ?? "P";
-  const totalGames = activeGames.length;
 
-  // Rotate featured winner card every 4s
   useEffect(() => {
-    const t = setInterval(() => {
-      setWinnerIndex((p) => (p + 1) % DUMMY_WINNERS.length);
-    }, 4000);
-    return () => clearInterval(t);
-  }, []);
-
-  // Occasionally add a new winner to the feed
-  useEffect(() => {
-    const names = ["CashMaster","LuckyDog","PlugzPro","WheelWiz","TokenAce","BigWin99","JackAce"];
-    const prizes = ["$750","$200","$500","PS5","65\" TV","$1,000","VIP Pack"];
-    const t = setInterval(() => {
-      setLiveWinners((prev) => [
-        { name: names[Math.floor(Math.random() * names.length)],
-          prize: prizes[Math.floor(Math.random() * prizes.length)] + " Prize",
-          ago: "Just now",
-          color: "from-green-500 to-emerald-600" },
-        ...prev.slice(0, 6),
-      ]);
-    }, 7000);
+    const t = setInterval(() => setWinnerTick((p) => (p + 1) % LIVE_WINNERS.length), 3500);
     return () => clearInterval(t);
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#08080f] text-white pb-20 md:pb-0">
-      <style>{`
-        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-        @keyframes ticker { 0%{transform:translateX(0)} 100%{transform:translateX(-50%)} }
-        @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-12px)} }
-        @keyframes glow { 0%,100%{opacity:0.7} 50%{opacity:1} }
-        .ticker-inner { animation: ticker 22s linear infinite; display:flex; width:max-content; }
-        .float-anim { animation: float 3s ease-in-out infinite; }
-        .glow-text { animation: glow 2s ease-in-out infinite; }
-        .neon-border { box-shadow: 0 0 12px rgba(168,85,247,0.5), 0 0 30px rgba(168,85,247,0.2); }
-        .gold-glow { box-shadow: 0 0 20px rgba(255,215,0,0.4), 0 0 50px rgba(255,140,0,0.2); }
-      `}</style>
+    <div className="min-h-screen bg-[#060611] text-white overflow-x-hidden">
 
-      {/* ── TOP HEADER ──────────────────────────────────────────────────── */}
-      <header className="sticky top-0 z-40 bg-[#0d0c1a]/98 backdrop-blur-xl border-b border-purple-500/20">
-        <div className="max-w-7xl mx-auto px-3 sm:px-5 py-2.5 flex items-center justify-between gap-2">
-          {/* Logo */}
-          <img src={logoPath} alt="Prize Plugz" className="h-12 sm:h-14 w-auto object-contain shrink-0" />
+      {/* ── LIVE TICKER ─────────────────────────────────────────── */}
+      <div className="bg-[#0a0918] border-b border-violet-500/10 py-2 overflow-hidden relative">
+        <div className="absolute left-0 top-0 bottom-0 w-16 bg-gradient-to-r from-[#0a0918] to-transparent z-10" />
+        <div className="absolute right-0 top-0 bottom-0 w-16 bg-gradient-to-l from-[#0a0918] to-transparent z-10" />
+        <div className="ticker-track">
+          {[...TICKER_ITEMS, ...TICKER_ITEMS].map((item, i) => (
+            <span key={i} className="inline-flex items-center space-x-2 mx-8 text-sm text-gray-300 font-medium whitespace-nowrap">
+              <span className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse" />
+              <span>{item}</span>
+            </span>
+          ))}
+        </div>
+      </div>
 
-          {/* Center CTA */}
-          <button className="hidden sm:flex items-center space-x-2 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 text-white font-bold px-4 py-2 rounded-xl border border-green-400/40 shadow-lg transition-all text-sm">
-            <Coins className="h-4 w-4 text-yellow-300" />
-            <div className="text-left">
-              <p className="text-xs font-black leading-none">CASH GIVEAWAYS</p>
-              <p className="text-green-200 text-xs leading-none font-medium">Every Single Day!</p>
-            </div>
-          </button>
+      {/* ── HEADER ──────────────────────────────────────────────── */}
+      <header className="sticky top-0 z-50 bg-[#060611]/95 backdrop-blur-2xl border-b border-white/5">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between gap-3">
+          <img src={logoPath} alt="Prize Plugz" className="h-11 sm:h-13 w-auto object-contain shrink-0" />
 
-          {/* Right */}
+          <div className="hidden md:flex items-center space-x-1 bg-[#0e0d1f] border border-white/6 rounded-full p-1">
+            {[
+              { label: "Home",    path: "/",            icon: Home },
+              { label: "Games",   path: "/games",       icon: Gamepad2 },
+              { label: "My Entries", path: "/my-numbers", icon: Hash },
+              { label: "Transactions", path: "/transactions", icon: CreditCard },
+            ].map(({ label, path, icon: Icon }) => (
+              <button key={label} onClick={() => setLocation(path)}
+                className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all ${
+                  path === "/" ? "bg-violet-600 text-white shadow-lg" : "text-gray-400 hover:text-white hover:bg-white/5"
+                }`}>
+                <Icon className="h-3.5 w-3.5" />
+                <span className="hidden lg:inline">{label}</span>
+              </button>
+            ))}
+          </div>
+
           <div className="flex items-center gap-2 sm:gap-3">
-            {/* Token balance */}
-            <div className="flex items-center space-x-1.5 bg-[#1e1d2e] border border-yellow-500/30 rounded-full px-3 py-1.5 gold-glow">
-              <Coins className="h-4 w-4 text-yellow-400 shrink-0" />
+            <div className="flex items-center space-x-1.5 bg-[#13122a] border border-yellow-500/25 rounded-full px-3 py-2 cursor-pointer hover:border-yellow-400/50 transition-colors"
+                 onClick={() => setLocation("/tokens")}
+                 style={{ boxShadow: "0 0 15px rgba(245,158,11,0.15)" }}>
+              <Coins className="h-4 w-4 text-yellow-400" />
               <span className="text-yellow-300 font-black text-sm">{tokenBalance}</span>
+              <span className="text-yellow-600 text-xs font-medium hidden sm:inline">tokens</span>
             </div>
-            {/* Bell */}
-            <div className="relative p-2 bg-[#1e1d2e] border border-white/10 rounded-full cursor-pointer hover:bg-white/10 transition">
+
+            <button onClick={() => setLocation("/tokens")}
+              className="hidden sm:flex items-center space-x-1.5 bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 text-white font-bold text-xs px-4 py-2 rounded-full transition-all hover:scale-105 shadow-lg"
+              style={{ boxShadow: "0 0 20px rgba(139,92,246,0.4)" }}>
+              <span>+ Add Tokens</span>
+            </button>
+
+            <div className="relative cursor-pointer p-2 bg-[#13122a] border border-white/8 rounded-full hover:bg-white/8 transition">
               <Bell className="h-4 w-4 text-gray-400" />
-              <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-red-500 rounded-full text-[9px] font-bold flex items-center justify-center">3</span>
+              <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-red-500 rounded-full text-[9px] font-black flex items-center justify-center">3</span>
             </div>
-            {/* User */}
-            <div className="flex items-center space-x-2 cursor-pointer" onClick={() => setLocation("/dashboard")}>
-              <div className="w-9 h-9 rounded-full bg-gradient-to-br from-purple-500 to-violet-600 flex items-center justify-center text-white font-black text-sm border-2 border-purple-400/50 shadow-lg">
+
+            <div className="flex items-center space-x-2 cursor-pointer group" onClick={() => setLocation("/dashboard")}>
+              <div className="w-9 h-9 rounded-full bg-gradient-to-br from-violet-500 to-purple-700 flex items-center justify-center text-white font-black text-sm border-2 border-violet-400/30 group-hover:border-violet-400/60 transition-all shadow-lg"
+                   style={{ boxShadow: "0 0 15px rgba(139,92,246,0.3)" }}>
                 {avatarLetter}
               </div>
-              <div className="hidden md:block text-left">
-                <p className="text-gray-400 text-xs leading-none">Welcome Back,</p>
+              <div className="hidden lg:block">
+                <p className="text-gray-500 text-[10px] leading-none">Welcome back,</p>
                 <p className="text-white font-black text-sm leading-none flex items-center gap-1">
                   {username} <Crown className="h-3.5 w-3.5 text-yellow-400" />
                 </p>
               </div>
             </div>
-            {/* Logout */}
-            <button onClick={() => logout()} className="p-2 text-gray-600 hover:text-red-400 hover:bg-red-500/10 rounded-full transition">
+
+            <button onClick={() => logout()} className="p-2 text-gray-600 hover:text-red-400 hover:bg-red-500/8 rounded-full transition">
               <LogOut className="h-4 w-4" />
             </button>
           </div>
         </div>
       </header>
 
-      {/* ── HERO BANNER ─────────────────────────────────────────────────── */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-[#0d0b25] via-[#150d30] to-[#0a0a18] py-8 sm:py-12 px-4 sm:px-6">
-        {/* BG glow orbs */}
-        <div className="absolute top-0 left-1/4 w-96 h-96 bg-purple-600/20 rounded-full blur-3xl" />
-        <div className="absolute bottom-0 right-1/4 w-80 h-80 bg-blue-600/15 rounded-full blur-3xl" />
-        <div className="absolute inset-0 opacity-10"
-             style={{ backgroundImage: "radial-gradient(circle at 50% 50%, rgba(120,40,255,0.4) 0%, transparent 60%)" }} />
+      {/* ── HERO ────────────────────────────────────────────────── */}
+      <section className="relative overflow-hidden py-12 sm:py-20 px-4 sm:px-6">
+        {/* Ambient background */}
+        <div className="absolute inset-0 bg-gradient-to-br from-[#0d0b25] via-[#0a0918] to-[#060611]" />
+        <div className="absolute top-0 right-0 w-2/3 h-full bg-gradient-to-l from-violet-600/8 to-transparent" />
+        <div className="absolute bottom-0 left-0 w-1/2 h-2/3 bg-gradient-to-tr from-purple-900/15 to-transparent" />
+        <div className="absolute inset-0" style={{ backgroundImage: "radial-gradient(ellipse at 30% 50%, rgba(139,92,246,0.12) 0%, transparent 60%), radial-gradient(ellipse at 80% 20%, rgba(236,72,153,0.08) 0%, transparent 50%)" }} />
 
         <div className="relative max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-10 lg:gap-16 items-center">
 
-            {/* LEFT: Headline */}
-            <div className="space-y-5 text-center md:text-left">
-              {/* Players badge */}
-              <div className="inline-flex items-center space-x-2 bg-white/5 border border-white/10 rounded-full px-4 py-2">
-                <div className="flex -space-x-2">
-                  {["bg-green-500","bg-blue-500","bg-purple-500"].map((c,i) => (
-                    <div key={i} className={`w-6 h-6 rounded-full ${c} border-2 border-[#0d0b25] flex items-center justify-center text-[8px] font-bold`}>
-                      {String.fromCharCode(65+i)}
-                    </div>
-                  ))}
-                </div>
-                <span className="text-white font-bold text-sm">12,458</span>
-                <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
-                <span className="text-gray-400 text-sm">Playing Now</span>
+            {/* Left: Headline */}
+            <div className="lg:col-span-3 space-y-7">
+              {/* Live pill */}
+              <div className="inline-flex items-center space-x-3 bg-green-500/10 border border-green-500/25 rounded-full px-4 py-2">
+                <span className="flex items-center space-x-1.5">
+                  <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
+                  <span className="text-green-300 font-bold text-sm">LIVE NOW</span>
+                </span>
+                <span className="text-gray-500 text-sm">·</span>
+                <span className="text-gray-300 text-sm font-medium">
+                  <span className="text-white font-bold">12,458</span> players online
+                </span>
               </div>
 
               {/* Main headline */}
-              <div>
-                <h1 className="text-5xl sm:text-6xl lg:text-7xl font-black leading-[0.9] tracking-tight">
-                  <span className="block text-white">SPIN.</span>
-                  <span className="block text-white">WIN.</span>
-                  <span className="block bg-gradient-to-r from-yellow-400 via-orange-400 to-yellow-300 bg-clip-text text-transparent glow-text">
-                    GET PAID.
-                  </span>
+              <div className="space-y-1">
+                <h1 className="font-black leading-[0.88] tracking-tight">
+                  <span className="block text-white" style={{ fontSize: "clamp(3rem, 8vw, 5.5rem)" }}>REAL PRIZES.</span>
+                  <span className="block text-white" style={{ fontSize: "clamp(3rem, 8vw, 5.5rem)" }}>REAL WINNERS.</span>
+                  <span className="block shimmer-text" style={{ fontSize: "clamp(3rem, 8vw, 5.5rem)" }}>EVERY DAY.</span>
                 </h1>
-                <p className="text-gray-300 text-base sm:text-lg mt-3 font-medium leading-snug">
-                  Real games. Real winners.<br />Real cash prizes.
-                </p>
               </div>
 
-              {/* CTAs */}
-              <div className="flex flex-col sm:flex-row gap-3 justify-center md:justify-start">
+              <p className="text-gray-400 text-lg leading-relaxed max-w-lg">
+                Spend tokens, watch the jackpot fill up, and win 
+                <span className="text-white font-semibold"> real cash and prizes</span>.
+                No numbers. No luck involved. Just pure, transparent giveaways.
+              </p>
+
+              {/* CTA buttons */}
+              <div className="flex flex-wrap gap-3">
                 <Button
                   onClick={() => activeGames[0] ? setLocation(`/game/${activeGames[0].id}`) : setLocation("/games")}
-                  className="bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-300 hover:to-orange-400 text-black font-black text-lg py-6 px-8 rounded-2xl gold-glow transition-all hover:scale-105 border border-yellow-300/50"
+                  className="group relative overflow-hidden text-black font-black text-base px-8 py-6 rounded-2xl transition-all hover:scale-105"
+                  style={{ background: "linear-gradient(135deg, #f59e0b, #f97316)", boxShadow: "0 0 30px rgba(245,158,11,0.4), 0 10px 40px rgba(245,158,11,0.2)" }}
                 >
-                  <Zap className="h-5 w-5 mr-2" /> SPIN NOW
+                  <div className="absolute inset-0 bg-white/20 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-500 skew-x-12" />
+                  <Zap className="h-5 w-5 mr-2 inline -mt-0.5" />
+                  SPIN NOW
                 </Button>
                 <Button
                   onClick={() => setLocation("/how-to-play")}
                   variant="outline"
-                  className="border-2 border-purple-500/60 text-purple-300 hover:bg-purple-500/20 hover:text-white font-black text-base py-6 px-6 rounded-2xl"
+                  className="border-2 border-white/15 text-white hover:bg-white/6 hover:border-white/30 font-bold text-base px-7 py-6 rounded-2xl transition-all"
                 >
-                  <Play className="h-4 w-4 mr-2 fill-current" /> HOW IT WORKS
+                  <Play className="h-4 w-4 mr-2 fill-current" />
+                  HOW IT WORKS
                 </Button>
               </div>
 
-              {/* Quick stats pills */}
-              <div className="flex flex-wrap gap-2 justify-center md:justify-start">
+              {/* Trust pills */}
+              <div className="flex flex-wrap gap-2">
                 {[
-                  { icon: "🏆", label: "$127K+ Paid Out" },
-                  { icon: "⚡", label: "Instant Results" },
-                  { icon: "🔒", label: "100% Secure" },
-                ].map(({ icon, label }) => (
-                  <span key={label} className="flex items-center space-x-1.5 bg-white/5 border border-white/10 rounded-full px-3 py-1.5 text-xs text-gray-300 font-semibold">
-                    <span>{icon}</span><span>{label}</span>
+                  { icon: "🏆", text: "$127K+ Paid Out" },
+                  { icon: "⚡", text: "Instant Results" },
+                  { icon: "🔒", text: "100% Transparent" },
+                  { icon: "🎯", text: "Auto Winner Selection" },
+                ].map(({ icon, text }) => (
+                  <span key={text} className="flex items-center space-x-1.5 bg-white/4 border border-white/8 rounded-full px-3 py-1.5 text-xs text-gray-400 font-medium">
+                    <span>{icon}</span><span>{text}</span>
                   </span>
                 ))}
               </div>
             </div>
 
-            {/* RIGHT: Wheel + prize display */}
-            <div className="flex flex-col items-center space-y-4">
-              {/* Wheel */}
-              <div className="float-anim">
-                <SpinningWheel spinning={isSpinning} />
-              </div>
-
-              {/* "WIN REAL CASH & PRIZES" neon */}
-              <div className="bg-gradient-to-r from-red-600 to-pink-600 border-2 border-red-400/60 rounded-2xl px-6 py-3 text-center neon-border w-full max-w-xs"
-                   style={{ boxShadow: "0 0 25px rgba(239,68,68,0.5), 0 0 60px rgba(239,68,68,0.2)" }}>
-                <p className="text-white font-black text-xl sm:text-2xl leading-tight tracking-wide">
-                  WIN REAL<br />
-                  <span className="text-yellow-300">CASH & PRIZES!</span>
-                </p>
-              </div>
-
-              {/* Token balance shortcut */}
-              <div className="flex items-center gap-3 w-full max-w-xs">
-                <div className="flex-1 bg-[#1a1830] border border-white/10 rounded-xl px-4 py-3 text-center">
-                  <p className="text-gray-500 text-xs font-medium mb-0.5">Your Tokens</p>
-                  <p className="text-yellow-300 font-black text-xl">{tokenBalance}</p>
+            {/* Right: Prize showcase */}
+            <div className="lg:col-span-2 flex flex-col items-center space-y-6">
+              <PrizeShowcase />
+              {/* Token CTA box */}
+              <div className="w-full max-w-xs bg-[#0e0d1f] border border-white/8 rounded-2xl p-4"
+                   style={{ boxShadow: "0 0 30px rgba(139,92,246,0.1)" }}>
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-gray-400 text-sm">Your Token Balance</span>
+                  <span className="text-yellow-300 font-black text-xl flex items-center gap-1.5">
+                    <Coins className="h-4 w-4 text-yellow-400" /> {tokenBalance}
+                  </span>
                 </div>
-                <Button
-                  onClick={() => setLocation("/tokens")}
-                  className="flex-1 bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white font-bold py-3 rounded-xl"
-                >
-                  + Add Tokens
-                </Button>
+                <button onClick={() => setLocation("/tokens")}
+                  className="w-full py-3 rounded-xl font-black text-sm text-white transition-all hover:scale-[1.02]"
+                  style={{ background: "linear-gradient(135deg, #7c3aed, #9333ea)", boxShadow: "0 0 20px rgba(124,58,237,0.3)" }}>
+                  + Buy More Tokens
+                </button>
               </div>
             </div>
+
           </div>
         </div>
       </section>
 
-      {/* ── STATS BAR ───────────────────────────────────────────────────── */}
-      <section className="bg-[#0f0e1c] border-y border-white/5 py-4 px-4">
-        <div className="max-w-7xl mx-auto grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
-          {[
-            { icon: Trophy,      color: "text-yellow-400", bg: "bg-yellow-500/10", label: "Total Prizes Paid",    value: "$127,250" },
-            { icon: Users,       color: "text-blue-400",   bg: "bg-blue-500/10",   label: "Active Players",      value: "12,458" },
-            { icon: Gamepad2,    color: "text-green-400",  bg: "bg-green-500/10",  label: "Games Played",        value: "98,623" },
-            { icon: Gift,        color: "text-pink-400",   bg: "bg-pink-500/10",   label: "Prizes Won Today",    value: "583" },
-            { icon: Timer,       color: "text-orange-400", bg: "bg-orange-500/10", label: "Prizes Ending Today", value: String(Math.max(totalGames, 1)) },
-          ].map(({ icon: Icon, color, bg, label, value }) => (
-            <div key={label} className="flex items-center space-x-3 bg-[#14132a] border border-white/5 rounded-xl px-4 py-3">
-              <div className={`${bg} rounded-lg p-2 shrink-0`}>
-                <Icon className={`h-4 w-4 ${color}`} />
+      {/* ── STATS ROW ───────────────────────────────────────────── */}
+      <section className="relative border-y border-white/5 overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-r from-[#0d0b25]/80 to-[#0a0918]/80" />
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6">
+          <div className="grid grid-cols-2 lg:grid-cols-4 divide-x divide-y lg:divide-y-0 divide-white/5">
+            {[
+              { icon: Trophy,     color: "#f59e0b", bg: "rgba(245,158,11,0.1)",  label: "Total Prizes Paid",  val: "$127,250" },
+              { icon: Users,      color: "#10b981", bg: "rgba(16,185,129,0.1)",  label: "Active Players",     val: "12,458" },
+              { icon: Gamepad2,   color: "#8b5cf6", bg: "rgba(139,92,246,0.1)", label: "Games Completed",    val: "98,623" },
+              { icon: Gift,       color: "#ec4899", bg: "rgba(236,72,153,0.1)", label: "Prizes Won Today",   val: "583" },
+            ].map(({ icon: Icon, color, bg, label, val }) => (
+              <div key={label} className="px-6 sm:px-8 py-6 flex items-center space-x-4">
+                <div className="p-3 rounded-2xl shrink-0" style={{ background: bg }}>
+                  <Icon className="h-6 w-6" style={{ color }} />
+                </div>
+                <div>
+                  <p className="font-black text-2xl sm:text-3xl text-white leading-none count-up" style={{ color }}>{val}</p>
+                  <p className="text-gray-500 text-xs mt-1 font-medium">{label}</p>
+                </div>
               </div>
-              <div className="min-w-0">
-                <p className="text-white font-black text-base leading-none truncate">{value}</p>
-                <p className="text-gray-500 text-xs mt-0.5 leading-tight truncate">{label}</p>
-              </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </section>
 
-      {/* ── LIVE WINNERS ────────────────────────────────────────────────── */}
-      <section className="px-4 sm:px-6 py-6 max-w-7xl mx-auto">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center space-x-2">
-            <Flame className="h-5 w-5 text-orange-400 animate-pulse" />
-            <h2 className="text-white font-black text-lg sm:text-xl uppercase tracking-wide">Live Winners</h2>
+      {/* ── LIVE GAMES ──────────────────────────────────────────── */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 py-12">
+        <div className="flex items-center justify-between mb-7">
+          <div className="flex items-center space-x-3">
+            <div className="p-2 bg-red-500/15 rounded-xl border border-red-500/20">
+              <Flame className="h-5 w-5 text-red-400 animate-pulse" />
+            </div>
+            <div>
+              <h2 className="text-white font-black text-2xl leading-none">Live Games</h2>
+              <p className="text-gray-500 text-sm mt-0.5">{activeGames.length} active right now</p>
+            </div>
           </div>
-          <button onClick={() => setLocation("/dashboard")} className="flex items-center space-x-1 text-purple-400 hover:text-purple-300 text-sm font-semibold transition-colors">
-            <span>View All Winners</span><ArrowRight className="h-4 w-4" />
+          <button onClick={() => setLocation("/games")}
+            className="flex items-center space-x-1.5 text-violet-400 hover:text-violet-300 text-sm font-semibold transition-colors">
+            <span>View All</span><ArrowRight className="h-4 w-4" />
           </button>
         </div>
 
-        <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
-          {liveWinners.slice(0, 5).map((w, i) => (
-            <div key={i} className={`bg-[#13122a] border border-white/8 rounded-2xl p-4 hover:border-purple-500/40 transition-all duration-300 ${i === 0 ? "ring-1 ring-green-500/40" : ""}`}>
-              <div className="flex items-center space-x-2 mb-2">
-                <div className={`w-10 h-10 rounded-full bg-gradient-to-br ${w.color} flex items-center justify-center font-black text-white text-base border-2 border-white/20`}>
-                  {w.name[0]}
-                </div>
-                <div className="min-w-0">
-                  <p className="text-white font-bold text-sm truncate">{w.name}</p>
-                  <p className="text-gray-500 text-xs">{w.ago}</p>
-                </div>
-              </div>
-              <p className="text-gray-400 text-xs mb-0.5">Just Won</p>
-              <p className="text-green-400 font-black text-lg leading-none">{w.prize}</p>
-              <p className="text-gray-600 text-xs mt-0.5">Cash Prize</p>
-            </div>
-          ))}
-        </div>
+        {isLoading ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            {[1,2,3].map(i => (
+              <div key={i} className="h-72 bg-[#0e0d1f] rounded-2xl border border-white/5 animate-pulse" />
+            ))}
+          </div>
+        ) : activeGames.length === 0 ? (
+          <div className="text-center py-16 bg-[#0e0d1f] border border-white/5 rounded-2xl">
+            <div className="text-6xl mb-4">🎮</div>
+            <h3 className="text-white font-black text-xl mb-2">No Live Games Right Now</h3>
+            <p className="text-gray-500 mb-5 max-w-md mx-auto text-sm">New games launch regularly. Get your tokens ready and be first to play!</p>
+            <Button onClick={() => setLocation("/tokens")} className="bg-gradient-to-r from-violet-600 to-purple-600 text-white font-bold px-6 py-3 rounded-xl">
+              <Coins className="h-4 w-4 mr-2" /> Get Tokens
+            </Button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            {activeGames.map((g) => (
+              <GameCard key={g.id} game={g} onPlay={() => setLocation(`/game/${g.id}`)} />
+            ))}
+          </div>
+        )}
       </section>
 
-      {/* ── FEATURED PRIZES ─────────────────────────────────────────────── */}
-      <section className="px-4 sm:px-6 py-6 max-w-7xl mx-auto">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center space-x-2">
-            <Gift className="h-5 w-5 text-purple-400" />
-            <h2 className="text-white font-black text-lg sm:text-xl uppercase tracking-wide">Featured Prizes</h2>
+      {/* ── FEATURED PRIZES ─────────────────────────────────────── */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 pb-12">
+        <div className="flex items-center justify-between mb-7">
+          <div className="flex items-center space-x-3">
+            <div className="p-2 bg-violet-500/15 rounded-xl border border-violet-500/20">
+              <Gift className="h-5 w-5 text-violet-400" />
+            </div>
+            <div>
+              <h2 className="text-white font-black text-2xl leading-none">Featured Prizes</h2>
+              <p className="text-gray-500 text-sm mt-0.5">Current and upcoming prizes</p>
+            </div>
           </div>
-          <button onClick={() => setLocation("/games")} className="flex items-center space-x-1 text-purple-400 hover:text-purple-300 text-sm font-semibold transition-colors">
-            <span>View All Prizes</span><ArrowRight className="h-4 w-4" />
+          <button onClick={() => setLocation("/games")}
+            className="flex items-center space-x-1.5 text-violet-400 hover:text-violet-300 text-sm font-semibold transition-colors">
+            <span>View All</span><ArrowRight className="h-4 w-4" />
           </button>
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
-          {/* Real active games first */}
+          {/* Real game prizes first */}
           {activeGames.slice(0, 2).map((g) => (
-            <div
-              key={g.id}
-              onClick={() => setLocation(`/game/${g.id}`)}
-              className="group bg-[#13122a] border border-purple-500/30 rounded-2xl overflow-hidden cursor-pointer hover:border-purple-400/60 hover:scale-105 transition-all duration-200"
-            >
-              <div className="relative bg-gradient-to-br from-purple-900 to-violet-950 h-32 flex flex-col items-center justify-center p-3">
-                <span className="absolute top-2 left-2 bg-green-500/90 text-white text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-wide">
-                  LIVE
-                </span>
-                {g.prizeImageUrl ? (
-                  <img src={g.prizeImageUrl} alt={g.name} className="h-20 w-full object-contain drop-shadow-xl" />
-                ) : (
-                  <div className="text-5xl leading-none">🏆</div>
-                )}
+            <div key={g.id} onClick={() => setLocation(`/game/${g.id}`)}
+              className="group relative rounded-2xl overflow-hidden cursor-pointer hover:scale-105 transition-all duration-200"
+              style={{ background: "linear-gradient(135deg, #1e1b4b, #2d1b69)", border: "1px solid rgba(139,92,246,0.3)", boxShadow: "0 0 20px rgba(139,92,246,0.15)" }}>
+              <div className="absolute top-2 left-2 z-10 flex items-center space-x-1 bg-green-500/90 text-white text-[9px] font-black px-2 py-0.5 rounded-full">
+                <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
+                <span>LIVE</span>
               </div>
-              <div className="p-3 bg-[#0f0e20]">
-                <p className="text-purple-300 text-xs font-black uppercase truncate">{g.code}</p>
+              <div className="h-28 flex items-center justify-center p-3 bg-gradient-to-br from-violet-900/40 to-purple-900/40">
+                {g.prizeImageUrl
+                  ? <img src={g.prizeImageUrl} alt={g.name} className="h-20 w-full object-contain drop-shadow-xl" />
+                  : <span className="text-5xl">🏆</span>
+                }
+              </div>
+              <div className="p-3" style={{ background: "rgba(0,0,0,0.4)" }}>
+                <p className="text-violet-300 text-[10px] font-black uppercase truncate">{g.code}</p>
                 <p className="text-white font-black text-base leading-tight truncate">${g.prizeValue}</p>
                 <p className="text-gray-500 text-xs truncate">{g.name}</p>
-                <button className="mt-2 w-full bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-400 hover:to-orange-400 text-black font-black text-xs py-2 rounded-xl transition-all">
+                <div className="mt-2 w-full py-2 rounded-xl font-black text-[11px] text-black text-center"
+                     style={{ background: "linear-gradient(135deg, #f59e0b, #f97316)" }}>
                   ENTER NOW
-                </button>
+                </div>
               </div>
             </div>
           ))}
 
-          {/* Dummy prize cards to fill out the grid */}
-          {DUMMY_PRIZES.slice(0, Math.max(5 - activeGames.slice(0,2).length, 3)).map((p) => (
-            <div
-              key={p.tag}
-              onClick={() => setLocation("/games")}
-              className={`group bg-gradient-to-br ${p.bg} border ${p.border} rounded-2xl overflow-hidden cursor-pointer hover:scale-105 transition-all duration-200`}
-            >
-              <div className="relative h-32 flex flex-col items-center justify-center p-3">
-                <span className={`absolute top-2 left-2 ${p.badgeBg} border ${p.accent} text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-wide`}>
-                  {p.tag}
-                </span>
-                <div className="text-5xl leading-none">{p.visual}</div>
+          {/* Dummy prizes */}
+          {FEATURED_PRIZES.slice(0, Math.max(5 - Math.min(activeGames.length, 2), 3)).map((p, pi) => (
+            <div key={`dummy-${pi}`} onClick={() => setLocation("/games")}
+              className="group rounded-2xl overflow-hidden cursor-pointer hover:scale-105 transition-all duration-200"
+              style={{ background: `linear-gradient(135deg, ${p.from}, ${p.to})`, border: `1px solid ${p.border}40`, boxShadow: `0 0 15px ${p.glow}` }}>
+              <div className="h-28 flex items-center justify-center bg-black/20">
+                <span className="text-5xl leading-none">{p.emoji}</span>
               </div>
-              <div className="p-3 bg-black/30">
-                <p className={`${p.accent} text-xs font-black uppercase`}>{p.sublabel}</p>
-                <p className="text-white font-black text-base leading-tight">{p.label}</p>
-                <button className="mt-2 w-full bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-400 hover:to-orange-400 text-black font-black text-xs py-2 rounded-xl transition-all">
+              <div className="p-3" style={{ background: "rgba(0,0,0,0.4)" }}>
+                <p className="text-[10px] font-black uppercase" style={{ color: p.border }}>{p.tag}</p>
+                <p className="text-white font-black text-sm leading-tight">{p.title}</p>
+                <p className="text-gray-500 text-[10px] truncate">{p.sub}</p>
+                <div className="mt-2 w-full py-2 rounded-xl font-black text-[11px] text-black text-center"
+                     style={{ background: "linear-gradient(135deg, #f59e0b, #f97316)" }}>
                   ENTER NOW
-                </button>
+                </div>
               </div>
             </div>
           ))}
         </div>
       </section>
 
-      {/* ── ACTIVE GAMES SPOTLIGHT ──────────────────────────────────────── */}
-      {activeGames.length > 0 && (
-        <section className="px-4 sm:px-6 py-6 max-w-7xl mx-auto">
-          <div className="flex items-center space-x-2 mb-4">
-            <Flame className="h-5 w-5 text-red-400 animate-pulse" />
-            <h2 className="text-white font-black text-lg sm:text-xl uppercase tracking-wide">🔴 Live Right Now</h2>
-          </div>
+      {/* ── LIVE WINNERS + HOW IT WORKS ─────────────────────────── */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 pb-12">
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-5">
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {activeGames.map((g) => {
-              const progress = g.tokenThreshold > 0 ? Math.min((g.tokensCollected / g.tokenThreshold) * 100, 100) : 0;
-              const tokensLeft = Math.max(g.tokenThreshold - g.tokensCollected, 0);
-              return (
-                <div
-                  key={g.id}
-                  onClick={() => setLocation(`/game/${g.id}`)}
-                  className="group bg-[#13122a] border border-white/8 hover:border-purple-500/50 rounded-2xl overflow-hidden cursor-pointer transition-all duration-200 hover:scale-[1.02]"
-                >
-                  <div className="relative bg-gradient-to-br from-violet-900/60 to-purple-950 p-4 flex items-center space-x-4">
-                    <div className="flex items-center space-x-1.5 absolute top-2 left-2">
-                      <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
-                      <span className="text-green-300 text-xs font-bold">LIVE NOW</span>
-                    </div>
-                    {g.prizeImageUrl ? (
-                      <img src={g.prizeImageUrl} alt={g.name} className="w-16 h-16 object-contain rounded-xl bg-black/20 p-1 mt-4" />
-                    ) : (
-                      <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-violet-600 to-purple-700 flex items-center justify-center mt-4 text-3xl">
-                        🎁
-                      </div>
-                    )}
-                    <div className="flex-1 min-w-0 mt-4">
-                      <p className="text-white font-black text-base truncate">{g.name}</p>
-                      <p className="text-yellow-400 font-black text-lg">${g.prizeValue} Prize</p>
-                    </div>
+          {/* Live Winners (3 cols) */}
+          <div className="lg:col-span-3 bg-[#0e0d1f] border border-white/6 rounded-2xl overflow-hidden"
+               style={{ boxShadow: "0 0 30px rgba(16,185,129,0.05)" }}>
+            <div className="px-5 py-4 border-b border-white/5 flex items-center justify-between">
+              <div className="flex items-center space-x-2.5">
+                <div className="p-1.5 bg-orange-500/15 rounded-lg border border-orange-500/20">
+                  <Flame className="h-4 w-4 text-orange-400 animate-pulse" />
+                </div>
+                <h3 className="text-white font-black text-lg">Live Winners</h3>
+              </div>
+              <div className="flex items-center space-x-1.5">
+                <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
+                <span className="text-green-400 text-xs font-semibold">Live</span>
+              </div>
+            </div>
+            <div className="divide-y divide-white/4">
+              {LIVE_WINNERS.map((w, i) => (
+                <div key={i}
+                     className={`flex items-center space-x-4 px-5 py-4 hover:bg-white/2 transition-colors ${i === winnerTick ? "bg-green-500/4" : ""}`}>
+                  <div className="w-10 h-10 rounded-full flex items-center justify-center text-lg font-black text-white shrink-0 border-2"
+                       style={{ background: `linear-gradient(135deg, ${w.color}40, ${w.color}80)`, borderColor: `${w.color}50` }}>
+                    {w.emoji}
                   </div>
-                  <div className="p-4 space-y-3">
-                    {/* Progress */}
-                    <div>
-                      <div className="flex justify-between text-xs mb-1.5">
-                        <span className="text-gray-400">{g.tokensCollected.toLocaleString()} collected</span>
-                        <span className="text-gray-400">{g.tokenThreshold.toLocaleString()} goal</span>
-                      </div>
-                      <div className="h-2.5 bg-white/10 rounded-full overflow-hidden">
-                        <div
-                          className={`h-full rounded-full transition-all duration-700 ${
-                            progress >= 95 ? "bg-red-500" : progress >= 80 ? "bg-orange-500" : "bg-gradient-to-r from-violet-600 to-purple-500"
-                          }`}
-                          style={{ width: `${progress}%` }}
-                        />
-                      </div>
-                      <p className="text-gray-500 text-xs mt-1">{tokensLeft.toLocaleString()} tokens until winner!</p>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center space-x-2">
+                      <p className="text-white font-bold text-sm truncate">{w.name}</p>
+                      {i === 0 && <span className="text-[9px] font-black bg-green-500/20 text-green-300 border border-green-500/30 px-1.5 py-0.5 rounded-full">NEW</span>}
                     </div>
-                    {/* Spin button */}
-                    <Button
-                      onClick={(e) => { e.stopPropagation(); setLocation(`/game/${g.id}`); }}
-                      className="w-full bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white font-black text-sm py-3 rounded-xl"
-                    >
-                      <Zap className="h-4 w-4 mr-1.5" />
-                      SPIN NOW — {g.tokensPerPlay} TOKENS
-                    </Button>
+                    <p className="text-gray-500 text-xs">{w.type} · {w.ago}</p>
+                  </div>
+                  <div className="text-right shrink-0">
+                    <p className="font-black text-lg leading-none" style={{ color: w.color }}>{w.prize}</p>
+                    <p className="text-gray-600 text-xs mt-0.5">Just won</p>
                   </div>
                 </div>
-              );
-            })}
+              ))}
+            </div>
+            <div className="px-5 py-3 border-t border-white/5">
+              <button onClick={() => setLocation("/dashboard")}
+                className="w-full flex items-center justify-center space-x-2 text-violet-400 hover:text-violet-300 text-sm font-semibold transition-colors py-1">
+                <span>View All Winners</span><ChevronRight className="h-4 w-4" />
+              </button>
+            </div>
           </div>
-        </section>
-      )}
 
-      {isLoading && (
-        <div className="flex items-center justify-center py-12">
-          <div className="w-12 h-12 rounded-full border-4 border-purple-500 border-t-transparent animate-spin" />
-        </div>
-      )}
-
-      {/* ── PROMO BANNERS ───────────────────────────────────────────────── */}
-      <section className="px-4 sm:px-6 py-6 max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 gap-4">
-        {/* 2X Entries */}
-        <div className="relative overflow-hidden bg-[#0f0e20] border border-purple-500/30 rounded-2xl p-5 flex items-center space-x-4"
-             style={{ boxShadow: "0 0 30px rgba(168,85,247,0.15)" }}>
-          <div className="shrink-0 w-20 h-20 rounded-2xl bg-gradient-to-br from-purple-600 to-violet-700 border-2 border-purple-400/50 flex items-center justify-center font-black text-3xl text-white shadow-xl"
-               style={{ textShadow: "0 0 15px rgba(168,85,247,0.8)" }}>
-            2X
-          </div>
-          <div className="flex-1">
-            <p className="text-yellow-400 font-black text-lg sm:text-xl">DOUBLE YOUR ENTRIES!</p>
-            <p className="text-gray-400 text-sm mt-1">Get 2X entries for every game when you verify your account!</p>
-            <button
-              onClick={() => setLocation("/dashboard")}
-              className="mt-3 bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-400 hover:to-orange-400 text-black font-black text-sm px-5 py-2 rounded-xl transition-all hover:scale-105"
-            >
-              SIGN UP NOW
-            </button>
-          </div>
-        </div>
-
-        {/* Safe & Secure */}
-        <div className="relative overflow-hidden bg-[#0f0e20] border border-green-500/20 rounded-2xl p-5 flex items-center space-x-4">
-          <div className="shrink-0 w-20 h-20 rounded-2xl bg-gradient-to-br from-green-900 to-emerald-900 border-2 border-green-500/50 flex items-center justify-center"
-               style={{ boxShadow: "0 0 20px rgba(34,197,94,0.2)" }}>
-            <span className="font-black text-green-400 text-2xl leading-none text-center">100<span className="text-lg">%</span></span>
-          </div>
-          <div className="flex-1">
-            <p className="text-white font-black text-lg sm:text-xl">SAFE &amp; SECURE</p>
-            <div className="mt-2 space-y-1.5">
-              {["Secure Payments","Instant Payouts","Trusted by Thousands"].map((t) => (
-                <div key={t} className="flex items-center space-x-2">
-                  <CheckCircle className="h-4 w-4 text-green-400 shrink-0" />
-                  <span className="text-gray-300 text-sm">{t}</span>
+          {/* How It Works (2 cols) */}
+          <div className="lg:col-span-2 bg-[#0e0d1f] border border-white/6 rounded-2xl overflow-hidden">
+            <div className="px-5 py-4 border-b border-white/5">
+              <div className="flex items-center space-x-2.5">
+                <div className="p-1.5 bg-violet-500/15 rounded-lg border border-violet-500/20">
+                  <Sparkles className="h-4 w-4 text-violet-400" />
+                </div>
+                <h3 className="text-white font-black text-lg">How It Works</h3>
+              </div>
+            </div>
+            <div className="p-5 space-y-5">
+              {HOW_IT_WORKS.map(({ step, icon: Icon, color, label, desc }) => (
+                <div key={step} className="flex items-start space-x-4">
+                  <div className="shrink-0 w-10 h-10 rounded-xl flex items-center justify-center font-black text-sm text-white relative"
+                       style={{ background: `linear-gradient(135deg, ${color}40, ${color}80)`, border: `1px solid ${color}50` }}>
+                    <Icon className="h-5 w-5" style={{ color }} />
+                    <span className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-[#060611] border border-white/10 text-[10px] font-black text-gray-400 flex items-center justify-center">
+                      {step}
+                    </span>
+                  </div>
+                  <div>
+                    <p className="text-white font-bold text-sm">{label}</p>
+                    <p className="text-gray-500 text-xs mt-0.5 leading-relaxed">{desc}</p>
+                  </div>
                 </div>
               ))}
             </div>
@@ -617,67 +619,100 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── TRUST BAR ───────────────────────────────────────────────────── */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 pb-6">
-        <div className="bg-[#0d0c1a] border border-white/5 rounded-2xl grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-white/5 overflow-hidden">
-          <div className="flex items-center space-x-4 px-5 py-4">
-            <div className="p-2.5 bg-yellow-500/15 rounded-xl border border-yellow-500/20">
-              <Star className="h-5 w-5 text-yellow-400" />
-            </div>
-            <div>
-              <div className="flex items-center space-x-0.5 mb-0.5">
-                {[...Array(5)].map((_, i) => <Star key={i} className="h-3.5 w-3.5 fill-yellow-400 text-yellow-400" />)}
+      {/* ── PROMO BANNERS ───────────────────────────────────────── */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 pb-12">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {/* 2X */}
+          <div className="relative overflow-hidden rounded-2xl p-6 flex items-center space-x-5"
+               style={{ background: "linear-gradient(135deg, #1e1b4b, #2d1b69)", border: "1px solid rgba(139,92,246,0.3)", boxShadow: "0 0 30px rgba(139,92,246,0.1)" }}>
+            <div className="absolute inset-0 bg-gradient-to-br from-violet-600/5 to-transparent" />
+            <div className="shrink-0 relative">
+              <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-violet-600 to-purple-700 flex items-center justify-center border border-violet-400/30"
+                   style={{ boxShadow: "0 0 25px rgba(139,92,246,0.5)" }}>
+                <span className="font-black text-3xl text-white" style={{ textShadow: "0 0 20px rgba(255,255,255,0.5)" }}>2X</span>
               </div>
-              <p className="text-white font-bold text-sm">JOIN THOUSANDS OF WINNERS TODAY!</p>
-              <p className="text-gray-500 text-xs">4.8/5 from 2,500+ reviews</p>
+            </div>
+            <div className="relative flex-1">
+              <p className="text-yellow-400 font-black text-xl leading-tight">DOUBLE YOUR ENTRIES!</p>
+              <p className="text-gray-400 text-sm mt-1.5 leading-snug">Verify your account and earn 2X entries in every game you play.</p>
+              <button onClick={() => setLocation("/dashboard")}
+                className="mt-3 inline-flex items-center space-x-1.5 font-black text-sm text-black px-5 py-2.5 rounded-xl hover:scale-105 transition-all"
+                style={{ background: "linear-gradient(135deg, #f59e0b, #f97316)", boxShadow: "0 0 15px rgba(245,158,11,0.3)" }}>
+                <span>CLAIM BONUS</span><ArrowRight className="h-3.5 w-3.5" />
+              </button>
             </div>
           </div>
-          <div className="flex items-center space-x-4 px-5 py-4">
-            <div className="p-2.5 bg-green-500/15 rounded-xl border border-green-500/20">
-              <Zap className="h-5 w-5 text-green-400" />
+
+          {/* Safe */}
+          <div className="relative overflow-hidden rounded-2xl p-6 flex items-center space-x-5"
+               style={{ background: "linear-gradient(135deg, #022c22, #064e3b)", border: "1px solid rgba(16,185,129,0.25)", boxShadow: "0 0 30px rgba(16,185,129,0.08)" }}>
+            <div className="absolute inset-0 bg-gradient-to-br from-green-600/5 to-transparent" />
+            <div className="shrink-0">
+              <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-green-700 to-emerald-800 flex items-center justify-center border border-green-500/30"
+                   style={{ boxShadow: "0 0 20px rgba(16,185,129,0.3)" }}>
+                <span className="font-black text-green-300 text-2xl leading-none text-center">100<br /><span className="text-base">%</span></span>
+              </div>
             </div>
-            <div>
-              <p className="text-white font-bold text-sm">FAST PAYOUTS</p>
-              <p className="text-gray-500 text-xs">Get your winnings fast</p>
-            </div>
-          </div>
-          <div className="flex items-center space-x-4 px-5 py-4">
-            <div className="p-2.5 bg-blue-500/15 rounded-xl border border-blue-500/20">
-              <Shield className="h-5 w-5 text-blue-400" />
-            </div>
-            <div>
-              <p className="text-white font-bold text-sm">TRUSTED &amp; SECURED</p>
-              <p className="text-gray-500 text-xs">Your security is our priority</p>
+            <div className="relative flex-1">
+              <p className="text-white font-black text-xl leading-tight">SAFE & SECURE</p>
+              <div className="mt-2 space-y-1.5">
+                {["Secure Payments","Instant Payouts","Trusted by Thousands"].map((t) => (
+                  <div key={t} className="flex items-center space-x-2">
+                    <CheckCircle className="h-3.5 w-3.5 text-green-400 shrink-0" />
+                    <span className="text-gray-300 text-sm">{t}</span>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* ── MOBILE BOTTOM NAV ─────────────────────────────────────────────── */}
-      <nav className="fixed bottom-0 inset-x-0 bg-[#0d0c1a]/98 backdrop-blur-xl border-t border-white/8 z-40 flex items-center justify-around px-1 py-2 md:hidden">
+      {/* ── TRUST BAR ───────────────────────────────────────────── */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 pb-20 md:pb-10">
+        <div className="rounded-2xl overflow-hidden border border-white/5"
+             style={{ background: "linear-gradient(135deg, #0e0d1f, #0a0918)" }}>
+          <div className="grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-white/5">
+            {[
+              { icon: Star,   color: "#f59e0b", bg: "rgba(245,158,11,0.1)", title: "4.8/5 Stars", sub: "From 2,500+ player reviews" },
+              { icon: Zap,    color: "#10b981", bg: "rgba(16,185,129,0.1)", title: "Fast Payouts", sub: "Prizes delivered quickly" },
+              { icon: Shield, color: "#6366f1", bg: "rgba(99,102,241,0.1)", title: "100% Secure",  sub: "Your data is always protected" },
+            ].map(({ icon: Icon, color, bg, title, sub }) => (
+              <div key={title} className="flex items-center space-x-4 px-6 py-5">
+                <div className="p-3 rounded-xl shrink-0" style={{ background: bg }}>
+                  <Icon className="h-5 w-5" style={{ color }} />
+                </div>
+                <div>
+                  <p className="text-white font-bold text-sm">{title}</p>
+                  <p className="text-gray-500 text-xs mt-0.5">{sub}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+        <p className="text-center text-gray-700 text-xs mt-6">© 2025 Prize Plugz. All rights reserved. · <button onClick={() => setLocation("/terms")} className="hover:text-gray-500">Terms</button> · <button onClick={() => setLocation("/privacy")} className="hover:text-gray-500">Privacy</button></p>
+      </section>
+
+      {/* ── MOBILE NAV ──────────────────────────────────────────── */}
+      <nav className="fixed bottom-0 inset-x-0 md:hidden bg-[#0a0918]/98 backdrop-blur-2xl border-t border-white/8 z-50 flex items-center justify-around px-1 py-2">
         {[
-          { icon: Home,     label: "Home",    path: "/",             active: true },
-          { icon: Gamepad2, label: "Games",   path: "/games" },
-          { icon: DollarSign,label: "Cash",   path: "/tokens" },
-          { icon: Gift,     label: "Prizes",  path: "/games" },
-          { icon: Trophy,   label: "Winners", path: "/dashboard" },
-          { icon: Bell,     label: "Alerts",  path: "/dashboard",   badge: 3 },
-          { icon: User,     label: "Account", path: "/dashboard" },
+          { icon: Home,       label: "Home",    path: "/",             active: true },
+          { icon: Gamepad2,   label: "Games",   path: "/games" },
+          { icon: DollarSign, label: "Tokens",  path: "/tokens" },
+          { icon: Gift,       label: "Prizes",  path: "/games" },
+          { icon: Trophy,     label: "Winners", path: "/dashboard" },
+          { icon: Bell,       label: "Alerts",  path: "/dashboard",   badge: 3 },
+          { icon: User,       label: "Account", path: "/dashboard" },
         ].map(({ icon: Icon, label, path, active, badge }) => (
-          <button
-            key={label}
-            onClick={() => setLocation(path)}
-            className={`relative flex flex-col items-center space-y-0.5 px-2 py-1 rounded-xl transition-all ${
-              active ? "text-purple-400" : "text-gray-600 hover:text-gray-400"
-            }`}
-          >
+          <button key={label} onClick={() => setLocation(path)}
+            className={`relative flex flex-col items-center space-y-0.5 px-2 py-1.5 rounded-xl transition-all ${active ? "text-violet-400" : "text-gray-600 hover:text-gray-400"}`}>
             <Icon className="h-5 w-5" />
             {badge && (
-              <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full text-[8px] font-black flex items-center justify-center text-white">
+              <span className="absolute -top-1 -right-0.5 w-4 h-4 bg-red-500 rounded-full text-[8px] font-black flex items-center justify-center text-white">
                 {badge}
               </span>
             )}
-            <span className="text-[9px] font-semibold">{label}</span>
+            <span className="text-[9px] font-semibold leading-none">{label}</span>
           </button>
         ))}
       </nav>
