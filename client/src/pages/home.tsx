@@ -12,6 +12,12 @@ import {
 import { logout } from "@/lib/auth";
 import type { Game } from "@shared/schema";
 import logoPath from "@assets/logo_1777237644041.png";
+import imgCash  from "@assets/prize-cash.png";
+import imgPs5   from "@assets/prize-ps5.png";
+import imgTv    from "@assets/prize-tv.png";
+import imgVip   from "@assets/prize-vip.png";
+import imgHero  from "@assets/hero-jackpot.png";
+import imgToken from "@assets/prize-token.png";
 
 /* ─── CSS ──────────────────────────────────────────────────────────────── */
 const GLOBAL_CSS = `
@@ -112,11 +118,11 @@ const WINNERS = [
 ];
 
 const PRIZES = [
-  { emoji:"💵", tag:"CASH",  title:"$500",          sub:"Cash Prize",     grad:"linear-gradient(145deg,#052e16,#14532d)", border:"#22c55e", glow:"rgba(34,197,94,0.5)" },
-  { emoji:"💵", tag:"CASH",  title:"$250",          sub:"Cash Prize",     grad:"linear-gradient(145deg,#052e16,#166534)", border:"#16a34a", glow:"rgba(22,163,74,0.4)" },
-  { emoji:"🎮", tag:"PS5",   title:"PlayStation 5", sub:"Gaming Console", grad:"linear-gradient(145deg,#0f172a,#1e1b4b)", border:"#818cf8", glow:"rgba(129,140,248,0.5)" },
-  { emoji:"📺", tag:"65\" TV",title:"Smart TV",     sub:"4K UHD Display", grad:"linear-gradient(145deg,#0c0a24,#2e1065)", border:"#a855f7", glow:"rgba(168,85,247,0.5)" },
-  { emoji:"🎁", tag:"VIP",   title:"VIP Bundle",    sub:"Cash+Gift Cards", grad:"linear-gradient(145deg,#1c0a00,#431407)", border:"#f97316", glow:"rgba(249,115,22,0.5)" },
+  { img:imgCash, tag:"CASH",   title:"$500",          sub:"Cash Prize",      grad:"linear-gradient(145deg,#052e16,#14532d)", border:"#22c55e", glow:"rgba(34,197,94,0.5)" },
+  { img:imgCash, tag:"CASH",   title:"$250",          sub:"Cash Prize",      grad:"linear-gradient(145deg,#052e16,#166534)", border:"#16a34a", glow:"rgba(22,163,74,0.4)" },
+  { img:imgPs5,  tag:"PS5",    title:"PlayStation 5", sub:"Gaming Console",  grad:"linear-gradient(145deg,#0f172a,#1e1b4b)", border:"#818cf8", glow:"rgba(129,140,248,0.5)" },
+  { img:imgTv,   tag:"65\" TV",title:"Smart TV",      sub:"4K UHD Display",  grad:"linear-gradient(145deg,#0c0a24,#2e1065)", border:"#a855f7", glow:"rgba(168,85,247,0.5)" },
+  { img:imgVip,  tag:"VIP",    title:"VIP Bundle",    sub:"Cash+Gift Cards",  grad:"linear-gradient(145deg,#1c0a00,#431407)", border:"#f97316", glow:"rgba(249,115,22,0.5)" },
 ];
 
 const STATS = [
@@ -141,16 +147,18 @@ function HeroPrizeDisplay({ games, onPlay }: { games: Game[]; onPlay: (id: numbe
     return (
       <div className="w-full h-full flex flex-col items-center justify-center space-y-4">
         {PRIZES.slice(0, 3).map((p, i) => (
-          <div key={i} className={`w-full max-w-xs prize-card ${["float-1","float-2","float-3"][i]}`}
-               style={{ background: p.grad, border:`1px solid ${p.border}60`, boxShadow:`0 0 25px ${p.glow}`, padding:"20px" }}>
-            <div className="flex items-center space-x-4">
-              <span className="text-4xl">{p.emoji}</span>
-              <div>
+          <div key={i} className={`w-full prize-card ${["float-1","float-2","float-3"][i]}`}
+               style={{ background: p.grad, border:`1px solid ${p.border}60`, boxShadow:`0 0 30px ${p.glow}`, padding:"0" }}>
+            <div className="flex items-center gap-3 p-3">
+              <div className="w-16 h-16 rounded-xl overflow-hidden shrink-0 bg-black/20">
+                <img src={p.img} alt={p.title} className="w-full h-full object-cover" />
+              </div>
+              <div className="flex-1 min-w-0">
                 <p className="text-xs font-black uppercase tracking-widest" style={{color:p.border}}>{p.tag}</p>
                 <p className="text-white font-black text-xl leading-tight">{p.title}</p>
                 <p className="text-gray-400 text-xs">{p.sub}</p>
               </div>
-              <div className="ml-auto px-3 py-1.5 rounded-lg font-black text-xs text-black"
+              <div className="shrink-0 px-3 py-1.5 rounded-xl font-black text-xs text-black"
                    style={{background:`linear-gradient(135deg,#f59e0b,#f97316)`}}>ENTER</div>
             </div>
           </div>
@@ -415,6 +423,10 @@ export default function HomePage() {
         <div className="absolute inset-0 pointer-events-none" style={{backgroundImage:"radial-gradient(ellipse at 20% 50%,rgba(124,58,237,0.18) 0%,transparent 60%),radial-gradient(ellipse at 80% 20%,rgba(236,72,153,0.1) 0%,transparent 50%),radial-gradient(ellipse at 70% 80%,rgba(59,130,246,0.08) 0%,transparent 50%)"}} />
         {/* Grid overlay */}
         <div className="absolute inset-0 opacity-5 pointer-events-none" style={{backgroundImage:"linear-gradient(rgba(139,92,246,1) 1px,transparent 1px),linear-gradient(90deg,rgba(139,92,246,1) 1px,transparent 1px)",backgroundSize:"80px 80px"}} />
+        {/* Hero jackpot image — subtle cinematic BG behind hero */}
+        <div className="absolute inset-0 pointer-events-none overflow-hidden">
+          <img src={imgHero} alt="" aria-hidden className="absolute bottom-0 right-0 w-[55%] max-w-2xl opacity-[0.07] object-cover mix-blend-luminosity scale-110 translate-x-10 translate-y-8 float-1" />
+        </div>
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 py-12 sm:py-20">
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-10 lg:gap-12 items-center">
@@ -488,16 +500,17 @@ export default function HomePage() {
               }
 
               {/* Token box */}
-              <div className="p-4 rounded-2xl" style={{background:"linear-gradient(145deg,#0e0c22,#160f2e)",border:"1px solid rgba(124,58,237,0.2)"}}>
-                <div className="flex items-center justify-between mb-3">
+              <div className="relative overflow-hidden p-4 rounded-2xl" style={{background:"linear-gradient(145deg,#0e0c22,#160f2e)",border:"1px solid rgba(124,58,237,0.25)"}}>
+                <img src={imgToken} alt="" aria-hidden className="absolute right-2 bottom-2 w-20 h-20 object-contain opacity-15 pointer-events-none float-2" />
+                <div className="flex items-center justify-between mb-3 relative z-10">
                   <span className="text-gray-400 text-sm font-medium">Your Token Balance</span>
-                  <div className="flex items-center gap-2">
-                    <Coins className="h-4 w-4 text-yellow-400" />
-                    <span className="text-yellow-300 font-black text-xl">{tokenBalance}</span>
+                  <div className="flex items-center gap-2 bg-yellow-400/10 border border-yellow-400/20 rounded-full px-3 py-1">
+                    <img src={imgToken} alt="token" className="w-4 h-4 object-contain rounded-full" />
+                    <span className="text-yellow-300 font-black text-lg">{tokenBalance}</span>
                   </div>
                 </div>
                 <button onClick={() => setLocation("/tokens")}
-                  className="w-full py-3 rounded-xl font-black text-sm text-white transition-all hover:scale-[1.02] glow-violet"
+                  className="relative z-10 w-full py-3 rounded-xl font-black text-sm text-white transition-all hover:scale-[1.02] glow-violet"
                   style={{background:"linear-gradient(135deg,#7c3aed,#9333ea)"}}>
                   + Buy More Tokens
                 </button>
@@ -549,13 +562,18 @@ export default function HomePage() {
               {[1,2,3].map(i => <div key={i} className="h-80 rounded-2xl animate-pulse" style={{background:"rgba(255,255,255,0.04)"}} />)}
             </div>
           : activeGames.length === 0
-            ? <div className="flex flex-col items-center justify-center py-16 rounded-2xl border border-white/5" style={{background:"rgba(255,255,255,0.02)"}}>
-                <span className="text-6xl mb-4">🎮</span>
-                <h3 className="text-white font-black text-xl mb-2">No Live Games Right Now</h3>
-                <p className="text-gray-500 text-sm mb-5 text-center max-w-sm">New games launch regularly. Get your tokens ready and be first to play!</p>
-                <button onClick={() => setLocation("/tokens")} className="flex items-center gap-2 font-bold text-white px-6 py-3 rounded-xl glow-violet" style={{background:"linear-gradient(135deg,#7c3aed,#9333ea)"}}>
-                  <Coins className="h-4 w-4" />Get Tokens
-                </button>
+            ? <div className="relative overflow-hidden flex flex-col items-center justify-center py-16 rounded-2xl border border-white/5" style={{background:"linear-gradient(145deg,#0d0b22,#110e2a)"}}>
+                <img src={imgHero} alt="" aria-hidden className="absolute inset-0 w-full h-full object-cover opacity-[0.08] pointer-events-none scale-110" />
+                <div className="relative z-10 flex flex-col items-center">
+                  <div className="w-20 h-20 rounded-2xl overflow-hidden mb-5 glow-violet">
+                    <img src={imgVip} alt="prizes" className="w-full h-full object-cover" />
+                  </div>
+                  <h3 className="text-white font-black text-xl mb-2">No Live Games Right Now</h3>
+                  <p className="text-gray-500 text-sm mb-6 text-center max-w-sm">New games launch regularly. Get your tokens ready and be first to play!</p>
+                  <button onClick={() => setLocation("/tokens")} className="flex items-center gap-2 font-bold text-white px-7 py-3 rounded-xl glow-violet" style={{background:"linear-gradient(135deg,#7c3aed,#9333ea)"}}>
+                    <img src={imgToken} alt="" className="w-5 h-5 object-contain rounded-full" />Get Tokens
+                  </button>
+                </div>
               </div>
             : <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
                 {activeGames.map(g => <GameCard key={g.id} game={g} onPlay={() => setLocation(`/game/${g.id}`)} />)}
@@ -601,16 +619,17 @@ export default function HomePage() {
           ))}
           {PRIZES.slice(0, Math.max(5 - Math.min(activeGames.length,2), 3)).map((p,i) => (
             <div key={`p${i}`} onClick={() => setLocation("/games")}
-              className="prize-card" style={{background:p.grad,border:`1px solid ${p.border}50`,boxShadow:`0 0 20px ${p.glow}`}}>
+              className="prize-card" style={{background:p.grad,border:`1px solid ${p.border}55`,boxShadow:`0 0 25px ${p.glow},0 8px 30px rgba(0,0,0,0.5)`}}>
               <div className="card-shine pointer-events-none" />
-              <div className="h-28 flex items-center justify-center bg-black/15">
-                <span className="text-5xl">{p.emoji}</span>
+              <div className="relative h-32 overflow-hidden bg-black/20">
+                <img src={p.img} alt={p.title} className="w-full h-full object-cover scale-110 group-hover:scale-125 transition-transform duration-500" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                <div className="absolute top-2 right-2 px-2 py-0.5 rounded-full text-[9px] font-black" style={{background:`${p.border}30`,border:`1px solid ${p.border}60`,color:p.border}}>{p.tag}</div>
               </div>
-              <div className="p-3" style={{background:"rgba(0,0,0,0.35)"}}>
-                <p className="text-[10px] font-black uppercase" style={{color:p.border}}>{p.tag}</p>
+              <div className="p-3" style={{background:"rgba(0,0,0,0.4)"}}>
                 <p className="text-white font-black text-sm leading-tight">{p.title}</p>
-                <p className="text-gray-500 text-xs">{p.sub}</p>
-                <div className="mt-2 w-full py-2 rounded-xl font-black text-[11px] text-black text-center" style={{background:"linear-gradient(135deg,#f59e0b,#f97316)"}}>ENTER NOW</div>
+                <p className="text-gray-500 text-xs mb-2">{p.sub}</p>
+                <div className="w-full py-2 rounded-xl font-black text-[11px] text-black text-center" style={{background:"linear-gradient(135deg,#f59e0b,#f97316)"}}>ENTER NOW</div>
               </div>
             </div>
           ))}

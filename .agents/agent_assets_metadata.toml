@@ -1,0 +1,38 @@
+uploads = []
+outputs = []
+
+[[generated]]
+id = "Z2-9kYktxpyNYErV-fHz_"
+uri = "file://client/src/assets/prize-cash.png"
+type = "image"
+title = "cash prize glowing"
+
+[[generated]]
+id = "KwYAKawJCKK_tMHv3YW7k"
+uri = "file://client/src/assets/prize-ps5.png"
+type = "image"
+title = "ps5 console glowing"
+
+[[generated]]
+id = "HlryJqAFM6iZ1d4syWKnS"
+uri = "file://client/src/assets/prize-tv.png"
+type = "image"
+title = "smart tv product shot"
+
+[[generated]]
+id = "9z1z7nZz5s6z7ZK7oMZyk"
+uri = "file://client/src/assets/prize-vip.png"
+type = "image"
+title = "vip gift bundle"
+
+[[generated]]
+id = "0zgRm-UE7cqpCAIk1LKmn"
+uri = "file://client/src/assets/hero-jackpot.png"
+type = "image"
+title = "hero jackpot scene"
+
+[[generated]]
+id = "pytale6pJJQ0NtFluCjR-"
+uri = "file://client/src/assets/prize-token.png"
+type = "image"
+title = "glowing token coin"
