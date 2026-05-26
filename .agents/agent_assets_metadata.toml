@@ -36,3 +36,21 @@ id = "pytale6pJJQ0NtFluCjR-"
 uri = "file://client/src/assets/prize-token.png"
 type = "image"
 title = "glowing token coin"
+
+[[generated]]
+id = "FoxMijsRVm5t8f0EVrFx9"
+uri = "file://attached_assets/hero-bg.png"
+type = "image"
+title = "dark neon gaming bg"
+
+[[generated]]
+id = "hhM6dwAPFZVXDrcMR6P_1"
+uri = "file://attached_assets/hero-treasure.png"
+type = "image"
+title = "treasure chest prizes"
+
+[[generated]]
+id = "0jJvhx72v-JWlG-jHKE5u"
+uri = "file://attached_assets/hero-wheel.png"
+type = "image"
+title = "glowing prize wheel"

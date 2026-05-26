@@ -12,12 +12,15 @@ import {
 import { logout } from "@/lib/auth";
 import type { Game } from "@shared/schema";
 import logoPath from "@assets/logo_1777237644041.png";
-import imgCash  from "@assets/prize-cash.png";
-import imgPs5   from "@assets/prize-ps5.png";
-import imgTv    from "@assets/prize-tv.png";
-import imgVip   from "@assets/prize-vip.png";
-import imgHero  from "@assets/hero-jackpot.png";
-import imgToken from "@assets/prize-token.png";
+import imgCash     from "@assets/prize-cash.png";
+import imgPs5      from "@assets/prize-ps5.png";
+import imgTv       from "@assets/prize-tv.png";
+import imgVip      from "@assets/prize-vip.png";
+import imgHero     from "@assets/hero-jackpot.png";
+import imgToken    from "@assets/prize-token.png";
+import imgHeroBg   from "@assets/hero-bg.png";
+import imgTreasure from "@assets/hero-treasure.png";
+import imgWheel    from "@assets/hero-wheel.png";
 
 /* ─── CSS ──────────────────────────────────────────────────────────────── */
 const GLOBAL_CSS = `
@@ -418,107 +421,218 @@ export default function HomePage() {
       </header>
 
       {/* ── HERO ─────────────────────────────────────────────────────── */}
-      <section className="relative overflow-hidden" style={{background:"linear-gradient(160deg,#0d0b25 0%,#0a0816 40%,#07060f 100%)"}}>
-        {/* BG texture */}
-        <div className="absolute inset-0 pointer-events-none" style={{backgroundImage:"radial-gradient(ellipse at 20% 50%,rgba(124,58,237,0.18) 0%,transparent 60%),radial-gradient(ellipse at 80% 20%,rgba(236,72,153,0.1) 0%,transparent 50%),radial-gradient(ellipse at 70% 80%,rgba(59,130,246,0.08) 0%,transparent 50%)"}} />
-        {/* Grid overlay */}
-        <div className="absolute inset-0 opacity-5 pointer-events-none" style={{backgroundImage:"linear-gradient(rgba(139,92,246,1) 1px,transparent 1px),linear-gradient(90deg,rgba(139,92,246,1) 1px,transparent 1px)",backgroundSize:"80px 80px"}} />
-        {/* Hero jackpot image — subtle cinematic BG behind hero */}
-        <div className="absolute inset-0 pointer-events-none overflow-hidden">
-          <img src={imgHero} alt="" aria-hidden className="absolute bottom-0 right-0 w-[55%] max-w-2xl opacity-[0.07] object-cover mix-blend-luminosity scale-110 translate-x-10 translate-y-8 float-1" />
+      <section className="relative overflow-hidden" style={{minHeight:"88vh",display:"flex",flexDirection:"column",justifyContent:"center",background:"#050412"}}>
+
+        {/* ── BG LAYERS ── */}
+        {/* 1. AI-generated atmospheric background */}
+        <div className="absolute inset-0 pointer-events-none">
+          <img src={imgHeroBg} alt="" aria-hidden
+            className="w-full h-full object-cover opacity-30 scale-105"
+            style={{filter:"blur(1px) saturate(1.4)"}} />
+          <div className="absolute inset-0" style={{background:"linear-gradient(to bottom,rgba(5,4,18,0.4) 0%,rgba(5,4,18,0.1) 40%,rgba(5,4,18,0.7) 85%,rgba(5,4,18,1) 100%)"}} />
+          <div className="absolute inset-0" style={{background:"linear-gradient(to right,rgba(5,4,18,0.8) 0%,transparent 50%,rgba(5,4,18,0.5) 100%)"}} />
         </div>
 
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 py-12 sm:py-20">
-          <div className="grid grid-cols-1 lg:grid-cols-5 gap-10 lg:gap-12 items-center">
+        {/* 2. Neon glow blobs */}
+        <div className="absolute inset-0 pointer-events-none overflow-hidden">
+          <div className="absolute rounded-full" style={{width:"600px",height:"600px",top:"-100px",left:"-150px",background:"radial-gradient(circle,rgba(109,40,217,0.22) 0%,transparent 70%)"}} />
+          <div className="absolute rounded-full float-2" style={{width:"500px",height:"500px",top:"20%",right:"-100px",background:"radial-gradient(circle,rgba(236,72,153,0.14) 0%,transparent 70%)"}} />
+          <div className="absolute rounded-full float-1" style={{width:"400px",height:"400px",bottom:"-80px",left:"35%",background:"radial-gradient(circle,rgba(245,158,11,0.1) 0%,transparent 70%)"}} />
+        </div>
 
-            {/* LEFT */}
-            <div className="lg:col-span-3 space-y-7 fade-up">
-              {/* Live pill */}
-              <div className="inline-flex items-center gap-3 px-4 py-2 rounded-full" style={{background:"rgba(16,185,129,0.1)",border:"1px solid rgba(16,185,129,0.25)"}}>
-                <span className="flex items-center gap-1.5">
-                  <span className="relative w-2 h-2 pulse-dot">
-                    <span className="block w-2 h-2 bg-green-400 rounded-full" />
-                  </span>
-                  <span className="text-green-300 font-bold text-sm">LIVE NOW</span>
+        {/* 3. Fine neon grid */}
+        <div className="absolute inset-0 opacity-[0.035] pointer-events-none"
+          style={{backgroundImage:"linear-gradient(rgba(139,92,246,1) 1px,transparent 1px),linear-gradient(90deg,rgba(139,92,246,1) 1px,transparent 1px)",backgroundSize:"60px 60px"}} />
+
+        {/* 4. Subtle scan line at top */}
+        <div className="absolute top-0 inset-x-0 h-px pointer-events-none"
+          style={{background:"linear-gradient(90deg,transparent,rgba(139,92,246,0.7),rgba(236,72,153,0.5),transparent)"}} />
+
+        {/* ── CONTENT ── */}
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 w-full py-16 sm:py-24">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-8 items-center">
+
+            {/* ── LEFT ── */}
+            <div className="space-y-8 fade-up">
+
+              {/* Live badge */}
+              <div className="inline-flex items-center gap-3 px-4 py-2 rounded-full backdrop-blur-sm"
+                style={{background:"rgba(16,185,129,0.08)",border:"1px solid rgba(16,185,129,0.3)"}}>
+                <span className="relative w-2.5 h-2.5 pulse-dot shrink-0">
+                  <span className="block w-2.5 h-2.5 bg-green-400 rounded-full" />
                 </span>
-                <span className="text-gray-600">·</span>
-                <span className="text-gray-400 text-sm"><span className="text-white font-bold">12,458</span> players online</span>
+                <span className="text-green-300 font-bold text-sm tracking-wide">LIVE NOW</span>
+                <span className="w-px h-4 bg-white/10" />
+                <span className="text-gray-300 text-sm">
+                  <span className="text-white font-black">12,458</span> players online
+                </span>
               </div>
 
               {/* Headline */}
-              <div className="space-y-1">
-                {["YOUR NEXT", "BIG WIN", "AWAITS."].map((line, i) => (
-                  <div key={i}>
-                    {i < 2
-                      ? <h1 className="font-black text-white leading-[0.9] tracking-tight" style={{fontSize:"clamp(2.8rem,7vw,5rem)"}}>{line}</h1>
-                      : <h1 className="shimmer-gold font-black leading-[0.9] tracking-tight" style={{fontSize:"clamp(2.8rem,7vw,5rem)"}}>{line}</h1>
-                    }
-                  </div>
-                ))}
+              <div>
+                <p className="text-violet-400 text-sm sm:text-base font-bold tracking-[0.3em] uppercase mb-3">Prize Plugz</p>
+                <h1 className="font-black leading-[0.88] tracking-tight text-white"
+                  style={{fontSize:"clamp(3.2rem,8vw,5.8rem)"}}>
+                  YOUR NEXT<br />
+                  <span className="shimmer-gold">BIG WIN</span><br />
+                  AWAITS.
+                </h1>
               </div>
 
-              <p className="text-gray-400 text-base sm:text-lg max-w-lg leading-relaxed">
-                Spend tokens, watch the jackpot fill in real-time, and win
-                <span className="text-white font-semibold"> real cash and amazing prizes</span>.
-                100% transparent. Auto winner selection.
+              <p className="text-gray-400 text-base sm:text-lg leading-relaxed max-w-md">
+                Spend tokens, watch the jackpot fill up live, and win{" "}
+                <span className="text-white font-semibold">real cash & amazing prizes</span>.{" "}
+                Fully transparent. Auto winner every time.
               </p>
 
-              <div className="flex flex-wrap gap-3">
-                <button onClick={() => activeGames[0] ? setLocation(`/game/${activeGames[0].id}`) : setLocation("/games")}
-                  className="group relative overflow-hidden flex items-center gap-2 font-black text-black px-8 py-4 rounded-2xl transition-all hover:scale-105 glow-gold"
-                  style={{background:"linear-gradient(135deg,#f59e0b,#f97316)"}}>
-                  <div className="absolute inset-0 bg-white/20 -translate-x-full group-hover:translate-x-full transition-transform duration-500 skew-x-12" />
-                  <Zap className="h-5 w-5" /><span className="text-base">SPIN NOW</span>
+              {/* CTAs */}
+              <div className="flex flex-wrap gap-4">
+                <button
+                  onClick={() => activeGames[0] ? setLocation(`/game/${activeGames[0].id}`) : setLocation("/games")}
+                  className="group relative overflow-hidden flex items-center gap-2.5 font-black text-black text-base px-9 py-4 rounded-2xl transition-all duration-200 hover:scale-105"
+                  style={{background:"linear-gradient(135deg,#f59e0b,#f97316)",boxShadow:"0 0 40px rgba(245,158,11,0.45),0 8px 30px rgba(249,115,22,0.3)"}}>
+                  <div className="absolute inset-0 bg-white/25 -translate-x-full group-hover:translate-x-full transition-transform duration-500 skew-x-12" />
+                  <Zap className="h-5 w-5 relative z-10 shrink-0" />
+                  <span className="relative z-10">SPIN NOW</span>
                 </button>
-                <button onClick={() => setLocation("/how-to-play")}
-                  className="flex items-center gap-2 font-bold text-gray-300 px-7 py-4 rounded-2xl transition-all hover:text-white hover:bg-white/8"
-                  style={{border:"2px solid rgba(255,255,255,0.12)"}}>
-                  <Play className="h-4 w-4 fill-current" />HOW IT WORKS
+                <button
+                  onClick={() => setLocation("/how-to-play")}
+                  className="flex items-center gap-2.5 font-bold text-gray-200 text-base px-8 py-4 rounded-2xl backdrop-blur-sm transition-all duration-200 hover:text-white hover:bg-white/10"
+                  style={{border:"2px solid rgba(255,255,255,0.14)"}}>
+                  <Play className="h-4 w-4 fill-current shrink-0" />
+                  HOW IT WORKS
                 </button>
               </div>
 
-              {/* Feature badges */}
-              <div className="flex flex-wrap gap-2">
+              {/* Trust badges */}
+              <div className="flex flex-wrap gap-2.5">
                 {[
-                  {e:"🏆",t:"$127K+ Paid Out"},{e:"⚡",t:"Instant Results"},
-                  {e:"🔒",t:"100% Transparent"},{e:"🤖",t:"Auto Winner"},
-                ].map(({e,t}) => (
-                  <span key={t} className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs text-gray-400 font-medium" style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.07)"}}>
-                    <span>{e}</span><span>{t}</span>
+                  {img:imgToken, t:"$127K+ Paid Out"},
+                  {icon:Zap,     t:"Instant Results"},
+                  {icon:Shield,  t:"100% Transparent"},
+                  {icon:Trophy,  t:"Auto Winner"},
+                ].map(({img,icon:Icon,t},bi) => (
+                  <span key={bi} className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs text-gray-400 font-semibold backdrop-blur-sm"
+                    style={{background:"rgba(255,255,255,0.05)",border:"1px solid rgba(255,255,255,0.09)"}}>
+                    {img ? <img src={img} alt="" className="w-3.5 h-3.5 rounded-full object-cover" />
+                         : Icon && <Icon className="h-3 w-3 text-violet-400" />}
+                    {t}
                   </span>
                 ))}
               </div>
-            </div>
 
-            {/* RIGHT: Prize display */}
-            <div className="lg:col-span-2 space-y-4">
-              {isLoading
-                ? <div className="space-y-3">
-                    {[1,2,3].map(i => <div key={i} className="h-20 rounded-2xl animate-pulse" style={{background:"rgba(255,255,255,0.04)"}} />)}
+              {/* Mini stat row */}
+              <div className="flex gap-6 pt-2">
+                {[
+                  {val:"12,458",lbl:"Players Online",color:"#10b981"},
+                  {val:"$127K+",lbl:"Total Paid",    color:"#f59e0b"},
+                  {val:"583",   lbl:"Won Today",     color:"#8b5cf6"},
+                ].map(({val,lbl,color}) => (
+                  <div key={lbl}>
+                    <p className="font-black text-xl leading-none" style={{color}}>{val}</p>
+                    <p className="text-gray-600 text-xs mt-0.5">{lbl}</p>
                   </div>
-                : <HeroPrizeDisplay games={activeGames} onPlay={id => setLocation(`/game/${id}`)} />
-              }
-
-              {/* Token box */}
-              <div className="relative overflow-hidden p-4 rounded-2xl" style={{background:"linear-gradient(145deg,#0e0c22,#160f2e)",border:"1px solid rgba(124,58,237,0.25)"}}>
-                <img src={imgToken} alt="" aria-hidden className="absolute right-2 bottom-2 w-20 h-20 object-contain opacity-15 pointer-events-none float-2" />
-                <div className="flex items-center justify-between mb-3 relative z-10">
-                  <span className="text-gray-400 text-sm font-medium">Your Token Balance</span>
-                  <div className="flex items-center gap-2 bg-yellow-400/10 border border-yellow-400/20 rounded-full px-3 py-1">
-                    <img src={imgToken} alt="token" className="w-4 h-4 object-contain rounded-full" />
-                    <span className="text-yellow-300 font-black text-lg">{tokenBalance}</span>
-                  </div>
-                </div>
-                <button onClick={() => setLocation("/tokens")}
-                  className="relative z-10 w-full py-3 rounded-xl font-black text-sm text-white transition-all hover:scale-[1.02] glow-violet"
-                  style={{background:"linear-gradient(135deg,#7c3aed,#9333ea)"}}>
-                  + Buy More Tokens
-                </button>
+                ))}
               </div>
             </div>
 
+            {/* ── RIGHT ── */}
+            <div className="relative flex flex-col items-center lg:items-end gap-4">
+
+              {/* Central treasure/jackpot showcase */}
+              <div className="relative w-full max-w-sm">
+                {/* Outer glow ring */}
+                <div className="absolute inset-[-20px] rounded-3xl pointer-events-none"
+                  style={{background:"radial-gradient(ellipse at center,rgba(124,58,237,0.3) 0%,transparent 70%)",filter:"blur(20px)"}} />
+
+                {/* Main card */}
+                <div className="relative rounded-3xl overflow-hidden card-shine"
+                  style={{background:"linear-gradient(145deg,#110e2a,#1a1040)",border:"1px solid rgba(139,92,246,0.35)",boxShadow:"0 0 60px rgba(109,40,217,0.3),0 30px 80px rgba(0,0,0,0.7)"}}>
+
+                  {/* Prize image */}
+                  <div className="relative h-56 overflow-hidden">
+                    <img src={imgTreasure} alt="Prize Jackpot" className="w-full h-full object-cover scale-105 float-1"
+                      style={{filter:"saturate(1.3) brightness(1.05)"}} />
+                    <div className="absolute inset-0" style={{background:"linear-gradient(to bottom,transparent 50%,rgba(17,14,42,1) 100%)"}} />
+
+                    {/* Live overlay badge */}
+                    <div className="absolute top-3 left-3 flex items-center gap-1.5 backdrop-blur-md px-3 py-1.5 rounded-full"
+                      style={{background:"rgba(16,185,129,0.2)",border:"1px solid rgba(16,185,129,0.4)"}}>
+                      <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
+                      <span className="text-green-300 text-xs font-black tracking-wide">LIVE JACKPOT</span>
+                    </div>
+
+                    {/* Prize value badge */}
+                    <div className="absolute top-3 right-3 backdrop-blur-md px-3 py-1.5 rounded-full"
+                      style={{background:"rgba(245,158,11,0.2)",border:"1px solid rgba(245,158,11,0.4)"}}>
+                      <span className="text-yellow-300 text-xs font-black">🏆 BIG PRIZES</span>
+                    </div>
+                  </div>
+
+                  {/* Card body */}
+                  <div className="p-5 space-y-4">
+                    <div>
+                      <h3 className="text-white font-black text-xl leading-tight">Win Real Prizes</h3>
+                      <p className="text-gray-500 text-sm mt-1">Tokens fill the jackpot — last one in triggers the draw!</p>
+                    </div>
+
+                    {/* Floating prize chips */}
+                    <div className="flex gap-2">
+                      {[
+                        {img:imgCash,  label:"$500 Cash",  color:"#22c55e"},
+                        {img:imgPs5,   label:"PS5",         color:"#818cf8"},
+                        {img:imgTv,    label:"65\" TV",     color:"#a855f7"},
+                        {img:imgVip,   label:"VIP Pack",   color:"#f97316"},
+                      ].map(({img,label,color},ci) => (
+                        <div key={ci} className="flex-1 flex flex-col items-center gap-1 p-2 rounded-xl transition-transform hover:scale-105 cursor-pointer"
+                          style={{background:`${color}12`,border:`1px solid ${color}30`}}>
+                          <div className="w-9 h-9 rounded-lg overflow-hidden">
+                            <img src={img} alt={label} className="w-full h-full object-cover" />
+                          </div>
+                          <span className="text-[9px] font-black text-center leading-tight" style={{color}}>{label}</span>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* CTA */}
+                    <button onClick={() => activeGames[0] ? setLocation(`/game/${activeGames[0].id}`) : setLocation("/games")}
+                      className="w-full py-3.5 rounded-xl font-black text-sm text-black transition-all hover:scale-[1.02]"
+                      style={{background:"linear-gradient(135deg,#f59e0b,#f97316)",boxShadow:"0 0 25px rgba(245,158,11,0.4)"}}>
+                      <Zap className="h-4 w-4 inline mr-1.5 -mt-0.5" />
+                      ENTER NOW
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Token balance pill */}
+              <div className="relative w-full max-w-sm overflow-hidden rounded-2xl px-4 py-3 backdrop-blur-sm"
+                style={{background:"linear-gradient(135deg,rgba(14,12,34,0.9),rgba(22,15,46,0.9))",border:"1px solid rgba(124,58,237,0.2)"}}>
+                <img src={imgToken} alt="" aria-hidden
+                  className="absolute right-3 top-1/2 -translate-y-1/2 w-14 h-14 object-contain opacity-20 pointer-events-none float-2" />
+                <div className="flex items-center justify-between relative z-10">
+                  <div className="flex items-center gap-2.5">
+                    <img src={imgToken} alt="token" className="w-8 h-8 object-contain rounded-full" />
+                    <div>
+                      <p className="text-gray-500 text-[10px] font-semibold uppercase tracking-wider">Your Balance</p>
+                      <p className="text-yellow-300 font-black text-xl leading-none">{tokenBalance} <span className="text-yellow-600 text-sm font-semibold">tokens</span></p>
+                    </div>
+                  </div>
+                  <button onClick={() => setLocation("/tokens")}
+                    className="flex items-center gap-1.5 font-black text-white text-xs px-4 py-2.5 rounded-xl transition-all hover:scale-105"
+                    style={{background:"linear-gradient(135deg,#7c3aed,#9333ea)",boxShadow:"0 0 15px rgba(124,58,237,0.35)"}}>
+                    + Add
+                  </button>
+                </div>
+              </div>
+
+            </div>
           </div>
         </div>
+
+        {/* Bottom fade into stats bar */}
+        <div className="absolute bottom-0 inset-x-0 h-24 pointer-events-none"
+          style={{background:"linear-gradient(to bottom,transparent,#050412)"}} />
       </section>
 
       {/* ── STATS ────────────────────────────────────────────────────── */}
