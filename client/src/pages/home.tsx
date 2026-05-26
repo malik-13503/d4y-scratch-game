@@ -421,32 +421,47 @@ export default function HomePage() {
       </header>
 
       {/* ── HERO ─────────────────────────────────────────────────────── */}
-      <section className="relative overflow-hidden" style={{minHeight:"88vh",display:"flex",flexDirection:"column",justifyContent:"center",background:"#050412"}}>
+      <section className="relative overflow-hidden" style={{minHeight:"90vh",display:"flex",flexDirection:"column",justifyContent:"center",background:"linear-gradient(135deg,#1a0533 0%,#0f0628 35%,#1b0a40 65%,#120625 100%)"}}>
 
         {/* ── BG LAYERS ── */}
-        {/* 1. AI-generated atmospheric background */}
-        <div className="absolute inset-0 pointer-events-none">
-          <img src={imgHeroBg} alt="" aria-hidden
-            className="w-full h-full object-cover opacity-30 scale-105"
-            style={{filter:"blur(1px) saturate(1.4)"}} />
-          <div className="absolute inset-0" style={{background:"linear-gradient(to bottom,rgba(5,4,18,0.4) 0%,rgba(5,4,18,0.1) 40%,rgba(5,4,18,0.7) 85%,rgba(5,4,18,1) 100%)"}} />
-          <div className="absolute inset-0" style={{background:"linear-gradient(to right,rgba(5,4,18,0.8) 0%,transparent 50%,rgba(5,4,18,0.5) 100%)"}} />
-        </div>
-
-        {/* 2. Neon glow blobs */}
+        {/* 1. AI background — visible, not smothered */}
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
-          <div className="absolute rounded-full" style={{width:"600px",height:"600px",top:"-100px",left:"-150px",background:"radial-gradient(circle,rgba(109,40,217,0.22) 0%,transparent 70%)"}} />
-          <div className="absolute rounded-full float-2" style={{width:"500px",height:"500px",top:"20%",right:"-100px",background:"radial-gradient(circle,rgba(236,72,153,0.14) 0%,transparent 70%)"}} />
-          <div className="absolute rounded-full float-1" style={{width:"400px",height:"400px",bottom:"-80px",left:"35%",background:"radial-gradient(circle,rgba(245,158,11,0.1) 0%,transparent 70%)"}} />
+          <img src={imgHeroBg} alt="" aria-hidden
+            className="w-full h-full object-cover scale-110"
+            style={{opacity:0.5,filter:"saturate(1.8) brightness(0.75) contrast(1.1)",mixBlendMode:"screen"}} />
         </div>
 
-        {/* 3. Fine neon grid */}
-        <div className="absolute inset-0 opacity-[0.035] pointer-events-none"
-          style={{backgroundImage:"linear-gradient(rgba(139,92,246,1) 1px,transparent 1px),linear-gradient(90deg,rgba(139,92,246,1) 1px,transparent 1px)",backgroundSize:"60px 60px"}} />
+        {/* 2. Big vivid glow blobs */}
+        <div className="absolute inset-0 pointer-events-none overflow-hidden">
+          <div className="absolute rounded-full float-1" style={{width:"700px",height:"700px",top:"-180px",left:"-200px",background:"radial-gradient(circle,rgba(124,58,237,0.55) 0%,transparent 65%)"}} />
+          <div className="absolute rounded-full float-2" style={{width:"600px",height:"600px",top:"5%",right:"-180px",background:"radial-gradient(circle,rgba(236,72,153,0.4) 0%,transparent 65%)"}} />
+          <div className="absolute rounded-full float-3" style={{width:"500px",height:"500px",bottom:"-100px",left:"30%",background:"radial-gradient(circle,rgba(245,158,11,0.25) 0%,transparent 65%)"}} />
+          <div className="absolute rounded-full" style={{width:"350px",height:"350px",top:"30%",left:"20%",background:"radial-gradient(circle,rgba(99,102,241,0.2) 0%,transparent 65%)"}} />
+        </div>
 
-        {/* 4. Subtle scan line at top */}
-        <div className="absolute top-0 inset-x-0 h-px pointer-events-none"
-          style={{background:"linear-gradient(90deg,transparent,rgba(139,92,246,0.7),rgba(236,72,153,0.5),transparent)"}} />
+        {/* 3. Neon grid — more visible */}
+        <div className="absolute inset-0 pointer-events-none"
+          style={{backgroundImage:"linear-gradient(rgba(139,92,246,0.15) 1px,transparent 1px),linear-gradient(90deg,rgba(139,92,246,0.15) 1px,transparent 1px)",backgroundSize:"80px 80px",opacity:1}} />
+
+        {/* 4. Top accent line */}
+        <div className="absolute top-0 inset-x-0 h-0.5 pointer-events-none"
+          style={{background:"linear-gradient(90deg,transparent 0%,#7c3aed 30%,#ec4899 60%,#f59e0b 80%,transparent 100%)"}} />
+
+        {/* 5. Floating neon particles */}
+        <div className="absolute inset-0 pointer-events-none overflow-hidden">
+          {[
+            {w:6,h:6,top:"15%",left:"8%",  color:"#a78bfa",anim:"float-1",delay:"0s"},
+            {w:4,h:4,top:"45%",left:"3%",  color:"#f472b6",anim:"float-2",delay:"1s"},
+            {w:5,h:5,top:"70%",left:"12%", color:"#fbbf24",anim:"float-3",delay:"0.5s"},
+            {w:3,h:3,top:"25%",left:"45%", color:"#34d399",anim:"float-1",delay:"1.5s"},
+            {w:6,h:6,top:"80%",left:"55%", color:"#818cf8",anim:"float-2",delay:"0.2s"},
+            {w:4,h:4,top:"10%",left:"75%", color:"#fb923c",anim:"float-3",delay:"0.8s"},
+            {w:5,h:5,top:"60%",left:"90%", color:"#c084fc",anim:"float-1",delay:"1.2s"},
+          ].map((p,i) => (
+            <div key={i} className={`absolute rounded-full ${p.anim}`}
+              style={{width:p.w,height:p.h,top:p.top,left:p.left,background:p.color,boxShadow:`0 0 ${p.w*4}px ${p.color}`,animationDelay:p.delay,opacity:0.7}} />
+          ))}
+        </div>
 
         {/* ── CONTENT ── */}
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 w-full py-16 sm:py-24">
