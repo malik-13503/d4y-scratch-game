@@ -13,7 +13,7 @@ import imgTv       from "@assets/prize-tv.png";
 import imgVip      from "@assets/prize-vip.png";
 import imgToken    from "@assets/prize-token.png";
 import imgWheel    from "@assets/hero-wheel.png";
-import { Trophy, Zap, Shield, CheckCircle, Star, Users, Gift, Crown, Sparkles } from "lucide-react";
+import { Trophy, Zap, Shield, CheckCircle, Star, Gift, Crown, Sparkles } from "lucide-react";
 
 /* ─── Injected CSS ─────────────────────────────────────────────────────── */
 const AUTH_CSS = `
@@ -143,35 +143,6 @@ function JackpotCounter() {
   );
 }
 
-/* ─── Recent winner ticker ────────────────────────────────────────────── */
-const WINNERS = [
-  {name:"Alex M.", prize:"$500 Cash",  color:"#22c55e"},
-  {name:"Sarah K.", prize:"PS5",        color:"#818cf8"},
-  {name:"Jordan T.",prize:"65\" TV",    color:"#a855f7"},
-  {name:"Mike R.", prize:"VIP Pack",   color:"#f97316"},
-  {name:"Emma S.", prize:"$250 Cash",  color:"#ec4899"},
-];
-function WinnerTicker() {
-  const [idx, setIdx] = useState(0);
-  useEffect(() => {
-    const id = setInterval(() => setIdx(i => (i + 1) % WINNERS.length), 2800);
-    return () => clearInterval(id);
-  }, []);
-  const w = WINNERS[idx];
-  return (
-    <div className="flex items-center gap-2.5 px-4 py-2.5 rounded-xl"
-      style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.08)"}}>
-      <div className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-black"
-        style={{background:"rgba(124,58,237,0.3)",color:"#c084fc"}}>🏆</div>
-      <div className="flex-1 min-w-0">
-        <span className="text-gray-400 text-xs">Just won: </span>
-        <span className="text-white text-xs font-bold">{w.name} </span>
-        <span className="text-xs font-black" style={{color:w.color}}>{w.prize}</span>
-      </div>
-      <span className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse shrink-0" />
-    </div>
-  );
-}
 
 /* ─── Main Page ───────────────────────────────────────────────────────── */
 export default function AuthLandingPage() {
@@ -255,18 +226,6 @@ export default function AuthLandingPage() {
           {/* Top nav */}
           <div className="flex items-center justify-between px-5 sm:px-8 py-4">
             <img src={logoPath} alt="Prize Plugz" className="h-9 sm:h-11 w-auto drop-shadow-lg" />
-            <div className="flex items-center gap-4">
-              <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full"
-                style={{background:"rgba(16,185,129,0.1)",border:"1px solid rgba(16,185,129,0.3)"}}>
-                <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
-                <span className="text-green-300 text-xs font-black tracking-wide">12,458 ONLINE</span>
-              </div>
-              <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full"
-                style={{background:"rgba(245,158,11,0.1)",border:"1px solid rgba(245,158,11,0.3)"}}>
-                <Trophy className="h-3 w-3 text-yellow-400" />
-                <span className="text-yellow-300 text-xs font-black">583 Winners Today</span>
-              </div>
-            </div>
           </div>
 
           {/* Main body */}
@@ -349,22 +308,45 @@ export default function AuthLandingPage() {
                   </div>
                 </div>
 
-                {/* Winner ticker */}
-                <WinnerTicker />
-
-                {/* Stats + trust */}
-                <div className="grid grid-cols-3 gap-3">
+                {/* Big prize feature cards */}
+                <div className="grid grid-cols-2 gap-3">
                   {[
-                    {val:"12,458", lbl:"Online Now",   color:"#10b981", icon:Users},
-                    {val:"$127K+", lbl:"Paid Out",     color:"#f59e0b", icon:Trophy},
-                    {val:"583",    lbl:"Won Today",    color:"#8b5cf6", icon:Crown},
-                  ].map(({val,lbl,color,icon:Icon})=>(
-                    <div key={lbl} className="flex flex-col items-center p-3 rounded-xl text-center"
-                      style={{background:"rgba(255,255,255,0.03)",border:"1px solid rgba(255,255,255,0.07)"}}>
-                      <Icon className="h-3.5 w-3.5 mb-1" style={{color}} />
-                      <p className="font-black text-base leading-none" style={{color,textShadow:`0 0 12px ${color}80`}}>{val}</p>
-                      <p className="text-gray-600 text-[10px] mt-0.5">{lbl}</p>
+                    {img:imgCash, label:"$500 Cash Prize",  sub:"Instant transfer",   color:"#22c55e", glow:"rgba(34,197,94,0.25)"},
+                    {img:imgPs5,  label:"PlayStation 5",    sub:"Brand new console",  color:"#818cf8", glow:"rgba(129,140,248,0.25)"},
+                    {img:imgTv,   label:"65\" Smart TV",    sub:"4K Ultra HD",        color:"#a855f7", glow:"rgba(168,85,247,0.25)"},
+                    {img:imgVip,  label:"VIP Pack",         sub:"Exclusive rewards",  color:"#f97316", glow:"rgba(249,115,22,0.25)"},
+                  ].map(({img,label,sub,color,glow},ci)=>(
+                    <div key={ci} className="relative group rounded-2xl overflow-hidden transition-all duration-300 hover:scale-[1.03] cursor-pointer"
+                      style={{background:`linear-gradient(145deg,rgba(16,12,40,0.9),rgba(22,14,55,0.9))`,
+                              border:`1px solid ${color}35`,
+                              boxShadow:`0 0 20px ${glow}`}}>
+                      <div className="h-28 overflow-hidden">
+                        <img src={img} alt={label} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                          style={{filter:"saturate(1.3) brightness(1.05)"}} />
+                        <div className="absolute inset-0" style={{background:`linear-gradient(to bottom,transparent 40%,rgba(16,12,40,0.95) 100%)`}} />
+                      </div>
+                      <div className="px-3 py-2.5">
+                        <p className="font-black text-sm leading-tight" style={{color}}>{label}</p>
+                        <p className="text-gray-600 text-[10px] mt-0.5">{sub}</p>
+                      </div>
+                      {/* Corner glow */}
+                      <div className="absolute top-2 right-2 w-2 h-2 rounded-full animate-pulse" style={{background:color,boxShadow:`0 0 8px ${color}`}} />
                     </div>
+                  ))}
+                </div>
+
+                {/* Feature badges row */}
+                <div className="flex flex-wrap gap-2">
+                  {[
+                    {icon:Zap,         t:"Instant Results",     c:"#10b981"},
+                    {icon:Shield,      t:"100% Transparent",    c:"#818cf8"},
+                    {icon:CheckCircle, t:"Auto Winner",         c:"#f59e0b"},
+                    {icon:Gift,        t:"Free Welcome Tokens", c:"#ec4899"},
+                  ].map(({icon:Icon,t,c})=>(
+                    <span key={t} className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold"
+                      style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.09)",color:"#9ca3af"}}>
+                      <Icon className="h-3 w-3" style={{color:c}} />{t}
+                    </span>
                   ))}
                 </div>
               </div>
