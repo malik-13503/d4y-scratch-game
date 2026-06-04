@@ -780,16 +780,15 @@ export default function AdminDashboard() {
 
           <p className="text-[10px] font-semibold uppercase tracking-widest text-gray-600 px-2 pt-2 pb-1">Payments</p>
           {([
-            { label:"Pending Payments",    icon:Clock,       tab:"pending-payments", filter:"pending",      badge:true  },
-            { label:"All Payments",        icon:List,        tab:"pending-payments", filter:"all"                       },
-            { label:"Approved",            icon:CheckCircle, tab:"pending-payments", filter:"approved"                  },
-            { label:"Rejected",            icon:XCircle,     tab:"pending-payments", filter:"rejected"                  },
-            { label:"Wallet Transactions", icon:Wallet,      tab:"pending-payments", filter:"transactions"               },
+            { label:"Pending Payments", icon:Clock,       filter:"pending",  badge:true },
+            { label:"All Payments",     icon:List,        filter:"all"                  },
+            { label:"Approved",         icon:CheckCircle, filter:"approved"             },
+            { label:"Rejected",         icon:XCircle,     filter:"rejected"             },
           ] as const).map(item => {
-            const isActive = activeTab === item.tab && paymentStatusFilter === item.filter;
+            const isActive = activeTab === "pending-payments" && paymentStatusFilter === item.filter;
             return (
               <button key={item.label}
-                onClick={() => { setActiveTab(item.tab); setPaymentStatusFilter(item.filter); }}
+                onClick={() => { setActiveTab("pending-payments"); setPaymentStatusFilter(item.filter); }}
                 className={`w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-xs font-medium transition-all text-left ${isActive ? "bg-blue-600 text-white" : "text-gray-400 hover:bg-white/5 hover:text-gray-200"}`}>
                 <item.icon className="h-3.5 w-3.5 flex-shrink-0" />
                 <span className="flex-1 truncate">{item.label}</span>
@@ -801,6 +800,12 @@ export default function AdminDashboard() {
               </button>
             );
           })}
+          <button
+            onClick={() => setLocation("/wallet")}
+            className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-xs font-medium transition-all text-left text-gray-400 hover:bg-white/5 hover:text-gray-200">
+            <Wallet className="h-3.5 w-3.5 flex-shrink-0" />
+            <span className="flex-1 truncate">Wallet Transactions</span>
+          </button>
 
           <p className="text-[10px] font-semibold uppercase tracking-widest text-gray-600 px-2 pt-3 pb-1">Management</p>
           {([
@@ -4888,7 +4893,7 @@ export default function AdminDashboard() {
           <PromoCodesTab />
 
           {/* ── Pending Payments Tab ───────────────────────────────────── */}
-          <PendingPaymentsTab />
+          <PendingPaymentsTab externalStatus={paymentStatusFilter} />
 
           </Tabs>
         </main>
@@ -5305,18 +5310,26 @@ function PromoCodesTab() {
 }
 
 // ── Pending Payments Tab ─────────────────────────────────────────────────────
-function PendingPaymentsTab() {
+function PendingPaymentsTab({ externalStatus }: { externalStatus?: string }) {
   const { toast } = useToast();
   const [searchUser, setSearchUser] = useState("");
   const [searchHandle, setSearchHandle] = useState("");
   const [filterAmount, setFilterAmount] = useState("all");
   const [filterMethod, setFilterMethod] = useState("all");
-  const [filterStatus, setFilterStatus] = useState("pending");
+  const [filterStatus, setFilterStatus] = useState(externalStatus ?? "pending");
   const [selected, setSelected] = useState<number[]>([]);
   const [rejectNotes, setRejectNotes] = useState("");
   const [rejectDialogId, setRejectDialogId] = useState<number | null>(null);
   const [page, setPage] = useState(1);
   const PAGE_SIZE = 10;
+
+  // Sync filter when sidebar nav changes
+  useEffect(() => {
+    if (externalStatus && externalStatus !== "transactions") {
+      setFilterStatus(externalStatus);
+      setPage(1);
+    }
+  }, [externalStatus]);
 
   const { data: payments = [], isLoading, refetch } = useQuery<any[]>({
     queryKey: ["/api/admin/pending-payments", filterStatus, filterMethod],
