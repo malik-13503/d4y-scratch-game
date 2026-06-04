@@ -74,6 +74,8 @@ import {
   Pencil,
   ToggleLeft,
   ToggleRight,
+  Wallet,
+  List,
 } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -84,6 +86,7 @@ import logoPath from "@assets/logo_1777237644041.png";
 export default function AdminDashboard() {
   const [, setLocation] = useLocation();
   const [activeTab, setActiveTab] = useState("overview");
+  const [paymentStatusFilter, setPaymentStatusFilter] = useState("pending");
   const [selectedGame, setSelectedGame] = useState<any>(null);
   const [isCreateGameOpen, setIsCreateGameOpen] = useState(false);
   const [isEditGameOpen, setIsEditGameOpen] = useState(false);
@@ -297,6 +300,15 @@ export default function AdminDashboard() {
     queryKey: ["/api/admin/users"],
     enabled: !!currentAdmin,
   });
+
+  // Pending payments count for sidebar badge
+  const { data: pendingPaymentsForBadge = [] } = useQuery<any[]>({
+    queryKey: ["/api/admin/pending-payments-badge"],
+    queryFn: () => fetch("/api/admin/pending-payments?status=pending").then(r => r.json()),
+    enabled: !!currentAdmin,
+    refetchInterval: 30000,
+  });
+  const pendingCount = Array.isArray(pendingPaymentsForBadge) ? pendingPaymentsForBadge.length : 0;
 
   // Fetch detailed user data when a user is selected for real-time information
   const {
@@ -732,222 +744,169 @@ export default function AdminDashboard() {
   };
 
   return (
-    <div
-      className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 admin-dashboard"
-      data-admin-dashboard
-    >
-      {/* Mobile-Optimized Header */}
-      <header className="bg-black/20 backdrop-blur-xl border-b border-purple-500/30 shadow-2xl">
-        <div className="max-w-7xl mx-auto px-3 sm:px-6 py-3 sm:py-4">
-          <div className="flex items-center justify-between">
-            {/* Logo and Title - Mobile Responsive */}
-            <div className="flex items-center space-x-2 sm:space-x-6">
-              <div className="flex items-center space-x-2 sm:space-x-3">
-                <img
-                  src={logoPath}
-                  alt="Prize Plugz"
-                  className="h-8 sm:h-12 md:h-16 lg:h-20 w-auto object-contain"
-                />
-                <div className="hidden sm:block">
-                  <h1 className="text-lg sm:text-2xl md:text-3xl font-bold bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
-                    ADMIN CENTER
-                  </h1>
-                  <p className="text-gray-400 text-xs sm:text-sm hidden md:block">
-                    Real-time Game Management System
-                  </p>
-                </div>
-                {/* Mobile Title */}
-                <div className="sm:hidden">
-                  <h1 className="text-sm font-bold bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
-                    ADMIN
-                  </h1>
-                </div>
-              </div>
+    <div className="flex h-screen overflow-hidden" style={{background:"#0b0c18"}} data-admin-dashboard>
 
-              {/* Live Status Indicator - Hidden on Mobile */}
-              <div className="hidden lg:flex items-center space-x-2 bg-green-500/20 px-4 py-2 rounded-full border border-green-500/30">
-                <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                <span className="text-green-400 text-sm font-medium">
-                  SYSTEM ONLINE
-                </span>
+      {/* ── LEFT SIDEBAR ───────────────────────────────────────────────────── */}
+      <aside className="w-56 flex-shrink-0 hidden lg:flex flex-col overflow-hidden"
+        style={{background:"#0f1117", borderRight:"1px solid rgba(255,255,255,0.07)", height:"100vh"}}>
+
+        {/* Logo */}
+        <div className="px-4 py-4 flex-shrink-0 border-b" style={{borderColor:"rgba(255,255,255,0.07)"}}>
+          <img src={logoPath} alt="PrizePLugz" className="h-9 w-auto object-contain" />
+        </div>
+
+        {/* Admin profile */}
+        <div className="px-4 py-3 flex-shrink-0 border-b" style={{borderColor:"rgba(255,255,255,0.07)"}}>
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
+              {((adminUser as any)?.firstName?.[0] ?? "A").toUpperCase()}
+            </div>
+            <div className="min-w-0">
+              <p className="text-[10px] text-gray-400 leading-none">Welcome,</p>
+              <p className="text-white font-semibold text-sm truncate leading-tight mt-0.5">
+                {(adminUser as any)?.firstName || "Admin"}
+              </p>
+              <div className="flex items-center gap-1 mt-0.5">
+                <div className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
+                <span className="text-gray-500 text-[10px]">Online</span>
               </div>
             </div>
+          </div>
+          <span className="mt-2 inline-block text-[10px] font-semibold text-gray-500 bg-white/5 px-2 py-0.5 rounded-full">Administrator</span>
+        </div>
 
-            <div className="flex items-center space-x-2 sm:space-x-4">
-              {/* Admin Profile - Mobile Responsive */}
-              <div className="flex items-center space-x-2 sm:space-x-3 bg-white/5 backdrop-blur-sm rounded-lg sm:rounded-xl px-2 sm:px-4 py-1 sm:py-2 border border-white/10">
-                <div className="w-6 h-6 sm:w-8 sm:h-8 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full flex items-center justify-center">
-                  <Shield className="h-3 w-3 sm:h-4 sm:w-4 text-white" />
-                </div>
-                <div className="hidden sm:block">
-                  <div className="text-sm font-medium text-white">
-                    {(adminUser as any)?.firstName || "Admin"}
-                  </div>
-                  <div className="text-xs text-gray-400 hidden md:block">
-                    System Administrator
-                  </div>
-                </div>
+        {/* Navigation */}
+        <nav className="flex-1 overflow-y-auto py-2 px-2 space-y-0.5">
+
+          <p className="text-[10px] font-semibold uppercase tracking-widest text-gray-600 px-2 pt-2 pb-1">Payments</p>
+          {([
+            { label:"Pending Payments",    icon:Clock,       tab:"pending-payments", filter:"pending",      badge:true  },
+            { label:"All Payments",        icon:List,        tab:"pending-payments", filter:"all"                       },
+            { label:"Approved",            icon:CheckCircle, tab:"pending-payments", filter:"approved"                  },
+            { label:"Rejected",            icon:XCircle,     tab:"pending-payments", filter:"rejected"                  },
+            { label:"Wallet Transactions", icon:Wallet,      tab:"pending-payments", filter:"transactions"               },
+          ] as const).map(item => {
+            const isActive = activeTab === item.tab && paymentStatusFilter === item.filter;
+            return (
+              <button key={item.label}
+                onClick={() => { setActiveTab(item.tab); setPaymentStatusFilter(item.filter); }}
+                className={`w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-xs font-medium transition-all text-left ${isActive ? "bg-blue-600 text-white" : "text-gray-400 hover:bg-white/5 hover:text-gray-200"}`}>
+                <item.icon className="h-3.5 w-3.5 flex-shrink-0" />
+                <span className="flex-1 truncate">{item.label}</span>
+                {item.badge && pendingCount > 0 && (
+                  <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center ${isActive ? "bg-white/20 text-white" : "bg-blue-600 text-white"}`}>
+                    {pendingCount}
+                  </span>
+                )}
+              </button>
+            );
+          })}
+
+          <p className="text-[10px] font-semibold uppercase tracking-widest text-gray-600 px-2 pt-3 pb-1">Management</p>
+          {([
+            { label:"Users",     icon:Users,      tab:"users"     },
+            { label:"Games",     icon:Gamepad2,   tab:"games"     },
+            { label:"Winners",   icon:Trophy,     tab:"winners"   },
+            { label:"Overview",  icon:BarChart3,  tab:"overview"  },
+            { label:"Analytics", icon:TrendingUp, tab:"analytics" },
+          ] as const).map(item => {
+            const isActive = activeTab === item.tab;
+            return (
+              <button key={item.label}
+                onClick={() => setActiveTab(item.tab)}
+                className={`w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-xs font-medium transition-all text-left ${isActive ? "bg-blue-600 text-white" : "text-gray-400 hover:bg-white/5 hover:text-gray-200"}`}>
+                <item.icon className="h-3.5 w-3.5 flex-shrink-0" />
+                <span className="truncate">{item.label}</span>
+              </button>
+            );
+          })}
+
+          <p className="text-[10px] font-semibold uppercase tracking-widest text-gray-600 px-2 pt-3 pb-1">Config</p>
+          {([
+            { label:"Settings",    icon:Settings, tab:"settings"    },
+            { label:"Promo Codes", icon:Tag,      tab:"promo-codes" },
+            { label:"System",      icon:Monitor,  tab:"system"      },
+          ] as const).map(item => {
+            const isActive = activeTab === item.tab;
+            return (
+              <button key={item.label}
+                onClick={() => setActiveTab(item.tab)}
+                className={`w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-xs font-medium transition-all text-left ${isActive ? "bg-blue-600 text-white" : "text-gray-400 hover:bg-white/5 hover:text-gray-200"}`}>
+                <item.icon className="h-3.5 w-3.5 flex-shrink-0" />
+                <span className="truncate">{item.label}</span>
+              </button>
+            );
+          })}
+        </nav>
+
+        {/* Logout + Help */}
+        <div className="flex-shrink-0 p-2 border-t" style={{borderColor:"rgba(255,255,255,0.07)"}}>
+          <button onClick={() => logoutMutation.mutate()}
+            className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-xs font-medium text-red-400 hover:bg-red-500/10 transition-all">
+            <LogOut className="h-3.5 w-3.5 flex-shrink-0" />
+            <span>Logout</span>
+          </button>
+          <div className="mt-1.5 px-3 py-2 rounded-lg" style={{background:"rgba(255,255,255,0.03)",border:"1px solid rgba(255,255,255,0.06)"}}>
+            <div className="flex items-center gap-2">
+              <div className="w-6 h-6 rounded-full bg-blue-600/20 flex items-center justify-center flex-shrink-0">
+                <Info className="h-3 w-3 text-blue-400" />
               </div>
-
-              {/* Mobile Logout Button */}
-              <Button
-                onClick={() => logoutMutation.mutate()}
-                variant="outline"
-                size="sm"
-                className="border-red-500/50 text-red-400 hover:bg-red-500/20 hover:border-red-500 px-2 sm:px-4"
-              >
-                <LogOut className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2" />
-                <span className="hidden sm:inline">Logout</span>
-              </Button>
+              <div>
+                <p className="text-[10px] font-semibold text-gray-300">Need Help?</p>
+                <p className="text-[10px] text-gray-500">Contact Support</p>
+              </div>
             </div>
           </div>
         </div>
-      </header>
+      </aside>
 
-      {/* Main Dashboard - Mobile Optimized */}
-      <main className="max-w-7xl mx-auto px-3 sm:px-6 py-4 sm:py-8 mt-5">
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          {/* Enhanced Mobile-Responsive Tab Navigation */}
-          <div className="mb-8 sm:mb-12">
-            <TabsList className="grid w-full grid-cols-3 sm:grid-cols-7 bg-gradient-to-r from-black/30 via-slate-900/50 to-black/30 backdrop-blur-md border-2 border-purple-500/40 rounded-xl sm:rounded-2xl p-1 sm:p-2 gap-1 shadow-2xl shadow-purple-900/30">
-              <TabsTrigger
-                value="overview"
-                className="relative group data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-purple-500/50 text-gray-300 hover:text-white hover:bg-slate-700/50 transition-all duration-300 text-xs sm:text-sm p-3 sm:p-4 rounded-lg sm:rounded-xl border border-transparent data-[state=active]:border-purple-400/60"
-              >
-                <div className="flex flex-col sm:flex-row items-center justify-center sm:justify-start space-y-1 sm:space-y-0 sm:space-x-2">
-                  <div className="relative">
-                    <BarChart3 className="h-4 w-4 sm:h-5 sm:w-5 transition-transform duration-300 group-data-[state=active]:scale-110" />
-                    <div className="absolute -inset-1 bg-purple-500/20 rounded-full scale-0 group-data-[state=active]:scale-100 transition-transform duration-300"></div>
-                  </div>
-                  <span className="hidden sm:inline font-semibold">
-                    Overview
-                  </span>
-                  <span className="sm:hidden text-xs font-medium">Stats</span>
-                </div>
-              </TabsTrigger>
+      {/* ── MAIN CONTENT AREA ─────────────────────────────────────────────── */}
+      <div className="flex-1 flex flex-col overflow-hidden">
 
-              <TabsTrigger
-                value="games"
-                className="relative group data-[state=active]:bg-gradient-to-r data-[state=active]:from-emerald-600 data-[state=active]:to-green-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-emerald-500/50 text-gray-300 hover:text-white hover:bg-slate-700/50 transition-all duration-300 text-xs sm:text-sm p-3 sm:p-4 rounded-lg sm:rounded-xl border border-transparent data-[state=active]:border-emerald-400/60"
-              >
-                <div className="flex flex-col sm:flex-row items-center justify-center sm:justify-start space-y-1 sm:space-y-0 sm:space-x-2">
-                  <div className="relative">
-                    <Gamepad2 className="h-4 w-4 sm:h-5 sm:w-5 transition-transform duration-300 group-data-[state=active]:scale-110 group-data-[state=active]:rotate-12" />
-                    <div className="absolute -inset-1 bg-emerald-500/20 rounded-full scale-0 group-data-[state=active]:scale-100 transition-transform duration-300"></div>
-                  </div>
-                  <span className="hidden sm:inline font-semibold">Games</span>
-                  <span className="sm:hidden text-xs font-medium">Games</span>
-                </div>
-              </TabsTrigger>
-
-              <TabsTrigger
-                value="users"
-                className="relative group data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-600 data-[state=active]:to-red-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-orange-500/50 text-gray-300 hover:text-white hover:bg-slate-700/50 transition-all duration-300 text-xs sm:text-sm p-3 sm:p-4 rounded-lg sm:rounded-xl border border-transparent data-[state=active]:border-orange-400/60"
-              >
-                <div className="flex flex-col sm:flex-row items-center justify-center sm:justify-start space-y-1 sm:space-y-0 sm:space-x-2">
-                  <div className="relative">
-                    <Users className="h-4 w-4 sm:h-5 sm:w-5 transition-transform duration-300 group-data-[state=active]:scale-110" />
-                    <div className="absolute -inset-1 bg-orange-500/20 rounded-full scale-0 group-data-[state=active]:scale-100 transition-transform duration-300"></div>
-                  </div>
-                  <span className="hidden sm:inline font-semibold">Users</span>
-                  <span className="sm:hidden text-xs font-medium">Users</span>
-                </div>
-              </TabsTrigger>
-
-              <TabsTrigger
-                value="analytics"
-                className="relative group data-[state=active]:bg-gradient-to-r data-[state=active]:from-cyan-600 data-[state=active]:to-blue-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-cyan-500/50 text-gray-300 hover:text-white hover:bg-slate-700/50 transition-all duration-300 text-xs sm:text-sm p-3 sm:p-4 rounded-lg sm:rounded-xl border border-transparent data-[state=active]:border-cyan-400/60"
-              >
-                <div className="flex flex-col sm:flex-row items-center justify-center sm:justify-start space-y-1 sm:space-y-0 sm:space-x-2">
-                  <div className="relative">
-                    <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 transition-transform duration-300 group-data-[state=active]:scale-110 group-data-[state=active]:-rotate-12" />
-                    <div className="absolute -inset-1 bg-cyan-500/20 rounded-full scale-0 group-data-[state=active]:scale-100 transition-transform duration-300"></div>
-                  </div>
-                  <span className="hidden sm:inline font-semibold">
-                    Analytics
-                  </span>
-                  <span className="sm:hidden text-xs font-medium">Charts</span>
-                </div>
-              </TabsTrigger>
-
-              <TabsTrigger
-                value="settings"
-                className="relative group data-[state=active]:bg-gradient-to-r data-[state=active]:from-pink-600 data-[state=active]:to-purple-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-pink-500/50 text-gray-300 hover:text-white hover:bg-slate-700/50 transition-all duration-300 text-xs sm:text-sm p-3 sm:p-4 rounded-lg sm:rounded-xl border border-transparent data-[state=active]:border-pink-400/60"
-              >
-                <div className="flex flex-col sm:flex-row items-center justify-center sm:justify-start space-y-1 sm:space-y-0 sm:space-x-2">
-                  <div className="relative">
-                    <Settings className="h-4 w-4 sm:h-5 sm:w-5 transition-transform duration-300 group-data-[state=active]:scale-110 group-data-[state=active]:rotate-90" />
-                    <div className="absolute -inset-1 bg-pink-500/20 rounded-full scale-0 group-data-[state=active]:scale-100 transition-transform duration-300"></div>
-                  </div>
-                  <span className="hidden sm:inline font-semibold">
-                    Settings
-                  </span>
-                  <span className="sm:hidden text-xs font-medium">Config</span>
-                </div>
-              </TabsTrigger>
-
-              <TabsTrigger
-                value="system"
-                className="relative group data-[state=active]:bg-gradient-to-r data-[state=active]:from-indigo-600 data-[state=active]:to-purple-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-indigo-500/50 text-gray-300 hover:text-white hover:bg-slate-700/50 transition-all duration-300 text-xs sm:text-sm p-3 sm:p-4 rounded-lg sm:rounded-xl border border-transparent data-[state=active]:border-indigo-400/60"
-              >
-                <div className="flex flex-col sm:flex-row items-center justify-center sm:justify-start space-y-1 sm:space-y-0 sm:space-x-2">
-                  <div className="relative">
-                    <Monitor className="h-4 w-4 sm:h-5 sm:w-5 transition-transform duration-300 group-data-[state=active]:scale-110" />
-                    <div className="absolute -inset-1 bg-indigo-500/20 rounded-full scale-0 group-data-[state=active]:scale-100 transition-transform duration-300"></div>
-                  </div>
-                  <span className="hidden sm:inline font-semibold">System</span>
-                  <span className="sm:hidden text-xs font-medium">System</span>
-                </div>
-              </TabsTrigger>
-
-              <TabsTrigger
-                value="winners"
-                className="relative group data-[state=active]:bg-gradient-to-r data-[state=active]:from-yellow-600 data-[state=active]:to-amber-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-yellow-500/50 text-gray-300 hover:text-white hover:bg-slate-700/50 transition-all duration-300 text-xs sm:text-sm p-3 sm:p-4 rounded-lg sm:rounded-xl border border-transparent data-[state=active]:border-yellow-400/60"
-              >
-                <div className="flex flex-col sm:flex-row items-center justify-center sm:justify-start space-y-1 sm:space-y-0 sm:space-x-2">
-                  <div className="relative">
-                    <Trophy className="h-4 w-4 sm:h-5 sm:w-5 transition-transform duration-300 group-data-[state=active]:scale-110" />
-                    <div className="absolute -inset-1 bg-yellow-500/20 rounded-full scale-0 group-data-[state=active]:scale-100 transition-transform duration-300"></div>
-                  </div>
-                  <span className="hidden sm:inline font-semibold">Winners</span>
-                  <span className="sm:hidden text-xs font-medium">Winners</span>
-                </div>
-              </TabsTrigger>
-              <TabsTrigger
-                value="promo-codes"
-                className="relative group data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-600 data-[state=active]:to-teal-600 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-green-500/50 text-gray-300 hover:text-white hover:bg-slate-700/50 transition-all duration-300 text-xs sm:text-sm p-3 sm:p-4 rounded-lg sm:rounded-xl border border-transparent data-[state=active]:border-green-400/60"
-              >
-                <div className="flex flex-col sm:flex-row items-center justify-center sm:justify-start space-y-1 sm:space-y-0 sm:space-x-2">
-                  <div className="relative">
-                    <Tag className="h-4 w-4 sm:h-5 sm:w-5 transition-transform duration-300 group-data-[state=active]:scale-110" />
-                    <div className="absolute -inset-1 bg-green-500/20 rounded-full scale-0 group-data-[state=active]:scale-100 transition-transform duration-300"></div>
-                  </div>
-                  <span className="hidden sm:inline font-semibold">Promo Codes</span>
-                  <span className="sm:hidden text-xs font-medium">Promos</span>
-                </div>
-              </TabsTrigger>
-              <TabsTrigger
-                value="pending-payments"
-                className="relative group data-[state=active]:bg-gradient-to-r data-[state=active]:from-emerald-500 data-[state=active]:to-green-500 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-emerald-500/50 text-gray-300 hover:text-white hover:bg-slate-700/50 transition-all duration-300 text-xs sm:text-sm p-3 sm:p-4 rounded-lg sm:rounded-xl border border-transparent data-[state=active]:border-emerald-400/60"
-              >
-                <div className="flex flex-col sm:flex-row items-center justify-center sm:justify-start space-y-1 sm:space-y-0 sm:space-x-2">
-                  <div className="relative">
-                    <DollarSign className="h-4 w-4 sm:h-5 sm:w-5 transition-transform duration-300 group-data-[state=active]:scale-110" />
-                    <div className="absolute -inset-1 bg-emerald-500/20 rounded-full scale-0 group-data-[state=active]:scale-100 transition-transform duration-300"></div>
-                  </div>
-                  <span className="hidden sm:inline font-semibold">Payments</span>
-                  <span className="sm:hidden text-xs font-medium">Pay</span>
-                </div>
-              </TabsTrigger>
-            </TabsList>
+        {/* Mobile top bar */}
+        <header className="lg:hidden flex items-center justify-between px-4 py-3 flex-shrink-0 border-b"
+          style={{background:"#0f1117", borderColor:"rgba(255,255,255,0.07)"}}>
+          <img src={logoPath} alt="PrizePLugz" className="h-8 w-auto object-contain" />
+          <div className="flex items-center gap-2">
+            <select value={activeTab} onChange={e => setActiveTab(e.target.value)}
+              className="text-xs rounded-lg px-2 py-1.5 text-white"
+              style={{background:"rgba(255,255,255,0.08)", border:"1px solid rgba(255,255,255,0.12)"}}>
+              <option value="overview">Overview</option>
+              <option value="pending-payments">Payments</option>
+              <option value="games">Games</option>
+              <option value="users">Users</option>
+              <option value="analytics">Analytics</option>
+              <option value="settings">Settings</option>
+              <option value="system">System</option>
+              <option value="winners">Winners</option>
+              <option value="promo-codes">Promo Codes</option>
+            </select>
+            <Button onClick={() => logoutMutation.mutate()} variant="outline" size="sm"
+              className="border-red-500/50 text-red-400 hover:bg-red-500/20 px-2">
+              <LogOut className="h-3.5 w-3.5" />
+            </Button>
           </div>
+        </header>
 
-          {/* Tab Content Container - Clear spacing below navigation */}
+        <main className="flex-1 overflow-auto" style={{background:"#0b0c18"}}>
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            {/* Sidebar drives navigation — TabsList hidden */}
+            <TabsList className="hidden">
+              <TabsTrigger value="overview">Overview</TabsTrigger>
+              <TabsTrigger value="games">Games</TabsTrigger>
+              <TabsTrigger value="users">Users</TabsTrigger>
+              <TabsTrigger value="analytics">Analytics</TabsTrigger>
+              <TabsTrigger value="settings">Settings</TabsTrigger>
+              <TabsTrigger value="system">System</TabsTrigger>
+              <TabsTrigger value="winners">Winners</TabsTrigger>
+              <TabsTrigger value="promo-codes">Promo Codes</TabsTrigger>
+              <TabsTrigger value="pending-payments">Payments</TabsTrigger>
+            </TabsList>
 
-          {/* Overview Tab - Mobile Optimized */}
+          {/* Overview Tab */}
           <TabsContent
             value="overview"
-            className="space-y-4 sm:space-y-8 mt-20 px-2 sm:px-4"
+            className="space-y-4 sm:space-y-8 px-4 sm:px-6 py-4 sm:py-6"
           >
             {/* Hero Stats Section - Mobile Responsive */}
             <div className="relative overflow-hidden bg-gradient-to-r from-slate-800/95 via-slate-700/95 to-slate-800/95 backdrop-blur-sm border border-slate-600/50 rounded-lg sm:rounded-2xl p-4 sm:p-8 shadow-2xl">
@@ -1387,7 +1346,7 @@ export default function AdminDashboard() {
           </TabsContent>
 
           {/* Games Management Tab */}
-          <TabsContent value="games" className="space-y-4 sm:space-y-6 mt-20 px-2 sm:px-4">
+          <TabsContent value="games" className="space-y-4 sm:space-y-6 px-4 sm:px-6 py-4 sm:py-6">
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="text-2xl font-bold text-white">
@@ -3045,7 +3004,7 @@ export default function AdminDashboard() {
           {/* Users Management Tab - Enhanced Mobile */}
           <TabsContent
             value="users"
-            className="space-y-4 sm:space-y-6 mt-20 px-2 sm:px-4"
+            className="space-y-4 sm:space-y-6 px-4 sm:px-6 py-4 sm:py-6"
           >
             <div className="flex flex-col gap-3 sm:gap-4">
               <div className="text-center sm:text-left">
@@ -3384,7 +3343,7 @@ export default function AdminDashboard() {
           {/* Analytics Tab - Mobile Enhanced */}
           <TabsContent
             value="analytics"
-            className="space-y-4 sm:space-y-6 mt-20 px-2 sm:px-4"
+            className="space-y-4 sm:space-y-6 px-4 sm:px-6 py-4 sm:py-6"
           >
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
               <div className="text-center sm:text-left">
@@ -3647,7 +3606,7 @@ export default function AdminDashboard() {
           </TabsContent>
 
           {/* System Monitoring Tab */}
-          <TabsContent value="system" className="space-y-4 sm:space-y-6 mt-20 px-2 sm:px-4">
+          <TabsContent value="system" className="space-y-4 sm:space-y-6 px-4 sm:px-6 py-4 sm:py-6">
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="text-2xl font-bold text-white">
@@ -4407,7 +4366,7 @@ export default function AdminDashboard() {
           </Dialog>
 
           {/* Settings Tab */}
-          <TabsContent value="settings" className="space-y-4 sm:space-y-6 mt-20 px-2 sm:px-4">
+          <TabsContent value="settings" className="space-y-4 sm:space-y-6 px-4 sm:px-6 py-4 sm:py-6">
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="text-2xl font-bold text-white">
@@ -4907,7 +4866,7 @@ export default function AdminDashboard() {
           </TabsContent>
 
           {/* Winners Tab - New Winners List */}
-          <TabsContent value="winners" className="space-y-4 sm:space-y-6 mt-20 px-2 sm:px-4">
+          <TabsContent value="winners" className="space-y-4 sm:space-y-6 px-4 sm:px-6 py-4 sm:py-6">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 space-y-4 sm:space-y-0">
               <div>
                 <h2 className="text-xl sm:text-2xl font-bold text-white flex items-center">
@@ -4931,8 +4890,9 @@ export default function AdminDashboard() {
           {/* ── Pending Payments Tab ───────────────────────────────────── */}
           <PendingPaymentsTab />
 
-        </Tabs>
-      </main>
+          </Tabs>
+        </main>
+      </div>
 
       {/* Eye-catching Delete Game Confirmation Dialog */}
       <Dialog open={isDeleteGameOpen} onOpenChange={setIsDeleteGameOpen}>
@@ -5189,7 +5149,7 @@ function PromoCodesTab() {
   };
 
   return (
-    <TabsContent value="promo-codes" className="space-y-4 sm:space-y-6 mt-20 px-2 sm:px-4">
+    <TabsContent value="promo-codes" className="space-y-4 sm:space-y-6 px-4 sm:px-6 py-4 sm:py-6">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 space-y-4 sm:space-y-0">
         <div>
           <h2 className="text-xl sm:text-2xl font-bold text-white flex items-center">
@@ -5355,6 +5315,8 @@ function PendingPaymentsTab() {
   const [selected, setSelected] = useState<number[]>([]);
   const [rejectNotes, setRejectNotes] = useState("");
   const [rejectDialogId, setRejectDialogId] = useState<number | null>(null);
+  const [page, setPage] = useState(1);
+  const PAGE_SIZE = 10;
 
   const { data: payments = [], isLoading, refetch } = useQuery<any[]>({
     queryKey: ["/api/admin/pending-payments", filterStatus, filterMethod],
@@ -5392,313 +5354,376 @@ function PendingPaymentsTab() {
     onError: () => toast({ title: "Bulk reject failed", variant: "destructive" }),
   });
 
-  const METHOD_LABELS: Record<string, string> = {
-    cashapp: "Cash App", venmo: "Venmo", chime: "Chime", applepay: "Apple Pay",
+  const METHOD_LABELS: Record<string, { label: string; color: string; bg: string }> = {
+    cashapp:  { label: "Cash App",   color: "#00d632", bg: "rgba(0,214,50,0.12)"    },
+    venmo:    { label: "Venmo",      color: "#3d95ce", bg: "rgba(61,149,206,0.12)"  },
+    chime:    { label: "Chime",      color: "#00c88c", bg: "rgba(0,200,140,0.12)"   },
+    applepay: { label: "Apple Pay",  color: "#e8e8e8", bg: "rgba(232,232,232,0.10)" },
   };
 
   const filtered = (payments as any[]).filter(p => {
     if (searchUser && !`${p.user?.firstName} ${p.user?.lastName} ${p.user?.email}`.toLowerCase().includes(searchUser.toLowerCase())) return false;
-    if (searchHandle && !p.paymentHandle.toLowerCase().includes(searchHandle.toLowerCase())) return false;
+    if (searchHandle && !(p.paymentHandle ?? "").toLowerCase().includes(searchHandle.toLowerCase())) return false;
     if (filterAmount !== "all") {
       const amt = Number(p.dollarAmount);
-      if (filterAmount === "5" && amt !== 5) return false;
-      if (filterAmount === "10" && amt !== 10) return false;
-      if (filterAmount === "20" && amt !== 20) return false;
-      if (filterAmount === "50" && amt !== 50) return false;
+      if (filterAmount === "5"   && amt !== 5)   return false;
+      if (filterAmount === "10"  && amt !== 10)  return false;
+      if (filterAmount === "20"  && amt !== 20)  return false;
+      if (filterAmount === "50"  && amt !== 50)  return false;
       if (filterAmount === "100" && amt !== 100) return false;
     }
     return true;
   });
 
-  const allSelected = filtered.length > 0 && filtered.every(p => selected.includes(p.id));
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const safePage   = Math.min(page, totalPages);
+  const pageItems  = filtered.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
 
-  function toggleAll() {
-    if (allSelected) setSelected([]);
-    else setSelected(filtered.map(p => p.id));
-  }
-  function toggleOne(id: number) {
-    setSelected(s => s.includes(id) ? s.filter(x => x !== id) : [...s, id]);
-  }
+  const allSelected = filtered.length > 0 && filtered.every(p => selected.includes(p.id));
+  function toggleAll()          { allSelected ? setSelected([]) : setSelected(filtered.map(p => p.id)); }
+  function toggleOne(id: number){ setSelected(s => s.includes(id) ? s.filter(x => x !== id) : [...s, id]); }
 
   function timeAgo(date: string) {
-    const diff = Date.now() - new Date(date).getTime();
-    const m = Math.floor(diff / 60000);
+    const m = Math.floor((Date.now() - new Date(date).getTime()) / 60000);
+    if (m < 1)  return "just now";
+    if (m < 60) return `${m} min${m > 1 ? "s" : ""} ago`;
     const h = Math.floor(m / 60);
-    const d = Math.floor(h / 24);
-    if (m < 1) return "just now";
-    if (m < 60) return `${m} min${m>1?"s":""} ago`;
-    if (h < 24) return `${h} hr${h>1?"s":""} ago`;
+    if (h < 24) return `${h} hr${h > 1 ? "s" : ""} ago`;
     return new Date(date).toLocaleDateString();
   }
 
   // Stats
-  const pendingPayments = (payments as any[]).filter(p => p.status === "pending");
-  const todayStart = new Date(); todayStart.setHours(0,0,0,0);
-  const approvedToday = (payments as any[]).filter(p => p.status === "approved" && new Date(p.processedAt) >= todayStart);
-  const rejectedToday = (payments as any[]).filter(p => p.status === "rejected" && new Date(p.processedAt) >= todayStart);
-  const totalPending = pendingPayments.reduce((s: number, p: any) => s + Number(p.dollarAmount), 0);
+  const allPayments   = payments as any[];
+  const pendingList   = allPayments.filter(p => p.status === "pending");
+  const todayStart    = new Date(); todayStart.setHours(0,0,0,0);
+  const approvedToday = allPayments.filter(p => p.status === "approved" && new Date(p.processedAt) >= todayStart);
+  const rejectedToday = allPayments.filter(p => p.status === "rejected" && new Date(p.processedAt) >= todayStart);
+  const totalPending  = pendingList.reduce((s, p) => s + Number(p.dollarAmount), 0);
+  const totalApproved = allPayments.filter(p => p.status === "approved").length;
+  const totalRejected = allPayments.filter(p => p.status === "rejected").length;
 
-  const statusCfg: Record<string, { cls: string; label: string }> = {
-    pending:  { cls: "bg-yellow-500/20 text-yellow-300 border-yellow-500/30",  label: "Pending"  },
-    approved: { cls: "bg-green-500/20  text-green-300  border-green-500/30",   label: "Approved" },
-    rejected: { cls: "bg-red-500/20    text-red-300    border-red-500/30",     label: "Rejected" },
-  };
+  function clearFilters() {
+    setSearchUser(""); setSearchHandle(""); setFilterAmount("all"); setFilterMethod("all"); setFilterStatus("pending"); setPage(1);
+  }
+
+  const inputCls = "w-full pl-9 pr-3 py-2 rounded-lg text-sm placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-blue-500/50 text-white";
+  const inputStyle = { background:"rgba(255,255,255,0.06)", border:"1px solid rgba(255,255,255,0.1)" };
 
   return (
-    <TabsContent value="pending-payments" className="space-y-4 sm:space-y-6 mt-20 px-2 sm:px-4">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold text-white flex items-center gap-3">
-            <DollarSign className="h-7 w-7 text-emerald-400" />
-            Pending Payments
-          </h2>
-          <p className="text-gray-400 text-sm mt-1">Review and process incoming payment submissions</p>
-        </div>
-        <Button onClick={() => refetch()} variant="outline" size="sm"
-          className="border-emerald-500/40 text-emerald-400 hover:bg-emerald-500/20">
-          <RefreshCw className="h-4 w-4 mr-2" /> Refresh
-        </Button>
-      </div>
+    <TabsContent value="pending-payments" className="px-0 py-0 mt-0">
+      <div className="p-6 space-y-5">
 
-      {/* Stat cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        {[
-          { label: "Pending Payments",  value: pendingPayments.length, sub: "Needs Review",     color: "#f59e0b", bg: "rgba(245,158,11,0.1)",  border: "rgba(245,158,11,0.3)"  },
-          { label: "Approved Today",    value: approvedToday.length,   sub: `Total: ${(payments as any[]).filter(p=>p.status==="approved").length}`, color: "#10b981", bg: "rgba(16,185,129,0.1)", border: "rgba(16,185,129,0.3)" },
-          { label: "Rejected Today",    value: rejectedToday.length,   sub: `Total: ${(payments as any[]).filter(p=>p.status==="rejected").length}`, color: "#ef4444", bg: "rgba(239,68,68,0.1)",  border: "rgba(239,68,68,0.3)"  },
-          { label: "Total $ Pending",   value: `$${totalPending.toFixed(2)}`, sub: `Across ${pendingPayments.length} payments`, color: "#f59e0b", bg: "rgba(245,158,11,0.1)", border: "rgba(245,158,11,0.3)" },
-        ].map(({ label, value, sub, color, bg, border }) => (
-          <div key={label} className="rounded-2xl p-4" style={{ background: bg, border: `1px solid ${border}` }}>
-            <p className="text-2xl font-black" style={{ color }}>{value}</p>
-            <p className="text-white text-sm font-semibold mt-0.5">{label}</p>
-            <p className="text-gray-500 text-xs mt-0.5">{sub}</p>
+        {/* ── Header ─────────────────────────────────────────────── */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-xl font-bold text-white">Pending Payments</h1>
+            <p className="text-gray-400 text-sm mt-0.5">Review and process incoming payment submissions</p>
           </div>
-        ))}
-      </div>
+          <button onClick={() => refetch()}
+            className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold text-white transition-all hover:opacity-90"
+            style={{background:"linear-gradient(135deg,#3b82f6,#6366f1)"}}>
+            <RefreshCw className="h-3.5 w-3.5" /> Refresh
+          </button>
+        </div>
 
-      {/* Filters */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
-        <div className="relative">
-          <Users className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
-          <input
-            placeholder="Search by name or email"
-            value={searchUser}
-            onChange={e => setSearchUser(e.target.value)}
-            className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-emerald-400/60"
-          />
+        {/* ── Stat Cards ─────────────────────────────────────────── */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          {[
+            { icon: Clock,       iconBg:"rgba(245,158,11,0.15)", iconColor:"#f59e0b", value: pendingList.length,    label:"Pending Payments", sub:"Needs Review",                       valueCls:"text-yellow-400" },
+            { icon: CheckCircle, iconBg:"rgba(16,185,129,0.15)", iconColor:"#10b981", value: approvedToday.length,  label:"Approved Today",   sub:`Total: ${totalApproved.toLocaleString()}`, valueCls:"text-emerald-400" },
+            { icon: XCircle,     iconBg:"rgba(239,68,68,0.15)",  iconColor:"#ef4444", value: rejectedToday.length,  label:"Rejected Today",   sub:`Total: ${totalRejected.toLocaleString()}`, valueCls:"text-red-400" },
+            { icon: DollarSign,  iconBg:"rgba(245,158,11,0.15)", iconColor:"#f59e0b", value:`$${totalPending.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2})}`, label:"Total Pending", sub:`Across ${pendingList.length} Payments`, valueCls:"text-yellow-400" },
+          ].map(({ icon: Icon, iconBg, iconColor, value, label, sub, valueCls }) => (
+            <div key={label} className="rounded-xl p-4 flex items-center gap-3"
+              style={{background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.08)"}}>
+              <div className="w-11 h-11 rounded-full flex items-center justify-center flex-shrink-0" style={{background:iconBg}}>
+                <Icon className="h-5 w-5" style={{color:iconColor}} />
+              </div>
+              <div className="min-w-0">
+                <p className={`text-2xl font-black leading-none ${valueCls}`}>{value}</p>
+                <p className="text-white text-xs font-semibold mt-1 truncate">{label}</p>
+                <p className="text-gray-500 text-[10px] truncate">{sub}</p>
+              </div>
+            </div>
+          ))}
         </div>
-        <div className="relative">
-          <Activity className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
-          <input
-            placeholder="Search by payment handle"
-            value={searchHandle}
-            onChange={e => setSearchHandle(e.target.value)}
-            className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-emerald-400/60"
-          />
-        </div>
-        <Select value={filterAmount} onValueChange={setFilterAmount}>
-          <SelectTrigger className="bg-white/5 border-white/10 text-white">
-            <SelectValue placeholder="All Amounts" />
-          </SelectTrigger>
-          <SelectContent className="bg-slate-800 border-white/10 text-white">
-            <SelectItem value="all">All Amounts</SelectItem>
-            <SelectItem value="5">$5</SelectItem>
-            <SelectItem value="10">$10</SelectItem>
-            <SelectItem value="20">$20</SelectItem>
-            <SelectItem value="50">$50</SelectItem>
-            <SelectItem value="100">$100</SelectItem>
-          </SelectContent>
-        </Select>
-        <Select value={filterMethod} onValueChange={setFilterMethod}>
-          <SelectTrigger className="bg-white/5 border-white/10 text-white">
-            <SelectValue placeholder="All Methods" />
-          </SelectTrigger>
-          <SelectContent className="bg-slate-800 border-white/10 text-white">
-            <SelectItem value="all">All Methods</SelectItem>
-            <SelectItem value="cashapp">Cash App</SelectItem>
-            <SelectItem value="venmo">Venmo</SelectItem>
-            <SelectItem value="chime">Chime</SelectItem>
-            <SelectItem value="applepay">Apple Pay</SelectItem>
-          </SelectContent>
-        </Select>
-        <Select value={filterStatus} onValueChange={setFilterStatus}>
-          <SelectTrigger className="bg-white/5 border-white/10 text-white">
-            <SelectValue placeholder="Status" />
-          </SelectTrigger>
-          <SelectContent className="bg-slate-800 border-white/10 text-white">
-            <SelectItem value="all">All Statuses</SelectItem>
-            <SelectItem value="pending">Pending</SelectItem>
-            <SelectItem value="approved">Approved</SelectItem>
-            <SelectItem value="rejected">Rejected</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
 
-      {/* Bulk actions */}
-      {selected.length > 0 && (
-        <div className="flex items-center gap-3 p-3 rounded-xl"
-          style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)" }}>
-          <span className="text-white text-sm font-semibold">{selected.length} selected</span>
-          <Button size="sm" onClick={() => bulkApproveMutation.mutate(selected)}
-            disabled={bulkApproveMutation.isPending}
-            className="bg-green-600 hover:bg-green-700 text-white font-bold">
-            <CheckCircle className="h-3.5 w-3.5 mr-1.5" />
-            Approve Selected ({selected.length})
-          </Button>
-          <Button size="sm" onClick={() => bulkRejectMutation.mutate(selected)}
-            disabled={bulkRejectMutation.isPending}
-            className="bg-red-600 hover:bg-red-700 text-white font-bold">
-            <XCircle className="h-3.5 w-3.5 mr-1.5" />
-            Reject Selected ({selected.length})
-          </Button>
-          <button onClick={() => setSelected([])}
-            className="ml-auto text-gray-500 hover:text-gray-300 text-xs">Clear</button>
+        {/* ── Filters ────────────────────────────────────────────── */}
+        <div className="flex flex-wrap items-end gap-2">
+          {/* Search User */}
+          <div className="flex-1 min-w-[160px]">
+            <p className="text-gray-400 text-xs mb-1 font-medium">Search User</p>
+            <div className="relative">
+              <Users className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-500" />
+              <input placeholder="Search by name or email" value={searchUser} onChange={e => { setSearchUser(e.target.value); setPage(1); }}
+                className={inputCls} style={inputStyle} />
+            </div>
+          </div>
+          {/* Search Handle */}
+          <div className="flex-1 min-w-[150px]">
+            <p className="text-gray-400 text-xs mb-1 font-medium">Search Handle</p>
+            <div className="relative">
+              <Activity className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-500" />
+              <input placeholder="Search by payment handle" value={searchHandle} onChange={e => { setSearchHandle(e.target.value); setPage(1); }}
+                className={inputCls} style={inputStyle} />
+            </div>
+          </div>
+          {/* Amount */}
+          <div className="min-w-[130px]">
+            <p className="text-gray-400 text-xs mb-1 font-medium">Filter by Amount</p>
+            <select value={filterAmount} onChange={e => { setFilterAmount(e.target.value); setPage(1); }}
+              className="w-full px-3 py-2 rounded-lg text-sm text-white focus:outline-none focus:ring-1 focus:ring-blue-500/50"
+              style={inputStyle}>
+              <option value="all">All Amounts</option>
+              <option value="5">$5</option><option value="10">$10</option>
+              <option value="20">$20</option><option value="50">$50</option><option value="100">$100</option>
+            </select>
+          </div>
+          {/* Method */}
+          <div className="min-w-[130px]">
+            <p className="text-gray-400 text-xs mb-1 font-medium">Filter by Method</p>
+            <select value={filterMethod} onChange={e => { setFilterMethod(e.target.value); setPage(1); }}
+              className="w-full px-3 py-2 rounded-lg text-sm text-white focus:outline-none focus:ring-1 focus:ring-blue-500/50"
+              style={inputStyle}>
+              <option value="all">All Methods</option>
+              <option value="cashapp">Cash App</option><option value="venmo">Venmo</option>
+              <option value="chime">Chime</option><option value="applepay">Apple Pay</option>
+            </select>
+          </div>
+          {/* Status */}
+          <div className="min-w-[130px]">
+            <p className="text-gray-400 text-xs mb-1 font-medium">Filter by Status</p>
+            <select value={filterStatus} onChange={e => { setFilterStatus(e.target.value); setPage(1); }}
+              className="w-full px-3 py-2 rounded-lg text-sm text-white focus:outline-none focus:ring-1 focus:ring-blue-500/50"
+              style={inputStyle}>
+              <option value="all">All Statuses</option>
+              <option value="pending">Pending</option><option value="approved">Approved</option><option value="rejected">Rejected</option>
+            </select>
+          </div>
+          {/* Clear */}
+          <button onClick={clearFilters}
+            className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium text-gray-400 hover:text-white transition-colors self-end"
+            style={{background:"rgba(255,255,255,0.06)",border:"1px solid rgba(255,255,255,0.1)"}}>
+            <X className="h-3.5 w-3.5" /> Clear Filters
+          </button>
         </div>
-      )}
 
-      {/* Table */}
-      {isLoading ? (
-        <div className="space-y-2">{[1,2,3,4,5].map(i => <div key={i} className="h-16 rounded-xl animate-pulse bg-white/5" />)}</div>
-      ) : filtered.length === 0 ? (
-        <div className="text-center py-20 text-gray-500">
-          <DollarSign className="h-16 w-16 mx-auto mb-4 opacity-20" />
-          <p className="text-lg">No payments found</p>
-        </div>
-      ) : (
-        <div className="rounded-2xl overflow-hidden" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)" }}>
-          {/* Table header */}
-          <div className="px-4 py-3 border-b border-white/10 hidden lg:grid gap-3 text-xs font-semibold uppercase tracking-wide text-gray-500"
-            style={{ gridTemplateColumns: "2rem 3fr 2.5fr 4rem 3.5rem 3.5fr 5fr 5fr 4rem 6rem" }}>
+        {/* ── Table Container ─────────────────────────────────────── */}
+        <div className="rounded-xl overflow-hidden" style={{background:"rgba(255,255,255,0.03)",border:"1px solid rgba(255,255,255,0.08)"}}>
+
+          {/* Bulk action bar */}
+          <div className="flex items-center gap-3 px-4 py-3 border-b" style={{borderColor:"rgba(255,255,255,0.07)"}}>
             <input type="checkbox" checked={allSelected} onChange={toggleAll}
-              className="rounded cursor-pointer accent-emerald-500" />
+              className="rounded cursor-pointer accent-blue-500 w-4 h-4" />
+            <span className="text-gray-400 text-sm">{selected.length} selected</span>
+            {filtered.length > 0 && (
+              <button onClick={() => setSelected(filtered.map(p => p.id))}
+                className="text-blue-400 hover:text-blue-300 text-sm underline-offset-2 hover:underline">
+                Select all {filtered.length} payments
+              </button>
+            )}
+            <div className="ml-auto flex items-center gap-2">
+              <button onClick={() => { if (selected.length) bulkApproveMutation.mutate(selected); }}
+                disabled={bulkApproveMutation.isPending || selected.length === 0}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-white transition-all disabled:opacity-40"
+                style={{background:"#16a34a"}}>
+                <Check className="h-3 w-3" /> Approve Selected ({selected.length})
+              </button>
+              <button onClick={() => { if (selected.length) bulkRejectMutation.mutate(selected); }}
+                disabled={bulkRejectMutation.isPending || selected.length === 0}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-white transition-all disabled:opacity-40"
+                style={{background:"#dc2626"}}>
+                <X className="h-3 w-3" /> Reject Selected ({selected.length})
+              </button>
+            </div>
+          </div>
+
+          {/* Column headers */}
+          <div className="hidden xl:grid px-4 py-2.5 border-b text-[11px] font-semibold uppercase tracking-wider text-gray-500"
+            style={{borderColor:"rgba(255,255,255,0.07)", gridTemplateColumns:"2.5rem 2.5fr 2fr 4.5rem 3.5rem 5rem 5rem 5.5rem 4.5rem 6rem"}}>
+            <span />
             <span>User</span><span>Email</span><span>Amount</span><span>Credits</span>
             <span>Method</span><span>Payment Info</span><span>Time Submitted</span>
             <span>Status</span><span>Actions</span>
           </div>
 
-          <div className="divide-y divide-white/5">
-            {filtered.map((p: any) => {
-              const cfg = statusCfg[p.status] ?? statusCfg.pending;
-              const isSel = selected.includes(p.id);
-              return (
-                <div key={p.id}
-                  className={`px-4 py-3 transition-colors ${isSel ? "bg-emerald-500/10" : "hover:bg-white/[0.02]"}`}>
-                  {/* Mobile layout */}
-                  <div className="lg:hidden space-y-2">
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="flex items-center gap-2">
-                        <input type="checkbox" checked={isSel} onChange={() => toggleOne(p.id)}
-                          className="rounded cursor-pointer accent-emerald-500 mt-0.5" />
-                        <div>
-                          <p className="text-white font-semibold text-sm">{p.user?.firstName} {p.user?.lastName}</p>
-                          <p className="text-gray-500 text-xs">{p.user?.email}</p>
+          {/* Rows */}
+          {isLoading ? (
+            <div className="p-4 space-y-2">
+              {[1,2,3,4,5].map(i => <div key={i} className="h-14 rounded-lg animate-pulse" style={{background:"rgba(255,255,255,0.04)"}} />)}
+            </div>
+          ) : pageItems.length === 0 ? (
+            <div className="text-center py-16 text-gray-500">
+              <DollarSign className="h-12 w-12 mx-auto mb-3 opacity-20" />
+              <p className="font-semibold">No payments found</p>
+              <p className="text-xs mt-1">Try adjusting your filters</p>
+            </div>
+          ) : (
+            <div className="divide-y" style={{borderColor:"rgba(255,255,255,0.05)"}}>
+              {pageItems.map((p: any) => {
+                const isSel = selected.includes(p.id);
+                const method = METHOD_LABELS[p.paymentMethod] ?? { label: p.paymentMethod, color: "#9ca3af", bg: "rgba(156,163,175,0.1)" };
+                const statusStyle =
+                  p.status === "approved" ? { bg:"rgba(16,185,129,0.15)", color:"#10b981", label:"Approved" } :
+                  p.status === "rejected" ? { bg:"rgba(239,68,68,0.15)",  color:"#ef4444", label:"Rejected" } :
+                                            { bg:"rgba(245,158,11,0.15)", color:"#f59e0b", label:"Pending"  };
+                return (
+                  <div key={p.id} className={`transition-colors ${isSel ? "bg-blue-500/8" : "hover:bg-white/[0.015]"}`}>
+                    {/* Mobile */}
+                    <div className="xl:hidden p-4 space-y-2">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex items-center gap-2.5">
+                          <input type="checkbox" checked={isSel} onChange={() => toggleOne(p.id)}
+                            className="rounded cursor-pointer accent-blue-500 w-4 h-4 mt-0.5 flex-shrink-0" />
+                          <div className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0"
+                            style={{background:"linear-gradient(135deg,#7c3aed,#3b82f6)"}}>
+                            {(p.user?.firstName?.[0] ?? "?").toUpperCase()}
+                          </div>
+                          <div>
+                            <p className="text-white font-semibold text-sm leading-tight">{p.user?.firstName} {p.user?.lastName}</p>
+                            <p className="text-gray-500 text-xs">{p.user?.email}</p>
+                          </div>
                         </div>
+                        <span className="text-xs font-semibold px-2 py-0.5 rounded-full flex-shrink-0"
+                          style={{background:statusStyle.bg, color:statusStyle.color}}>{statusStyle.label}</span>
                       </div>
-                      <span className={`text-xs px-2 py-1 rounded-full border ${cfg.cls}`}>{cfg.label}</span>
-                    </div>
-                    <div className="flex items-center gap-3 pl-6 text-sm">
-                      <span className="text-emerald-400 font-bold">${Number(p.dollarAmount).toFixed(2)}</span>
-                      <span className="text-gray-400">{p.creditsAmount} credits</span>
-                      <span className="text-gray-400">via {METHOD_LABELS[p.paymentMethod] ?? p.paymentMethod}</span>
-                    </div>
-                    <div className="pl-6 text-xs text-gray-500">
-                      <p>Name: {p.paymentName} · Handle: {p.paymentHandle}</p>
-                      <p>{timeAgo(p.submittedAt)}</p>
-                    </div>
-                    {p.status === "pending" && (
-                      <div className="pl-6 flex gap-2">
-                        <Button size="sm" onClick={() => approveMutation.mutate(p.id)}
-                          disabled={approveMutation.isPending}
-                          className="bg-green-600 hover:bg-green-700 text-white font-bold h-7 px-3 text-xs">
-                          <Check className="h-3 w-3 mr-1" />Approve
-                        </Button>
-                        <Button size="sm" onClick={() => setRejectDialogId(p.id)}
-                          className="bg-red-600 hover:bg-red-700 text-white font-bold h-7 px-3 text-xs">
-                          <X className="h-3 w-3 mr-1" />Reject
-                        </Button>
+                      <div className="flex items-center gap-3 pl-[60px] text-sm flex-wrap">
+                        <span className="font-bold" style={{color:"#10b981"}}>${Number(p.dollarAmount).toFixed(2)}</span>
+                        <span className="text-gray-400 text-xs">{p.creditsAmount} credits</span>
+                        <span className="text-xs font-semibold px-2 py-0.5 rounded-full" style={{background:method.bg,color:method.color}}>{method.label}</span>
                       </div>
-                    )}
-                  </div>
-
-                  {/* Desktop layout */}
-                  <div className="hidden lg:grid gap-3 items-center text-sm"
-                    style={{ gridTemplateColumns: "2rem 3fr 2.5fr 4rem 3.5rem 3.5fr 5fr 5fr 4rem 6rem" }}>
-                    <input type="checkbox" checked={isSel} onChange={() => toggleOne(p.id)}
-                      className="rounded cursor-pointer accent-emerald-500" />
-                    <div className="flex items-center gap-2">
-                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center text-white text-xs font-bold shrink-0">
-                        {(p.user?.firstName?.[0] ?? "?")}
-                      </div>
-                      <div className="min-w-0">
-                        <p className="text-white font-semibold truncate">{p.user?.firstName} {p.user?.lastName}</p>
-                        <p className="text-gray-500 text-xs truncate">@{p.paymentHandle}</p>
-                      </div>
-                    </div>
-                    <span className="text-gray-400 truncate text-xs">{p.user?.email}</span>
-                    <span className="text-emerald-400 font-bold">${Number(p.dollarAmount).toFixed(2)}</span>
-                    <span className="text-white font-semibold">{p.creditsAmount}</span>
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-xs px-2 py-0.5 rounded-full font-semibold"
-                        style={{ background: "rgba(255,255,255,0.08)", color: "#d1d5db" }}>
-                        {METHOD_LABELS[p.paymentMethod] ?? p.paymentMethod}
-                      </span>
-                    </div>
-                    <div className="text-xs text-gray-400 min-w-0">
-                      <p className="truncate">Name: {p.paymentName}</p>
-                      <p className="truncate">Handle: {p.paymentHandle}</p>
-                    </div>
-                    <div className="text-xs text-gray-500">
-                      <p>{timeAgo(p.submittedAt)}</p>
-                      <p>{new Date(p.submittedAt).toLocaleDateString()}</p>
-                    </div>
-                    <span className={`text-xs px-2 py-1 rounded-full border text-center ${cfg.cls}`}>{cfg.label}</span>
-                    <div className="flex items-center gap-1.5">
-                      {p.status === "pending" ? (
-                        <>
-                          <button onClick={() => approveMutation.mutate(p.id)}
-                            disabled={approveMutation.isPending}
-                            className="flex items-center gap-1 px-2 py-1.5 rounded-lg text-xs font-bold bg-green-600 hover:bg-green-700 text-white transition-colors">
+                      <p className="pl-[60px] text-xs text-gray-500">Name: {p.paymentName} · Handle: {p.paymentHandle}</p>
+                      {p.status === "pending" && (
+                        <div className="pl-[60px] flex gap-2">
+                          <button onClick={() => approveMutation.mutate(p.id)} disabled={approveMutation.isPending}
+                            className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-bold text-white" style={{background:"#16a34a"}}>
                             <Check className="h-3 w-3" />Approve
                           </button>
                           <button onClick={() => setRejectDialogId(p.id)}
-                            className="flex items-center gap-1 px-2 py-1.5 rounded-lg text-xs font-bold bg-red-600 hover:bg-red-700 text-white transition-colors">
+                            className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-bold text-white" style={{background:"#dc2626"}}>
                             <X className="h-3 w-3" />Reject
                           </button>
-                        </>
-                      ) : (
-                        <span className="text-xs text-gray-600 italic">
-                          {p.processedAt ? new Date(p.processedAt).toLocaleDateString() : "–"}
-                        </span>
+                        </div>
                       )}
                     </div>
+
+                    {/* Desktop */}
+                    <div className="hidden xl:grid items-center gap-3 px-4 py-3 text-sm"
+                      style={{gridTemplateColumns:"2.5rem 2.5fr 2fr 4.5rem 3.5rem 5rem 5rem 5.5rem 4.5rem 6rem"}}>
+                      <input type="checkbox" checked={isSel} onChange={() => toggleOne(p.id)}
+                        className="rounded cursor-pointer accent-blue-500 w-4 h-4" />
+                      {/* User */}
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <div className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0"
+                          style={{background:"linear-gradient(135deg,#7c3aed,#3b82f6)"}}>
+                          {(p.user?.firstName?.[0] ?? "?").toUpperCase()}
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-white font-semibold text-xs leading-tight truncate">{p.user?.firstName} {p.user?.lastName}</p>
+                          <p className="text-gray-500 text-[10px] truncate">@{p.paymentHandle}</p>
+                        </div>
+                      </div>
+                      {/* Email */}
+                      <span className="text-gray-400 text-xs truncate">{p.user?.email}</span>
+                      {/* Amount */}
+                      <span className="font-bold text-sm" style={{color:"#10b981"}}>${Number(p.dollarAmount).toFixed(2)}</span>
+                      {/* Credits */}
+                      <span className="text-white font-semibold text-sm">{p.creditsAmount}</span>
+                      {/* Method */}
+                      <span className="text-xs font-semibold px-2 py-1 rounded-full inline-block"
+                        style={{background:method.bg, color:method.color}}>{method.label}</span>
+                      {/* Payment Info */}
+                      <div className="text-[11px] text-gray-400 min-w-0">
+                        <p className="truncate">Name: {p.paymentName}</p>
+                        <p className="truncate">Handle: {p.paymentHandle}</p>
+                      </div>
+                      {/* Time */}
+                      <div className="text-[11px] text-gray-400">
+                        <p>{timeAgo(p.submittedAt)}</p>
+                        <p className="text-gray-600">{new Date(p.submittedAt).toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"})}</p>
+                      </div>
+                      {/* Status */}
+                      <span className="text-[11px] font-semibold px-2 py-1 rounded-full text-center inline-block"
+                        style={{background:statusStyle.bg, color:statusStyle.color}}>{statusStyle.label}</span>
+                      {/* Actions */}
+                      <div className="flex items-center gap-1">
+                        {p.status === "pending" ? (
+                          <>
+                            <button onClick={() => approveMutation.mutate(p.id)} disabled={approveMutation.isPending}
+                              className="flex items-center gap-0.5 px-2 py-1.5 rounded-lg text-[11px] font-bold text-white transition-opacity hover:opacity-80 disabled:opacity-40"
+                              style={{background:"#16a34a"}}>
+                              <Check className="h-2.5 w-2.5" />Approve
+                            </button>
+                            <button onClick={() => setRejectDialogId(p.id)}
+                              className="flex items-center gap-0.5 px-2 py-1.5 rounded-lg text-[11px] font-bold text-white transition-opacity hover:opacity-80"
+                              style={{background:"#dc2626"}}>
+                              <X className="h-2.5 w-2.5" />Reject
+                            </button>
+                          </>
+                        ) : (
+                          <span className="text-[10px] text-gray-600 italic">
+                            {p.processedAt ? new Date(p.processedAt).toLocaleDateString() : "–"}
+                          </span>
+                        )}
+                      </div>
+                    </div>
                   </div>
-                </div>
-              );
-            })}
-          </div>
-          <div className="px-4 py-3 border-t border-white/10 text-xs text-gray-500">
-            Showing {filtered.length} of {(payments as any[]).length} payments
-          </div>
+                );
+              })}
+            </div>
+          )}
+
+          {/* Pagination */}
+          {filtered.length > 0 && (
+            <div className="flex items-center justify-between px-4 py-3 border-t" style={{borderColor:"rgba(255,255,255,0.07)"}}>
+              <p className="text-xs text-gray-500">
+                Showing {Math.min((safePage - 1) * PAGE_SIZE + 1, filtered.length)} to {Math.min(safePage * PAGE_SIZE, filtered.length)} of {filtered.length} payments
+              </p>
+              <div className="flex items-center gap-1">
+                <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={safePage === 1}
+                  className="w-7 h-7 rounded flex items-center justify-center text-gray-400 disabled:opacity-30 hover:bg-white/10 transition-colors">
+                  ‹
+                </button>
+                {Array.from({length: Math.min(totalPages, 5)}, (_, i) => {
+                  const p = totalPages <= 5 ? i + 1 : Math.max(1, Math.min(safePage - 2, totalPages - 4)) + i;
+                  return (
+                    <button key={p} onClick={() => setPage(p)}
+                      className={`w-7 h-7 rounded text-xs font-semibold transition-colors ${p === safePage ? "bg-blue-600 text-white" : "text-gray-400 hover:bg-white/10"}`}>
+                      {p}
+                    </button>
+                  );
+                })}
+                <button onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={safePage === totalPages}
+                  className="w-7 h-7 rounded flex items-center justify-center text-gray-400 disabled:opacity-30 hover:bg-white/10 transition-colors">
+                  ›
+                </button>
+              </div>
+              <div className="flex items-center gap-1.5 text-xs text-gray-500">
+                Items per page:
+                <span className="text-white font-semibold">{PAGE_SIZE}</span>
+              </div>
+            </div>
+          )}
         </div>
-      )}
+      </div>
 
       {/* Reject dialog */}
       {rejectDialogId !== null && (
         <Dialog open={true} onOpenChange={() => setRejectDialogId(null)}>
-          <DialogContent className="bg-slate-900 border-red-500/30 text-white">
+          <DialogContent className="border-red-500/30 text-white" style={{background:"#111827"}}>
             <DialogHeader>
-              <DialogTitle className="text-red-400">Reject Payment</DialogTitle>
+              <DialogTitle className="text-red-400 flex items-center gap-2">
+                <XCircle className="h-5 w-5" /> Reject Payment
+              </DialogTitle>
               <DialogDescription className="text-gray-400">
                 Optionally enter a reason for rejection (visible to staff only).
               </DialogDescription>
             </DialogHeader>
             <textarea
-              className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-red-400 resize-none"
-              rows={3}
-              placeholder="Reason for rejection (optional)"
-              value={rejectNotes}
-              onChange={e => setRejectNotes(e.target.value)}
+              className="w-full rounded-xl p-3 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-red-400 resize-none"
+              style={{background:"rgba(255,255,255,0.05)", border:"1px solid rgba(255,255,255,0.1)"}}
+              rows={3} placeholder="Reason for rejection (optional)"
+              value={rejectNotes} onChange={e => setRejectNotes(e.target.value)}
             />
             <div className="flex gap-3 justify-end">
               <Button variant="outline" onClick={() => setRejectDialogId(null)} className="border-white/20 text-gray-300">
