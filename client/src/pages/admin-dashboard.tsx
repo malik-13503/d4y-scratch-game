@@ -926,6 +926,19 @@ export default function AdminDashboard() {
                   <span className="sm:hidden text-xs font-medium">Promos</span>
                 </div>
               </TabsTrigger>
+              <TabsTrigger
+                value="pending-payments"
+                className="relative group data-[state=active]:bg-gradient-to-r data-[state=active]:from-emerald-500 data-[state=active]:to-green-500 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:shadow-emerald-500/50 text-gray-300 hover:text-white hover:bg-slate-700/50 transition-all duration-300 text-xs sm:text-sm p-3 sm:p-4 rounded-lg sm:rounded-xl border border-transparent data-[state=active]:border-emerald-400/60"
+              >
+                <div className="flex flex-col sm:flex-row items-center justify-center sm:justify-start space-y-1 sm:space-y-0 sm:space-x-2">
+                  <div className="relative">
+                    <DollarSign className="h-4 w-4 sm:h-5 sm:w-5 transition-transform duration-300 group-data-[state=active]:scale-110" />
+                    <div className="absolute -inset-1 bg-emerald-500/20 rounded-full scale-0 group-data-[state=active]:scale-100 transition-transform duration-300"></div>
+                  </div>
+                  <span className="hidden sm:inline font-semibold">Payments</span>
+                  <span className="sm:hidden text-xs font-medium">Pay</span>
+                </div>
+              </TabsTrigger>
             </TabsList>
           </div>
 
@@ -4915,6 +4928,9 @@ export default function AdminDashboard() {
           {/* ── Promo Codes Tab ────────────────────────────────────────── */}
           <PromoCodesTab />
 
+          {/* ── Pending Payments Tab ───────────────────────────────────── */}
+          <PendingPaymentsTab />
+
         </Tabs>
       </main>
 
@@ -5323,6 +5339,380 @@ function PromoCodesTab() {
             );
           })}
         </div>
+      )}
+    </TabsContent>
+  );
+}
+
+// ── Pending Payments Tab ─────────────────────────────────────────────────────
+function PendingPaymentsTab() {
+  const { toast } = useToast();
+  const [searchUser, setSearchUser] = useState("");
+  const [searchHandle, setSearchHandle] = useState("");
+  const [filterAmount, setFilterAmount] = useState("all");
+  const [filterMethod, setFilterMethod] = useState("all");
+  const [filterStatus, setFilterStatus] = useState("pending");
+  const [selected, setSelected] = useState<number[]>([]);
+  const [rejectNotes, setRejectNotes] = useState("");
+  const [rejectDialogId, setRejectDialogId] = useState<number | null>(null);
+
+  const { data: payments = [], isLoading, refetch } = useQuery<any[]>({
+    queryKey: ["/api/admin/pending-payments", filterStatus, filterMethod],
+    queryFn: () => {
+      const params = new URLSearchParams();
+      if (filterStatus !== "all") params.set("status", filterStatus);
+      if (filterMethod !== "all") params.set("paymentMethod", filterMethod);
+      return fetch(`/api/admin/pending-payments?${params}`).then(r => r.json());
+    },
+    refetchInterval: 15000,
+  });
+
+  const approveMutation = useMutation({
+    mutationFn: (id: number) => apiRequest("POST", `/api/admin/pending-payments/${id}/approve`, {}),
+    onSuccess: () => { toast({ title: "Payment approved! Credits added." }); refetch(); },
+    onError: () => toast({ title: "Failed to approve", variant: "destructive" }),
+  });
+
+  const rejectMutation = useMutation({
+    mutationFn: ({ id, notes }: { id: number; notes: string }) =>
+      apiRequest("POST", `/api/admin/pending-payments/${id}/reject`, { notes }),
+    onSuccess: () => { toast({ title: "Payment rejected." }); setRejectDialogId(null); refetch(); },
+    onError: () => toast({ title: "Failed to reject", variant: "destructive" }),
+  });
+
+  const bulkApproveMutation = useMutation({
+    mutationFn: (ids: number[]) => apiRequest("POST", "/api/admin/pending-payments/bulk-approve", { ids }),
+    onSuccess: (_, ids) => { toast({ title: `${ids.length} payment(s) approved!` }); setSelected([]); refetch(); },
+    onError: () => toast({ title: "Bulk approve failed", variant: "destructive" }),
+  });
+
+  const bulkRejectMutation = useMutation({
+    mutationFn: (ids: number[]) => apiRequest("POST", "/api/admin/pending-payments/bulk-reject", { ids, notes: "Bulk rejected by staff" }),
+    onSuccess: (_, ids) => { toast({ title: `${ids.length} payment(s) rejected.` }); setSelected([]); refetch(); },
+    onError: () => toast({ title: "Bulk reject failed", variant: "destructive" }),
+  });
+
+  const METHOD_LABELS: Record<string, string> = {
+    cashapp: "Cash App", venmo: "Venmo", chime: "Chime", applepay: "Apple Pay",
+  };
+
+  const filtered = (payments as any[]).filter(p => {
+    if (searchUser && !`${p.user?.firstName} ${p.user?.lastName} ${p.user?.email}`.toLowerCase().includes(searchUser.toLowerCase())) return false;
+    if (searchHandle && !p.paymentHandle.toLowerCase().includes(searchHandle.toLowerCase())) return false;
+    if (filterAmount !== "all") {
+      const amt = Number(p.dollarAmount);
+      if (filterAmount === "5" && amt !== 5) return false;
+      if (filterAmount === "10" && amt !== 10) return false;
+      if (filterAmount === "20" && amt !== 20) return false;
+      if (filterAmount === "50" && amt !== 50) return false;
+      if (filterAmount === "100" && amt !== 100) return false;
+    }
+    return true;
+  });
+
+  const allSelected = filtered.length > 0 && filtered.every(p => selected.includes(p.id));
+
+  function toggleAll() {
+    if (allSelected) setSelected([]);
+    else setSelected(filtered.map(p => p.id));
+  }
+  function toggleOne(id: number) {
+    setSelected(s => s.includes(id) ? s.filter(x => x !== id) : [...s, id]);
+  }
+
+  function timeAgo(date: string) {
+    const diff = Date.now() - new Date(date).getTime();
+    const m = Math.floor(diff / 60000);
+    const h = Math.floor(m / 60);
+    const d = Math.floor(h / 24);
+    if (m < 1) return "just now";
+    if (m < 60) return `${m} min${m>1?"s":""} ago`;
+    if (h < 24) return `${h} hr${h>1?"s":""} ago`;
+    return new Date(date).toLocaleDateString();
+  }
+
+  // Stats
+  const pendingPayments = (payments as any[]).filter(p => p.status === "pending");
+  const todayStart = new Date(); todayStart.setHours(0,0,0,0);
+  const approvedToday = (payments as any[]).filter(p => p.status === "approved" && new Date(p.processedAt) >= todayStart);
+  const rejectedToday = (payments as any[]).filter(p => p.status === "rejected" && new Date(p.processedAt) >= todayStart);
+  const totalPending = pendingPayments.reduce((s: number, p: any) => s + Number(p.dollarAmount), 0);
+
+  const statusCfg: Record<string, { cls: string; label: string }> = {
+    pending:  { cls: "bg-yellow-500/20 text-yellow-300 border-yellow-500/30",  label: "Pending"  },
+    approved: { cls: "bg-green-500/20  text-green-300  border-green-500/30",   label: "Approved" },
+    rejected: { cls: "bg-red-500/20    text-red-300    border-red-500/30",     label: "Rejected" },
+  };
+
+  return (
+    <TabsContent value="pending-payments" className="space-y-4 sm:space-y-6 mt-20 px-2 sm:px-4">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-2xl font-bold text-white flex items-center gap-3">
+            <DollarSign className="h-7 w-7 text-emerald-400" />
+            Pending Payments
+          </h2>
+          <p className="text-gray-400 text-sm mt-1">Review and process incoming payment submissions</p>
+        </div>
+        <Button onClick={() => refetch()} variant="outline" size="sm"
+          className="border-emerald-500/40 text-emerald-400 hover:bg-emerald-500/20">
+          <RefreshCw className="h-4 w-4 mr-2" /> Refresh
+        </Button>
+      </div>
+
+      {/* Stat cards */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        {[
+          { label: "Pending Payments",  value: pendingPayments.length, sub: "Needs Review",     color: "#f59e0b", bg: "rgba(245,158,11,0.1)",  border: "rgba(245,158,11,0.3)"  },
+          { label: "Approved Today",    value: approvedToday.length,   sub: `Total: ${(payments as any[]).filter(p=>p.status==="approved").length}`, color: "#10b981", bg: "rgba(16,185,129,0.1)", border: "rgba(16,185,129,0.3)" },
+          { label: "Rejected Today",    value: rejectedToday.length,   sub: `Total: ${(payments as any[]).filter(p=>p.status==="rejected").length}`, color: "#ef4444", bg: "rgba(239,68,68,0.1)",  border: "rgba(239,68,68,0.3)"  },
+          { label: "Total $ Pending",   value: `$${totalPending.toFixed(2)}`, sub: `Across ${pendingPayments.length} payments`, color: "#f59e0b", bg: "rgba(245,158,11,0.1)", border: "rgba(245,158,11,0.3)" },
+        ].map(({ label, value, sub, color, bg, border }) => (
+          <div key={label} className="rounded-2xl p-4" style={{ background: bg, border: `1px solid ${border}` }}>
+            <p className="text-2xl font-black" style={{ color }}>{value}</p>
+            <p className="text-white text-sm font-semibold mt-0.5">{label}</p>
+            <p className="text-gray-500 text-xs mt-0.5">{sub}</p>
+          </div>
+        ))}
+      </div>
+
+      {/* Filters */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+        <div className="relative">
+          <Users className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
+          <input
+            placeholder="Search by name or email"
+            value={searchUser}
+            onChange={e => setSearchUser(e.target.value)}
+            className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-emerald-400/60"
+          />
+        </div>
+        <div className="relative">
+          <Activity className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
+          <input
+            placeholder="Search by payment handle"
+            value={searchHandle}
+            onChange={e => setSearchHandle(e.target.value)}
+            className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-emerald-400/60"
+          />
+        </div>
+        <Select value={filterAmount} onValueChange={setFilterAmount}>
+          <SelectTrigger className="bg-white/5 border-white/10 text-white">
+            <SelectValue placeholder="All Amounts" />
+          </SelectTrigger>
+          <SelectContent className="bg-slate-800 border-white/10 text-white">
+            <SelectItem value="all">All Amounts</SelectItem>
+            <SelectItem value="5">$5</SelectItem>
+            <SelectItem value="10">$10</SelectItem>
+            <SelectItem value="20">$20</SelectItem>
+            <SelectItem value="50">$50</SelectItem>
+            <SelectItem value="100">$100</SelectItem>
+          </SelectContent>
+        </Select>
+        <Select value={filterMethod} onValueChange={setFilterMethod}>
+          <SelectTrigger className="bg-white/5 border-white/10 text-white">
+            <SelectValue placeholder="All Methods" />
+          </SelectTrigger>
+          <SelectContent className="bg-slate-800 border-white/10 text-white">
+            <SelectItem value="all">All Methods</SelectItem>
+            <SelectItem value="cashapp">Cash App</SelectItem>
+            <SelectItem value="venmo">Venmo</SelectItem>
+            <SelectItem value="chime">Chime</SelectItem>
+            <SelectItem value="applepay">Apple Pay</SelectItem>
+          </SelectContent>
+        </Select>
+        <Select value={filterStatus} onValueChange={setFilterStatus}>
+          <SelectTrigger className="bg-white/5 border-white/10 text-white">
+            <SelectValue placeholder="Status" />
+          </SelectTrigger>
+          <SelectContent className="bg-slate-800 border-white/10 text-white">
+            <SelectItem value="all">All Statuses</SelectItem>
+            <SelectItem value="pending">Pending</SelectItem>
+            <SelectItem value="approved">Approved</SelectItem>
+            <SelectItem value="rejected">Rejected</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      {/* Bulk actions */}
+      {selected.length > 0 && (
+        <div className="flex items-center gap-3 p-3 rounded-xl"
+          style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)" }}>
+          <span className="text-white text-sm font-semibold">{selected.length} selected</span>
+          <Button size="sm" onClick={() => bulkApproveMutation.mutate(selected)}
+            disabled={bulkApproveMutation.isPending}
+            className="bg-green-600 hover:bg-green-700 text-white font-bold">
+            <CheckCircle className="h-3.5 w-3.5 mr-1.5" />
+            Approve Selected ({selected.length})
+          </Button>
+          <Button size="sm" onClick={() => bulkRejectMutation.mutate(selected)}
+            disabled={bulkRejectMutation.isPending}
+            className="bg-red-600 hover:bg-red-700 text-white font-bold">
+            <XCircle className="h-3.5 w-3.5 mr-1.5" />
+            Reject Selected ({selected.length})
+          </Button>
+          <button onClick={() => setSelected([])}
+            className="ml-auto text-gray-500 hover:text-gray-300 text-xs">Clear</button>
+        </div>
+      )}
+
+      {/* Table */}
+      {isLoading ? (
+        <div className="space-y-2">{[1,2,3,4,5].map(i => <div key={i} className="h-16 rounded-xl animate-pulse bg-white/5" />)}</div>
+      ) : filtered.length === 0 ? (
+        <div className="text-center py-20 text-gray-500">
+          <DollarSign className="h-16 w-16 mx-auto mb-4 opacity-20" />
+          <p className="text-lg">No payments found</p>
+        </div>
+      ) : (
+        <div className="rounded-2xl overflow-hidden" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)" }}>
+          {/* Table header */}
+          <div className="px-4 py-3 border-b border-white/10 hidden lg:grid gap-3 text-xs font-semibold uppercase tracking-wide text-gray-500"
+            style={{ gridTemplateColumns: "2rem 3fr 2.5fr 4rem 3.5rem 3.5fr 5fr 5fr 4rem 6rem" }}>
+            <input type="checkbox" checked={allSelected} onChange={toggleAll}
+              className="rounded cursor-pointer accent-emerald-500" />
+            <span>User</span><span>Email</span><span>Amount</span><span>Credits</span>
+            <span>Method</span><span>Payment Info</span><span>Time Submitted</span>
+            <span>Status</span><span>Actions</span>
+          </div>
+
+          <div className="divide-y divide-white/5">
+            {filtered.map((p: any) => {
+              const cfg = statusCfg[p.status] ?? statusCfg.pending;
+              const isSel = selected.includes(p.id);
+              return (
+                <div key={p.id}
+                  className={`px-4 py-3 transition-colors ${isSel ? "bg-emerald-500/10" : "hover:bg-white/[0.02]"}`}>
+                  {/* Mobile layout */}
+                  <div className="lg:hidden space-y-2">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex items-center gap-2">
+                        <input type="checkbox" checked={isSel} onChange={() => toggleOne(p.id)}
+                          className="rounded cursor-pointer accent-emerald-500 mt-0.5" />
+                        <div>
+                          <p className="text-white font-semibold text-sm">{p.user?.firstName} {p.user?.lastName}</p>
+                          <p className="text-gray-500 text-xs">{p.user?.email}</p>
+                        </div>
+                      </div>
+                      <span className={`text-xs px-2 py-1 rounded-full border ${cfg.cls}`}>{cfg.label}</span>
+                    </div>
+                    <div className="flex items-center gap-3 pl-6 text-sm">
+                      <span className="text-emerald-400 font-bold">${Number(p.dollarAmount).toFixed(2)}</span>
+                      <span className="text-gray-400">{p.creditsAmount} credits</span>
+                      <span className="text-gray-400">via {METHOD_LABELS[p.paymentMethod] ?? p.paymentMethod}</span>
+                    </div>
+                    <div className="pl-6 text-xs text-gray-500">
+                      <p>Name: {p.paymentName} · Handle: {p.paymentHandle}</p>
+                      <p>{timeAgo(p.submittedAt)}</p>
+                    </div>
+                    {p.status === "pending" && (
+                      <div className="pl-6 flex gap-2">
+                        <Button size="sm" onClick={() => approveMutation.mutate(p.id)}
+                          disabled={approveMutation.isPending}
+                          className="bg-green-600 hover:bg-green-700 text-white font-bold h-7 px-3 text-xs">
+                          <Check className="h-3 w-3 mr-1" />Approve
+                        </Button>
+                        <Button size="sm" onClick={() => setRejectDialogId(p.id)}
+                          className="bg-red-600 hover:bg-red-700 text-white font-bold h-7 px-3 text-xs">
+                          <X className="h-3 w-3 mr-1" />Reject
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Desktop layout */}
+                  <div className="hidden lg:grid gap-3 items-center text-sm"
+                    style={{ gridTemplateColumns: "2rem 3fr 2.5fr 4rem 3.5rem 3.5fr 5fr 5fr 4rem 6rem" }}>
+                    <input type="checkbox" checked={isSel} onChange={() => toggleOne(p.id)}
+                      className="rounded cursor-pointer accent-emerald-500" />
+                    <div className="flex items-center gap-2">
+                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center text-white text-xs font-bold shrink-0">
+                        {(p.user?.firstName?.[0] ?? "?")}
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-white font-semibold truncate">{p.user?.firstName} {p.user?.lastName}</p>
+                        <p className="text-gray-500 text-xs truncate">@{p.paymentHandle}</p>
+                      </div>
+                    </div>
+                    <span className="text-gray-400 truncate text-xs">{p.user?.email}</span>
+                    <span className="text-emerald-400 font-bold">${Number(p.dollarAmount).toFixed(2)}</span>
+                    <span className="text-white font-semibold">{p.creditsAmount}</span>
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-xs px-2 py-0.5 rounded-full font-semibold"
+                        style={{ background: "rgba(255,255,255,0.08)", color: "#d1d5db" }}>
+                        {METHOD_LABELS[p.paymentMethod] ?? p.paymentMethod}
+                      </span>
+                    </div>
+                    <div className="text-xs text-gray-400 min-w-0">
+                      <p className="truncate">Name: {p.paymentName}</p>
+                      <p className="truncate">Handle: {p.paymentHandle}</p>
+                    </div>
+                    <div className="text-xs text-gray-500">
+                      <p>{timeAgo(p.submittedAt)}</p>
+                      <p>{new Date(p.submittedAt).toLocaleDateString()}</p>
+                    </div>
+                    <span className={`text-xs px-2 py-1 rounded-full border text-center ${cfg.cls}`}>{cfg.label}</span>
+                    <div className="flex items-center gap-1.5">
+                      {p.status === "pending" ? (
+                        <>
+                          <button onClick={() => approveMutation.mutate(p.id)}
+                            disabled={approveMutation.isPending}
+                            className="flex items-center gap-1 px-2 py-1.5 rounded-lg text-xs font-bold bg-green-600 hover:bg-green-700 text-white transition-colors">
+                            <Check className="h-3 w-3" />Approve
+                          </button>
+                          <button onClick={() => setRejectDialogId(p.id)}
+                            className="flex items-center gap-1 px-2 py-1.5 rounded-lg text-xs font-bold bg-red-600 hover:bg-red-700 text-white transition-colors">
+                            <X className="h-3 w-3" />Reject
+                          </button>
+                        </>
+                      ) : (
+                        <span className="text-xs text-gray-600 italic">
+                          {p.processedAt ? new Date(p.processedAt).toLocaleDateString() : "–"}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+          <div className="px-4 py-3 border-t border-white/10 text-xs text-gray-500">
+            Showing {filtered.length} of {(payments as any[]).length} payments
+          </div>
+        </div>
+      )}
+
+      {/* Reject dialog */}
+      {rejectDialogId !== null && (
+        <Dialog open={true} onOpenChange={() => setRejectDialogId(null)}>
+          <DialogContent className="bg-slate-900 border-red-500/30 text-white">
+            <DialogHeader>
+              <DialogTitle className="text-red-400">Reject Payment</DialogTitle>
+              <DialogDescription className="text-gray-400">
+                Optionally enter a reason for rejection (visible to staff only).
+              </DialogDescription>
+            </DialogHeader>
+            <textarea
+              className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-red-400 resize-none"
+              rows={3}
+              placeholder="Reason for rejection (optional)"
+              value={rejectNotes}
+              onChange={e => setRejectNotes(e.target.value)}
+            />
+            <div className="flex gap-3 justify-end">
+              <Button variant="outline" onClick={() => setRejectDialogId(null)} className="border-white/20 text-gray-300">
+                Cancel
+              </Button>
+              <Button onClick={() => rejectMutation.mutate({ id: rejectDialogId, notes: rejectNotes })}
+                disabled={rejectMutation.isPending}
+                className="bg-red-600 hover:bg-red-700 text-white font-bold">
+                <X className="h-4 w-4 mr-1.5" />
+                {rejectMutation.isPending ? "Rejecting..." : "Reject Payment"}
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
       )}
     </TabsContent>
   );

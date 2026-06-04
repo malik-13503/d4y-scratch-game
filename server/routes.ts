@@ -2670,6 +2670,212 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ─── WALLET / PENDING PAYMENTS ────────────────────────────────────────────
+
+  // Credit packages (static, no DB needed for MVP)
+  const CREDIT_PACKAGES = [
+    { id: 1, dollars: 5,   credits: 20  },
+    { id: 2, dollars: 10,  credits: 40  },
+    { id: 3, dollars: 20,  credits: 80  },
+    { id: 4, dollars: 50,  credits: 200 },
+    { id: 5, dollars: 100, credits: 400 },
+  ];
+
+  // Payment destinations (configurable in production via settings)
+  const PAYMENT_DESTINATIONS: Record<string, { label: string; destination: string; hint: string }> = {
+    cashapp:  { label: "Cash App",        destination: "$PrizePlugz",            hint: "Send to $PrizePlugz on Cash App" },
+    venmo:    { label: "Venmo",           destination: "@PrizePlugz",            hint: "Send to @PrizePlugz on Venmo" },
+    chime:    { label: "Chime",           destination: "payments@prizeplugz.com", hint: "Send to payments@prizeplugz.com via Chime" },
+    applepay: { label: "Apple Pay/Cash",  destination: "payments@prizeplugz.com", hint: "Send to payments@prizeplugz.com via Apple Pay/Cash" },
+  };
+
+  app.get("/api/wallet/packages", (req, res) => {
+    res.json(CREDIT_PACKAGES);
+  });
+
+  app.get("/api/wallet/destinations", (req, res) => {
+    res.json(PAYMENT_DESTINATIONS);
+  });
+
+  // User submits payment for review
+  app.post("/api/wallet/submit-payment", async (req, res) => {
+    const userId = (req.session as any)?.userId;
+    if (!userId) return res.status(401).json({ message: "Not authenticated" });
+
+    const { dollarAmount, creditsAmount, paymentMethod, paymentName, paymentHandle } = req.body;
+    if (!dollarAmount || !creditsAmount || !paymentMethod || !paymentName || !paymentHandle) {
+      return res.status(400).json({ message: "All fields are required" });
+    }
+    if (!PAYMENT_DESTINATIONS[paymentMethod]) {
+      return res.status(400).json({ message: "Invalid payment method" });
+    }
+    // Validate amount/credits match a known package
+    const pkg = CREDIT_PACKAGES.find(p => p.dollars === Number(dollarAmount) && p.credits === Number(creditsAmount));
+    if (!pkg) return res.status(400).json({ message: "Invalid package selection" });
+
+    try {
+      const payment = await storage.createPendingPayment({
+        userId,
+        dollarAmount: String(dollarAmount),
+        creditsAmount: Number(creditsAmount),
+        paymentMethod,
+        paymentName: paymentName.trim(),
+        paymentHandle: paymentHandle.trim(),
+      });
+      res.status(201).json(payment);
+    } catch (err) {
+      res.status(500).json({ message: "Failed to submit payment" });
+    }
+  });
+
+  // User wallet info (balance + recent pending payments)
+  app.get("/api/wallet", async (req, res) => {
+    const userId = (req.session as any)?.userId;
+    if (!userId) return res.status(401).json({ message: "Not authenticated" });
+    try {
+      const user = await storage.getUser(userId);
+      if (!user) return res.status(404).json({ message: "User not found" });
+      const payments = await storage.getPendingPaymentsByUserId(userId);
+      const transactions = await storage.getTokenTransactionsByUserId(userId);
+      res.json({
+        balance: user.tokenBalance,
+        payments,
+        transactions: transactions.slice(0, 50),
+      });
+    } catch (err) {
+      res.status(500).json({ message: "Failed to load wallet" });
+    }
+  });
+
+  // ─── ADMIN: Pending Payments ──────────────────────────────────────────────
+
+  app.get("/api/admin/pending-payments", requireAuth, async (req, res) => {
+    try {
+      const { status, paymentMethod } = req.query as Record<string, string>;
+      const payments = await storage.getPendingPayments({
+        status: status || undefined,
+        paymentMethod: paymentMethod || undefined,
+      });
+      res.json(payments);
+    } catch (err) {
+      res.status(500).json({ message: "Failed to load pending payments" });
+    }
+  });
+
+  app.post("/api/admin/pending-payments/:id/approve", requireAuth, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const payment = await storage.getPendingPayment(id);
+      if (!payment) return res.status(404).json({ message: "Payment not found" });
+      if (payment.status !== "pending") return res.status(400).json({ message: "Payment already processed" });
+
+      const adminUser = (req as any).adminUser;
+
+      // Add credits to user
+      await storage.updateUserTokenBalance(payment.userId, payment.creditsAmount);
+
+      // Create token transaction record
+      await storage.createTokenTransaction({
+        userId: payment.userId,
+        transactionType: "purchase",
+        amount: payment.creditsAmount,
+        dollarAmount: payment.dollarAmount,
+        description: `Credits purchased via ${payment.paymentMethod} — Payment #${id} approved`,
+        status: "completed",
+      });
+
+      // Mark payment approved
+      const updated = await storage.updatePendingPayment(id, {
+        status: "approved",
+        processedAt: new Date(),
+        processedByAdminId: adminUser?.id || null,
+        notes: req.body.notes || null,
+      });
+
+      res.json({ success: true, payment: updated });
+    } catch (err) {
+      console.error("Approve payment error:", err);
+      res.status(500).json({ message: "Failed to approve payment" });
+    }
+  });
+
+  app.post("/api/admin/pending-payments/:id/reject", requireAuth, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const payment = await storage.getPendingPayment(id);
+      if (!payment) return res.status(404).json({ message: "Payment not found" });
+      if (payment.status !== "pending") return res.status(400).json({ message: "Payment already processed" });
+
+      const adminUser = (req as any).adminUser;
+      const updated = await storage.updatePendingPayment(id, {
+        status: "rejected",
+        processedAt: new Date(),
+        processedByAdminId: adminUser?.id || null,
+        notes: req.body.notes || "Rejected by staff",
+      });
+
+      res.json({ success: true, payment: updated });
+    } catch (err) {
+      res.status(500).json({ message: "Failed to reject payment" });
+    }
+  });
+
+  // Bulk approve
+  app.post("/api/admin/pending-payments/bulk-approve", requireAuth, async (req, res) => {
+    try {
+      const { ids } = req.body as { ids: number[] };
+      if (!Array.isArray(ids) || ids.length === 0) return res.status(400).json({ message: "No IDs provided" });
+      const adminUser = (req as any).adminUser;
+      const results = [];
+      for (const id of ids) {
+        const payment = await storage.getPendingPayment(id);
+        if (!payment || payment.status !== "pending") continue;
+        await storage.updateUserTokenBalance(payment.userId, payment.creditsAmount);
+        await storage.createTokenTransaction({
+          userId: payment.userId,
+          transactionType: "purchase",
+          amount: payment.creditsAmount,
+          dollarAmount: payment.dollarAmount,
+          description: `Credits purchased via ${payment.paymentMethod} — bulk approved`,
+          status: "completed",
+        });
+        const updated = await storage.updatePendingPayment(id, {
+          status: "approved",
+          processedAt: new Date(),
+          processedByAdminId: adminUser?.id || null,
+        });
+        results.push(updated);
+      }
+      res.json({ success: true, count: results.length });
+    } catch (err) {
+      res.status(500).json({ message: "Bulk approve failed" });
+    }
+  });
+
+  // Bulk reject
+  app.post("/api/admin/pending-payments/bulk-reject", requireAuth, async (req, res) => {
+    try {
+      const { ids, notes } = req.body as { ids: number[]; notes?: string };
+      if (!Array.isArray(ids) || ids.length === 0) return res.status(400).json({ message: "No IDs provided" });
+      const adminUser = (req as any).adminUser;
+      let count = 0;
+      for (const id of ids) {
+        const payment = await storage.getPendingPayment(id);
+        if (!payment || payment.status !== "pending") continue;
+        await storage.updatePendingPayment(id, {
+          status: "rejected",
+          processedAt: new Date(),
+          processedByAdminId: adminUser?.id || null,
+          notes: notes || "Bulk rejected by staff",
+        });
+        count++;
+      }
+      res.json({ success: true, count });
+    } catch (err) {
+      res.status(500).json({ message: "Bulk reject failed" });
+    }
+  });
+
   const httpServer = createServer(app);
 
   return httpServer;

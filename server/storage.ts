@@ -1,14 +1,15 @@
 import { 
   games, players, gameResults, adminUsers, wheelSegments, systemSettings, adminSessions, notifications, spinResults,
   users, transactions, userSessions, complianceLogs, freePlayUsage, paymentCards, tokenTransactions, userFreeEntries,
-  dailyTokenClaims, promoCodes, promoCodeRedemptions,
+  dailyTokenClaims, promoCodes, promoCodeRedemptions, pendingPayments,
   type Game, type InsertGame, type Player, type InsertPlayer, type GameResult, type InsertGameResult, 
   type AdminUser, type InsertAdminUser, type WheelSegment, type InsertWheelSegment,
   type SystemSetting, type InsertSystemSetting, type InsertNotification, type Notification,
   type SpinResult, type InsertSpinResult, type User, type InsertUser, type Transaction, type InsertTransaction,
   type FreePlayUsage, type InsertFreePlayUsage, type PaymentCard, type InsertPaymentCard,
   type TokenTransaction, type InsertTokenTransaction, type UserFreeEntry, type InsertUserFreeEntry,
-  type DailyTokenClaim, type PromoCode, type InsertPromoCode, type PromoCodeRedemption
+  type DailyTokenClaim, type PromoCode, type InsertPromoCode, type PromoCodeRedemption,
+  type PendingPayment, type InsertPendingPayment
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, sql, asc, and, isNotNull } from "drizzle-orm";
@@ -149,6 +150,13 @@ export interface IStorage {
   incrementPromoCodeUses(id: number): Promise<void>;
   hasUserRedeemedPromoCode(userId: number, promoCodeId: number): Promise<boolean>;
   createPromoCodeRedemption(userId: number, promoCodeId: number): Promise<PromoCodeRedemption>;
+
+  // Pending payment methods (wallet MVP)
+  createPendingPayment(payment: InsertPendingPayment): Promise<PendingPayment>;
+  getPendingPayment(id: number): Promise<PendingPayment | undefined>;
+  getPendingPayments(filters?: { status?: string; paymentMethod?: string }): Promise<(PendingPayment & { user: Pick<User,'firstName'|'lastName'|'email'> })[]>;
+  getPendingPaymentsByUserId(userId: number): Promise<PendingPayment[]>;
+  updatePendingPayment(id: number, updates: Partial<PendingPayment>): Promise<PendingPayment | undefined>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1523,6 +1531,71 @@ export class DatabaseStorage implements IStorage {
       .values({ userId, promoCodeId })
       .returning();
     return row;
+  }
+
+  // Pending payment methods (wallet MVP)
+  async createPendingPayment(payment: InsertPendingPayment): Promise<PendingPayment> {
+    const [row] = await db.insert(pendingPayments).values(payment).returning();
+    return row;
+  }
+
+  async getPendingPayment(id: number): Promise<PendingPayment | undefined> {
+    const [row] = await db.select().from(pendingPayments).where(eq(pendingPayments.id, id));
+    return row || undefined;
+  }
+
+  async getPendingPayments(filters?: { status?: string; paymentMethod?: string }): Promise<(PendingPayment & { user: Pick<User,'firstName'|'lastName'|'email'> })[]> {
+    const rows = await db.select({
+      id: pendingPayments.id,
+      userId: pendingPayments.userId,
+      dollarAmount: pendingPayments.dollarAmount,
+      creditsAmount: pendingPayments.creditsAmount,
+      paymentMethod: pendingPayments.paymentMethod,
+      paymentName: pendingPayments.paymentName,
+      paymentHandle: pendingPayments.paymentHandle,
+      status: pendingPayments.status,
+      notes: pendingPayments.notes,
+      processedByAdminId: pendingPayments.processedByAdminId,
+      submittedAt: pendingPayments.submittedAt,
+      processedAt: pendingPayments.processedAt,
+      userFirstName: users.firstName,
+      userLastName: users.lastName,
+      userEmail: users.email,
+    })
+    .from(pendingPayments)
+    .leftJoin(users, eq(pendingPayments.userId, users.id))
+    .orderBy(desc(pendingPayments.submittedAt));
+
+    let filtered = rows;
+    if (filters?.status) filtered = filtered.filter(r => r.status === filters.status);
+    if (filters?.paymentMethod) filtered = filtered.filter(r => r.paymentMethod === filters.paymentMethod);
+
+    return filtered.map(r => ({
+      id: r.id,
+      userId: r.userId,
+      dollarAmount: r.dollarAmount,
+      creditsAmount: r.creditsAmount,
+      paymentMethod: r.paymentMethod,
+      paymentName: r.paymentName,
+      paymentHandle: r.paymentHandle,
+      status: r.status,
+      notes: r.notes,
+      processedByAdminId: r.processedByAdminId,
+      submittedAt: r.submittedAt,
+      processedAt: r.processedAt,
+      user: { firstName: r.userFirstName || '', lastName: r.userLastName || '', email: r.userEmail || '' },
+    }));
+  }
+
+  async getPendingPaymentsByUserId(userId: number): Promise<PendingPayment[]> {
+    return db.select().from(pendingPayments)
+      .where(eq(pendingPayments.userId, userId))
+      .orderBy(desc(pendingPayments.submittedAt));
+  }
+
+  async updatePendingPayment(id: number, updates: Partial<PendingPayment>): Promise<PendingPayment | undefined> {
+    const [row] = await db.update(pendingPayments).set(updates).where(eq(pendingPayments.id, id)).returning();
+    return row || undefined;
   }
 }
 

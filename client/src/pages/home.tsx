@@ -7,7 +7,7 @@ import {
   Star, Crown, Flame, Bell, LogOut, Coins,
   ArrowRight, ChevronRight, Gamepad2, DollarSign,
   Home, User, BarChart3, Lock, Timer,
-  Sparkles, Play, Hash, CreditCard, TrendingUp,
+  Sparkles, Play, Hash, CreditCard, TrendingUp, Wallet,
 } from "lucide-react";
 import { logout } from "@/lib/auth";
 import type { Game } from "@shared/schema";
@@ -389,10 +389,10 @@ export default function HomePage() {
               <span className="text-yellow-600 text-xs hidden sm:inline">tokens</span>
             </button>
 
-            <button onClick={() => setLocation("/tokens")}
+            <button onClick={() => setLocation("/wallet")}
               className="hidden sm:flex items-center gap-1.5 text-white font-bold text-xs px-4 py-2 rounded-full transition-all hover:scale-105 glow-violet"
               style={{background:"linear-gradient(135deg,#7c3aed,#9333ea)",border:"1px solid rgba(139,92,246,0.4)"}}>
-              <span>+ Add Tokens</span>
+              <span>+ Add Credits</span>
             </button>
 
             <button className="relative p-2 rounded-full transition hover:bg-white/8" style={{background:"rgba(255,255,255,0.05)",border:"1px solid rgba(255,255,255,0.07)"}}>
@@ -922,7 +922,7 @@ export default function HomePage() {
         {[
           {icon:Home,      label:"Home",   path:"/",           active:true},
           {icon:Gamepad2,  label:"Games",  path:"/games"},
-          {icon:DollarSign,label:"Tokens", path:"/tokens"},
+          {icon:Wallet,    label:"Wallet",  path:"/wallet"},
           {icon:Gift,      label:"Prizes", path:"/games"},
           {icon:Trophy,    label:"Winners",path:"/dashboard"},
           {icon:Bell,      label:"Alerts", path:"/dashboard",  badge:3},

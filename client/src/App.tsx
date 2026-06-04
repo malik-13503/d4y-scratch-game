@@ -27,6 +27,8 @@ import Dashboard from "@/pages/dashboard";
 import Transactions from "@/pages/transactions";
 import Achievements from "@/pages/achievements";
 import MyNumbers from "@/pages/my-numbers";
+import WalletPage from "@/pages/wallet";
+import AddCreditsPage from "@/pages/add-credits";
 import { TokenPurchase } from "@/components/token-purchase";
 
 import NotFound from "@/pages/not-found";
@@ -108,6 +110,8 @@ function Router() {
           <Route path="/achievements" component={Achievements} />
           <Route path="/my-numbers" component={MyNumbers} />
           <Route path="/tokens" component={TokenPurchase} />
+          <Route path="/wallet" component={WalletPage} />
+          <Route path="/add-credits" component={AddCreditsPage} />
         </>
       ) : (
         <>
@@ -120,6 +124,8 @@ function Router() {
           <Route path="/achievements" component={AuthLandingPage} />
           <Route path="/my-numbers" component={AuthLandingPage} />
           <Route path="/tokens" component={AuthLandingPage} />
+          <Route path="/wallet" component={AuthLandingPage} />
+          <Route path="/add-credits" component={AuthLandingPage} />
         </>
       )}
       

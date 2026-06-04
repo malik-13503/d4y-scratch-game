@@ -253,6 +253,22 @@ export const claimedNumbers = pgTable("claimed_numbers", {
   claimedAt: timestamp("claimed_at").notNull().defaultNow(),
 });
 
+// Pending payment submissions — manual approval flow
+export const pendingPayments = pgTable("pending_payments", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  dollarAmount: decimal("dollar_amount", { precision: 10, scale: 2 }).notNull(),
+  creditsAmount: integer("credits_amount").notNull(), // Credits to be awarded on approval
+  paymentMethod: text("payment_method").notNull(), // 'cashapp' | 'venmo' | 'chime' | 'applepay'
+  paymentName: text("payment_name").notNull(), // Sender's name on payment
+  paymentHandle: text("payment_handle").notNull(), // Sender's handle/tag/email
+  status: text("status").notNull().default("pending"), // 'pending' | 'approved' | 'rejected'
+  notes: text("notes"), // Staff notes or rejection reason
+  processedByAdminId: integer("processed_by_admin_id"),
+  submittedAt: timestamp("submitted_at").notNull().defaultNow(),
+  processedAt: timestamp("processed_at"),
+});
+
 // Daily token claims — one per user per day
 export const dailyTokenClaims = pgTable("daily_token_claims", {
   id: serial("id").primaryKey(),
@@ -272,6 +288,18 @@ export const promoCodes = pgTable("promo_codes", {
   isActive: boolean("is_active").notNull().default(true),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
+
+// Pending payment schema and types
+export const insertPendingPaymentSchema = createInsertSchema(pendingPayments).omit({
+  id: true,
+  submittedAt: true,
+  processedAt: true,
+  processedByAdminId: true,
+  status: true,
+  notes: true,
+});
+export type PendingPayment = typeof pendingPayments.$inferSelect;
+export type InsertPendingPayment = z.infer<typeof insertPendingPaymentSchema>;
 
 // Promo code redemptions — one per user per code
 export const promoCodeRedemptions = pgTable("promo_code_redemptions", {
