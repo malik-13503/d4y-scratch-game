@@ -800,12 +800,6 @@ export default function AdminDashboard() {
               </button>
             );
           })}
-          <button
-            onClick={() => setLocation("/wallet")}
-            className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-xs font-medium transition-all text-left text-gray-400 hover:bg-white/5 hover:text-gray-200">
-            <Wallet className="h-3.5 w-3.5 flex-shrink-0" />
-            <span className="flex-1 truncate">Wallet Transactions</span>
-          </button>
 
           <p className="text-[10px] font-semibold uppercase tracking-widest text-gray-600 px-2 pt-3 pb-1">Management</p>
           {([
