@@ -193,6 +193,17 @@ export default function Dashboard() {
     staleTime: 30000,
   });
 
+  const { data: walletData, isLoading: walletLoading } = useQuery<{
+    balance: number;
+    payments: any[];
+    transactions: any[];
+  }>({
+    queryKey: ["/api/wallet"],
+    enabled: !!user && currentTab === 'payment',
+    refetchInterval: currentTab === 'payment' ? 15000 : false,
+    staleTime: 10000,
+  });
+
   if (userLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950 to-slate-950 flex items-center justify-center">
@@ -933,82 +944,116 @@ export default function Dashboard() {
           </TabsContent>
 
           {/* Payment Tab */}
-          <TabsContent value="payment" className="space-y-8">
-            <Card className="relative overflow-hidden bg-gradient-to-br from-slate-800/80 to-slate-900/80 border-purple-400/40 backdrop-blur-xl shadow-2xl">
-              <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-blue-500/10 blur-2xl"></div>
-              <CardHeader className="relative">
-                <CardTitle className="text-2xl font-bold bg-gradient-to-r from-white to-gray-200 bg-clip-text text-transparent flex items-center">
-                  <div className="p-2 bg-gradient-to-br from-purple-500 to-blue-500 rounded-lg mr-3 shadow-lg">
-                    <CreditCard className="h-6 w-6 text-white" />
+          <TabsContent value="payment" className="space-y-6">
+            {walletLoading ? (
+              <div className="space-y-4">
+                {[1,2,3].map(i => <div key={i} className="h-24 rounded-xl animate-pulse bg-white/5" />)}
+              </div>
+            ) : (
+              <>
+                {/* Token Balance Card */}
+                <div className="rounded-2xl p-6 flex flex-col sm:flex-row items-start sm:items-center gap-5"
+                  style={{background:"linear-gradient(135deg,rgba(124,58,237,0.2),rgba(59,130,246,0.2))", border:"1px solid rgba(124,58,237,0.35)"}}>
+                  <div className="w-16 h-16 rounded-2xl flex items-center justify-center flex-shrink-0"
+                    style={{background:"linear-gradient(135deg,#7c3aed,#3b82f6)"}}>
+                    <Coins className="h-8 w-8 text-white" />
                   </div>
-                  Payment Methods
-                </CardTitle>
-                <p className="text-gray-300 text-lg mt-2">Manage your payment methods securely</p>
-              </CardHeader>
-              <CardContent className="relative">
-                {(user as any).cardOnFile ? (
-                  <div className="space-y-6">
-                    <div className="p-6 bg-gradient-to-r from-emerald-900/40 to-green-900/40 rounded-xl border border-emerald-500/30">
-                      <div className="flex items-center space-x-4">
-                        <div className="p-3 bg-gradient-to-br from-emerald-500 to-green-600 rounded-xl shadow-lg">
-                          <CreditCard className="h-8 w-8 text-white" />
+                  <div className="flex-1">
+                    <p className="text-gray-400 text-sm font-medium">Your Token Balance</p>
+                    <p className="text-4xl font-black text-white">{walletData?.balance ?? (user as any).tokenBalance ?? 0}</p>
+                    <p className="text-purple-300 text-sm mt-1">Tokens are used to spin games and win prizes</p>
+                  </div>
+                  <button
+                    onClick={() => setLocation("/add-credits")}
+                    className="flex items-center gap-2 px-5 py-3 rounded-xl text-sm font-bold text-white transition-all hover:opacity-90 flex-shrink-0"
+                    style={{background:"linear-gradient(135deg,#7c3aed,#3b82f6)"}}>
+                    <Gift className="h-4 w-4" /> Add Credits
+                  </button>
+                </div>
+
+                {/* How it works */}
+                <div className="rounded-xl p-5" style={{background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.08)"}}>
+                  <h3 className="text-white font-bold mb-4 flex items-center gap-2">
+                    <CheckCircle className="h-5 w-5 text-emerald-400" /> How to Add Credits
+                  </h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    {[
+                      { step:"1", title:"Choose a Package", desc:"Pick a token package from $5 to $100" },
+                      { step:"2", title:"Send Payment",     desc:"Pay via Cash App, Venmo, Chime, or Apple Pay" },
+                      { step:"3", title:"Get Your Tokens",  desc:"Tokens credited after staff approval (usually within minutes)" },
+                    ].map(({ step, title, desc }) => (
+                      <div key={step} className="flex gap-3">
+                        <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-black text-white flex-shrink-0 mt-0.5"
+                          style={{background:"linear-gradient(135deg,#7c3aed,#3b82f6)"}}>
+                          {step}
                         </div>
                         <div>
-                          <h3 className="text-white font-bold text-xl">Payment Method Active</h3>
-                          <p className="text-gray-300">
-                            {(user as any).cardBrand} ending in {(user as any).cardLast4}
-                          </p>
-                        </div>
-                        <div className="ml-auto">
-                          <Badge className="bg-gradient-to-r from-emerald-500 to-green-500 text-white px-4 py-2 font-bold">
-                            Verified
-                          </Badge>
+                          <p className="text-white text-sm font-semibold">{title}</p>
+                          <p className="text-gray-400 text-xs mt-0.5">{desc}</p>
                         </div>
                       </div>
-                    </div>
-                    <div className="p-4 bg-blue-900/20 rounded-xl border border-blue-500/30">
-                      <p className="text-blue-300 text-sm">
-                        Your payment method is secure and ready for transactions. You can update it anytime.
-                      </p>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="space-y-6">
-                    <div className="text-center py-8">
-                      <div className="relative inline-block mb-6">
-                        <div className="absolute inset-0 bg-gradient-to-br from-red-500/30 to-orange-500/30 blur-2xl rounded-full"></div>
-                        <div className="relative p-6 bg-gradient-to-br from-red-500 to-orange-600 rounded-full shadow-2xl">
-                          <CreditCard className="h-12 w-12 text-white" />
-                        </div>
-                      </div>
-                      <h3 className="text-2xl font-bold text-white mb-4">No Payment Method</h3>
-                      <p className="text-gray-300 text-lg mb-8">Add a payment method to start playing games and winning prizes!</p>
-                    </div>
-                    <div className="text-center p-6 bg-purple-900/20 border border-purple-500/30 rounded-xl">
-                      <p className="text-purple-300 font-medium">A new payment system is coming soon. Stay tuned!</p>
-                    </div>
-                  </div>
-                )}
-                
-                {/* Security Information */}
-                <div className="mt-8">
-                  <div className="p-4 sm:p-6 bg-gradient-to-r from-slate-700/50 to-slate-800/50 rounded-xl border border-slate-600/30">
-                    <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-3 sm:space-y-0 sm:space-x-4">
-                      <div className="p-2 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl shadow-lg flex-shrink-0">
-                        <Shield className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <h3 className="text-white font-bold text-lg mb-1">Secure Payment Processing</h3>
-                        <p className="text-gray-300 text-sm">
-                          All transactions are processed securely through Square's encrypted payment system. 
-                          Your card information is protected with industry-standard security measures.
-                        </p>
-                      </div>
-                    </div>
+                    ))}
                   </div>
                 </div>
-              </CardContent>
-            </Card>
+
+                {/* Payment History */}
+                <div className="rounded-xl overflow-hidden" style={{background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.08)"}}>
+                  <div className="px-5 py-4 border-b flex items-center justify-between" style={{borderColor:"rgba(255,255,255,0.08)"}}>
+                    <h3 className="text-white font-bold flex items-center gap-2">
+                      <Clock className="h-4 w-4 text-purple-400" /> Payment History
+                    </h3>
+                    <button onClick={() => setLocation("/wallet")}
+                      className="text-purple-400 hover:text-purple-300 text-xs font-medium transition-colors">
+                      View All →
+                    </button>
+                  </div>
+                  {!walletData?.payments?.length ? (
+                    <div className="text-center py-12">
+                      <CreditCard className="h-10 w-10 text-gray-600 mx-auto mb-3" />
+                      <p className="text-gray-400 font-semibold">No payments yet</p>
+                      <p className="text-gray-600 text-sm mt-1">Your payment history will appear here</p>
+                      <button onClick={() => setLocation("/add-credits")}
+                        className="mt-4 px-4 py-2 rounded-lg text-sm font-bold text-white transition-all hover:opacity-90"
+                        style={{background:"linear-gradient(135deg,#7c3aed,#3b82f6)"}}>
+                        Add Your First Credits
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="divide-y" style={{borderColor:"rgba(255,255,255,0.05)"}}>
+                      {(walletData.payments as any[]).slice(0, 5).map((p: any) => {
+                        const methodLabels: Record<string,string> = { cashapp:"Cash App", venmo:"Venmo", chime:"Chime", applepay:"Apple Pay" };
+                        const statusCfg =
+                          p.status === "approved" ? { cls:"bg-emerald-500/20 text-emerald-300", label:"Approved" } :
+                          p.status === "rejected" ? { cls:"bg-red-500/20 text-red-300",         label:"Rejected" } :
+                                                    { cls:"bg-yellow-500/20 text-yellow-300",   label:"Pending"  };
+                        return (
+                          <div key={p.id} className="px-5 py-3 flex items-center gap-4">
+                            <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0"
+                              style={{background:"rgba(124,58,237,0.2)"}}>
+                              <Coins className="h-4 w-4 text-purple-400" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-white text-sm font-semibold">+{p.creditsAmount} tokens</p>
+                              <p className="text-gray-500 text-xs">{methodLabels[p.paymentMethod] ?? p.paymentMethod} · {p.paymentHandle}</p>
+                            </div>
+                            <div className="text-right flex-shrink-0">
+                              <p className="text-emerald-400 font-bold text-sm">${Number(p.dollarAmount).toFixed(2)}</p>
+                              <span className={`text-[10px] px-2 py-0.5 rounded-full font-semibold ${statusCfg.cls}`}>{statusCfg.label}</span>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+
+                {/* Security note */}
+                <div className="p-4 rounded-xl flex items-start gap-3" style={{background:"rgba(16,185,129,0.08)", border:"1px solid rgba(16,185,129,0.2)"}}>
+                  <Shield className="h-5 w-5 text-emerald-400 flex-shrink-0 mt-0.5" />
+                  <p className="text-gray-300 text-sm">All payments are manually reviewed by our team before credits are applied. Approved payments are processed quickly, usually within minutes.</p>
+                </div>
+              </>
+            )}
           </TabsContent>
 
 
