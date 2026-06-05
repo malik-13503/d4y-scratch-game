@@ -20,11 +20,13 @@ import { Input } from "@/components/ui/input";
 
 // ── Static data (matches server) ────────────────────────────────────────────
 const PACKAGES = [
-  { id: 1, dollars: 5,   credits: 20,  popular: false, bonus: "" },
-  { id: 2, dollars: 10,  credits: 40,  popular: false, bonus: "" },
-  { id: 3, dollars: 20,  credits: 80,  popular: true,  bonus: "Best Value" },
-  { id: 4, dollars: 50,  credits: 200, popular: false, bonus: "+5 Bonus" },
-  { id: 5, dollars: 100, credits: 400, popular: false, bonus: "+20 Bonus" },
+  { id: 1, dollars: 5,   credits: 10,   popular: false, bonus: "",             label: "Starter Pack"     },
+  { id: 2, dollars: 10,  credits: 25,   popular: false, bonus: "",             label: "Player Pack"      },
+  { id: 3, dollars: 20,  credits: 60,   popular: false, bonus: "",             label: "Power Pack"       },
+  { id: 4, dollars: 50,  credits: 175,  popular: false, bonus: "",             label: "Winner Pack"      },
+  { id: 5, dollars: 100, credits: 400,  popular: false, bonus: "",             label: "VIP Pack"         },
+  { id: 6, dollars: 250, credits: 1200, popular: false, bonus: "High Roller",  label: "High Roller Pack" },
+  { id: 7, dollars: 500, credits: 3000, popular: true,  bonus: "⭐ Best Value", label: "Best Value Pack"  },
 ];
 
 const METHODS = [
@@ -105,7 +107,7 @@ export default function AddCreditsPage() {
             </div>
             <div className="mt-2 h-1 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.1)" }}>
               <div className="h-full rounded-full transition-all"
-                style={{ width: `${(p.credits / 400) * 100}%`, background: "linear-gradient(90deg,#7c3aed,#2563eb)" }} />
+                style={{ width: `${(p.credits / 3000) * 100}%`, background: "linear-gradient(90deg,#7c3aed,#2563eb)" }} />
             </div>
           </button>
         ))}

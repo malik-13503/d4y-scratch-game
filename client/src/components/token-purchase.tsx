@@ -40,11 +40,13 @@ export function TokenPurchase() {
   const currentBalance = tokenBalanceData?.tokenBalance || 0;
 
   const packageStyles = [
-    { gradient: "from-slate-800 to-slate-900",  accent: "border-slate-500/50",  bar: "#64748b", btn: "from-slate-600 to-slate-700" },
-    { gradient: "from-blue-950 to-slate-900",   accent: "border-blue-500/50",   bar: "#3b82f6", btn: "from-blue-600 to-blue-700"   },
-    { gradient: "from-purple-950 to-slate-900", accent: "border-purple-400/60", bar: "#a855f7", btn: "from-purple-600 to-purple-700"},
-    { gradient: "from-orange-950 to-slate-900", accent: "border-orange-400/60", bar: "#f97316", btn: "from-orange-500 to-orange-600"},
-    { gradient: "from-yellow-950 to-slate-900", accent: "border-yellow-400/60", bar: "#eab308", btn: "from-yellow-500 to-yellow-600"},
+    { gradient: "from-slate-800 to-slate-900",  accent: "border-slate-500/50",   bar: "#64748b", btn: "from-slate-600 to-slate-700"  },
+    { gradient: "from-blue-950 to-slate-900",   accent: "border-blue-500/50",    bar: "#3b82f6", btn: "from-blue-600 to-blue-700"    },
+    { gradient: "from-purple-950 to-slate-900", accent: "border-purple-400/60",  bar: "#a855f7", btn: "from-purple-600 to-purple-700" },
+    { gradient: "from-orange-950 to-slate-900", accent: "border-orange-400/60",  bar: "#f97316", btn: "from-orange-500 to-orange-600" },
+    { gradient: "from-yellow-950 to-slate-900", accent: "border-yellow-400/60",  bar: "#eab308", btn: "from-yellow-500 to-yellow-600" },
+    { gradient: "from-emerald-950 to-slate-900",accent: "border-emerald-400/60", bar: "#10b981", btn: "from-emerald-600 to-emerald-700"},
+    { gradient: "from-rose-950 to-slate-900",   accent: "border-rose-400/60",    bar: "#f43f5e", btn: "from-rose-500 to-rose-600"     },
   ];
 
   return (
@@ -147,7 +149,7 @@ export function TokenPurchase() {
         </div>
 
         {/* ── PACKAGE GRID ── */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 mb-10">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mb-10">
           {tokenPackages.map((pkg, index) => {
             const style = packageStyles[index % packageStyles.length];
             const totalTokens = pkg.tokens + pkg.bonus;
@@ -190,7 +192,7 @@ export function TokenPurchase() {
                   {/* Value bar */}
                   <div className="mb-4 h-1.5 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.08)" }}>
                     <div className="h-full rounded-full transition-all"
-                      style={{ width: `${((5 - index) / 5) * 100 + index * 20}%`, background: style.bar }} />
+                      style={{ width: `${Math.round((totalTokens / 3000) * 100)}%`, background: style.bar }} />
                   </div>
                   <button
                     onClick={() => setLocation("/add-credits")}
@@ -238,7 +240,7 @@ export function TokenPurchase() {
             <TrendingUp className="h-5 w-5 text-green-400" />
             <h3 className="text-white font-bold">Token Value Guide</h3>
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-3">
             {tokenPackages.map((pkg) => (
               <div key={pkg.id} className="text-center rounded-xl p-3"
                 style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)" }}>

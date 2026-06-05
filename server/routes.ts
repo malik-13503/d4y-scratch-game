@@ -1891,51 +1891,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/token-packages", async (req, res) => {
     try {
       const tokenPackages = [
-        {
-          id: "package_5",
-          name: "Starter Pack",
-          tokens: 5,
-          price: 5.00,
-          bonus: 0,
-          popular: false,
-          valueLabel: "$1.00 per token"
-        },
-        {
-          id: "package_10",
-          name: "Value Pack",
-          tokens: 12,
-          price: 10.00,
-          bonus: 2,
-          popular: false,
-          valueLabel: "$0.83 per token"
-        },
-        {
-          id: "package_20",
-          name: "Super Pack",
-          tokens: 26,
-          price: 20.00,
-          bonus: 6,
-          popular: true,
-          valueLabel: "$0.77 per token"
-        },
-        {
-          id: "package_50",
-          name: "Mega Pack",
-          tokens: 70,
-          price: 50.00,
-          bonus: 20,
-          popular: false,
-          valueLabel: "$0.71 per token"
-        },
-        {
-          id: "package_100",
-          name: "Ultimate Pack",
-          tokens: 150,
-          price: 100.00,
-          bonus: 50,
-          popular: false,
-          valueLabel: "$0.67 per token"
-        }
+        { id: "package_5",   name: "Starter Pack",     tokens: 10,   price: 5,   bonus: 0, popular: false, valueLabel: "$0.50 per token" },
+        { id: "package_10",  name: "Player Pack",      tokens: 25,   price: 10,  bonus: 0, popular: false, valueLabel: "$0.40 per token" },
+        { id: "package_20",  name: "Power Pack",       tokens: 60,   price: 20,  bonus: 0, popular: false, valueLabel: "$0.33 per token" },
+        { id: "package_50",  name: "Winner Pack",      tokens: 175,  price: 50,  bonus: 0, popular: false, valueLabel: "$0.29 per token" },
+        { id: "package_100", name: "VIP Pack",         tokens: 400,  price: 100, bonus: 0, popular: false, valueLabel: "$0.25 per token" },
+        { id: "package_250", name: "High Roller Pack", tokens: 1200, price: 250, bonus: 0, popular: false, valueLabel: "$0.21 per token" },
+        { id: "package_500", name: "Best Value Pack",  tokens: 3000, price: 500, bonus: 0, popular: true,  valueLabel: "$0.17 per token" },
       ];
 
       res.json(tokenPackages);
@@ -2674,11 +2636,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Credit packages (static, no DB needed for MVP)
   const CREDIT_PACKAGES = [
-    { id: 1, dollars: 5,   credits: 20  },
-    { id: 2, dollars: 10,  credits: 40  },
-    { id: 3, dollars: 20,  credits: 80  },
-    { id: 4, dollars: 50,  credits: 200 },
-    { id: 5, dollars: 100, credits: 400 },
+    { id: 1, dollars: 5,   credits: 10   },
+    { id: 2, dollars: 10,  credits: 25   },
+    { id: 3, dollars: 20,  credits: 60   },
+    { id: 4, dollars: 50,  credits: 175  },
+    { id: 5, dollars: 100, credits: 400  },
+    { id: 6, dollars: 250, credits: 1200 },
+    { id: 7, dollars: 500, credits: 3000 },
   ];
 
   // Payment destinations (configurable in production via settings)
