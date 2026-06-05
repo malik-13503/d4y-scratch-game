@@ -698,9 +698,8 @@
   html,
   body {
     overflow-x: hidden;
-    overscroll-behavior: none;
+    overscroll-behavior-x: none;
     -webkit-overflow-scrolling: touch;
-    position: relative;
   }
 
   /* Prevent zoom on mobile inputs */
