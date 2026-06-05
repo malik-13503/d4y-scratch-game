@@ -28,10 +28,10 @@ const PACKAGES = [
 ];
 
 const METHODS = [
-  { id: "cashapp",  label: "Cash App",       color: "#00c244", bgColor: "rgba(0,194,68,0.12)",  destination: "$PrizePlugz",            icon: "💵" },
-  { id: "venmo",    label: "Venmo",           color: "#3d95ce", bgColor: "rgba(61,149,206,0.12)", destination: "@PrizePlugz",            icon: "💳" },
-  { id: "chime",    label: "Chime",           color: "#00c6a0", bgColor: "rgba(0,198,160,0.12)",  destination: "payments@prizeplugz.com", icon: "🏦" },
-  { id: "applepay", label: "Apple Pay/Cash",  color: "#888888", bgColor: "rgba(136,136,136,0.12)", destination: "payments@prizeplugz.com", icon: "🍎" },
+  { id: "cashapp",  label: "Cash App",       color: "#00c244", bgColor: "rgba(0,194,68,0.12)",   destination: "$m2mm",              icon: "💵" },
+  { id: "venmo",    label: "Venmo",           color: "#3d95ce", bgColor: "rgba(61,149,206,0.12)", destination: "@Daveon-Mcgary",      icon: "💳" },
+  { id: "chime",    label: "Chime",           color: "#00c6a0", bgColor: "rgba(0,198,160,0.12)",  destination: "740-802-4646",        icon: "🏦" },
+  { id: "applepay", label: "Apple Pay/Cash",  color: "#888888", bgColor: "rgba(136,136,136,0.12)", destination: "+1 (740) 262-3121",  icon: "🍎" },
 ];
 
 type Step = "package" | "method" | "send" | "confirm" | "done";
