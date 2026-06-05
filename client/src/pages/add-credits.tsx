@@ -75,7 +75,7 @@ export default function AddCreditsPage() {
 
   // ── STEP: Package selection ───────────────────────────────────────────────
   if (step === "package") return (
-    <Page onBack={() => setLocation("/wallet")} title="Add Credits" subtitle="Choose a credit package">
+    <Page onBack={() => setLocation("/wallet")} title="Add Tokens" subtitle="Choose a token package">
       <div className="space-y-3">
         {PACKAGES.map(p => (
           <button key={p.id} onClick={() => { setPkg(p); setStep("method"); }}
@@ -96,11 +96,11 @@ export default function AddCreditsPage() {
             <div className="flex items-center justify-between">
               <div>
                 <span className="text-2xl font-black text-white">{p.credits}</span>
-                <span className="text-gray-400 ml-1 text-sm">PrizePlugz Credits</span>
+                <span className="text-gray-400 ml-1 text-sm">PrizePlugz Tokens</span>
               </div>
               <div className="text-right">
                 <span className="text-xl font-black" style={{ color: "#f59e0b" }}>${p.dollars}</span>
-                <div className="text-gray-500 text-xs">{(p.credits / p.dollars).toFixed(1)} cr/$</div>
+                <div className="text-gray-500 text-xs">{(p.credits / p.dollars).toFixed(1)} tkn/$</div>
               </div>
             </div>
             <div className="mt-2 h-1 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.1)" }}>
@@ -117,7 +117,7 @@ export default function AddCreditsPage() {
 
   // ── STEP: Payment method ──────────────────────────────────────────────────
   if (step === "method") return (
-    <Page onBack={() => setStep("package")} title="Payment Method" subtitle={`Sending $${pkg?.dollars} for ${pkg?.credits} credits`}>
+    <Page onBack={() => setStep("package")} title="Payment Method" subtitle={`Sending $${pkg?.dollars} for ${pkg?.credits} tokens`}>
       <div className="space-y-3">
         {METHODS.map(m => (
           <button key={m.id} onClick={() => { setMethod(m); setStep("send"); }}
@@ -145,7 +145,7 @@ export default function AddCreditsPage() {
           style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.12)" }}>
           <p className="text-gray-400 text-sm mb-1">Amount to send</p>
           <p className="text-4xl font-black text-white">${pkg.dollars}.00</p>
-          <p className="text-gray-500 text-xs mt-1">Sends {pkg.credits} PrizePlugz Credits to your account after approval</p>
+          <p className="text-gray-500 text-xs mt-1">Sends {pkg.credits} PrizePlugz Tokens to your account after approval</p>
         </div>
 
         {/* Send to */}
@@ -177,7 +177,7 @@ export default function AddCreditsPage() {
             <li>Send the <strong className="text-yellow-200">exact amount</strong> shown</li>
             <li>Do not include a note/memo unless instructed</li>
             <li>After sending, click "I Sent Payment" below</li>
-            <li>Credits are added after staff verification (usually within 1–4 hours)</li>
+            <li>Tokens are added after staff verification (usually within 1–4 hours)</li>
           </ul>
         </div>
 
@@ -201,7 +201,7 @@ export default function AddCreditsPage() {
           <span className="text-3xl">{method.icon}</span>
           <div>
             <p className="text-white font-bold">${pkg.dollars} via {method.label}</p>
-            <p className="text-purple-300 text-sm">{pkg.credits} credits will be added after approval</p>
+            <p className="text-purple-300 text-sm">{pkg.credits} tokens will be added after approval</p>
           </div>
         </div>
 
@@ -261,14 +261,14 @@ export default function AddCreditsPage() {
         </div>
         <div>
           <h2 className="text-2xl font-black text-white">Payment Submitted!</h2>
-          <p className="text-gray-400 mt-2">Your payment is under review. Credits will appear in your wallet once approved by our team — usually within 1–4 hours.</p>
+          <p className="text-gray-400 mt-2">Your payment is under review. Tokens will appear in your wallet once approved by our team — usually within 1–4 hours.</p>
         </div>
 
         <div className="rounded-2xl p-4 space-y-2"
           style={{ background: "rgba(16,185,129,0.1)", border: "1px solid rgba(16,185,129,0.3)" }}>
           <div className="flex justify-between text-sm">
             <span className="text-gray-400">Package</span>
-            <span className="text-white font-semibold">${pkg?.dollars} → {pkg?.credits} credits</span>
+            <span className="text-white font-semibold">${pkg?.dollars} → {pkg?.credits} tokens</span>
           </div>
           <div className="flex justify-between text-sm">
             <span className="text-gray-400">Method</span>
@@ -333,7 +333,7 @@ function DisclaimerBox() {
       style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.05)" }}>
       <div className="flex items-start gap-1.5">
         <Shield className="h-3 w-3 text-gray-600 mt-0.5 shrink-0" />
-        <p>PrizePlugz Credits are used solely for game participation. Credits have no cash value and are non-refundable except as required by law. No purchase necessary — see <a href="/official-rules" className="text-purple-500 hover:underline">Official Rules</a> for free entry.</p>
+        <p>PrizePlugz Tokens are used solely for game participation. Tokens have no cash value and are non-refundable except as required by law. No purchase necessary — see <a href="/official-rules" className="text-purple-500 hover:underline">Official Rules</a> for free entry.</p>
       </div>
     </div>
   );

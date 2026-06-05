@@ -967,14 +967,14 @@ export default function Dashboard() {
                     onClick={() => setLocation("/add-credits")}
                     className="flex items-center gap-2 px-5 py-3 rounded-xl text-sm font-bold text-white transition-all hover:opacity-90 flex-shrink-0"
                     style={{background:"linear-gradient(135deg,#7c3aed,#3b82f6)"}}>
-                    <Gift className="h-4 w-4" /> Add Credits
+                    <Gift className="h-4 w-4" /> Add Tokens
                   </button>
                 </div>
 
                 {/* How it works */}
                 <div className="rounded-xl p-5" style={{background:"rgba(255,255,255,0.04)", border:"1px solid rgba(255,255,255,0.08)"}}>
                   <h3 className="text-white font-bold mb-4 flex items-center gap-2">
-                    <CheckCircle className="h-5 w-5 text-emerald-400" /> How to Add Credits
+                    <CheckCircle className="h-5 w-5 text-emerald-400" /> How to Add Tokens
                   </h3>
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     {[
@@ -1015,7 +1015,7 @@ export default function Dashboard() {
                       <button onClick={() => setLocation("/add-credits")}
                         className="mt-4 px-4 py-2 rounded-lg text-sm font-bold text-white transition-all hover:opacity-90"
                         style={{background:"linear-gradient(135deg,#7c3aed,#3b82f6)"}}>
-                        Add Your First Credits
+                        Add Your First Tokens
                       </button>
                     </div>
                   ) : (
@@ -1050,7 +1050,7 @@ export default function Dashboard() {
                 {/* Security note */}
                 <div className="p-4 rounded-xl flex items-start gap-3" style={{background:"rgba(16,185,129,0.08)", border:"1px solid rgba(16,185,129,0.2)"}}>
                   <Shield className="h-5 w-5 text-emerald-400 flex-shrink-0 mt-0.5" />
-                  <p className="text-gray-300 text-sm">All payments are manually reviewed by our team before credits are applied. Approved payments are processed quickly, usually within minutes.</p>
+                  <p className="text-gray-300 text-sm">All payments are manually reviewed by our team before tokens are applied. Approved payments are processed quickly, usually within minutes.</p>
                 </div>
               </>
             )}

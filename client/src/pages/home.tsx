@@ -392,7 +392,7 @@ export default function HomePage() {
             <button onClick={() => setLocation("/wallet")}
               className="hidden sm:flex items-center gap-1.5 text-white font-bold text-xs px-4 py-2 rounded-full transition-all hover:scale-105 glow-violet"
               style={{background:"linear-gradient(135deg,#7c3aed,#9333ea)",border:"1px solid rgba(139,92,246,0.4)"}}>
-              <span>+ Add Credits</span>
+              <span>+ Add Tokens</span>
             </button>
 
             <button className="relative p-2 rounded-full transition hover:bg-white/8" style={{background:"rgba(255,255,255,0.05)",border:"1px solid rgba(255,255,255,0.07)"}}>

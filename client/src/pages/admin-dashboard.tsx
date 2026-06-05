@@ -5338,7 +5338,7 @@ function PendingPaymentsTab({ externalStatus }: { externalStatus?: string }) {
 
   const approveMutation = useMutation({
     mutationFn: (id: number) => apiRequest("POST", `/api/admin/pending-payments/${id}/approve`, {}),
-    onSuccess: () => { toast({ title: "Payment approved! Credits added." }); refetch(); },
+    onSuccess: () => { toast({ title: "Payment approved! Tokens added." }); refetch(); },
     onError: () => toast({ title: "Failed to approve", variant: "destructive" }),
   });
 
@@ -5549,7 +5549,7 @@ function PendingPaymentsTab({ externalStatus }: { externalStatus?: string }) {
           <div className="hidden xl:grid px-4 py-2.5 border-b text-[11px] font-semibold uppercase tracking-wider text-gray-500"
             style={{borderColor:"rgba(255,255,255,0.07)", gridTemplateColumns:"2.5rem 2.5fr 2fr 4.5rem 3.5rem 5rem 5rem 5.5rem 4.5rem 6rem"}}>
             <span />
-            <span>User</span><span>Email</span><span>Amount</span><span>Credits</span>
+            <span>User</span><span>Email</span><span>Amount</span><span>Tokens</span>
             <span>Method</span><span>Payment Info</span><span>Time Submitted</span>
             <span>Status</span><span>Actions</span>
           </div>
@@ -5596,7 +5596,7 @@ function PendingPaymentsTab({ externalStatus }: { externalStatus?: string }) {
                       </div>
                       <div className="flex items-center gap-3 pl-[60px] text-sm flex-wrap">
                         <span className="font-bold" style={{color:"#10b981"}}>${Number(p.dollarAmount).toFixed(2)}</span>
-                        <span className="text-gray-400 text-xs">{p.creditsAmount} credits</span>
+                        <span className="text-gray-400 text-xs">{p.creditsAmount} tokens</span>
                         <span className="text-xs font-semibold px-2 py-0.5 rounded-full" style={{background:method.bg,color:method.color}}>{method.label}</span>
                       </div>
                       <p className="pl-[60px] text-xs text-gray-500">Name: {p.paymentName} · Handle: {p.paymentHandle}</p>
@@ -5634,7 +5634,7 @@ function PendingPaymentsTab({ externalStatus }: { externalStatus?: string }) {
                       <span className="text-gray-400 text-xs truncate">{p.user?.email}</span>
                       {/* Amount */}
                       <span className="font-bold text-sm" style={{color:"#10b981"}}>${Number(p.dollarAmount).toFixed(2)}</span>
-                      {/* Credits */}
+                      {/* Tokens */}
                       <span className="text-white font-semibold text-sm">{p.creditsAmount}</span>
                       {/* Method */}
                       <span className="text-xs font-semibold px-2 py-1 rounded-full inline-block"

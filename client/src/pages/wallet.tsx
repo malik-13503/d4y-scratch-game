@@ -77,7 +77,7 @@ export default function WalletPage() {
             </div>
             <div>
               <h1 className="font-bold text-white text-lg leading-none">My Wallet</h1>
-              <p className="text-gray-500 text-xs mt-0.5">PrizePlugz Credits</p>
+              <p className="text-gray-500 text-xs mt-0.5">PrizePlugz Tokens</p>
             </div>
           </div>
         </div>
@@ -94,17 +94,17 @@ export default function WalletPage() {
             style={{ background: "radial-gradient(#3b82f6,transparent 70%)" }} />
 
           <div className="relative">
-            <p className="text-purple-200 text-sm font-medium mb-1">Available Credits</p>
+            <p className="text-purple-200 text-sm font-medium mb-1">Available Tokens</p>
             {isLoading ? (
               <div className="h-12 w-32 rounded-lg bg-white/20 animate-pulse" />
             ) : (
               <div className="flex items-end gap-2">
                 <span className="text-5xl font-black text-white">{balance.toLocaleString()}</span>
-                <span className="text-purple-200 text-lg mb-2">credits</span>
+                <span className="text-purple-200 text-lg mb-2">tokens</span>
               </div>
             )}
 
-            <p className="text-purple-200/70 text-xs mt-2">Use credits to enter PrizePlugz games</p>
+            <p className="text-purple-200/70 text-xs mt-2">Use tokens to enter PrizePlugz games</p>
 
             {pendingCount > 0 && (
               <div className="mt-3 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold"
@@ -121,7 +121,7 @@ export default function WalletPage() {
               className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm transition-all hover:scale-105 active:scale-95"
               style={{ background: "rgba(255,255,255,0.2)", color: "white", border: "1px solid rgba(255,255,255,0.3)" }}>
               <Plus className="h-4 w-4" />
-              Add Credits
+              Add Tokens
             </button>
           </div>
         </div>
@@ -163,7 +163,7 @@ export default function WalletPage() {
                       <p className="text-white text-sm font-semibold">
                         ${Number(p.dollarAmount).toFixed(2)} via {METHOD_LABELS[p.paymentMethod] ?? p.paymentMethod}
                       </p>
-                      <p className="text-gray-500 text-xs">{p.creditsAmount} credits · {timeAgo(p.submittedAt)}</p>
+                      <p className="text-gray-500 text-xs">{p.creditsAmount} tokens · {timeAgo(p.submittedAt)}</p>
                     </div>
                     <Badge className={`text-xs border ${cfg.color}`}>{cfg.label}</Badge>
                   </div>
@@ -179,7 +179,7 @@ export default function WalletPage() {
             style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)" }}>
             <div className="px-4 py-3 border-b border-white/10 flex items-center gap-2">
               <Coins className="h-4 w-4 text-yellow-400" />
-              <h2 className="font-semibold text-white text-sm">Credit History</h2>
+              <h2 className="font-semibold text-white text-sm">Token History</h2>
             </div>
             <div className="divide-y divide-white/5">
               {txs.slice(0, 20).map((t: any) => {
@@ -211,11 +211,11 @@ export default function WalletPage() {
               <Gift className="h-8 w-8 text-white" />
             </div>
             <p className="text-white font-bold text-lg">No activity yet</p>
-            <p className="text-gray-500 text-sm">Add credits to start playing!</p>
+            <p className="text-gray-500 text-sm">Add tokens to start playing!</p>
             <button onClick={() => setLocation("/add-credits")}
               className="px-6 py-3 rounded-xl font-bold text-sm text-white transition-all hover:opacity-90"
               style={{ background: "linear-gradient(135deg,#7c3aed,#2563eb)" }}>
-              Add Your First Credits
+              Add Your First Tokens
             </button>
           </div>
         )}
@@ -223,8 +223,8 @@ export default function WalletPage() {
         {/* Disclaimer */}
         <div className="rounded-xl p-4 text-xs text-gray-600 space-y-1"
           style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)" }}>
-          <p className="font-semibold text-gray-500">About PrizePlugz Credits</p>
-          <p>Credits are used solely for participation in PrizePlugz games. Credits have no cash value and are non-transferable. Purchases are final — no refunds except where required by law. A free alternative method of entry (AMOE) is available — no purchase necessary. See <Link href="/official-rules" className="text-purple-400 hover:underline">Official Rules</Link> and <Link href="/terms" className="text-purple-400 hover:underline">Terms</Link>.</p>
+          <p className="font-semibold text-gray-500">About PrizePlugz Tokens</p>
+          <p>Tokens are used solely for participation in PrizePlugz games. Tokens have no cash value and are non-transferable. Purchases are final — no refunds except where required by law. A free alternative method of entry (AMOE) is available — no purchase necessary. See <Link href="/official-rules" className="text-purple-400 hover:underline">Official Rules</Link> and <Link href="/terms" className="text-purple-400 hover:underline">Terms</Link>.</p>
         </div>
       </div>
     </div>

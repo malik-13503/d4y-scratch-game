@@ -2780,7 +2780,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         transactionType: "purchase",
         amount: payment.creditsAmount,
         dollarAmount: payment.dollarAmount,
-        description: `Credits purchased via ${payment.paymentMethod} — Payment #${id} approved`,
+        description: `Tokens purchased via ${payment.paymentMethod} — Payment #${id} approved`,
         status: "completed",
       });
 
@@ -2836,7 +2836,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           transactionType: "purchase",
           amount: payment.creditsAmount,
           dollarAmount: payment.dollarAmount,
-          description: `Credits purchased via ${payment.paymentMethod} — bulk approved`,
+          description: `Tokens purchased via ${payment.paymentMethod} — bulk approved`,
           status: "completed",
         });
         const updated = await storage.updatePendingPayment(id, {
