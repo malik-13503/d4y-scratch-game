@@ -41,9 +41,6 @@ export default function GamePage() {
   const [showCardSelector, setShowCardSelector] = useState(false);
   const [isSpinning, setIsSpinning] = useState(false);
   const [playerCount, setPlayerCount] = useState(1);
-  const [hasUsedFreePlay, setHasUsedFreePlay] = useState(false);
-  const [isFreePlay, setIsFreePlay] = useState(false);
-  const [freePlayMessage, setFreePlayMessage] = useState<string | null>(null);
   const wheelRef = useRef<{ triggerSpin: () => Promise<void> }>(null);
 
   // Simulate real-time player count updates
@@ -58,26 +55,6 @@ export default function GamePage() {
     queryKey: [`/api/games/${id}`],
     enabled: !!id,
   });
-
-  // Check if user has already used free play when game loads
-  useEffect(() => {
-    const checkFreePlayStatus = async () => {
-      if (!game?.id) return;
-      
-      try {
-        const response = await fetch(`/api/games/${game.id}/free-play-status`);
-        
-        if (response.ok) {
-          const data = await response.json();
-          setHasUsedFreePlay(data.hasUsedFreePlay);
-        }
-      } catch (error) {
-        console.log("Free play status check failed, assuming available");
-      }
-    };
-
-    checkFreePlayStatus();
-  }, [game?.id]);
 
   const { data: user } = useQuery({
     queryKey: ["/api/user"],
@@ -209,27 +186,6 @@ export default function GamePage() {
     }
 
     // User is authenticated - proceed with game (tokens are deducted on the server during spin)
-    setIsFreePlay(false);
-    setShowDisclaimer(true);
-  };
-
-  const handleFreePlay = () => {
-    // Check if game has ended
-    if (isGameEnded) {
-      return;
-    }
-
-    // Check if all numbers are taken
-    if (areAllNumbersTaken) {
-      return;
-    }
-
-    if (hasUsedFreePlay) {
-      return; // Already used free play
-    }
-
-    setIsFreePlay(true);
-    setHasUsedFreePlay(true);
     setShowDisclaimer(true);
   };
 
@@ -252,50 +208,7 @@ export default function GamePage() {
 
     console.log("🎯 Starting API call for game spin...");
 
-    // For free play, use the dedicated free play API endpoint
-    if (isFreePlay) {
-      try {
-        const response = await fetch("/api/free-spin", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            gameId: game.id,
-          }),
-        });
 
-        const data = await response.json();
-        
-        if (!response.ok) {
-          if (data.code === 'FREE_PLAY_EXHAUSTED') {
-            setHasUsedFreePlay(true);
-            throw new Error(data.description || "Free play already used for this game");
-          }
-          throw new Error(data.message || "Free spin failed");
-        }
-
-        console.log("🎯 Free play spin result:", data.result.number);
-        setLastResult(data.result.number);
-        setShowConfetti(true);
-        setFreePlayMessage(data.result.message);
-
-        // Invalidate queries to refresh available numbers and game data
-        queryClient.invalidateQueries({ queryKey: [`/api/games/${game.id}/available-numbers`] });
-        queryClient.invalidateQueries({ queryKey: [`/api/games/${game.id}/recent-numbers`] });
-        queryClient.invalidateQueries({ queryKey: [`/api/games/${game.id}`] });
-
-        setTimeout(() => {
-          setShowConfetti(false);
-          setFreePlayMessage(null);
-        }, 8000);
-        
-        return data.result.number;
-      } catch (error) {
-        console.error("Free play spin error:", error);
-        throw error;
-      }
-    }
 
     try {
       const response = await fetch("/api/spin", {
@@ -570,65 +483,6 @@ export default function GamePage() {
                   
 
                   
-                  {/* Free Play Button - Hidden when freePlayStart > freePlayEnd (disabled free play) */}
-                  {!hasUsedFreePlay && game && 
-                   game.freePlayStart && game.freePlayEnd &&
-                   game.freePlayStart <= game.freePlayEnd && 
-                   game.freePlayStart <= game.totalNumbers && game.freePlayEnd <= game.totalNumbers && 
-                   game.freePlayStart > 0 && game.freePlayEnd > 0 && // Only show if free play is actually enabled
-                   game.freePlayStart !== game.totalNumbers + 1 && // Don't show if set to disabled values
-                   (
-                    <div className="bg-gradient-to-r from-green-500/20 to-emerald-500/20 backdrop-blur-xl rounded-xl border border-green-400/40 shadow-2xl p-4 sm:p-6">
-                      <div className="flex flex-col items-center space-y-3">
-                        <div className="flex items-center space-x-2">
-                          <Gift className="h-5 w-5 text-green-400" />
-                          <span className="text-green-300 font-bold text-sm uppercase tracking-wide">
-                            Free Play Available
-                          </span>
-                        </div>
-                        <p className="text-white text-sm sm:text-base text-center">
-                          Try your luck with one free spin - no payment required!
-                        </p>
-                        <Button
-                          onClick={handleFreePlay}
-                          disabled={isSpinning}
-                          className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-bold px-6 py-3 rounded-xl shadow-lg transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
-                        >
-                          <Sparkles className="h-4 w-4 mr-2" />
-                          {isSpinning ? "Spinning..." : "Free Play Spin"}
-                        </Button>
-                      </div>
-                    </div>
-                  )}
-                  
-                  {hasUsedFreePlay && game && 
-                   game.freePlayStart <= game.freePlayEnd && 
-                   game.freePlayStart <= game.totalNumbers && game.freePlayEnd <= game.totalNumbers && (
-                    <div className="bg-gradient-to-r from-gray-500/20 to-slate-500/20 backdrop-blur-xl rounded-xl border border-gray-400/40 shadow-2xl p-4">
-                      <div className="flex items-center justify-center space-x-2 text-gray-400">
-                        <Gift className="h-4 w-4" />
-                        <span className="text-sm">Free play used - Join the game to continue playing!</span>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Free Play Result Display */}
-                  {freePlayMessage && (
-                    <div className="bg-gradient-to-r from-green-500/20 to-emerald-500/20 backdrop-blur-xl rounded-xl border border-green-400/40 shadow-2xl p-4 sm:p-6 animate-pulse">
-                      <div className="text-center space-y-2">
-                        <div className="text-2xl">🎉</div>
-                        <p className="text-green-300 font-bold text-lg">
-                          Free Play Complete!
-                        </p>
-                        <p className="text-white text-sm">
-                          {freePlayMessage}
-                        </p>
-                        <p className="text-green-400 text-xs">
-                          Sign up to play for real prizes!
-                        </p>
-                      </div>
-                    </div>
-                  )}
                 </div>
               </CardContent>
             </Card>
