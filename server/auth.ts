@@ -22,19 +22,20 @@ declare global {
 }
 
 export function setupAuth(app: Express) {
+  const isProduction = process.env.NODE_ENV === 'production';
   const sessionSettings: session.SessionOptions = {
     secret: process.env.SESSION_SECRET || "your-secret-key-change-in-production",
-    resave: false, // Don't force session save if unmodified
-    saveUninitialized: false, // Don't save uninitialized sessions for security
+    resave: false,
+    saveUninitialized: false,
     store: storage.sessionStore,
     cookie: {
-      secure: false, // Set to false for development
+      secure: isProduction, // true in production (HTTPS), false in dev (HTTP)
       httpOnly: true,
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days for admin sessions
-      sameSite: 'lax',
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      sameSite: isProduction ? 'none' : 'lax', // 'none' required with secure:true on some proxies
     },
-    rolling: true, // Extend session on each request
-    name: 'admin_session', // Unique session name for admin
+    rolling: true,
+    name: 'admin_session',
   };
 
   app.set("trust proxy", 1);

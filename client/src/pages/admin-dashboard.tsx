@@ -164,20 +164,16 @@ export default function AdminDashboard() {
     retry: false,
   });
 
-  // Get admin user from localStorage if available
-  const [localAdminUser, setLocalAdminUser] = useState(null);
-
-  useEffect(() => {
-    const stored = localStorage.getItem("admin_user");
-    if (stored) {
-      try {
-        setLocalAdminUser(JSON.parse(stored));
-      } catch (e) {
-        console.error("Failed to parse stored admin user:", e);
-        localStorage.removeItem("admin_user");
-      }
+  // Get admin user from localStorage — read synchronously so it's available on first render
+  // (avoids race where API returns 401 before useEffect populates state)
+  const [localAdminUser, setLocalAdminUser] = useState<any>(() => {
+    try {
+      const stored = localStorage.getItem("admin_user");
+      return stored ? JSON.parse(stored) : null;
+    } catch {
+      return null;
     }
-  }, []);
+  });
 
   useEffect(() => {
     // Only redirect if we have neither server nor local auth AND not loading AND enough time has passed
