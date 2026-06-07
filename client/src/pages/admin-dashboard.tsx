@@ -283,6 +283,27 @@ export default function AdminDashboard() {
     enabled: !!currentAdmin,
   });
 
+  // Payment destinations — editable from admin
+  const { data: paymentDests, refetch: refetchPaymentDests } = useQuery<Record<string, { label: string; destination: string; hint: string }>>({
+    queryKey: ["/api/admin/payment-destinations"],
+    enabled: !!currentAdmin,
+  });
+  const [editedDests, setEditedDests] = useState<Record<string, string>>({});
+  const updatePaymentDestsMutation = useMutation({
+    mutationFn: async (dests: Record<string, string>) => {
+      const response = await apiRequest("PATCH", "/api/admin/payment-destinations", dests);
+      return response.json();
+    },
+    onSuccess: () => {
+      refetchPaymentDests();
+      queryClient.invalidateQueries({ queryKey: ["/api/wallet/destinations"] });
+      toast({ title: "Payment Accounts Saved", description: "Destination addresses updated successfully." });
+    },
+    onError: () => {
+      toast({ title: "Save Failed", description: "Could not update payment destinations.", variant: "destructive" });
+    },
+  });
+
   // Recent activity
   const { data: recentActivity } = useQuery<any[]>({
     queryKey: ["/api/admin/activity"],
@@ -4773,6 +4794,77 @@ export default function AdminDashboard() {
                       Audit Logging
                     </Label>
                   </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Payment Account Destinations */}
+            <Card className="bg-black/20 backdrop-blur-sm border border-green-500/30">
+              <CardHeader>
+                <CardTitle className="text-white flex items-center gap-2">
+                  <Wallet className="h-5 w-5 text-green-400" />
+                  Payment Account Destinations
+                </CardTitle>
+                <p className="text-gray-400 text-sm">
+                  Set the account handles users send payments to. Changes apply immediately to all users.
+                </p>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                  {[
+                    { id: "cashapp",  label: "💵 Cash App",       placeholder: "$YourCashtag",       color: "#00c244" },
+                    { id: "venmo",    label: "💳 Venmo",           placeholder: "@YourHandle",        color: "#3d95ce" },
+                    { id: "chime",    label: "🏦 Chime",           placeholder: "Phone or email",     color: "#00c6a0" },
+                    { id: "applepay", label: "🍎 Apple Pay/Cash",  placeholder: "+1 (000) 000-0000",  color: "#aaaaaa" },
+                  ].map(m => {
+                    const current = editedDests[m.id] ?? paymentDests?.[m.id]?.destination ?? "";
+                    return (
+                      <div key={m.id} className="space-y-1.5">
+                        <Label className="text-gray-300 font-semibold">{m.label}</Label>
+                        <div className="relative">
+                          <Input
+                            value={current}
+                            onChange={e => setEditedDests(prev => ({ ...prev, [m.id]: e.target.value }))}
+                            placeholder={m.placeholder}
+                            className="bg-white/5 border-white/20 text-white placeholder-gray-600 pr-10 focus:border-opacity-80"
+                            style={{ borderColor: `${m.color}40` }}
+                          />
+                          <div className="absolute right-3 top-1/2 -translate-y-1/2 w-2 h-2 rounded-full" style={{ background: m.color }} />
+                        </div>
+                        {paymentDests?.[m.id] && (
+                          <p className="text-gray-600 text-xs">Current: <span className="text-gray-400">{paymentDests[m.id].destination}</span></p>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+                <div className="flex items-center gap-3 mt-5 pt-5 border-t border-white/10">
+                  <Button
+                    onClick={() => updatePaymentDestsMutation.mutate(editedDests)}
+                    disabled={Object.keys(editedDests).length === 0 || updatePaymentDestsMutation.isPending}
+                    className="bg-gradient-to-r from-green-600 to-emerald-600 text-white font-bold"
+                  >
+                    {updatePaymentDestsMutation.isPending ? (
+                      <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Saving...</>
+                    ) : (
+                      <><CheckCircle className="h-4 w-4 mr-2" />Save Payment Accounts</>
+                    )}
+                  </Button>
+                  {Object.keys(editedDests).length > 0 && (
+                    <Button
+                      variant="outline"
+                      className="border-gray-600 text-gray-400"
+                      onClick={() => setEditedDests({})}
+                    >
+                      Cancel
+                    </Button>
+                  )}
+                  {Object.keys(editedDests).length > 0 && (
+                    <span className="text-yellow-400 text-xs flex items-center gap-1">
+                      <AlertTriangle className="h-3 w-3" />
+                      {Object.keys(editedDests).length} unsaved change{Object.keys(editedDests).length > 1 ? "s" : ""}
+                    </span>
+                  )}
                 </div>
               </CardContent>
             </Card>

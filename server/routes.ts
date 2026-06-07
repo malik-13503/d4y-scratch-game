@@ -2645,20 +2645,59 @@ export async function registerRoutes(app: Express): Promise<Server> {
     { id: 7, dollars: 500, credits: 3000 },
   ];
 
-  // Payment destinations (configurable in production via settings)
-  const PAYMENT_DESTINATIONS: Record<string, { label: string; destination: string; hint: string }> = {
-    cashapp:  { label: "Cash App",        destination: "$PrizePlugz",            hint: "Send to $PrizePlugz on Cash App" },
-    venmo:    { label: "Venmo",           destination: "@PrizePlugz",            hint: "Send to @PrizePlugz on Venmo" },
-    chime:    { label: "Chime",           destination: "payments@prizeplugz.com", hint: "Send to payments@prizeplugz.com via Chime" },
-    applepay: { label: "Apple Pay/Cash",  destination: "payments@prizeplugz.com", hint: "Send to payments@prizeplugz.com via Apple Pay/Cash" },
+  // Default payment destinations (used as fallbacks if not set in DB)
+  const DEFAULT_DESTINATIONS: Record<string, { label: string; defaultDest: string; hint: string }> = {
+    cashapp:  { label: "Cash App",       defaultDest: "$m2mm",             hint: "Send via Cash App"      },
+    venmo:    { label: "Venmo",          defaultDest: "@Daveon-Mcgary",    hint: "Send via Venmo"         },
+    chime:    { label: "Chime",          defaultDest: "740-802-4646",      hint: "Send via Chime"         },
+    applepay: { label: "Apple Pay/Cash", defaultDest: "+1 (740) 262-3121", hint: "Send via Apple Pay"     },
   };
+
+  async function getPaymentDestinations() {
+    const result: Record<string, { label: string; destination: string; hint: string }> = {};
+    for (const [id, meta] of Object.entries(DEFAULT_DESTINATIONS)) {
+      const setting = await storage.getSystemSetting(`payment_${id}`);
+      result[id] = { label: meta.label, destination: setting?.value ?? meta.defaultDest, hint: meta.hint };
+    }
+    return result;
+  }
 
   app.get("/api/wallet/packages", (req, res) => {
     res.json(CREDIT_PACKAGES);
   });
 
-  app.get("/api/wallet/destinations", (req, res) => {
-    res.json(PAYMENT_DESTINATIONS);
+  app.get("/api/wallet/destinations", async (req, res) => {
+    try {
+      res.json(await getPaymentDestinations());
+    } catch (err) {
+      console.error("Failed to fetch payment destinations:", err);
+      res.status(500).json({ message: "Failed to fetch payment destinations" });
+    }
+  });
+
+  // Admin: update payment account destinations
+  app.patch("/api/admin/payment-destinations", requireAuth, async (req, res) => {
+    try {
+      const { cashapp, venmo, chime, applepay } = req.body;
+      const updates: Record<string, string> = {};
+      if (cashapp  !== undefined) { await storage.upsertSystemSetting("payment_cashapp",  cashapp,  "Cash App destination"); updates.cashapp = cashapp; }
+      if (venmo    !== undefined) { await storage.upsertSystemSetting("payment_venmo",    venmo,    "Venmo destination");    updates.venmo   = venmo;   }
+      if (chime    !== undefined) { await storage.upsertSystemSetting("payment_chime",    chime,    "Chime destination");    updates.chime   = chime;   }
+      if (applepay !== undefined) { await storage.upsertSystemSetting("payment_applepay", applepay, "Apple Pay destination"); updates.applepay = applepay; }
+      res.json({ message: "Payment destinations updated", updated: updates });
+    } catch (err) {
+      console.error("Failed to update payment destinations:", err);
+      res.status(500).json({ message: "Failed to update payment destinations" });
+    }
+  });
+
+  // Admin: get current payment destinations
+  app.get("/api/admin/payment-destinations", requireAuth, async (req, res) => {
+    try {
+      res.json(await getPaymentDestinations());
+    } catch (err) {
+      res.status(500).json({ message: "Failed to fetch payment destinations" });
+    }
   });
 
   // User submits payment for review

@@ -69,6 +69,7 @@ export interface IStorage {
   getSystemSettings(): Promise<SystemSetting[]>;
   getSystemSetting(key: string): Promise<SystemSetting | undefined>;
   updateSystemSetting(key: string, value: string): Promise<SystemSetting>;
+  upsertSystemSetting(key: string, value: string, description?: string): Promise<SystemSetting>;
 
   // Notification methods
   createNotification(notification: InsertNotification): Promise<Notification>;
@@ -324,6 +325,17 @@ export class DatabaseStorage implements IStorage {
     const [setting] = await db.update(systemSettings)
       .set({ value, updatedAt: new Date() })
       .where(eq(systemSettings.key, key))
+      .returning();
+    return setting;
+  }
+
+  async upsertSystemSetting(key: string, value: string, description?: string): Promise<SystemSetting> {
+    const [setting] = await db.insert(systemSettings)
+      .values({ key, value, description: description || key })
+      .onConflictDoUpdate({
+        target: systemSettings.key,
+        set: { value, updatedAt: new Date() },
+      })
       .returning();
     return setting;
   }

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -21,12 +21,13 @@ const PACKAGES = [
   { id: 7, dollars: 500, credits: 3000, popular: true,  bonus: "⭐ Best Value", label: "Best Value",  icon: Star,    color: "#f59e0b", glow: "rgba(245,158,11,0.5)",    bg: "from-amber-900/80 to-yellow-950/90"  },
 ];
 
-const METHODS = [
-  { id: "cashapp",  label: "Cash App",      color: "#00c244", bgColor: "rgba(0,194,68,0.12)",    destination: "$m2mm",             icon: "💵", hint: "Instant transfer" },
-  { id: "venmo",    label: "Venmo",          color: "#3d95ce", bgColor: "rgba(61,149,206,0.12)",  destination: "@Daveon-Mcgary",     icon: "💳", hint: "Fast & easy" },
-  { id: "chime",    label: "Chime",          color: "#00c6a0", bgColor: "rgba(0,198,160,0.12)",   destination: "740-802-4646",       icon: "🏦", hint: "Bank transfer" },
-  { id: "applepay", label: "Apple Pay/Cash", color: "#aaaaaa", bgColor: "rgba(170,170,170,0.12)", destination: "+1 (740) 262-3121",  icon: "🍎", hint: "Apple devices" },
-];
+// Static method metadata (colors/icons) — destination comes from API
+const METHOD_META: Record<string, { label: string; color: string; bgColor: string; icon: string; hint: string }> = {
+  cashapp:  { label: "Cash App",      color: "#00c244", bgColor: "rgba(0,194,68,0.12)",    icon: "💵", hint: "Instant transfer" },
+  venmo:    { label: "Venmo",         color: "#3d95ce", bgColor: "rgba(61,149,206,0.12)",  icon: "💳", hint: "Fast & easy"      },
+  chime:    { label: "Chime",         color: "#00c6a0", bgColor: "rgba(0,198,160,0.12)",   icon: "🏦", hint: "Bank transfer"    },
+  applepay: { label: "Apple Pay/Cash",color: "#aaaaaa", bgColor: "rgba(170,170,170,0.12)", icon: "🍎", hint: "Apple devices"    },
+};
 
 type Step = "package" | "method" | "send" | "confirm" | "done";
 
@@ -34,9 +35,21 @@ export default function AddCreditsPage() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
 
+  // Fetch live payment destinations from server (admin can change them anytime)
+  const { data: destinationsData } = useQuery<Record<string, { label: string; destination: string; hint: string }>>({
+    queryKey: ["/api/wallet/destinations"],
+  });
+
+  // Merge API destinations with static metadata
+  const METHODS = Object.entries(METHOD_META).map(([id, meta]) => ({
+    id,
+    ...meta,
+    destination: destinationsData?.[id]?.destination ?? "",
+  }));
+
   const [step, setStep]               = useState<Step>("package");
   const [pkg, setPkg]                 = useState<typeof PACKAGES[0] | null>(null);
-  const [method, setMethod]           = useState<typeof METHODS[0] | null>(null);
+  const [method, setMethod]           = useState<(typeof METHODS)[0] | null>(null);
   const [paymentName, setPaymentName] = useState("");
   const [paymentHandle, setPaymentHandle] = useState("");
   const [copied, setCopied]           = useState(false);
