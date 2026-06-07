@@ -5204,6 +5204,15 @@ function PromoCodesTab() {
     onError: (e: any) => toast({ title: "Error", description: e.message, variant: "destructive" }),
   });
 
+  const resetUsesMutation = useMutation({
+    mutationFn: (id: number) => apiRequest("PATCH", `/api/admin/promo-codes/${id}`, { usesCount: 0 }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/promo-codes"] });
+      toast({ title: "Uses reset to 0 ✅", description: "The code can be used again." });
+    },
+    onError: (e: any) => toast({ title: "Error", description: e.message, variant: "destructive" }),
+  });
+
   const handleSubmit = () => {
     if (!form.code || !form.tokenAmount) {
       toast({ title: "Code and token amount are required", variant: "destructive" });
@@ -5354,7 +5363,7 @@ function PromoCodesTab() {
                     {code.expiresAt && <span>Expires: {new Date(code.expiresAt).toLocaleDateString()}</span>}
                   </div>
                 </div>
-                <div className="flex items-center gap-2 shrink-0">
+                <div className="flex items-center gap-2 shrink-0 flex-wrap">
                   <Button
                     size="sm"
                     variant="outline"
@@ -5364,6 +5373,19 @@ function PromoCodesTab() {
                     {code.isActive ? <ToggleRight className="h-4 w-4 text-green-400" /> : <ToggleLeft className="h-4 w-4 text-gray-400" />}
                     <span className="ml-1 hidden sm:inline">{code.isActive ? "Active" : "Inactive"}</span>
                   </Button>
+                  {(code.usesCount > 0 || (code.expiresAt && new Date() > new Date(code.expiresAt))) && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => resetUsesMutation.mutate(code.id)}
+                      disabled={resetUsesMutation.isPending}
+                      className="border-yellow-500/40 text-yellow-400 hover:text-yellow-300 hover:bg-yellow-900/20 text-xs"
+                      title="Reset use count to 0 so the code can be used again"
+                    >
+                      <RefreshCw className="h-3.5 w-3.5 mr-1" />
+                      <span className="hidden sm:inline">Reset Uses</span>
+                    </Button>
+                  )}
                   <Button
                     size="sm"
                     variant="outline"
