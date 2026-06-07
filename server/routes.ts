@@ -1043,6 +1043,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.post("/api/admin/users/:id/add-tokens", requireAuth, async (req, res) => {
+    try {
+      const userId = parseInt(req.params.id);
+      const { amount } = req.body;
+      if (!amount || isNaN(Number(amount)) || Number(amount) <= 0) {
+        return res.status(400).json({ message: "Invalid token amount" });
+      }
+      const user = await storage.getUser(userId);
+      if (!user) return res.status(404).json({ message: "User not found" });
+      const updated = await storage.updateUserTokenBalance(userId, Number(amount));
+      res.json({ message: `Added ${amount} tokens to ${user.email}`, newBalance: updated });
+    } catch (error) {
+      console.error("Add tokens error:", error);
+      res.status(500).json({ message: "Failed to add tokens" });
+    }
+  });
+
   // Admin analytics - using only real database data
   // Admin activity feed - Real-time activity data
   app.get("/api/admin/activity", requireAuth, async (req, res) => {

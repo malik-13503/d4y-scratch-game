@@ -563,6 +563,26 @@ export default function AdminDashboard() {
     },
   });
 
+  // Add tokens to user
+  const [addTokensUser, setAddTokensUser] = useState<any>(null);
+  const [addTokensAmount, setAddTokensAmount] = useState("");
+
+  const addTokensMutation = useMutation({
+    mutationFn: ({ userId, amount }: { userId: number; amount: number }) =>
+      apiRequest("POST", `/api/admin/users/${userId}/add-tokens`, { amount }),
+    onSuccess: (_, vars) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
+      toast({
+        title: "Tokens Added ✅",
+        description: `${vars.amount} tokens added to ${addTokensUser?.email}`,
+      });
+      setAddTokensUser(null);
+      setAddTokensAmount("");
+    },
+    onError: (e: any) =>
+      toast({ title: "Error", description: e.message, variant: "destructive" }),
+  });
+
   // Removed real-time stats simulation to display only authentic data
 
   // Show loading screen while checking authentication
@@ -3261,6 +3281,15 @@ export default function AdminDashboard() {
                               <Button
                                 size="sm"
                                 variant="outline"
+                                className="border-green-500/50 text-green-400 hover:bg-green-500/20 px-2 py-1 h-7"
+                                onClick={() => { setAddTokensUser(user); setAddTokensAmount(""); }}
+                                title="Add tokens"
+                              >
+                                <Plus className="h-3 w-3" />
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
                                 className="border-red-500/50 text-red-400 hover:bg-red-500/20 px-2 py-1 h-7"
                                 onClick={() => handleDeleteUser(user)}
                               >
@@ -3326,9 +3355,11 @@ export default function AdminDashboard() {
                               <Button
                                 size="sm"
                                 variant="outline"
-                                className="border-yellow-500/50 text-yellow-400 hover:bg-yellow-500/20"
+                                className="border-green-500/50 text-green-400 hover:bg-green-500/20"
+                                onClick={() => { setAddTokensUser(user); setAddTokensAmount(""); }}
+                                title="Add tokens to this user"
                               >
-                                <Edit3 className="h-4 w-4" />
+                                <Plus className="h-4 w-4" />
                               </Button>
                               <Button
                                 size="sm"
@@ -5069,6 +5100,60 @@ export default function AdminDashboard() {
         user={userToDelete}
         isDeleting={deleteUserMutation.isPending}
       />
+
+      {/* Add Tokens Dialog */}
+      {addTokensUser && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+          <div className="bg-slate-900 border border-white/20 rounded-2xl shadow-2xl p-6 w-full max-w-sm mx-4">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full flex items-center justify-center">
+                <Plus className="h-5 w-5 text-white" />
+              </div>
+              <div>
+                <h3 className="text-white font-bold text-lg">Add Tokens</h3>
+                <p className="text-gray-400 text-sm truncate max-w-[200px]">{addTokensUser.email}</p>
+              </div>
+            </div>
+            <div className="mb-5">
+              <label className="text-gray-300 text-sm font-medium mb-2 block">How many tokens to add?</label>
+              <input
+                type="number"
+                min="1"
+                placeholder="e.g. 10"
+                value={addTokensAmount}
+                onChange={(e) => setAddTokensAmount(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && addTokensAmount && Number(addTokensAmount) > 0) {
+                    addTokensMutation.mutate({ userId: addTokensUser.id, amount: Number(addTokensAmount) });
+                  }
+                }}
+                className="w-full px-4 py-3 rounded-lg text-white text-lg font-semibold text-center focus:outline-none focus:ring-2 focus:ring-green-500"
+                style={{ background: "#111827", border: "1px solid rgba(255,255,255,0.15)" }}
+                autoFocus
+              />
+            </div>
+            <div className="flex gap-3">
+              <button
+                onClick={() => { setAddTokensUser(null); setAddTokensAmount(""); }}
+                className="flex-1 px-4 py-2.5 rounded-lg border border-white/20 text-gray-300 hover:text-white hover:bg-white/10 transition-colors font-medium"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  if (addTokensAmount && Number(addTokensAmount) > 0) {
+                    addTokensMutation.mutate({ userId: addTokensUser.id, amount: Number(addTokensAmount) });
+                  }
+                }}
+                disabled={addTokensMutation.isPending || !addTokensAmount || Number(addTokensAmount) <= 0}
+                className="flex-1 px-4 py-2.5 rounded-lg bg-gradient-to-r from-green-500 to-emerald-600 text-white font-semibold hover:from-green-400 hover:to-emerald-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {addTokensMutation.isPending ? "Adding..." : `Add ${addTokensAmount || 0} Tokens`}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Winner Selection Modal */}
       <WinnerSelectionModal
