@@ -2709,7 +2709,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     if (!dollarAmount || !creditsAmount || !paymentMethod || !paymentName || !paymentHandle) {
       return res.status(400).json({ message: "All fields are required" });
     }
-    if (!PAYMENT_DESTINATIONS[paymentMethod]) {
+    const validMethods = ["cashapp", "venmo", "chime", "applepay"];
+    if (!validMethods.includes(paymentMethod)) {
       return res.status(400).json({ message: "Invalid payment method" });
     }
     // Validate amount/credits match a known package

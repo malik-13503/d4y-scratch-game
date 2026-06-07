@@ -342,7 +342,8 @@ export default function AddCreditsPage() {
                 placeholder="e.g. John Smith"
                 value={paymentName}
                 onChange={e => setPaymentName(e.target.value)}
-                className="bg-white/8 border-white/20 text-white placeholder-gray-500 focus:border-purple-400 h-12 rounded-xl text-base"
+                className="bg-gray-900 border-gray-600 text-white placeholder-gray-500 focus:border-purple-400 h-12 rounded-xl text-base"
+                style={{ color: "#ffffff", backgroundColor: "#111827" }}
               />
               <p className="text-gray-600 text-xs">Name shown on your {method.label} profile</p>
             </div>
@@ -355,7 +356,8 @@ export default function AddCreditsPage() {
                 placeholder={method.id === "cashapp" ? "$YourCashtag" : method.id === "venmo" ? "@YourHandle" : "your@email.com"}
                 value={paymentHandle}
                 onChange={e => setPaymentHandle(e.target.value)}
-                className="bg-white/8 border-white/20 text-white placeholder-gray-500 focus:border-purple-400 h-12 rounded-xl text-base"
+                className="bg-gray-900 border-gray-600 text-white placeholder-gray-500 focus:border-purple-400 h-12 rounded-xl text-base"
+                style={{ color: "#ffffff", backgroundColor: "#111827" }}
               />
               <p className="text-gray-600 text-xs">So our team can match the payment to your account</p>
             </div>
