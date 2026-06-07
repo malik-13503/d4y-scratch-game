@@ -291,7 +291,7 @@ export default function AddCreditsPage() {
               "Send the EXACT amount shown above",
               "Do NOT include a note or memo",
               "Click \"I Sent Payment\" after sending",
-              "Tokens are added within 1–4 hours after verification",
+              "Tokens are added within 1–2 minutes after verification",
             ].map((tip, i) => (
               <div key={i} className="flex items-start gap-2.5">
                 <div className="w-5 h-5 rounded-full flex items-center justify-center shrink-0 mt-0.5 text-xs font-black"
@@ -401,7 +401,7 @@ export default function AddCreditsPage() {
         <div>
           <h2 className="text-3xl font-black text-white">Payment Submitted!</h2>
           <p className="text-gray-400 mt-2 text-sm leading-relaxed max-w-sm mx-auto">
-            Our team is reviewing your payment. Tokens will appear in your wallet — usually within <strong className="text-white">1–4 hours</strong>.
+            Our team is reviewing your payment. Tokens will appear in your wallet — usually within <strong className="text-white">1–2 minutes</strong>.
           </p>
         </div>
 

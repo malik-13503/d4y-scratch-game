@@ -242,7 +242,7 @@ function HeroPrizeDisplay({ games, onPlay }: { games: Game[]; onPlay: (id: numbe
             className="w-full py-3.5 rounded-xl font-black text-sm text-white transition-all hover:scale-[1.02] glow-gold"
             style={{background:"linear-gradient(135deg,#f59e0b,#f97316)"}}>
             <Zap className="h-4 w-4 inline mr-1.5 -mt-0.5 text-black" />
-            <span className="text-black">SPIN NOW — {featured.tokensPerPlay} TOKENS</span>
+            <span className="text-black">SPIN NOW — {featured.tokenCostPerEntry} TOKENS</span>
           </button>
         </div>
       </div>
@@ -307,7 +307,7 @@ function GameCard({ game, onPlay }: { game: Game; onPlay: () => void }) {
 
         <div className="flex items-center justify-between bg-white/4 border border-white/6 rounded-xl px-3 py-2 mb-3">
           <span className="text-gray-400 text-xs flex items-center gap-1.5"><Coins className="h-3.5 w-3.5 text-yellow-400" />Each spin</span>
-          <span className="text-yellow-300 font-black text-sm">{game.tokensPerPlay} TOKENS</span>
+          <span className="text-yellow-300 font-black text-sm">{game.tokenCostPerEntry} TOKENS</span>
         </div>
 
         <button onClick={e=>{e.stopPropagation();onPlay();}} className="w-full py-3 rounded-xl font-black text-sm text-white transition-all hover:scale-[1.02]"
