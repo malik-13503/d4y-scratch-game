@@ -4,3 +4,12 @@ dist
 server/public
 vite.config.ts.*
 *.tar.gz
+
+# Replit internals — not needed in the repo
+.replit
+replit.nix
+.local/
+.agents/
+.config/
+.upm/
+.cache/
