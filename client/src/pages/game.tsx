@@ -692,7 +692,7 @@ export default function GamePage() {
         onClose={() => setShowDisclaimer(false)}
         onConfirm={handleConfirmSpin}
         gameTitle={game.name}
-        isFreePlay={isFreePlay}
+        isFreePlay={false}
       />
 
       {/* Auth Required Popup */}
