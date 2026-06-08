@@ -19,10 +19,11 @@ import {
 
 interface NumberEntry {
   number: number;
-  amount: string;
+  amount: number;
   isFreePlay: boolean;
-  timestamp: string;
+  createdAt: string;
   gameId: number;
+  gameName: string;
 }
 
 export default function MyNumbers() {
@@ -54,19 +55,20 @@ export default function MyNumbers() {
   // Process game history to get number entries
   const numberEntries: NumberEntry[] = gameHistory?.map((entry: any) => ({
     number: entry.number,
-    amount: entry.amount,
+    amount: typeof entry.amount === "number" ? entry.amount : parseFloat(entry.amount || "0"),
     isFreePlay: entry.isFreePlay,
-    timestamp: entry.createdAt || new Date().toISOString(),
-    gameId: entry.gameId || 1
+    createdAt: entry.createdAt || new Date().toISOString(),
+    gameId: entry.gameId || 1,
+    gameName: entry.gameName || `Game #${entry.gameId || 1}`,
   })) || [];
 
   // Group numbers by type
   const freeNumbers = numberEntries.filter(entry => entry.isFreePlay);
   const paidNumbers = numberEntries.filter(entry => !entry.isFreePlay);
-  const allNumbers = numberEntries.sort((a, b) => a.number - b.number);
+  const allNumbers = [...numberEntries].sort((a, b) => a.number - b.number);
 
   // Calculate statistics
-  const totalSpent = paidNumbers.reduce((sum, entry) => sum + parseFloat(entry.amount), 0);
+  const totalSpent = paidNumbers.reduce((sum, entry) => sum + entry.amount, 0);
   const averageSpend = paidNumbers.length > 0 ? totalSpent / paidNumbers.length : 0;
   const numberRange = allNumbers.length > 0 ? {
     min: Math.min(...allNumbers.map(e => e.number)),
@@ -217,7 +219,7 @@ export default function MyNumbers() {
                         : 'bg-gradient-to-br from-orange-600/80 to-red-600/80 border border-orange-400/40'
                       }
                     `}
-                    title={`${entry.isFreePlay ? 'Free' : `$${entry.amount}`} • Game ${entry.gameId} • ${new Date(entry.timestamp).toLocaleDateString()}`}
+                    title={`${entry.isFreePlay ? 'Free' : `${entry.amount} tokens`} • ${entry.gameName} • ${new Date(entry.createdAt).toLocaleDateString()}`}
                   >
                     <div className="text-white drop-shadow-lg text-2xl mb-1">
                       {entry.number}
@@ -231,7 +233,7 @@ export default function MyNumbers() {
                         }
                       `}
                     >
-                      {entry.isFreePlay ? 'FREE' : `$${entry.amount}`}
+                      {entry.isFreePlay ? 'FREE' : `${entry.amount}T`}
                     </Badge>
                   </div>
                 ))}
@@ -262,7 +264,7 @@ export default function MyNumbers() {
                     <div
                       key={index}
                       className="p-3 bg-gradient-to-br from-green-600/50 to-emerald-600/50 rounded-lg text-center text-white font-bold drop-shadow-md border border-green-400/30"
-                      title={`Game ${entry.gameId} • ${new Date(entry.timestamp).toLocaleDateString()}`}
+                      title={`${entry.gameName} • ${new Date(entry.createdAt).toLocaleDateString()}`}
                     >
                       {entry.number}
                     </div>
@@ -297,7 +299,7 @@ export default function MyNumbers() {
                       <div
                         key={index}
                         className="p-3 bg-gradient-to-br from-orange-600/50 to-red-600/50 rounded-lg text-center text-white font-bold drop-shadow-md border border-orange-400/30"
-                        title={`$${entry.amount} • Game ${entry.gameId} • ${new Date(entry.timestamp).toLocaleDateString()}`}
+                        title={`${entry.amount} tokens • ${entry.gameName} • ${new Date(entry.createdAt).toLocaleDateString()}`}
                       >
                         <div className="text-lg">{entry.number}</div>
                         <div className="text-xs opacity-80">${entry.amount}</div>

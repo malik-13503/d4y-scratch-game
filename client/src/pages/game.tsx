@@ -253,10 +253,12 @@ export default function GamePage() {
       setLastResult(data);
       setShowConfetti(true);
 
-      // Invalidate queries to refresh available numbers and game data
+      // Invalidate queries to refresh available numbers, game data, and user's number history
       queryClient.invalidateQueries({ queryKey: [`/api/games/${game.id}/available-numbers`] });
       queryClient.invalidateQueries({ queryKey: [`/api/games/${game.id}/recent-numbers`] });
       queryClient.invalidateQueries({ queryKey: [`/api/games/${game.id}`] });
+      queryClient.invalidateQueries({ queryKey: ["/api/user/game-history"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/user/token-balance"] });
 
       // Hide confetti after 5 seconds
       setTimeout(() => setShowConfetti(false), 5000);

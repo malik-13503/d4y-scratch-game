@@ -1838,20 +1838,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ message: "Not authenticated" });
       }
 
-      // Get user's transaction history and format it for game history
-      const transactions = await storage.getTransactionsByUserId(userId);
-      
-      const gameHistory = transactions.map(transaction => {
-        const amount = parseFloat(transaction.amount.toString());
-        return {
-          number: (transaction as any).spunNumber || Math.floor(Math.random() * 200) + 1,
-          amount: amount,
-          isFreePlay: amount === 0,
-          playedAt: transaction.createdAt,
-          gameId: transaction.gameId || 1,
-          isWin: amount > 0 && amount <= 50 // Low amounts indicate better numbers
-        };
-      }).reverse(); // Show most recent first
+      const spinResultRows = await storage.getSpinResultsByUserId(userId);
+
+      const gameHistory = spinResultRows.map(row => ({
+        number: row.spunNumber,
+        amount: parseFloat(row.amountCharged?.toString() || "0"),
+        isFreePlay: row.isFreePlay,
+        createdAt: row.createdAt,
+        gameId: row.gameId,
+        gameName: row.gameName || `Game #${row.gameId}`,
+      }));
 
       res.json(gameHistory);
     } catch (error) {
@@ -2423,10 +2419,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       if (promoCode.expiresAt && new Date() > new Date(promoCode.expiresAt)) {
         return res.status(400).json({ message: "Promo code has expired" });
-      }
-
-      if (promoCode.maxUses !== null && promoCode.usesCount >= promoCode.maxUses) {
-        return res.status(400).json({ message: "Promo code has reached its usage limit" });
       }
 
       const alreadyRedeemed = await storage.hasUserRedeemedPromoCode(userId, promoCode.id);

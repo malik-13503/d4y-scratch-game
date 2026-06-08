@@ -80,6 +80,7 @@ export interface IStorage {
   createSpinResultWithNumber(gameId: number, playerId: number, spunNumber: number, amountCharged: string): Promise<SpinResult>;
   getSpinResultsByGameId(gameId: number): Promise<SpinResult[]>;
   getSpinResultsByPlayerId(playerId: number): Promise<SpinResult[]>;
+  getSpinResultsByUserId(userId: number): Promise<(SpinResult & { gameName: string | null })[]>;
 
   // Legal compliance methods
   createComplianceLog(userId: number | null, gameId: number | null, logType: string, details: any): Promise<void>;
@@ -565,6 +566,26 @@ export class DatabaseStorage implements IStorage {
 
   async getSpinResultsByPlayerId(playerId: number): Promise<SpinResult[]> {
     return await db.select().from(spinResults).where(eq(spinResults.playerId, playerId));
+  }
+
+  async getSpinResultsByUserId(userId: number): Promise<(SpinResult & { gameName: string | null })[]> {
+    const rows = await db
+      .select({
+        id: spinResults.id,
+        gameId: spinResults.gameId,
+        playerId: spinResults.playerId,
+        spunNumber: spinResults.spunNumber,
+        isFreePlay: spinResults.isFreePlay,
+        amountCharged: spinResults.amountCharged,
+        createdAt: spinResults.createdAt,
+        gameName: games.name,
+      })
+      .from(spinResults)
+      .innerJoin(players, eq(players.id, spinResults.playerId))
+      .leftJoin(games, eq(games.id, spinResults.gameId))
+      .where(eq(players.userId, userId))
+      .orderBy(desc(spinResults.createdAt));
+    return rows;
   }
 
   // Game logic methods
