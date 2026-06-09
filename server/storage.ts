@@ -737,24 +737,17 @@ export class DatabaseStorage implements IStorage {
     const game = await this.getGame(gameId);
     if (!game) return [];
 
-    // Only consider numbers claimed if there's a successful payment transaction
-    // This query gets all numbers that have both a spin result AND a completed payment
-    const claimedNumbers = await db
+    // A number is claimed once it appears in spin_results — the source of truth
+    const claimedRows = await db
       .select({ spunNumber: spinResults.spunNumber })
       .from(spinResults)
-      .innerJoin(transactions, eq(spinResults.id, transactions.spinResultId))
-      .where(
-        and(
-          eq(spinResults.gameId, gameId),
-          eq(transactions.status, 'COMPLETED')
-        )
-      );
-    
-    const spunNumbers = claimedNumbers.map(result => result.spunNumber);
-    
+      .where(eq(spinResults.gameId, gameId));
+
+    const spunNumbers = new Set(claimedRows.map(r => r.spunNumber));
+
     const availableNumbers = [];
     for (let i = 1; i <= game.totalNumbers; i++) {
-      if (!spunNumbers.includes(i)) {
+      if (!spunNumbers.has(i)) {
         availableNumbers.push(i);
       }
     }
