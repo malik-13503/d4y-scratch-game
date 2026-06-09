@@ -2177,46 +2177,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
         await storage.updateGame(gameId, { isActive: false });
         gameCompleted = true;
 
-        // Trigger automatic winner selection
+        // Trigger automatic winner selection using fair per-number random draw
         try {
-          const gamePlayers = await storage.getPlayersByGameId(gameId);
-          if (gamePlayers.length > 0) {
-            const winnerIndex = Math.floor(Math.random() * gamePlayers.length);
-            const winner = gamePlayers[winnerIndex];
-            await storage.updatePlayer(winner.id, { isWinner: true });
-            await storage.createGameResult({
-              gameId,
-              winningNumber: winner.selectedNumber || spunNumber,
-              winnerId: winner.id,
-              totalParticipants: gamePlayers.length,
-              totalSpins: gamePlayers.length
-            });
-            // Send winner and completion emails
+          // selectGameWinner picks a random number from all spin_results (each number = equal chance),
+          // creates the game result record, and marks the winner player.
+          const winner = await storage.selectGameWinner(gameId);
+          if (winner) {
+            console.log(`🏆 Winner selected for "${game.name}": Player ${winner.id} (number ${winner.selectedNumber})`);
+            // Send winner and completion emails to all participants
             try {
-              const winnerUser = await storage.getUser(winner.userId);
-              if (winnerUser) {
-                await emailService.sendWinnerEmail(
-                  winnerUser.email,
-                  winnerUser.firstName,
-                  game.name,
-                  game.prize,
-                  winner.selectedNumber || spunNumber
-                );
-                for (const p of gamePlayers) {
-                  if (p.userId !== winner.userId) {
-                    const pUser = await storage.getUser(p.userId);
-                    if (pUser) {
-                      await emailService.sendGameCompletionEmail(
-                        pUser.email, pUser.firstName, game.name, game.prize,
-                        winnerUser.firstName + " " + winnerUser.lastName
-                      );
-                    }
-                  }
-                }
-              }
+              await storage.sendGameCompletionEmails(gameId);
             } catch (emailErr) {
               console.error("Auto-close winner email error:", emailErr);
             }
+          } else {
+            console.error(`No winner could be selected for game ${gameId} — no spin results found`);
           }
         } catch (winnerErr) {
           console.error("Auto-close winner selection error:", winnerErr);
