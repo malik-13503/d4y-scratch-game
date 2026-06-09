@@ -1629,15 +1629,15 @@ export default function AdminDashboard() {
                                     className="bg-white/10 border-purple-500/30"
                                     placeholder="e.g. 10"
                                   />
-                                  <p className="text-gray-500 text-xs mt-1">Tokens charged per spin — 1 token = $1</p>
+                                  <p className="text-gray-500 text-xs mt-1">Tokens charged per spin — 1 token = $0.50</p>
                                 </div>
                                 <div className="flex flex-col justify-center bg-white/5 rounded-lg px-4 py-3 border border-white/10">
                                   <p className="text-gray-400 text-xs mb-1">Auto-calculated revenue</p>
                                   <p className="text-yellow-400 font-black text-xl">
-                                    {"$" + (parseInt(previewData.totalNumbers || "0") * parseInt(previewData.tokenCostPerEntry || "0")).toLocaleString()}
+                                    {"$" + (parseInt(previewData.totalNumbers || "0") * parseInt(previewData.tokenCostPerEntry || "0") * 0.50).toLocaleString()}
                                   </p>
                                   <p className="text-gray-500 text-xs mt-1">
-                                    {previewData.totalNumbers || "0"} spots &times; {previewData.tokenCostPerEntry || "0"} tokens
+                                    {previewData.totalNumbers || "0"} spots &times; {previewData.tokenCostPerEntry || "0"} tokens &times; $0.50
                                   </p>
                                 </div>
                               </div>
@@ -1645,7 +1645,7 @@ export default function AdminDashboard() {
                               {previewData.totalNumbers && previewData.tokenCostPerEntry && (() => {
                                 const totalSpots = parseInt(previewData.totalNumbers || "0");
                                 const tokensPerPlay = parseInt(previewData.tokenCostPerEntry || "5");
-                                const pricePerSpin = tokensPerPlay; // 1 token = $1
+                                const pricePerSpin = tokensPerPlay * 0.50; // 1 token = $0.50 (base rate: $5 = 10 tokens)
                                 const totalRevenue = totalSpots * pricePerSpin;
 
                                 return (
