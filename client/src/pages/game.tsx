@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useParams, useLocation } from "wouter";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -26,12 +26,14 @@ import {
 } from "lucide-react";
 import { formatTimeRemaining, formatCountdownObject } from "@/lib/utils";
 import { useCountdown } from "@/hooks/useCountdown";
+import { useToast } from "@/hooks/use-toast";
 import type { Game } from "@shared/schema";
 
 export default function GamePage() {
   const { id } = useParams();
   const [, setLocation] = useLocation();
   const queryClient = useQueryClient();
+  const { toast } = useToast();
   const [lastResult, setLastResult] = useState<number | null>(null);
   const [showConfetti, setShowConfetti] = useState(false);
   const [showDisclaimer, setShowDisclaimer] = useState(false);
@@ -167,6 +169,18 @@ export default function GamePage() {
       </div>
     );
   }
+
+  const handleSpinError = useCallback((message: string) => {
+    setIsSpinning(false);
+    const isInsufficientTokens = message.toLowerCase().includes("insufficient") || message.toLowerCase().includes("token");
+    toast({
+      title: isInsufficientTokens ? "Not enough tokens" : "Spin failed",
+      description: isInsufficientTokens
+        ? "You don't have enough tokens for this spin. Buy more tokens to keep playing!"
+        : message,
+      variant: "destructive",
+    });
+  }, [toast]);
 
   const handleInitiateSpin = () => {
     // Check if game has ended
@@ -475,6 +489,7 @@ export default function GamePage() {
                     disabled={isSpinning}
                     totalNumbers={game?.totalNumbers || 200}
                     onInitiateSpin={handleInitiateSpin}
+                    onSpinError={handleSpinError}
                     gameData={game ? {
                       id: game.id,
                       totalNumbers: game.totalNumbers,

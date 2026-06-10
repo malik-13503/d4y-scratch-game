@@ -22,6 +22,7 @@ interface ProfessionalWheelProps {
   disabled?: boolean;
   totalNumbers?: number;
   onInitiateSpin?: () => void;
+  onSpinError?: (message: string) => void;
   gameData?: {
     id: number;
     totalNumbers: number;
@@ -33,7 +34,7 @@ interface ProfessionalWheelProps {
 export const ProfessionalWheel = forwardRef<
   { triggerSpin: () => Promise<void> },
   ProfessionalWheelProps
->(({ onSpin, disabled = false, totalNumbers = 200, onInitiateSpin, gameData }, ref) => {
+>(({ onSpin, disabled = false, totalNumbers = 200, onInitiateSpin, onSpinError, gameData }, ref) => {
   const [isSpinning, setIsSpinning] = useState(false);
   const [rotation, setRotation] = useState(0);
   const [pointerRotation, setPointerRotation] = useState(0);
@@ -261,16 +262,13 @@ export const ProfessionalWheel = forwardRef<
         }
         
         console.log("🎯 Got spin number:", resultNumber);
-      } catch (apiError) {
+      } catch (apiError: any) {
         console.error("🚨 Failed to get spin number:", apiError);
-        // Use fallback random number
-        if (availableNumbers.length > 0) {
-          const randomIndex = Math.floor(Math.random() * availableNumbers.length);
-          resultNumber = availableNumbers[randomIndex];
-        } else {
-          resultNumber = Math.floor(Math.random() * totalNumbers) + 1;
-        }
-        console.log("🎯 Using fallback number:", resultNumber);
+        // Stop the spin entirely — do NOT award a number on error
+        setIsSpinning(false);
+        const msg = apiError?.message || "Spin failed. Please try again.";
+        if (onSpinError) onSpinError(msg);
+        return;
       }
 
       // Calculate precise landing position using FROZEN wheel numbers
