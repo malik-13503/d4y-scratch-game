@@ -72,7 +72,7 @@ export default function GamePage() {
 
   const gameId = game?.id;
 
-  const { data: availableNumbersData } = useQuery<{availableNumbers: number[], totalAvailable: number}>({
+  const { data: availableNumbersData, isLoading: isAvailableLoading } = useQuery<{availableNumbers: number[], totalAvailable: number}>({
     queryKey: [`/api/games/${gameId}/available-numbers`],
     refetchInterval: 10000,
     enabled: !!gameId,
@@ -89,6 +89,19 @@ export default function GamePage() {
 
   // Always call useCountdown hook consistently with stable value
   const countdown = useCountdown(game?.endTime || new Date().toISOString());
+
+  // Must be declared before any conditional returns — hooks can't be called conditionally
+  const handleSpinError = useCallback((message: string) => {
+    setIsSpinning(false);
+    const isInsufficientTokens = message.toLowerCase().includes("insufficient") || message.toLowerCase().includes("token");
+    toast({
+      title: isInsufficientTokens ? "Not enough tokens" : "Spin failed",
+      description: isInsufficientTokens
+        ? "You don't have enough tokens for this spin. Buy more tokens to keep playing!"
+        : message,
+      variant: "destructive",
+    });
+  }, [toast]);
 
   if (isLoading) {
     return (
@@ -125,8 +138,8 @@ export default function GamePage() {
   // Check if game has ended
   const isGameEnded = game.endTime && new Date() > new Date(game.endTime);
   
-  // Check if all numbers are taken
-  const areAllNumbersTaken = availableNumbers.length === 0;
+  // Check if all numbers are taken — only true once data has actually loaded
+  const areAllNumbersTaken = !isAvailableLoading && availableNumbersData !== undefined && availableNumbers.length === 0;
 
   if (isGameEnded) {
     return (
@@ -169,18 +182,6 @@ export default function GamePage() {
       </div>
     );
   }
-
-  const handleSpinError = useCallback((message: string) => {
-    setIsSpinning(false);
-    const isInsufficientTokens = message.toLowerCase().includes("insufficient") || message.toLowerCase().includes("token");
-    toast({
-      title: isInsufficientTokens ? "Not enough tokens" : "Spin failed",
-      description: isInsufficientTokens
-        ? "You don't have enough tokens for this spin. Buy more tokens to keep playing!"
-        : message,
-      variant: "destructive",
-    });
-  }, [toast]);
 
   const handleInitiateSpin = () => {
     // Check if game has ended
