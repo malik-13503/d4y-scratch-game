@@ -72,7 +72,7 @@ export default function GamePage() {
 
   const gameId = game?.id;
 
-  const { data: availableNumbersData, isLoading: isAvailableLoading } = useQuery<{availableNumbers: number[], totalAvailable: number}>({
+  const { data: availableNumbersData, isLoading: isAvailableLoading } = useQuery<{availableNumbers: number[], totalAvailable: number, totalNumbers: number, takenCount: number, tokensCollectedActual: number}>({
     queryKey: [`/api/games/${gameId}/available-numbers`],
     refetchInterval: 10000,
     enabled: !!gameId,
@@ -286,10 +286,13 @@ export default function GamePage() {
     }
   };
 
-  // Calculate progress using token collection vs token threshold
+  // Calculate progress using live spin count from available-numbers (source of truth)
   const tokenThreshold = (game as any)?.tokenThreshold || 0;
-  const tokensCollected = (game as any)?.tokensCollected || 0;
   const tokenCostPerEntry = (game as any)?.tokenCostPerEntry || 10;
+  // Use actual spin-result-based count when available, fall back to game.tokensCollected
+  const tokensCollected = availableNumbersData !== undefined
+    ? (availableNumbersData.tokensCollectedActual ?? (game as any)?.tokensCollected ?? 0)
+    : ((game as any)?.tokensCollected ?? 0);
   const progress = tokenThreshold > 0 ? Math.min((tokensCollected / tokenThreshold) * 100, 100) : 0;
   const tokensRemaining = Math.max(tokenThreshold - tokensCollected, 0);
   const playsRemaining = tokenCostPerEntry > 0 ? Math.ceil(tokensRemaining / tokenCostPerEntry) : 0;
@@ -630,6 +633,53 @@ export default function GamePage() {
                 )}
               </CardContent>
             </Card>
+
+            {/* Taken Numbers Grid */}
+            {game && (
+              <Card className="bg-black/20 backdrop-blur-xl border border-purple-500/30 shadow-2xl">
+                <CardHeader>
+                  <CardTitle className="text-white flex items-center justify-between">
+                    <div className="flex items-center">
+                      <div className="h-5 w-5 mr-2 rounded-full bg-red-500/70 flex items-center justify-center text-xs">✕</div>
+                      Numbers Board
+                    </div>
+                    <span className="text-sm font-normal text-gray-400">
+                      {availableNumbersData?.takenCount ?? (game.totalNumbers - availableNumbers.length)} / {game.totalNumbers} claimed
+                    </span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex flex-wrap gap-1.5">
+                    {Array.from({ length: game.totalNumbers }, (_, i) => i + 1).map((num) => {
+                      const isTaken = !availableNumbers.includes(num) && availableNumbersData !== undefined;
+                      return (
+                        <div
+                          key={num}
+                          className={`w-8 h-8 rounded-md flex items-center justify-center text-xs font-bold transition-colors ${
+                            isTaken
+                              ? "bg-red-600/50 text-red-200 border border-red-500/40 line-through opacity-70"
+                              : "bg-purple-600/30 text-purple-200 border border-purple-500/30"
+                          }`}
+                          title={isTaken ? `Number ${num} — claimed` : `Number ${num} — available`}
+                        >
+                          {num}
+                        </div>
+                      );
+                    })}
+                  </div>
+                  <div className="flex items-center gap-4 mt-3 pt-3 border-t border-white/10 text-xs text-gray-400">
+                    <div className="flex items-center gap-1.5">
+                      <div className="w-3 h-3 rounded bg-purple-600/30 border border-purple-500/30"></div>
+                      Available
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <div className="w-3 h-3 rounded bg-red-600/50 border border-red-500/40"></div>
+                      Claimed
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
 
             {/* Game Rules */}
             <Card className="bg-black/20 backdrop-blur-xl border border-purple-500/30 shadow-2xl">

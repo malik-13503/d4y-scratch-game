@@ -1108,23 +1108,15 @@ export class DatabaseStorage implements IStorage {
     try {
       const result = await db
         .select({
-          id: transactions.id,
-          userId: transactions.userId,
-          gameId: transactions.gameId,
-          spinResultId: transactions.spinResultId,
-          amount: transactions.amount,
-          createdAt: transactions.createdAt,
+          id: spinResults.id,
           spunNumber: spinResults.spunNumber,
+          createdAt: spinResults.createdAt,
+          userId: players.userId,
         })
-        .from(transactions)
-        .leftJoin(spinResults, eq(transactions.spinResultId, spinResults.id))
-        .where(
-          and(
-            eq(transactions.gameId, gameId),
-            isNotNull(spinResults.spunNumber)
-          )
-        )
-        .orderBy(desc(transactions.createdAt))
+        .from(spinResults)
+        .leftJoin(players, eq(spinResults.playerId, players.id))
+        .where(eq(spinResults.gameId, gameId))
+        .orderBy(desc(spinResults.createdAt))
         .limit(limit);
       
       return result;

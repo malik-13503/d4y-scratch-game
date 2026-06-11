@@ -539,11 +539,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/games/:id/available-numbers", async (req, res) => {
     try {
       const gameId = parseInt(req.params.id);
+      const game = await storage.getGame(gameId);
       const availableNumbers = await storage.getAvailableNumbers(gameId);
+      const totalNumbers = game?.totalNumbers || 0;
+      const takenCount = totalNumbers - availableNumbers.length;
+      const tokenCostPerEntry = game?.tokenCostPerEntry || 0;
+      const tokensCollectedActual = takenCount * tokenCostPerEntry;
       
       res.json({ 
         availableNumbers,
-        totalAvailable: availableNumbers.length 
+        totalAvailable: availableNumbers.length,
+        totalNumbers,
+        takenCount,
+        tokensCollectedActual,
       });
     } catch (error) {
       console.error("Error fetching available numbers:", error);
