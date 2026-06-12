@@ -1,5 +1,5 @@
 import { useLocation } from "wouter";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -322,11 +322,41 @@ function GameCard({ game, onPlay }: { game: Game; onPlay: () => void }) {
 /* ─── PAGE ──────────────────────────────────────────────────────────────── */
 export default function HomePage() {
   const [, setLocation] = useLocation();
-  const [winnerIdx, setWinnerIdx]   = useState(0);
+  const [winnerIdx, setWinnerIdx] = useState(0);
+  const [showNotifs, setShowNotifs] = useState(false);
+  useQueryClient(); // keep import active
 
   const { data: user }      = useQuery<any>({ queryKey: ["/api/user"] });
   const { data: tokenData } = useQuery<{ tokenBalance: number }>({ queryKey: ["/api/user/token-balance"], refetchInterval: 15000 });
   const { data: games, isLoading } = useQuery<Game[]>({ queryKey: ["/api/games"], refetchInterval: 20000 });
+  const { data: winnersData } = useQuery<{ winnerName: string; prize: string; prizeValue: string; completedAt: string; gameName: string }[]>({
+    queryKey: ["/api/winners"],
+    refetchInterval: 60000,
+  });
+  const { data: notifsData, refetch: refetchNotifs } = useQuery<{ notifications: any[]; unreadCount: number }>({
+    queryKey: ["/api/notifications"],
+    refetchInterval: 30000,
+  });
+
+  const realWinners = winnersData && winnersData.length > 0 ? winnersData : null;
+  const displayWinners = realWinners
+    ? realWinners.map((w, i) => ({
+        name: w.winnerName,
+        prize: w.prize,
+        label: w.prize,
+        color: ["#10b981","#f59e0b","#6366f1","#8b5cf6","#ec4899","#f97316"][i % 6],
+        icon: w.prize.toLowerCase().includes("cash") || w.prize.startsWith("$") ? "💵" : "🏆",
+        ago: new Date(w.completedAt).toLocaleDateString(),
+        hot: i === 0,
+      }))
+    : WINNERS;
+
+  const tickerItems = realWinners && realWinners.length > 0
+    ? realWinners.map(w => `🏆 ${w.winnerName} won ${w.prize}!`)
+    : TICKER;
+
+  const unreadCount = notifsData?.unreadCount ?? 0;
+  const notifsList  = notifsData?.notifications ?? [];
 
   const activeGames  = games?.filter(g => g.isActive) ?? [];
   const tokenBalance = tokenData?.tokenBalance ?? 0;
@@ -334,9 +364,16 @@ export default function HomePage() {
   const avatarLetter = username[0]?.toUpperCase() ?? "P";
 
   useEffect(() => {
-    const t = setInterval(() => setWinnerIdx(p => (p+1) % WINNERS.length), 3000);
+    const t = setInterval(() => setWinnerIdx(p => (p + 1) % displayWinners.length), 3000);
     return () => clearInterval(t);
-  }, []);
+  }, [displayWinners.length]);
+
+  async function markAllRead() {
+    try {
+      await fetch("/api/notifications/read-all", { method: "POST", credentials: "include" });
+      refetchNotifs();
+    } catch (_) {}
+  }
 
   return (
     <div className="min-h-screen text-white overflow-x-hidden" style={{background:"#07060f"}}>
@@ -348,7 +385,7 @@ export default function HomePage() {
         <div className="absolute right-0 top-0 bottom-0 w-20 z-10" style={{background:"linear-gradient(270deg,#0d0b1e,transparent)"}} />
         <div className="ticker-wrap">
           <div className="ticker-inner">
-            {[...TICKER,...TICKER].map((item,i) => (
+            {[...tickerItems,...tickerItems].map((item,i) => (
               <span key={i} className="inline-flex items-center gap-2 mx-10 text-sm font-medium whitespace-nowrap" style={{color:"#a78bfa"}}>
                 <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{background:"#4ade80"}} />
                 <span className="text-gray-200">{item}</span>
@@ -395,10 +432,42 @@ export default function HomePage() {
               <span>+ Add Tokens</span>
             </button>
 
-            <button className="relative p-2 rounded-full transition hover:bg-white/8" style={{background:"rgba(255,255,255,0.05)",border:"1px solid rgba(255,255,255,0.07)"}}>
-              <Bell className="h-4 w-4 text-gray-400" />
-              <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-red-500 rounded-full text-[9px] font-black flex items-center justify-center">3</span>
-            </button>
+            <div className="relative">
+              <button
+                onClick={() => { setShowNotifs(p => !p); if (!showNotifs) markAllRead(); }}
+                className="relative p-2 rounded-full transition hover:bg-white/8"
+                style={{background:"rgba(255,255,255,0.05)",border:"1px solid rgba(255,255,255,0.07)"}}>
+                <Bell className="h-4 w-4 text-gray-400" />
+                {unreadCount > 0 && (
+                  <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-red-500 rounded-full text-[9px] font-black flex items-center justify-center text-white">
+                    {unreadCount > 9 ? "9+" : unreadCount}
+                  </span>
+                )}
+              </button>
+              {showNotifs && (
+                <div className="absolute right-0 top-12 w-80 rounded-2xl shadow-2xl z-50 overflow-hidden"
+                  style={{background:"linear-gradient(145deg,#0e0c22,#130f28)",border:"1px solid rgba(255,255,255,0.1)"}}>
+                  <div className="px-4 py-3 border-b border-white/5 flex items-center justify-between">
+                    <span className="text-white font-black text-sm">Notifications</span>
+                    <button onClick={() => setShowNotifs(false)} className="text-gray-500 hover:text-white text-xs">✕</button>
+                  </div>
+                  {notifsList.length === 0 ? (
+                    <div className="px-4 py-6 text-center text-gray-500 text-sm">No notifications yet</div>
+                  ) : (
+                    <div className="max-h-72 overflow-y-auto">
+                      {notifsList.map((n: any) => (
+                        <div key={n.id} className="px-4 py-3 border-b border-white/3 hover:bg-white/3 transition-colors"
+                          style={!n.isRead ? {background:"rgba(124,58,237,0.06)"} : {}}>
+                          <p className="text-white text-sm font-semibold leading-tight">{n.title}</p>
+                          <p className="text-gray-400 text-xs mt-0.5 leading-relaxed">{n.message}</p>
+                          <p className="text-gray-600 text-[10px] mt-1">{new Date(n.createdAt).toLocaleDateString()}</p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
 
             <button className="flex items-center gap-2 group" onClick={() => setLocation("/dashboard")}>
               <div className="w-9 h-9 rounded-full flex items-center justify-center text-white font-black text-sm border-2 glow-violet"
@@ -781,10 +850,9 @@ export default function HomePage() {
               </span>
             </div>
             <div>
-              {WINNERS.map((w,i) => (
+              {displayWinners.map((w,i) => (
                 <div key={i} className={`flex items-center gap-4 px-5 py-4 transition-colors ${i===winnerIdx?"":"hover:bg-white/2"}`}
-                     style={i===winnerIdx?{background:"rgba(16,185,129,0.05)"}:{}}
-                     border-b="true">
+                     style={i===winnerIdx?{background:"rgba(16,185,129,0.05)"}:{}}>
                   <div className="w-10 h-10 rounded-full flex items-center justify-center text-lg font-black border-2 shrink-0"
                        style={{background:`linear-gradient(135deg,${w.color}30,${w.color}60)`,borderColor:`${w.color}40`}}>
                     {w.icon}

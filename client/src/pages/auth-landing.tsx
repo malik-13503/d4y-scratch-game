@@ -387,7 +387,7 @@ export default function AuthLandingPage() {
                                   border:"1px solid rgba(245,158,11,0.35)",
                                   boxShadow:"0 0 20px rgba(245,158,11,0.15)"}}>
                           <img src={imgToken} alt="" className="w-4 h-4 rounded-full object-cover" />
-                          <span className="text-yellow-300 text-xs font-black tracking-wide">✨ Get 3 FREE Tokens on signup!</span>
+                          <span className="text-yellow-300 text-xs font-black tracking-wide">✨ Get 10 FREE Tokens on signup!</span>
                         </div>
                       </div>
 

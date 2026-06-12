@@ -5,7 +5,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { saveAuthToStorage } from "@/lib/auth";
-import { AlertCircle, User, Mail, Phone, Lock, Eye, EyeOff } from "lucide-react";
+import { AlertCircle, User, Mail, Phone, Lock, Eye, EyeOff, Gift } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { EmailAlreadyExistsPopup } from "@/components/email-already-exists-popup";
 
@@ -22,6 +22,7 @@ export function ImprovedSignupForm({ onSuccess, onSwitchToLogin }: ImprovedSignu
     phone: "",
     password: "",
     confirmPassword: "",
+    referralCode: "",
   });
   const [ageConfirmed, setAgeConfirmed] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -268,6 +269,38 @@ export function ImprovedSignupForm({ onSuccess, onSwitchToLogin }: ImprovedSignu
               <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 to-blue-500/10 rounded-xl pointer-events-none"></div>
             </div>
           </div>
+        </div>
+
+        {/* Welcome bonus reminder */}
+        <div className="flex items-center gap-3 px-4 py-3 rounded-xl"
+          style={{ background: "rgba(16,185,129,0.08)", border: "1px solid rgba(16,185,129,0.25)" }}>
+          <Gift className="h-4 w-4 text-emerald-400 shrink-0" />
+          <p className="text-emerald-300 text-xs font-medium">
+            🎉 You'll get <strong>10 free tokens</strong> the moment your account is created!
+          </p>
+        </div>
+
+        {/* Referral Code (optional) */}
+        <div className="space-y-2">
+          <Label htmlFor="referralCode" className="text-white font-medium text-sm">
+            Referral Code <span className="text-gray-500 font-normal">(optional)</span>
+          </Label>
+          <div className="relative">
+            <div className="absolute left-3 top-1/2 transform -translate-y-1/2 z-10">
+              <Gift className="h-4 w-4 text-gray-400" />
+            </div>
+            <Input
+              id="referralCode"
+              name="referralCode"
+              type="text"
+              value={formData.referralCode}
+              onChange={handleChange}
+              placeholder="Enter friend's referral code"
+              className="bg-slate-800/50 border-2 border-white/20 text-white placeholder-gray-400 focus:border-purple-500 focus:ring-purple-500 rounded-xl py-3 pl-10 pr-4 text-base backdrop-blur-sm transition-all duration-300 w-full uppercase"
+            />
+            <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 to-blue-500/10 rounded-xl pointer-events-none"></div>
+          </div>
+          <p className="text-xs text-gray-500">Both you and your friend earn 10 bonus tokens!</p>
         </div>
 
         {/* Age Verification - Friendly Design */}

@@ -1,7 +1,7 @@
 import { 
   games, players, gameResults, adminUsers, wheelSegments, systemSettings, adminSessions, notifications, spinResults,
   users, transactions, userSessions, complianceLogs, freePlayUsage, paymentCards, tokenTransactions, userFreeEntries,
-  dailyTokenClaims, promoCodes, promoCodeRedemptions, pendingPayments,
+  dailyTokenClaims, promoCodes, promoCodeRedemptions, pendingPayments, userNotifications,
   type Game, type InsertGame, type Player, type InsertPlayer, type GameResult, type InsertGameResult, 
   type AdminUser, type InsertAdminUser, type WheelSegment, type InsertWheelSegment,
   type SystemSetting, type InsertSystemSetting, type InsertNotification, type Notification,
@@ -9,7 +9,8 @@ import {
   type FreePlayUsage, type InsertFreePlayUsage, type PaymentCard, type InsertPaymentCard,
   type TokenTransaction, type InsertTokenTransaction, type UserFreeEntry, type InsertUserFreeEntry,
   type DailyTokenClaim, type PromoCode, type InsertPromoCode, type PromoCodeRedemption,
-  type PendingPayment, type InsertPendingPayment
+  type PendingPayment, type InsertPendingPayment,
+  type UserNotification, type InsertUserNotification
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, sql, asc, and, isNotNull } from "drizzle-orm";
@@ -159,6 +160,19 @@ export interface IStorage {
   getPendingPayments(filters?: { status?: string; paymentMethod?: string }): Promise<(PendingPayment & { user: Pick<User,'firstName'|'lastName'|'email'> })[]>;
   getPendingPaymentsByUserId(userId: number): Promise<PendingPayment[]>;
   updatePendingPayment(id: number, updates: Partial<PendingPayment>): Promise<PendingPayment | undefined>;
+
+  // Referral methods
+  getUserByReferralCode(code: string): Promise<User | undefined>;
+
+  // User notification methods
+  createUserNotification(notification: InsertUserNotification): Promise<UserNotification>;
+  getUserNotifications(userId: number): Promise<UserNotification[]>;
+  getUnreadNotificationCount(userId: number): Promise<number>;
+  markUserNotificationRead(id: number): Promise<void>;
+  markAllUserNotificationsRead(userId: number): Promise<void>;
+
+  // Winners feed
+  getRecentWinners(limit?: number): Promise<{ winnerName: string; prize: string; prizeValue: string; completedAt: Date; gameName: string }[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1614,6 +1628,63 @@ export class DatabaseStorage implements IStorage {
   async updatePendingPayment(id: number, updates: Partial<PendingPayment>): Promise<PendingPayment | undefined> {
     const [row] = await db.update(pendingPayments).set(updates).where(eq(pendingPayments.id, id)).returning();
     return row || undefined;
+  }
+
+  async getUserByReferralCode(code: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.referralCode, code.toUpperCase()));
+    return user || undefined;
+  }
+
+  async createUserNotification(notification: InsertUserNotification): Promise<UserNotification> {
+    const [row] = await db.insert(userNotifications).values(notification).returning();
+    return row;
+  }
+
+  async getUserNotifications(userId: number): Promise<UserNotification[]> {
+    return db.select().from(userNotifications)
+      .where(eq(userNotifications.userId, userId))
+      .orderBy(desc(userNotifications.createdAt))
+      .limit(50);
+  }
+
+  async getUnreadNotificationCount(userId: number): Promise<number> {
+    const [row] = await db.select({ count: sql<number>`count(*)` }).from(userNotifications)
+      .where(and(eq(userNotifications.userId, userId), eq(userNotifications.isRead, false)));
+    return Number(row?.count ?? 0);
+  }
+
+  async markUserNotificationRead(id: number): Promise<void> {
+    await db.update(userNotifications).set({ isRead: true }).where(eq(userNotifications.id, id));
+  }
+
+  async markAllUserNotificationsRead(userId: number): Promise<void> {
+    await db.update(userNotifications).set({ isRead: false }).where(eq(userNotifications.userId, userId));
+  }
+
+  async getRecentWinners(limit = 10): Promise<{ winnerName: string; prize: string; prizeValue: string; completedAt: Date; gameName: string }[]> {
+    const rows = await db
+      .select({
+        firstName: users.firstName,
+        lastName: users.lastName,
+        prize: games.prize,
+        prizeValue: games.prizeValue,
+        completedAt: gameResults.completedAt,
+        gameName: games.name,
+      })
+      .from(gameResults)
+      .innerJoin(games, eq(gameResults.gameId, games.id))
+      .leftJoin(users, eq(gameResults.winnerId, users.id))
+      .where(isNotNull(gameResults.winnerId))
+      .orderBy(desc(gameResults.completedAt))
+      .limit(limit);
+
+    return rows.map(r => ({
+      winnerName: r.firstName ? `${r.firstName} ${r.lastName?.charAt(0) ?? ''}.` : 'Anonymous',
+      prize: r.prize,
+      prizeValue: r.prizeValue?.toString() ?? '0',
+      completedAt: r.completedAt,
+      gameName: r.gameName,
+    }));
   }
 }
 

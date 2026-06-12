@@ -1,14 +1,15 @@
 import { useState } from "react";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import {
   ChevronLeft, ChevronRight, CheckCircle, Clock, Copy,
   Shield, AlertCircle, Wallet, Star, Zap, Crown, Trophy,
-  Flame, Rocket, Diamond,
+  Flame, Rocket, Diamond, CreditCard,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { AuthorizeNetForm } from "@/components/authorize-net-form";
 
 // ── Static data (matches server) ────────────────────────────────────────────
 const PACKAGES = [
@@ -29,11 +30,12 @@ const METHOD_META: Record<string, { label: string; color: string; bgColor: strin
   applepay: { label: "Apple Pay/Cash",color: "#aaaaaa", bgColor: "rgba(170,170,170,0.12)", icon: "🍎", hint: "Apple devices"    },
 };
 
-type Step = "package" | "method" | "send" | "confirm" | "done";
+type Step = "package" | "method" | "send" | "confirm" | "done" | "card-done";
 
 export default function AddCreditsPage() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   // Fetch live payment destinations from server (admin can change them anytime)
   const { data: destinationsData } = useQuery<Record<string, { label: string; destination: string; hint: string }>>({
@@ -53,6 +55,9 @@ export default function AddCreditsPage() {
   const [paymentName, setPaymentName] = useState("");
   const [paymentHandle, setPaymentHandle] = useState("");
   const [copied, setCopied]           = useState(false);
+  const [showCardForm, setShowCardForm] = useState(false);
+  const [isProcessingCard, setIsProcessingCard] = useState(false);
+  const [cardResult, setCardResult] = useState<{ tokens: number; newBalance: number } | null>(null);
 
   const submitMutation = useMutation({
     mutationFn: async () => {
@@ -71,12 +76,93 @@ export default function AddCreditsPage() {
     },
   });
 
+  async function handleCardSuccess(descriptor: string, value: string) {
+    if (!pkg) return;
+    setIsProcessingCard(true);
+    try {
+      const res = await apiRequest("POST", "/api/purchase-tokens", {
+        packageId: `package_${pkg.dollars}`,
+        opaqueDataDescriptor: descriptor,
+        opaqueDataValue: value,
+      });
+      const data = await res.json();
+      if (!data.success) throw new Error(data.message || "Payment declined");
+      setCardResult({ tokens: data.transaction.tokens, newBalance: data.newBalance });
+      queryClient.invalidateQueries({ queryKey: ["/api/user/token-balance"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/notifications"] });
+      setShowCardForm(false);
+      setStep("card-done");
+    } catch (err: any) {
+      toast({ title: "Payment failed", description: err.message || "Please try again.", variant: "destructive" });
+    } finally {
+      setIsProcessingCard(false);
+    }
+  }
+
   function copy(text: string) {
     navigator.clipboard.writeText(text).then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     });
   }
+
+  // ── STEP: Card-Done (instant delivery) ───────────────────────────────────
+  if (step === "card-done") return (
+    <Shell onBack={undefined}>
+      <div className="text-center py-6 space-y-6">
+        <div className="relative inline-flex">
+          <div className="w-28 h-28 rounded-3xl flex items-center justify-center"
+            style={{ background: "linear-gradient(135deg,#7c3aed,#2563eb)", boxShadow: "0 0 60px rgba(124,58,237,0.6)" }}>
+            <Zap className="h-14 w-14 text-white" />
+          </div>
+          <div className="absolute -top-2 -right-2 w-8 h-8 rounded-full flex items-center justify-center"
+            style={{ background: "#10b981", boxShadow: "0 0 15px rgba(16,185,129,0.6)" }}>
+            <CheckCircle className="h-4 w-4 text-white" />
+          </div>
+        </div>
+
+        <div>
+          <h2 className="text-3xl font-black text-white">Tokens Added! ⚡</h2>
+          <p className="text-gray-400 mt-2 text-sm leading-relaxed max-w-sm mx-auto">
+            <strong className="text-green-400">{cardResult?.tokens?.toLocaleString()} tokens</strong> were instantly added to your account. Go win something!
+          </p>
+        </div>
+
+        <div className="rounded-2xl p-4 text-left space-y-3 mx-auto max-w-xs"
+          style={{ background: "rgba(124,58,237,0.08)", border: "1px solid rgba(124,58,237,0.3)" }}>
+          {[
+            ["Package", pkg ? `$${pkg.dollars} → ${pkg.credits.toLocaleString()} tokens` : ""],
+            ["Method", "Credit/Debit Card"],
+            ["Status", null],
+          ].map(([label, value]) => (
+            <div key={label} className="flex items-center justify-between">
+              <span className="text-gray-400 text-sm">{label}</span>
+              {label === "Status" ? (
+                <span className="text-green-400 text-sm font-semibold flex items-center gap-1.5">
+                  <CheckCircle className="h-3.5 w-3.5" />Delivered Instantly
+                </span>
+              ) : (
+                <span className="text-white text-sm font-semibold">{value}</span>
+              )}
+            </div>
+          ))}
+        </div>
+
+        <div className="flex flex-col gap-3">
+          <button onClick={() => setLocation("/")}
+            className="w-full py-3.5 rounded-2xl font-black text-white transition-all hover:opacity-90"
+            style={{ background: "linear-gradient(135deg,#7c3aed,#2563eb)", boxShadow: "0 0 25px rgba(124,58,237,0.35)" }}>
+            Play Games Now 🎮
+          </button>
+          <button onClick={() => setLocation("/wallet")}
+            className="w-full py-3.5 rounded-2xl font-semibold text-gray-400 transition-all hover:text-white"
+            style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)" }}>
+            View My Wallet
+          </button>
+        </div>
+      </div>
+    </Shell>
+  );
 
   // ── STEP: Package ─────────────────────────────────────────────────────────
   if (step === "package") return (
@@ -207,6 +293,35 @@ export default function AddCreditsPage() {
 
       <p className="text-white font-bold text-lg mb-3">How do you want to pay?</p>
 
+      {/* ── INSTANT CARD PAYMENT ── */}
+      <button
+        onClick={() => setShowCardForm(true)}
+        className="w-full rounded-2xl p-4 text-left flex items-center gap-4 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] group mb-2"
+        style={{ background: "linear-gradient(135deg,rgba(124,58,237,0.25),rgba(37,99,235,0.2))", border: "1px solid rgba(124,58,237,0.5)", boxShadow: "0 4px 30px rgba(124,58,237,0.25)" }}>
+        <div className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0"
+          style={{ background: "linear-gradient(135deg,#7c3aed,#2563eb)" }}>
+          <CreditCard className="h-6 w-6 text-white" />
+        </div>
+        <div className="flex-1">
+          <div className="flex items-center gap-2">
+            <p className="font-black text-white text-base">Credit / Debit Card</p>
+            <span className="px-2 py-0.5 rounded-full text-[10px] font-black text-black"
+              style={{ background: "linear-gradient(90deg,#10b981,#059669)" }}>⚡ INSTANT</span>
+          </div>
+          <p className="text-xs mt-0.5" style={{ color: "#a78bfa" }}>Tokens delivered the moment payment clears</p>
+        </div>
+        <div className="p-2 rounded-xl transition-all group-hover:translate-x-1"
+          style={{ background: "rgba(124,58,237,0.2)" }}>
+          <ChevronRight className="h-4 w-4 text-purple-400" />
+        </div>
+      </button>
+
+      <div className="flex items-center gap-3 my-3">
+        <div className="flex-1 h-px" style={{ background: "rgba(255,255,255,0.08)" }} />
+        <span className="text-gray-600 text-xs font-semibold">or pay manually</span>
+        <div className="flex-1 h-px" style={{ background: "rgba(255,255,255,0.08)" }} />
+      </div>
+
       <div className="space-y-3">
         {METHODS.map(m => (
           <button key={m.id} onClick={() => { setMethod(m); setStep("send"); }}
@@ -231,6 +346,18 @@ export default function AddCreditsPage() {
       </div>
 
       <DisclaimerBox />
+
+      {/* AuthorizeNet card form overlay */}
+      {showCardForm && pkg && (
+        <AuthorizeNetForm
+          packageName={`${pkg.label} Pack`}
+          packagePrice={pkg.dollars}
+          packageTokens={pkg.credits}
+          onSuccess={handleCardSuccess}
+          onClose={() => setShowCardForm(false)}
+          isProcessing={isProcessingCard}
+        />
+      )}
     </Shell>
   );
 

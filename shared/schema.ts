@@ -26,6 +26,9 @@ export const users = pgTable("users", {
   // Legal compliance fields
   acceptedTermsAt: timestamp("accepted_terms_at"),
   optOutPublicity: boolean("opt_out_publicity").notNull().default(false), // TN residents can opt out
+  // Referral system
+  referralCode: text("referral_code").unique(),
+  referredBy: integer("referred_by"), // userId of the person who referred this user
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
@@ -230,6 +233,17 @@ export const adminSessions = pgTable("admin_sessions", {
   adminId: integer("admin_id").notNull(),
   token: text("token").notNull().unique(),
   expiresAt: timestamp("expires_at").notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+// In-app user notifications (referral bonuses, purchase confirmations, winner alerts)
+export const userNotifications = pgTable("user_notifications", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  type: text("type").notNull(), // 'referral_bonus' | 'token_purchase' | 'welcome' | 'winner'
+  title: text("title").notNull(),
+  message: text("message").notNull(),
+  isRead: boolean("is_read").notNull().default(false),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
@@ -451,3 +465,11 @@ export const insertPromoCodeRedemptionSchema = createInsertSchema(promoCodeRedem
 });
 export type PromoCodeRedemption = typeof promoCodeRedemptions.$inferSelect;
 export type InsertPromoCodeRedemption = z.infer<typeof insertPromoCodeRedemptionSchema>;
+
+// User notification schema and types
+export const insertUserNotificationSchema = createInsertSchema(userNotifications).omit({
+  id: true,
+  createdAt: true,
+});
+export type UserNotification = typeof userNotifications.$inferSelect;
+export type InsertUserNotification = z.infer<typeof insertUserNotificationSchema>;

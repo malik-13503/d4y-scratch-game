@@ -88,23 +88,64 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Email already registered" });
       }
 
+      // Generate unique referral code for this new user
+      const referralCode = Math.random().toString(36).substring(2, 6).toUpperCase() +
+        Math.random().toString(36).substring(2, 6).toUpperCase();
+
+      // Check if a referral code was provided
+      const incomingReferralCode = (req.body.referralCode || "").toString().trim().toUpperCase();
+      let referrerId: number | null = null;
+      if (incomingReferralCode) {
+        try {
+          const referrer = await storage.getUserByReferralCode(incomingReferralCode);
+          if (referrer && referrer.isActive) referrerId = referrer.id;
+        } catch (_) {}
+      }
+
       const user = await storage.createUser({
         ...userData,
+        referralCode,
+        referredBy: referrerId ?? undefined,
       });
 
-      // Grant 3 free welcome tokens to new users
+      // Grant 10 free welcome tokens to new users
       try {
         await storage.createTokenTransaction({
           userId: user.id,
           transactionType: 'bonus',
-          amount: 3,
-          description: 'Welcome bonus: 3 free tokens for new user',
+          amount: 10,
+          description: 'Welcome bonus: 10 free tokens for new user',
           status: 'completed'
         });
-        await storage.updateUserTokenBalance(user.id, 3);
-        console.log(`✅ Granted 3 free welcome tokens to: ${user.email}`);
+        await storage.updateUserTokenBalance(user.id, 10);
+        await storage.createUserNotification({
+          userId: user.id,
+          type: 'welcome',
+          title: '🎁 Welcome to Prize Plugz!',
+          message: 'You received 10 free tokens. Use them to enter live games and win big!',
+          isRead: false,
+        });
+        console.log(`✅ Granted 10 free welcome tokens to: ${user.email}`);
       } catch (tokenErr) {
         console.error("Failed to grant welcome tokens:", tokenErr);
+      }
+
+      // If referred, give 10 bonus tokens to BOTH referrer and new user
+      if (referrerId) {
+        try {
+          const REFERRAL_BONUS = 10;
+          // Bonus for referrer
+          await storage.createTokenTransaction({ userId: referrerId, transactionType: 'bonus', amount: REFERRAL_BONUS, description: `Referral bonus: ${user.firstName} joined with your code`, status: 'completed' });
+          await storage.updateUserTokenBalance(referrerId, REFERRAL_BONUS);
+          await storage.createUserNotification({ userId: referrerId, type: 'referral_bonus', title: '🎉 Referral Bonus Earned!', message: `${user.firstName} signed up using your referral code. You earned ${REFERRAL_BONUS} bonus tokens!`, isRead: false });
+          // Bonus for new user
+          await storage.createTokenTransaction({ userId: user.id, transactionType: 'bonus', amount: REFERRAL_BONUS, description: `Referral bonus: joined with a friend's code`, status: 'completed' });
+          await storage.updateUserTokenBalance(user.id, REFERRAL_BONUS);
+          await storage.createUserNotification({ userId: user.id, type: 'referral_bonus', title: '🎉 Referral Bonus!', message: `You used a friend's referral code and earned ${REFERRAL_BONUS} bonus tokens!`, isRead: false });
+          console.log(`✅ Referral bonus granted: referrer=${referrerId}, new user=${user.id}`);
+        } catch (refErr) {
+          console.error("Failed to grant referral bonus:", refErr);
+        }
       }
 
       // Create compliance log for new user registration
@@ -2021,13 +2062,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Package ID is required" });
       }
 
-      // Get token package details
+      // Get token package details (must match frontend PACKAGES array)
       const packages = {
-        "package_5":   { tokens: 5,   price: 5.00,   name: "Starter Pack" },
-        "package_10":  { tokens: 12,  price: 10.00,  name: "Value Pack" },
-        "package_20":  { tokens: 26,  price: 20.00,  name: "Super Pack" },
-        "package_50":  { tokens: 70,  price: 50.00,  name: "Mega Pack" },
-        "package_100": { tokens: 150, price: 100.00, name: "Ultimate Pack" }
+        "package_5":   { tokens: 10,   price: 5.00,   name: "Starter Pack" },
+        "package_10":  { tokens: 25,   price: 10.00,  name: "Player Pack" },
+        "package_20":  { tokens: 60,   price: 20.00,  name: "Power Pack" },
+        "package_50":  { tokens: 175,  price: 50.00,  name: "Winner Pack" },
+        "package_100": { tokens: 400,  price: 100.00, name: "VIP Pack" },
+        "package_250": { tokens: 1200, price: 250.00, name: "High Roller Pack" },
+        "package_500": { tokens: 3000, price: 500.00, name: "Best Value Pack" },
       };
 
       const tokenPackage = packages[packageId as keyof typeof packages];
@@ -2074,6 +2117,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Credit tokens to user balance
       const updatedUser = await storage.updateUserTokenBalance(userId, tokenPackage.tokens);
+
+      // Send in-app notification for successful purchase
+      try {
+        await storage.createUserNotification({
+          userId,
+          type: 'token_purchase',
+          title: '⚡ Tokens Added Instantly!',
+          message: `${tokenPackage.tokens} tokens from your ${tokenPackage.name} have been added to your account. Go play!`,
+          isRead: false,
+        });
+      } catch (_) {}
 
       console.log(`✅ Token purchase: user ${user.email} bought ${tokenPackage.tokens} tokens for $${tokenPackage.price} | txn ${chargeResult.transactionId}`);
 
@@ -2597,6 +2651,65 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/wallet/packages", (req, res) => {
     res.json(CREDIT_PACKAGES);
+  });
+
+  // ── Public winners feed ──────────────────────────────────────────────────
+  app.get("/api/winners", async (_req, res) => {
+    try {
+      const winners = await storage.getRecentWinners(20);
+      res.json(winners);
+    } catch (err) {
+      console.error("Winners feed error:", err);
+      res.status(500).json({ message: "Failed to load winners" });
+    }
+  });
+
+  // ── User notifications ───────────────────────────────────────────────────
+  app.get("/api/notifications", async (req, res) => {
+    const userId = (req.session as any)?.userId;
+    if (!userId) return res.status(401).json({ message: "Not authenticated" });
+    try {
+      const notifs = await storage.getUserNotifications(userId);
+      const unread = await storage.getUnreadNotificationCount(userId);
+      res.json({ notifications: notifs, unreadCount: unread });
+    } catch (err) {
+      res.status(500).json({ message: "Failed to load notifications" });
+    }
+  });
+
+  app.post("/api/notifications/:id/read", async (req, res) => {
+    const userId = (req.session as any)?.userId;
+    if (!userId) return res.status(401).json({ message: "Not authenticated" });
+    try {
+      await storage.markUserNotificationRead(parseInt(req.params.id));
+      res.json({ success: true });
+    } catch (err) {
+      res.status(500).json({ message: "Failed to mark notification read" });
+    }
+  });
+
+  app.post("/api/notifications/read-all", async (req, res) => {
+    const userId = (req.session as any)?.userId;
+    if (!userId) return res.status(401).json({ message: "Not authenticated" });
+    try {
+      await storage.markAllUserNotificationsRead(userId);
+      res.json({ success: true });
+    } catch (err) {
+      res.status(500).json({ message: "Failed to mark all notifications read" });
+    }
+  });
+
+  // ── User referral code ───────────────────────────────────────────────────
+  app.get("/api/user/referral-code", async (req, res) => {
+    const userId = (req.session as any)?.userId;
+    if (!userId) return res.status(401).json({ message: "Not authenticated" });
+    try {
+      const user = await storage.getUser(userId);
+      if (!user) return res.status(404).json({ message: "User not found" });
+      res.json({ referralCode: user.referralCode || null });
+    } catch (err) {
+      res.status(500).json({ message: "Failed to load referral code" });
+    }
   });
 
   app.get("/api/wallet/destinations", async (req, res) => {
