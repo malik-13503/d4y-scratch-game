@@ -32,6 +32,8 @@ import AddCreditsPage from "@/pages/add-credits";
 import { TokenPurchase } from "@/components/token-purchase";
 
 import NotFound from "@/pages/not-found";
+import ForgotPassword from "@/pages/forgot-password";
+import ResetPassword from "@/pages/reset-password";
 
 function Router() {
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
@@ -144,6 +146,8 @@ function Router() {
       <Route path="/real-prizes" component={RealPrizes} />
       <Route path="/free-spins" component={FreeSpins} />
       <Route path="/welcome" component={WelcomePage} />
+      <Route path="/forgot-password" component={ForgotPassword} />
+      <Route path="/reset-password" component={ResetPassword} />
 
       <Route component={NotFound} />
     </Switch>

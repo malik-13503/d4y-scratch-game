@@ -278,6 +278,85 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // In-memory password reset tokens: token -> { userId, expires }
+  const passwordResetTokens = new Map<string, { userId: number; expires: Date }>();
+
+  app.post("/api/forgot-password", async (req, res) => {
+    try {
+      const { email } = req.body;
+      if (!email) return res.status(400).json({ message: "Email is required" });
+
+      const user = await storage.getUserByEmail(email);
+      if (!user) return res.json({ message: "If that email exists, a reset link has been sent." });
+
+      const token = require("crypto").randomBytes(32).toString("hex");
+      const expires = new Date(Date.now() + 60 * 60 * 1000);
+      passwordResetTokens.set(token, { userId: user.id, expires });
+
+      const resetUrl = `${req.protocol}://${req.get("host")}/reset-password?token=${token}`;
+      const userName = `${user.firstName || ""} ${user.lastName || ""}`.trim() || "there";
+
+      try {
+        const { Resend } = await import("resend");
+        const resend = new Resend(process.env.RESEND_API_KEY);
+        await resend.emails.send({
+          from: "Prize Plugz <admin@prizeplugz.com>",
+          to: user.email,
+          subject: "🔐 Reset Your Prize Plugz Password",
+          html: `<!DOCTYPE html><html><head><meta charset="UTF-8"></head>
+<body style="font-family:sans-serif;background:#f8fafc;margin:0;padding:20px">
+  <div style="max-width:500px;margin:0 auto;background:white;border-radius:16px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,0.1)">
+    <div style="background:linear-gradient(135deg,#6366f1,#8b5cf6,#d946ef);padding:32px 24px;text-align:center">
+      <h1 style="color:white;margin:0;font-size:24px">🔐 Password Reset</h1>
+    </div>
+    <div style="padding:32px 24px">
+      <p style="font-size:16px;color:#334155">Hi ${userName},</p>
+      <p style="color:#64748b">We received a request to reset your Prize Plugz password. Click the button below — this link expires in 1 hour.</p>
+      <div style="text-align:center;margin:32px 0">
+        <a href="${resetUrl}" style="background:linear-gradient(135deg,#6366f1,#8b5cf6);color:white;padding:14px 32px;border-radius:8px;text-decoration:none;font-weight:bold;font-size:16px">Reset My Password</a>
+      </div>
+      <p style="color:#94a3b8;font-size:13px">If you didn't request this, you can safely ignore this email.</p>
+      <hr style="border:none;border-top:1px solid #e2e8f0;margin:24px 0">
+      <p style="color:#94a3b8;font-size:12px;text-align:center">Or copy this link:<br><a href="${resetUrl}" style="color:#8b5cf6;word-break:break-all">${resetUrl}</a></p>
+    </div>
+  </div>
+</body></html>`,
+        });
+        console.log(`Password reset email sent to ${user.email}`);
+      } catch (emailErr) {
+        console.error("Failed to send reset email:", emailErr);
+      }
+
+      res.json({ message: "If that email exists, a reset link has been sent." });
+    } catch (error) {
+      console.error("Forgot password error:", error);
+      res.status(500).json({ message: "Failed to process request" });
+    }
+  });
+
+  app.post("/api/reset-password", async (req, res) => {
+    try {
+      const { token, password } = req.body;
+      if (!token || !password) return res.status(400).json({ message: "Token and password are required" });
+      if (password.length < 6) return res.status(400).json({ message: "Password must be at least 6 characters" });
+
+      const entry = passwordResetTokens.get(token);
+      if (!entry) return res.status(400).json({ message: "Invalid or expired reset link" });
+      if (entry.expires < new Date()) {
+        passwordResetTokens.delete(token);
+        return res.status(400).json({ message: "Reset link has expired. Please request a new one." });
+      }
+
+      await storage.updateUserPassword(entry.userId, password);
+      passwordResetTokens.delete(token);
+      console.log(`Password reset successfully for user ${entry.userId}`);
+      res.json({ message: "Password updated successfully" });
+    } catch (error) {
+      console.error("Reset password error:", error);
+      res.status(500).json({ message: "Failed to reset password" });
+    }
+  });
+
   app.post("/api/logout", (req, res) => {
     const clientIP = req.ip || req.connection.remoteAddress || req.socket.remoteAddress;
     const userId = (req.session as any)?.userId;

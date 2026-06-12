@@ -992,7 +992,7 @@ export class DatabaseStorage implements IStorage {
 
   async getUserByEmail(email: string): Promise<User | undefined> {
     try {
-      const [user] = await db.select().from(users).where(eq(users.email, email));
+      const [user] = await db.select().from(users).where(eq(sql`lower(${users.email})`, email.toLowerCase().trim()));
       return user;
     } catch (error) {
       console.error("Error getting user by email:", error);
