@@ -136,8 +136,6 @@ export default function Dashboard() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [deleteConfirmation, setDeleteConfirmation] = useState('');
   const { toast } = useToast();
-  const [copiedReferral, setCopiedReferral] = useState(false);
-  
   const handleTabChange = (value: string) => {
     setCurrentTab(value);
     // Update URL without page reload
@@ -161,13 +159,6 @@ export default function Dashboard() {
   const { data: user, isLoading: userLoading } = useQuery({
     queryKey: ["/api/user"],
   });
-
-  const { data: referralData } = useQuery<{ referralCode: string | null }>({
-    queryKey: ["/api/user/referral-code"],
-    enabled: !!user,
-  });
-  const referralCode = referralData?.referralCode;
-  const referralLink = referralCode ? `${window.location.origin}/?ref=${referralCode}` : null;
 
   const { data: userStats, isLoading: statsLoading } = useQuery({
     queryKey: ["/api/user/stats"],
@@ -1417,6 +1408,13 @@ function DailyTokensAndPromoSection() {
   const { toast } = useToast();
   const [promoInput, setPromoInput] = useState("");
   const [promoLoading, setPromoLoading] = useState(false);
+  const [copiedReferral, setCopiedReferral] = useState(false);
+
+  const { data: referralData } = useQuery<{ referralCode: string | null }>({
+    queryKey: ["/api/user/referral-code"],
+  });
+  const referralCode = referralData?.referralCode;
+  const referralLink = referralCode ? `${window.location.origin}/?ref=${referralCode}` : null;
 
   const { data: dailyStatus, isLoading: statusLoading, refetch: refetchStatus } = useQuery<{
     canClaim: boolean;
