@@ -524,9 +524,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Helper: auto-close any active game whose endTime has passed and select a winner
+  async function autoCloseExpiredGames(specificGameId?: number) {
+    try {
+      const allGames = await storage.getGames();
+      const now = new Date();
+      const toClose = allGames.filter(g =>
+        g.isActive &&
+        g.endTime &&
+        new Date(g.endTime) < now &&
+        (specificGameId === undefined || g.id === specificGameId)
+      );
+      for (const game of toClose) {
+        console.log(`⏰ Auto-closing expired game "${game.name}" (ID: ${game.id}, ended: ${game.endTime})`);
+        await storage.updateGame(game.id, { isActive: false });
+        try {
+          const winner = await storage.selectGameWinner(game.id);
+          if (winner) {
+            console.log(`🏆 Winner auto-selected for expired game ${game.id}: Player ${winner.id}`);
+            try { await storage.sendGameCompletionEmails(game.id); } catch (_) {}
+          } else {
+            console.warn(`⚠️ No spin results found for expired game ${game.id} — no winner selected`);
+          }
+        } catch (winnerErr) {
+          console.error(`Winner selection error for expired game ${game.id}:`, winnerErr);
+        }
+      }
+    } catch (err) {
+      console.error("autoCloseExpiredGames error:", err);
+    }
+  }
+
   // Public routes - Get all active games
   app.get("/api/games", async (req, res) => {
     try {
+      // Auto-close any games whose endTime has passed (non-blocking)
+      autoCloseExpiredGames().catch(() => {});
       const games = await storage.getGames();
       res.json(games);
     } catch (error) {
@@ -595,6 +628,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Handle numeric IDs for database games
       const numericId = parseInt(id);
       if (!isNaN(numericId)) {
+        // Auto-close this game if its endTime has passed (non-blocking)
+        autoCloseExpiredGames(numericId).catch(() => {});
         const game = await storage.getGame(numericId);
         if (!game) {
           return res.status(404).json({ message: "Game not found" });
@@ -1516,6 +1551,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Failed to select winner:", error);
       res.status(500).json({ message: "Failed to select winner" });
+    }
+  });
+
+  // Admin: Force-close an expired game and auto-select a winner immediately
+  app.post("/api/admin/games/:id/force-close", requireAuth, async (req, res) => {
+    try {
+      const gameId = parseInt(req.params.id);
+      const game = await storage.getGame(gameId);
+      if (!game) return res.status(404).json({ message: "Game not found" });
+
+      // Check if winner already selected
+      const existingResult = await storage.getGameResult(gameId);
+      if (existingResult) {
+        return res.status(400).json({ message: "A winner has already been selected for this game" });
+      }
+
+      // Check if there are any participants
+      const spinResults = await storage.getSpinResultsByGameId(gameId);
+      if (spinResults.length === 0) {
+        // Close game even with no participants
+        await storage.updateGame(gameId, { isActive: false });
+        return res.json({ message: "Game closed (no participants — no winner selected)", winnerSelected: false });
+      }
+
+      // Close game and select winner
+      await storage.updateGame(gameId, { isActive: false });
+      const winner = await storage.selectGameWinner(gameId);
+      if (winner) {
+        try { await storage.sendGameCompletionEmails(gameId); } catch (_) {}
+        console.log(`🏆 Admin force-closed game ${gameId}, winner: Player ${winner.id}`);
+        res.json({ message: "Game closed and winner selected!", winnerSelected: true, winner: { playerName: winner.playerName } });
+      } else {
+        res.json({ message: "Game closed but winner selection failed — please try selecting manually", winnerSelected: false });
+      }
+    } catch (error: any) {
+      console.error("Force-close error:", error);
+      res.status(500).json({ message: "Failed to force-close game", error: error.message });
     }
   });
 

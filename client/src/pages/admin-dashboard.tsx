@@ -726,6 +726,25 @@ export default function AdminDashboard() {
     setIsDeleteGameOpen(true);
   };
 
+  const handleForceCloseGame = async (gameId: number, gameName: string) => {
+    if (!confirm(`Close "${gameName}" now and auto-select a winner from all participants? This cannot be undone.`)) return;
+    try {
+      const res = await apiRequest("POST", `/api/admin/games/${gameId}/force-close`, {});
+      const data = await res.json();
+      toast({
+        title: data.winnerSelected ? "✅ Winner Selected!" : "⚠️ Game Closed",
+        description: data.winnerSelected
+          ? `Game closed and winner selected: ${data.winner?.playerName || "Unknown"}. Emails sent!`
+          : data.message,
+        className: data.winnerSelected ? "bg-green-700 text-white border-green-600" : "bg-yellow-700 text-white border-yellow-600",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/games"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/winners"] });
+    } catch (err: any) {
+      toast({ title: "Error", description: err.message || "Failed to close game", variant: "destructive" });
+    }
+  };
+
   const confirmDeleteGame = () => {
     if (gameToDelete) {
       deleteGameMutation.mutate(gameToDelete.id);
@@ -2822,14 +2841,20 @@ export default function AdminDashboard() {
                             </p>
                           </div>
                         </div>
-                        <Badge
-                          variant={game.isActive ? "default" : "secondary"}
-                          className={`${
-                            game.isActive ? "bg-green-500" : "bg-gray-500"
-                          } text-xs flex-shrink-0 ml-2`}
-                        >
-                          {game.isActive ? "Active" : "Ended"}
-                        </Badge>
+                        {game.isActive && new Date(game.endTime) < new Date() ? (
+                          <Badge className="bg-red-600 text-xs flex-shrink-0 ml-2 animate-pulse">
+                            ⚠️ Expired
+                          </Badge>
+                        ) : (
+                          <Badge
+                            variant={game.isActive ? "default" : "secondary"}
+                            className={`${
+                              game.isActive ? "bg-green-500" : "bg-gray-500"
+                            } text-xs flex-shrink-0 ml-2`}
+                          >
+                            {game.isActive ? "Active" : "Ended"}
+                          </Badge>
+                        )}
                       </div>
 
                       <div className="space-y-3 mb-4">
@@ -2883,6 +2908,19 @@ export default function AdminDashboard() {
                             <span className="hidden sm:inline">View</span>
                             <span className="sm:hidden">View</span>
                           </Button>
+
+                          {/* Force-Close button for expired-but-still-active games */}
+                          {game.isActive && new Date(game.endTime) < new Date() && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="flex-1 border-red-500/70 text-red-400 hover:bg-red-500/20 text-xs sm:text-sm font-semibold"
+                              onClick={() => handleForceCloseGame(game.id, game.name)}
+                            >
+                              <span className="mr-1">🏁</span>
+                              <span>Close & Pick Winner</span>
+                            </Button>
+                          )}
 
                           {/* Winner Selection Button - Show for completed games or games with players */}
                           {((!game.isActive && game.numbersLeft === 0) ||
