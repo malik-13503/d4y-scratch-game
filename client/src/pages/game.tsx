@@ -135,8 +135,10 @@ export default function GamePage() {
     );
   }
 
-  // Check if game has ended
-  const isGameEnded = game.endTime && new Date() > new Date(game.endTime);
+  // Check if game has ended — but skip "no-expiry" games (sentinel: endTime >= year 2050)
+  // No-expiry games only close when the progress bar (token threshold) fills up
+  const isNoExpirySentinel = game.endTime && new Date(game.endTime).getFullYear() >= 2050;
+  const isGameEnded = !isNoExpirySentinel && game.endTime && new Date() > new Date(game.endTime);
   
   // Check if all numbers are taken — only true once data has actually loaded
   const areAllNumbersTaken = !isAvailableLoading && availableNumbersData !== undefined && availableNumbers.length === 0;

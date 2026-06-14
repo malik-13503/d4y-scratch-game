@@ -525,6 +525,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Helper: auto-close any active game whose endTime has passed and select a winner
+  // Games with endTime >= year 2050 are "no-expiry" games that only close when progress bar fills — skip them.
+  const NO_EXPIRY_SENTINEL_YEAR = 2050;
   async function autoCloseExpiredGames(specificGameId?: number) {
     try {
       const allGames = await storage.getGames();
@@ -533,6 +535,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         g.isActive &&
         g.endTime &&
         new Date(g.endTime) < now &&
+        new Date(g.endTime).getFullYear() < NO_EXPIRY_SENTINEL_YEAR &&
         (specificGameId === undefined || g.id === specificGameId)
       );
       for (const game of toClose) {
@@ -890,15 +893,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const durationHours = req.body.durationHours || 240; // Default to 240 hours if not specified
       const startTime = req.body.startTime ? new Date(req.body.startTime) : new Date();
-      const endTime = req.body.endTime 
-        ? new Date(req.body.endTime) 
-        : new Date(startTime.getTime() + durationHours * 60 * 60 * 1000);
 
-      // Convert string dates to Date objects if they exist
-      // Derive tokenThreshold from targetRevenue (1 token = $1 of revenue)
+      // noExpiry games use year 2099 as sentinel — they close only when progress bar fills
+      const noExpiry = req.body.noExpiry === true || req.body.noExpiry === "true";
+      const endTime = noExpiry
+        ? new Date('2099-12-31T23:59:59Z')
+        : req.body.endTime
+          ? new Date(req.body.endTime)
+          : new Date(startTime.getTime() + durationHours * 60 * 60 * 1000);
+
+      // tokenThreshold = total tokens to collect before auto-closing (1 token ≈ $0.50 at cheapest package)
       const targetRevenue = req.body.targetRevenue ? parseFloat(req.body.targetRevenue) : null;
       const tokenCostPerEntry = req.body.tokenCostPerEntry ? parseInt(req.body.tokenCostPerEntry) : 10;
-      const tokenThreshold = targetRevenue ? Math.round(targetRevenue) : (req.body.tokenThreshold || 4000);
+      // Use explicit tokenThreshold from frontend if sent; fallback to targetRevenue (sent as token count from frontend)
+      const tokenThreshold = req.body.tokenThreshold ? parseInt(req.body.tokenThreshold) : (targetRevenue ? Math.round(targetRevenue) : 4000);
 
       const processedBody = {
         ...req.body,

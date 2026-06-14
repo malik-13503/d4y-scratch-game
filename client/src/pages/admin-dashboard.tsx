@@ -119,6 +119,7 @@ export default function AdminDashboard() {
     prizeValue: "50.00",
     totalNumbers: "125",
     duration: "240",
+    noExpiry: false,
     prizeImageUrl: "",
     freePlayEnabled: false,
     freePlayNumbers: "",
@@ -638,9 +639,12 @@ export default function AdminDashboard() {
       });
     }
 
-    // Calculate start and end times based on duration
+    // Calculate start and end times — no-expiry games use year 2099 sentinel
     const startTime = new Date();
-    const endTime = new Date(startTime.getTime() + durationHours * 60 * 60 * 1000);
+    const noExpiry = previewData.noExpiry === true;
+    const endTime = noExpiry
+      ? new Date('2099-12-31T23:59:59Z')
+      : new Date(startTime.getTime() + durationHours * 60 * 60 * 1000);
 
     const tokenCostPerEntry = parseInt(previewData.tokenCostPerEntry || "10");
     // Auto-calculate revenue: every spot filled = 1 spin = tokenCostPerEntry tokens
@@ -670,7 +674,8 @@ export default function AdminDashboard() {
       emoji: (formData.get("emoji") as string) || "🎮",
       startTime: startTime.toISOString(),
       endTime: endTime.toISOString(),
-      durationHours: durationHours,
+      durationHours: noExpiry ? 0 : durationHours,
+      noExpiry: noExpiry,
       targetRevenue: targetRevenue.toFixed(2),
       tokenCostPerEntry: tokenCostPerEntry,
       tokenThreshold: targetRevenue,
@@ -1765,28 +1770,45 @@ export default function AdminDashboard() {
                                 />
                               </div>
                               <div>
-                                <Label
-                                  htmlFor="duration"
-                                  className="text-gray-300"
-                                >
-                                  Duration (hours)
-                                </Label>
-                                <Input
-                                  id="duration"
-                                  name="duration"
-                                  type="number"
-                                  min="1"
-                                  max="730"
-                                  value={previewData.duration}
-                                  onChange={(e) =>
-                                    setPreviewData({
-                                      ...previewData,
-                                      duration: e.target.value,
-                                    })
-                                  }
-                                  className="bg-white/10 border-purple-500/30"
-                                  placeholder="240"
-                                />
+                                <div className="flex items-center justify-between mb-1">
+                                  <Label htmlFor="duration" className="text-gray-300">
+                                    Duration (hours)
+                                  </Label>
+                                  <label className="flex items-center gap-1.5 cursor-pointer select-none">
+                                    <input
+                                      type="checkbox"
+                                      className="w-4 h-4 accent-purple-500"
+                                      checked={previewData.noExpiry}
+                                      onChange={(e) =>
+                                        setPreviewData({ ...previewData, noExpiry: e.target.checked })
+                                      }
+                                    />
+                                    <span className="text-purple-300 text-xs font-semibold">No Expiry</span>
+                                  </label>
+                                </div>
+                                {previewData.noExpiry ? (
+                                  <div className="bg-purple-900/40 border border-purple-500/40 rounded-md px-3 py-2 text-purple-300 text-sm flex items-center gap-2">
+                                    <span>♾️</span>
+                                    <span>Closes only when progress bar fills</span>
+                                  </div>
+                                ) : (
+                                  <Input
+                                    id="duration"
+                                    name="duration"
+                                    type="number"
+                                    min="1"
+                                    max="730"
+                                    value={previewData.duration}
+                                    onChange={(e) =>
+                                      setPreviewData({
+                                        ...previewData,
+                                        duration: e.target.value,
+                                      })
+                                    }
+                                    className="bg-white/10 border-purple-500/30"
+                                    placeholder="240"
+                                  />
+                                )}
                               </div>
                             </div>
 
@@ -2841,20 +2863,29 @@ export default function AdminDashboard() {
                             </p>
                           </div>
                         </div>
-                        {game.isActive && new Date(game.endTime) < new Date() ? (
-                          <Badge className="bg-red-600 text-xs flex-shrink-0 ml-2 animate-pulse">
-                            ⚠️ Expired
-                          </Badge>
-                        ) : (
-                          <Badge
-                            variant={game.isActive ? "default" : "secondary"}
-                            className={`${
-                              game.isActive ? "bg-green-500" : "bg-gray-500"
-                            } text-xs flex-shrink-0 ml-2`}
-                          >
-                            {game.isActive ? "Active" : "Ended"}
-                          </Badge>
-                        )}
+                        {(() => {
+                          const isNoExpiry = game.endTime && new Date(game.endTime).getFullYear() >= 2050;
+                          const isExpired = game.isActive && !isNoExpiry && new Date(game.endTime) < new Date();
+                          if (isExpired) {
+                            return (
+                              <Badge className="bg-red-600 text-xs flex-shrink-0 ml-2 animate-pulse">
+                                ⚠️ Expired
+                              </Badge>
+                            );
+                          }
+                          return (
+                            <Badge
+                              variant={game.isActive ? "default" : "secondary"}
+                              className={`${
+                                game.isActive
+                                  ? isNoExpiry ? "bg-purple-600" : "bg-green-500"
+                                  : "bg-gray-500"
+                              } text-xs flex-shrink-0 ml-2`}
+                            >
+                              {game.isActive ? (isNoExpiry ? "♾️ Active" : "Active") : "Ended"}
+                            </Badge>
+                          );
+                        })()}
                       </div>
 
                       <div className="space-y-3 mb-4">
@@ -2909,8 +2940,8 @@ export default function AdminDashboard() {
                             <span className="sm:hidden">View</span>
                           </Button>
 
-                          {/* Force-Close button for expired-but-still-active games */}
-                          {game.isActive && new Date(game.endTime) < new Date() && (
+                          {/* Force-Close button for expired-but-still-active games (not no-expiry games) */}
+                          {game.isActive && new Date(game.endTime).getFullYear() < 2050 && new Date(game.endTime) < new Date() && (
                             <Button
                               size="sm"
                               variant="outline"
