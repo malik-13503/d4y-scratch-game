@@ -39,6 +39,8 @@ import {
   Tag,
   CheckCircle,
   Timer,
+  Copy,
+  Share2,
 } from "lucide-react";
 import logoPath from "@assets/logo_1777237644041.png";
 
@@ -134,6 +136,7 @@ export default function Dashboard() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [deleteConfirmation, setDeleteConfirmation] = useState('');
   const { toast } = useToast();
+  const [copiedReferral, setCopiedReferral] = useState(false);
   
   const handleTabChange = (value: string) => {
     setCurrentTab(value);
@@ -158,6 +161,13 @@ export default function Dashboard() {
   const { data: user, isLoading: userLoading } = useQuery({
     queryKey: ["/api/user"],
   });
+
+  const { data: referralData } = useQuery<{ referralCode: string | null }>({
+    queryKey: ["/api/user/referral-code"],
+    enabled: !!user,
+  });
+  const referralCode = referralData?.referralCode;
+  const referralLink = referralCode ? `${window.location.origin}/?ref=${referralCode}` : null;
 
   const { data: userStats, isLoading: statsLoading } = useQuery({
     queryKey: ["/api/user/stats"],
@@ -1457,7 +1467,7 @@ function DailyTokensAndPromoSection() {
   };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
       {/* Daily Token Claim Card */}
       <Card className="relative overflow-hidden bg-gradient-to-br from-violet-900/70 to-purple-900/70 border-violet-400/40 backdrop-blur-xl shadow-2xl">
         <div className="absolute inset-0 bg-gradient-to-br from-violet-800/20 to-purple-800/20 blur-xl" />
@@ -1468,7 +1478,7 @@ function DailyTokensAndPromoSection() {
             </div>
             <div className="flex-1 min-w-0">
               <h3 className="text-lg font-bold text-white mb-1">Daily Free Tokens</h3>
-              <p className="text-violet-200 text-sm mb-4">Claim 3 free tokens every 24 hours — no purchase needed!</p>
+              <p className="text-violet-200 text-sm mb-4">Claim 1 free token every 24 hours — no purchase needed!</p>
               {statusLoading ? (
                 <div className="h-10 bg-violet-700/40 rounded-lg animate-pulse" />
               ) : dailyStatus?.canClaim ? (
@@ -1480,7 +1490,7 @@ function DailyTokensAndPromoSection() {
                   {claimMutation.isPending ? (
                     <span className="flex items-center"><RefreshCw className="h-4 w-4 mr-2 animate-spin" />Claiming...</span>
                   ) : (
-                    <span className="flex items-center"><Gift className="h-4 w-4 mr-2" />Claim 3 Free Tokens</span>
+                    <span className="flex items-center"><Gift className="h-4 w-4 mr-2" />Claim 1 Free Token</span>
                   )}
                 </Button>
               ) : (
@@ -1496,6 +1506,45 @@ function DailyTokensAndPromoSection() {
                     </div>
                   )}
                 </div>
+              )}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Referral Card */}
+      <Card className="relative overflow-hidden bg-gradient-to-br from-amber-900/70 to-orange-900/70 border-amber-400/40 backdrop-blur-xl shadow-2xl">
+        <div className="absolute inset-0 bg-gradient-to-br from-amber-800/20 to-orange-800/20 blur-xl" />
+        <CardContent className="relative p-6">
+          <div className="flex items-start space-x-4">
+            <div className="p-3 bg-gradient-to-br from-amber-500 to-orange-600 rounded-xl shadow-lg shrink-0">
+              <Share2 className="h-7 w-7 text-white" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <h3 className="text-lg font-bold text-white mb-1">Refer a Friend</h3>
+              <p className="text-amber-200 text-sm mb-3">Share your link — you both get <strong>5 bonus tokens</strong> when they sign up!</p>
+              {referralLink ? (
+                <div className="space-y-2">
+                  <div className="bg-amber-900/50 border border-amber-500/40 rounded-lg px-3 py-2 text-amber-100 text-xs font-mono tracking-wide truncate">
+                    {referralLink}
+                  </div>
+                  <Button
+                    onClick={() => {
+                      navigator.clipboard.writeText(referralLink);
+                      setCopiedReferral(true);
+                      setTimeout(() => setCopiedReferral(false), 2000);
+                    }}
+                    className="w-full bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white font-bold shadow-lg transition-all duration-300"
+                  >
+                    {copiedReferral ? (
+                      <span className="flex items-center"><CheckCircle className="h-4 w-4 mr-2" />Copied!</span>
+                    ) : (
+                      <span className="flex items-center"><Copy className="h-4 w-4 mr-2" />Copy Link</span>
+                    )}
+                  </Button>
+                </div>
+              ) : (
+                <div className="h-16 bg-amber-700/30 rounded-lg animate-pulse" />
               )}
             </div>
           </div>

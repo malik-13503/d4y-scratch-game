@@ -7,7 +7,7 @@ import {
   insertGameSchema, insertPlayerSchema, insertGameResultSchema, 
   insertWheelSegmentSchema, insertSystemSettingSchema, insertNotificationSchema,
   insertUserSchema, insertTransactionSchema, complianceLogs, users,
-  gameResults, games, transactions, spinResults, players
+  gameResults, games, transactions, spinResults, players, tokenTransactions
 } from "@shared/schema";
 import { z } from "zod";
 import { emailService } from "./emailService";
@@ -130,10 +130,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.error("Failed to grant welcome tokens:", tokenErr);
       }
 
-      // If referred, give 10 bonus tokens to BOTH referrer and new user
+      // If referred, give 5 bonus tokens to BOTH referrer and new user
       if (referrerId) {
         try {
-          const REFERRAL_BONUS = 10;
+          const REFERRAL_BONUS = 5;
           // Bonus for referrer
           await storage.createTokenTransaction({ userId: referrerId, transactionType: 'bonus', amount: REFERRAL_BONUS, description: `Referral bonus: ${user.firstName} joined with your code`, status: 'completed' });
           await storage.updateUserTokenBalance(referrerId, REFERRAL_BONUS);
@@ -1331,6 +1331,56 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Failed to fetch admin analytics:", error);
       res.status(500).json({ message: "Failed to fetch analytics" });
+    }
+  });
+
+  // Per-game profit/revenue/payout analytics
+  app.get("/api/admin/per-game-stats", requireAuth, async (req, res) => {
+    try {
+      const gameList = await storage.getAllGames();
+      const stats = await Promise.all(gameList.map(async (game) => {
+        const revenueResult = await db.select({
+          total: sql<number>`coalesce(sum(cast(${transactions.amount} as decimal)), 0)`
+        }).from(transactions).where(eq(transactions.gameId, game.id));
+        const revenue = Math.round(Number(revenueResult[0]?.total || 0) * 100) / 100;
+        const prizeValue = Math.round(parseFloat(game.prizeValue?.toString() || "0") * 100) / 100;
+        const profit = Math.round((revenue - prizeValue) * 100) / 100;
+        return {
+          id: game.id,
+          name: game.name,
+          emoji: game.emoji || "🎮",
+          tokensCollected: game.tokensCollected || 0,
+          revenue,
+          prizeValue,
+          profit,
+          isActive: game.isActive,
+        };
+      }));
+      res.json(stats);
+    } catch (error) {
+      console.error("Failed to fetch per-game stats:", error);
+      res.status(500).json({ message: "Failed to fetch per-game stats" });
+    }
+  });
+
+  // Token type breakdown (paid purchased vs free bonus)
+  app.get("/api/admin/token-stats", requireAuth, async (req, res) => {
+    try {
+      const paidResult = await db.select({
+        total: sql<number>`coalesce(sum(cast(amount as integer)), 0)`
+      }).from(tokenTransactions)
+        .where(sql`transaction_type = 'purchase' AND amount > 0`);
+      const freeResult = await db.select({
+        total: sql<number>`coalesce(sum(cast(amount as integer)), 0)`
+      }).from(tokenTransactions)
+        .where(sql`transaction_type = 'bonus' AND amount > 0`);
+      res.json({
+        paidTokens: Number(paidResult[0]?.total || 0),
+        freeTokens: Number(freeResult[0]?.total || 0),
+      });
+    } catch (error) {
+      console.error("Failed to fetch token stats:", error);
+      res.status(500).json({ message: "Failed to fetch token stats" });
     }
   });
 
@@ -2579,7 +2629,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
 
-      const DAILY_TOKENS = 3;
+      const DAILY_TOKENS = 1;
       await storage.updateUserTokenBalance(userId, DAILY_TOKENS);
       await storage.createDailyTokenClaim(userId);
       await storage.createTokenTransaction({

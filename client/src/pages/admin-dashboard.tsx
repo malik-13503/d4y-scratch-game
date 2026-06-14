@@ -76,6 +76,7 @@ import {
   ToggleRight,
   Wallet,
   List,
+  Coins,
 } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -396,6 +397,20 @@ export default function AdminDashboard() {
       console.log("⚡ User Activity received:", userActivity);
     }
   }, [userActivity]);
+
+  // Per-game profit stats
+  const { data: perGameStats = [] } = useQuery<any[]>({
+    queryKey: ["/api/admin/per-game-stats"],
+    enabled: !!currentAdmin,
+    refetchInterval: 30000,
+  });
+
+  // Token type stats (paid vs free)
+  const { data: tokenStats } = useQuery<{ paidTokens: number; freeTokens: number }>({
+    queryKey: ["/api/admin/token-stats"],
+    enabled: !!currentAdmin,
+    refetchInterval: 30000,
+  });
 
   // Analytics data
   const { data: analytics, refetch: refetchAnalytics } = useQuery<{
@@ -3579,6 +3594,105 @@ export default function AdminDashboard() {
                 </CardContent>
               </Card>
             </div>
+
+            {/* Token Type Breakdown */}
+            <Card className="bg-black/20 backdrop-blur-sm border border-purple-500/30">
+              <CardHeader>
+                <CardTitle className="text-white flex items-center">
+                  <Coins className="h-5 w-5 mr-2 text-yellow-400" />
+                  Token Breakdown — Paid vs Free
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="p-5 bg-green-500/10 border border-green-500/30 rounded-xl text-center">
+                    <div className="text-3xl font-bold text-green-300 mb-1">
+                      {(tokenStats?.paidTokens ?? 0).toLocaleString()}
+                    </div>
+                    <div className="text-sm text-green-200 font-medium">Purchased Tokens</div>
+                    <div className="text-xs text-green-400 mt-1">Paid by users (token purchases)</div>
+                  </div>
+                  <div className="p-5 bg-amber-500/10 border border-amber-500/30 rounded-xl text-center">
+                    <div className="text-3xl font-bold text-amber-300 mb-1">
+                      {(tokenStats?.freeTokens ?? 0).toLocaleString()}
+                    </div>
+                    <div className="text-sm text-amber-200 font-medium">Bonus Tokens</div>
+                    <div className="text-xs text-amber-400 mt-1">Free (referrals, daily, promo, welcome)</div>
+                  </div>
+                </div>
+                {tokenStats && (tokenStats.paidTokens + tokenStats.freeTokens) > 0 && (
+                  <div className="mt-4 p-4 bg-white/5 rounded-lg">
+                    <div className="flex justify-between text-sm text-gray-300 mb-2">
+                      <span>Paid</span>
+                      <span>{Math.round((tokenStats.paidTokens / (tokenStats.paidTokens + tokenStats.freeTokens)) * 100)}%</span>
+                    </div>
+                    <div className="h-3 bg-gray-700 rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-gradient-to-r from-green-500 to-emerald-400 rounded-full transition-all"
+                        style={{ width: `${Math.round((tokenStats.paidTokens / (tokenStats.paidTokens + tokenStats.freeTokens)) * 100)}%` }}
+                      />
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Per-Game Revenue / Profit Table */}
+            <Card className="bg-black/20 backdrop-blur-sm border border-purple-500/30">
+              <CardHeader>
+                <CardTitle className="text-white flex items-center">
+                  <TrendingUp className="h-5 w-5 mr-2 text-green-400" />
+                  Per-Game Revenue &amp; Profit
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {perGameStats.length === 0 ? (
+                  <div className="text-center py-8 text-gray-400">No games found</div>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="border-b border-white/10 text-gray-400 text-left">
+                          <th className="pb-3 pr-4">Game</th>
+                          <th className="pb-3 pr-4 text-right">Tokens In</th>
+                          <th className="pb-3 pr-4 text-right">Revenue</th>
+                          <th className="pb-3 pr-4 text-right">Prize Payout</th>
+                          <th className="pb-3 text-right">Profit</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-white/5">
+                        {perGameStats.map((game: any) => (
+                          <tr key={game.id} className="hover:bg-white/5 transition-colors">
+                            <td className="py-3 pr-4">
+                              <div className="flex items-center space-x-2">
+                                <span>{game.emoji}</span>
+                                <span className="text-white font-medium truncate max-w-[140px]">{game.name}</span>
+                                {game.isActive && <span className="text-xs text-green-400 bg-green-500/20 px-1.5 py-0.5 rounded-full">Live</span>}
+                              </div>
+                            </td>
+                            <td className="py-3 pr-4 text-right text-blue-300">{game.tokensCollected}</td>
+                            <td className="py-3 pr-4 text-right text-green-300">${game.revenue.toFixed(2)}</td>
+                            <td className="py-3 pr-4 text-right text-orange-300">${game.prizeValue.toFixed(2)}</td>
+                            <td className={`py-3 text-right font-bold ${game.profit >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                              {game.profit >= 0 ? '+' : ''}${game.profit.toFixed(2)}
+                            </td>
+                          </tr>
+                        ))}
+                        <tr className="border-t border-white/20 font-bold">
+                          <td className="pt-3 pr-4 text-white">Total</td>
+                          <td className="pt-3 pr-4 text-right text-blue-300">{perGameStats.reduce((s: number, g: any) => s + (g.tokensCollected || 0), 0)}</td>
+                          <td className="pt-3 pr-4 text-right text-green-300">${perGameStats.reduce((s: number, g: any) => s + g.revenue, 0).toFixed(2)}</td>
+                          <td className="pt-3 pr-4 text-right text-orange-300">${perGameStats.reduce((s: number, g: any) => s + g.prizeValue, 0).toFixed(2)}</td>
+                          <td className={`pt-3 text-right font-bold ${perGameStats.reduce((s: number, g: any) => s + g.profit, 0) >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                            {perGameStats.reduce((s: number, g: any) => s + g.profit, 0) >= 0 ? '+' : ''}${perGameStats.reduce((s: number, g: any) => s + g.profit, 0).toFixed(2)}
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
 
             {/* Revenue Trends */}
             <Card className="bg-black/20 backdrop-blur-sm border border-purple-500/30">
