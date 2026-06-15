@@ -1,5 +1,4 @@
 uploads = []
-outputs = []
 
 [[generated]]
 id = "Z2-9kYktxpyNYErV-fHz_"
@@ -54,3 +53,9 @@ id = "0jJvhx72v-JWlG-jHKE5u"
 uri = "file://attached_assets/hero-wheel.png"
 type = "image"
 title = "glowing prize wheel"
+
+[[outputs]]
+id = "ruAn-cWF3HxzLHgpbGRwY"
+uri = "file://prizeplugz-client.zip"
+type = "unspecified"
+title = "Prize Plugz — Client Source Code"
