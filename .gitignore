@@ -5,11 +5,18 @@ server/public
 vite.config.ts.*
 *.tar.gz
 
-# Replit internals — not needed in the repo
+# Replit internals
 .replit
 replit.nix
+replit.md
 .local/
 .agents/
 .config/
 .upm/
 .cache/
+
+# Agent conversation artifacts
+attached_assets/
+cookies*.txt
+.npmrc.bak
+false/
