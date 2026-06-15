@@ -1543,7 +1543,7 @@ function DailyTokensAndPromoSection() {
                             });
                           } catch (_) {}
                         }}
-                        className="flex-1 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white font-bold shadow-lg transition-all duration-300"
+                        className="flex-1 bg-white hover:bg-gray-100 text-orange-700 font-bold shadow-lg border-0 transition-all duration-300"
                       >
                         <span className="flex items-center justify-center"><Share2 className="h-4 w-4 mr-2" />Share</span>
                       </Button>
@@ -1563,7 +1563,7 @@ function DailyTokensAndPromoSection() {
                         setCopiedReferral(true);
                         setTimeout(() => setCopiedReferral(false), 2000);
                       }}
-                      className="flex-1 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white font-bold shadow-lg transition-all duration-300"
+                      className="flex-1 bg-white hover:bg-gray-100 text-orange-700 font-bold shadow-lg border-0 transition-all duration-300"
                     >
                       {copiedReferral ? (
                         <span className="flex items-center justify-center"><CheckCircle className="h-4 w-4 mr-2" />Copied!</span>
