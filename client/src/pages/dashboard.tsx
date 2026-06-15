@@ -1,5 +1,6 @@
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
+import MobileNav from "@/components/MobileNav";
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -1399,6 +1400,10 @@ export default function Dashboard() {
           </TabsContent>
         </Tabs>
       </div>
+      {/* Mobile bottom nav — persists on dashboard too */}
+      <MobileNav />
+      {/* Spacer so content isn't hidden behind fixed nav on mobile */}
+      <div className="h-16 md:hidden" />
     </div>
   );
 }

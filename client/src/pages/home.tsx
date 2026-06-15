@@ -1,6 +1,7 @@
 import { useLocation } from "wouter";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
+import MobileNav from "@/components/MobileNav";
 import { Button } from "@/components/ui/button";
 import {
   Zap, Trophy, Gift, Users, Shield, CheckCircle,
@@ -985,25 +986,7 @@ export default function HomePage() {
       </section>
 
       {/* ── MOBILE NAV ───────────────────────────────────────────────── */}
-      <nav className="fixed bottom-0 inset-x-0 md:hidden z-50 flex items-center justify-around px-1 py-2"
-           style={{background:"rgba(7,6,15,0.97)",backdropFilter:"blur(20px)",borderTop:"1px solid rgba(255,255,255,0.07)"}}>
-        {[
-          {icon:Home,      label:"Home",   path:"/",           active:true},
-          {icon:Gamepad2,  label:"Games",  path:"/games"},
-          {icon:Wallet,    label:"Wallet",  path:"/wallet"},
-          {icon:Gift,      label:"Prizes", path:"/games"},
-          {icon:Trophy,    label:"Winners",path:"/dashboard"},
-          {icon:Bell,      label:"Alerts", path:"/dashboard",  badge:3},
-          {icon:User,      label:"Account",path:"/dashboard"},
-        ].map(({icon:Icon,label,path,active,badge}) => (
-          <button key={label} onClick={() => setLocation(path)}
-            className={`relative flex flex-col items-center gap-0.5 px-2 py-1.5 rounded-xl transition-all ${active?"text-violet-400":"text-gray-600 hover:text-gray-400"}`}>
-            <Icon className="h-5 w-5" />
-            {badge && <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-red-500 rounded-full text-[8px] font-black flex items-center justify-center text-white">{badge}</span>}
-            <span className="text-[9px] font-semibold">{label}</span>
-          </button>
-        ))}
-      </nav>
+      <MobileNav />
     </div>
   );
 }
