@@ -12,9 +12,12 @@ import { EmailAlreadyExistsPopup } from "@/components/email-already-exists-popup
 interface ImprovedSignupFormProps {
   onSuccess: (userName: string) => void;
   onSwitchToLogin?: () => void;
+  initialReferralCode?: string;
 }
 
-export function ImprovedSignupForm({ onSuccess, onSwitchToLogin }: ImprovedSignupFormProps) {
+export function ImprovedSignupForm({ onSuccess, onSwitchToLogin, initialReferralCode }: ImprovedSignupFormProps) {
+  const urlRef = new URLSearchParams(window.location.search).get("ref") || "";
+  const prefilledCode = (initialReferralCode || urlRef).toUpperCase();
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -22,7 +25,7 @@ export function ImprovedSignupForm({ onSuccess, onSwitchToLogin }: ImprovedSignu
     phone: "",
     password: "",
     confirmPassword: "",
-    referralCode: "",
+    referralCode: prefilledCode,
   });
   const [ageConfirmed, setAgeConfirmed] = useState(false);
   const [isLoading, setIsLoading] = useState(false);

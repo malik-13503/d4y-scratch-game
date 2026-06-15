@@ -146,7 +146,8 @@ function JackpotCounter() {
 
 /* ─── Main Page ───────────────────────────────────────────────────────── */
 export default function AuthLandingPage() {
-  const [activeTab, setActiveTab]             = useState<"signup"|"login">("signup");
+  const refFromUrl = new URLSearchParams(window.location.search).get("ref") || "";
+  const [activeTab, setActiveTab]             = useState<"signup"|"login">(refFromUrl ? "signup" : "signup");
   const [showSignupPopup, setShowSignupPopup] = useState(false);
   const [signupUserName, setSignupUserName]   = useState("");
   const [, setLocation] = useLocation();
@@ -418,7 +419,8 @@ export default function AuthLandingPage() {
                         {activeTab === "signup"
                           ? <ImprovedSignupForm
                               onSuccess={name => { setSignupUserName(name); setShowSignupPopup(true); }}
-                              onSwitchToLogin={() => setActiveTab("login")} />
+                              onSwitchToLogin={() => setActiveTab("login")}
+                              initialReferralCode={refFromUrl} />
                           : <ImprovedLoginForm
                               onSuccess={() => { refetch(); setTimeout(() => refetch(), 100); }} />
                         }
