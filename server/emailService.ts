@@ -16,13 +16,130 @@ export interface EmailService {
   sendGameWinnerAnnouncementToAllParticipants(gameName: string, winnerName: string, winningNumber: number, prizeDescription: string, participantEmails: Array<{email: string, name: string}>): Promise<void>;
 }
 
+/* ─── Shared brand shell ─────────────────────────────────────────────────── */
+function shell(content: string): string {
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <!--[if mso]><noscript><xml><o:OfficeDocumentSettings><o:PixelsPerInch>96</o:PixelsPerInch></o:OfficeDocumentSettings></xml></noscript><![endif]-->
+</head>
+<body style="margin:0;padding:0;background-color:#0f0a1e;font-family:'Segoe UI',Arial,sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#0f0a1e;">
+  <tr><td align="center" style="padding:32px 16px;">
+    <table width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;width:100%;">
+
+      <!-- HEADER -->
+      <tr>
+        <td style="background:linear-gradient(135deg,#4c1d95 0%,#7c3aed 40%,#db2777 80%,#f59e0b 100%);border-radius:16px 16px 0 0;padding:40px 32px 36px;text-align:center;">
+          <div style="display:inline-block;background:rgba(255,255,255,0.12);border:1.5px solid rgba(255,255,255,0.25);border-radius:14px;padding:10px 22px;margin-bottom:18px;">
+            <span style="font-size:28px;letter-spacing:2px;font-weight:900;color:#ffffff;text-transform:uppercase;font-family:'Segoe UI',Arial,sans-serif;">🎯 PRIZE PLUGZ</span>
+          </div>
+          <br>
+          <span style="font-size:12px;letter-spacing:4px;text-transform:uppercase;color:rgba(255,255,255,0.65);font-weight:600;">Real Games · Real Prizes · Real Winners</span>
+        </td>
+      </tr>
+
+      <!-- BODY -->
+      <tr>
+        <td style="background:#1a1035;padding:0;">
+          ${content}
+        </td>
+      </tr>
+
+      <!-- FOOTER -->
+      <tr>
+        <td style="background:#0d0820;border-radius:0 0 16px 16px;padding:28px 32px;text-align:center;border-top:1px solid rgba(124,58,237,0.25);">
+          <p style="margin:0 0 8px;font-size:13px;color:#a78bfa;font-weight:700;letter-spacing:1px;text-transform:uppercase;">Prize Plugz</p>
+          <p style="margin:0 0 12px;font-size:12px;color:#6b7280;">Questions? Email us at <a href="mailto:admin@prizeplugz.com" style="color:#f59e0b;text-decoration:none;">admin@prizeplugz.com</a></p>
+          <p style="margin:0;font-size:11px;color:#374151;">© 2025 Prize Plugz. All rights reserved.<br>
+          <a href="https://prizeplugz.com/privacy" style="color:#6b7280;text-decoration:none;">Privacy Policy</a> &nbsp;·&nbsp;
+          <a href="https://prizeplugz.com/terms" style="color:#6b7280;text-decoration:none;">Terms & Conditions</a> &nbsp;·&nbsp;
+          <a href="https://prizeplugz.com/official-rules" style="color:#6b7280;text-decoration:none;">Official Rules</a></p>
+        </td>
+      </tr>
+
+    </table>
+  </td></tr>
+</table>
+</body>
+</html>`;
+}
+
+/* ─── Reusable pieces ────────────────────────────────────────────────────── */
+function heroSection(emoji: string, headline: string, sub: string, gradFrom = '#7c3aed', gradTo = '#db2777'): string {
+  return `
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+    <tr>
+      <td style="padding:36px 32px 24px;text-align:center;">
+        <div style="display:inline-block;width:72px;height:72px;line-height:72px;border-radius:50%;background:linear-gradient(135deg,${gradFrom},${gradTo});font-size:34px;text-align:center;margin-bottom:16px;">${emoji}</div>
+        <h1 style="margin:0 0 8px;font-size:26px;font-weight:900;color:#f3f4f6;letter-spacing:-0.5px;">${headline}</h1>
+        <p style="margin:0;font-size:15px;color:#9ca3af;line-height:1.5;">${sub}</p>
+      </td>
+    </tr>
+  </table>`;
+}
+
+function infoCard(rows: Array<[string, string]>, accentColor = '#7c3aed'): string {
+  const rowsHtml = rows.map(([label, value]) => `
+    <tr>
+      <td style="padding:11px 16px;font-size:13px;color:#9ca3af;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;width:40%;border-bottom:1px solid rgba(255,255,255,0.06);">${label}</td>
+      <td style="padding:11px 16px;font-size:14px;color:#f3f4f6;font-weight:700;border-bottom:1px solid rgba(255,255,255,0.06);">${value}</td>
+    </tr>`).join('');
+  return `
+  <table width="100%" cellpadding="0" cellspacing="0" border="0"
+    style="background:rgba(255,255,255,0.04);border:1px solid rgba(${accentColor === '#7c3aed' ? '124,58,237' : '245,158,11'},0.25);border-radius:12px;overflow:hidden;margin:0 0 20px;">
+    ${rowsHtml}
+  </table>`;
+}
+
+function ctaButton(label: string, href: string, gradFrom = '#f59e0b', gradTo = '#f97316'): string {
+  return `
+  <table cellpadding="0" cellspacing="0" border="0" style="margin:0 auto;">
+    <tr>
+      <td style="background:linear-gradient(135deg,${gradFrom},${gradTo});border-radius:10px;padding:0;">
+        <a href="${href}" style="display:inline-block;padding:15px 36px;font-size:15px;font-weight:900;color:#000000;text-decoration:none;letter-spacing:0.5px;">${label}</a>
+      </td>
+    </tr>
+  </table>`;
+}
+
+function alertBox(text: string, emoji: string, bg = 'rgba(245,158,11,0.1)', border = '#f59e0b'): string {
+  return `
+  <table width="100%" cellpadding="0" cellspacing="0" border="0"
+    style="background:${bg};border:1px solid ${border};border-radius:10px;margin:0 0 20px;">
+    <tr>
+      <td style="padding:16px 20px;font-size:14px;color:#e5e7eb;line-height:1.6;">
+        <span style="font-size:18px;margin-right:8px;">${emoji}</span>${text}
+      </td>
+    </tr>
+  </table>`;
+}
+
+function featureList(items: Array<[string, string]>): string {
+  return items.map(([icon, text]) => `
+  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 10px;">
+    <tr>
+      <td style="width:40px;vertical-align:top;padding-top:2px;font-size:20px;">${icon}</td>
+      <td style="font-size:14px;color:#d1d5db;line-height:1.5;">${text}</td>
+    </tr>
+  </table>`).join('');
+}
+
+function divider(): string {
+  return `<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:24px 0;"><tr><td style="border-top:1px solid rgba(255,255,255,0.07);"></td></tr></table>`;
+}
+
+/* ─── Email service ──────────────────────────────────────────────────────── */
 class ResendEmailService implements EmailService {
   async sendWelcomeEmail(userEmail: string, userName: string): Promise<void> {
     try {
       await resend.emails.send({
         from: FROM_EMAIL,
         to: userEmail,
-        subject: '🎉 Welcome to Prize Plugz - Start Your Gaming Adventure!',
+        subject: '🎉 Welcome to Prize Plugz — Your Free Tokens Are Inside!',
         html: this.getWelcomeEmailTemplate(userName),
       });
       console.log(`Welcome email sent to ${userEmail}`);
@@ -37,7 +154,7 @@ class ResendEmailService implements EmailService {
       await resend.emails.send({
         from: FROM_EMAIL,
         to: userEmail,
-        subject: '✅ Payment Card Successfully Added - Ready to Play!',
+        subject: '✅ Payment Card Added — You\'re Ready to Play!',
         html: this.getCardSetupTemplate(userName, cardLast4, cardBrand),
       });
       console.log(`Card setup confirmation sent to ${userEmail}`);
@@ -52,7 +169,7 @@ class ResendEmailService implements EmailService {
       await resend.emails.send({
         from: FROM_EMAIL,
         to: userEmail,
-        subject: '🎯 Payment Successful - Your Lucky Number Awaits!',
+        subject: `🎯 Payment Confirmed — You Picked #${gameNumber}!`,
         html: this.getPaymentReceiptTemplate(userName, amount, gameNumber, transactionId),
       });
       console.log(`Payment success email sent to ${userEmail}`);
@@ -62,245 +179,14 @@ class ResendEmailService implements EmailService {
     }
   }
 
-  private getWelcomeEmailTemplate(userName: string): string {
-    return `
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Welcome to Prize Plugz</title>
-  <style>
-    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; background-color: #f8fafc; }
-    .container { max-width: 600px; margin: 0 auto; background-color: white; }
-    .header { background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #d946ef 100%); padding: 40px 20px; text-align: center; }
-    .header h1 { color: white; margin: 0; font-size: 28px; font-weight: bold; text-shadow: 0 2px 4px rgba(0,0,0,0.3); }
-    .content { padding: 40px 30px; }
-    .welcome-message { font-size: 18px; color: #334155; margin-bottom: 25px; line-height: 1.6; }
-    .features { background-color: #f1f5f9; padding: 25px; border-radius: 12px; margin: 25px 0; }
-    .feature { display: flex; align-items: center; margin-bottom: 15px; }
-    .feature-icon { width: 24px; height: 24px; margin-right: 15px; }
-    .cta-button { display: inline-block; background: linear-gradient(135deg, #6366f1, #8b5cf6); color: white; padding: 16px 32px; text-decoration: none; border-radius: 8px; font-weight: bold; margin: 20px 0; }
-    .footer { background-color: #1e293b; color: white; padding: 30px; text-align: center; font-size: 14px; }
-    .security-notice { background-color: #fef3c7; border-left: 4px solid #f59e0b; padding: 15px; margin: 20px 0; border-radius: 4px; }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <div class="header">
-      <h1>🎯 Prize Plugz</h1>
-      <p style="color: rgba(255,255,255,0.9); margin: 10px 0 0 0; font-size: 16px;">Welcome to the Ultimate Gaming Experience!</p>
-    </div>
-    
-    <div class="content">
-      <div class="welcome-message">
-        <h2 style="color: #1e293b; margin-top: 0;">Welcome, ${userName}! 🎉</h2>
-        <p>Congratulations on joining Prize Plugz! You're now part of an exclusive community where excitement meets opportunity.</p>
-      </div>
-      
-      <div class="features">
-        <h3 style="color: #1e293b; margin-top: 0;">What You Can Do Now:</h3>
-        <div class="feature">
-          <span style="font-size: 20px;">🎰</span>
-          <span style="margin-left: 15px;">Play exciting wheel-spinning games with real prizes</span>
-        </div>
-        <div class="feature">
-          <span style="font-size: 20px;">💳</span>
-          <span style="margin-left: 15px;">Secure payment processing with instant transactions</span>
-        </div>
-        <div class="feature">
-          <span style="font-size: 20px;">🏆</span>
-          <span style="margin-left: 15px;">Win amazing prizes and track your achievements</span>
-        </div>
-        <div class="feature">
-          <span style="font-size: 20px;">📱</span>
-          <span style="margin-left: 15px;">Play anywhere with our mobile-optimized platform</span>
-        </div>
-      </div>
-      
-      <div style="text-align: center; margin: 30px 0;">
-        <a href="https://prizeplugz.com" class="cta-button">Start Playing Now!</a>
-      </div>
-      
-      <div class="security-notice">
-        <p style="margin: 0; color: #92400e;"><strong>Security First:</strong> Your account is protected with industry-standard encryption. All transactions are processed securely through Square's payment system.</p>
-      </div>
-    </div>
-    
-    <div class="footer">
-      <p><strong>Prize Plugz Team</strong></p>
-      <p>Questions? Reply to this email or contact us at admin@prizeplugz.com</p>
-      <p style="margin-top: 20px; color: #94a3b8; font-size: 12px;">This email was sent because you created an account with Prize Plugz.</p>
-    </div>
-  </div>
-</body>
-</html>`;
-  }
-
-  private getCardSetupTemplate(userName: string, cardLast4: string, cardBrand: string): string {
-    return `
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Payment Method Confirmed</title>
-  <style>
-    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; background-color: #f8fafc; }
-    .container { max-width: 600px; margin: 0 auto; background-color: white; }
-    .header { background: linear-gradient(135deg, #10b981 0%, #059669 50%, #047857 100%); padding: 40px 20px; text-align: center; }
-    .header h1 { color: white; margin: 0; font-size: 28px; font-weight: bold; text-shadow: 0 2px 4px rgba(0,0,0,0.3); }
-    .content { padding: 40px 30px; }
-    .confirmation-box { background-color: #f0fdf4; border: 2px solid #22c55e; border-radius: 12px; padding: 25px; text-align: center; margin: 25px 0; }
-    .card-info { background-color: #f8fafc; padding: 20px; border-radius: 8px; margin: 20px 0; }
-    .footer { background-color: #1e293b; color: white; padding: 30px; text-align: center; font-size: 14px; }
-    .security-badge { display: inline-flex; align-items: center; background-color: #dbeafe; color: #1e40af; padding: 8px 16px; border-radius: 20px; font-size: 14px; margin: 10px 0; }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <div class="header">
-      <h1>💳 Prize Plugz</h1>
-      <p style="color: rgba(255,255,255,0.9); margin: 10px 0 0 0; font-size: 16px;">Payment Method Successfully Added!</p>
-    </div>
-    
-    <div class="content">
-      <div class="confirmation-box">
-        <h2 style="color: #059669; margin-top: 0;">✅ Success!</h2>
-        <p style="color: #374151; font-size: 16px; margin-bottom: 0;">Hi ${userName}, your payment method has been successfully added and verified.</p>
-      </div>
-      
-      <div class="card-info">
-        <h3 style="color: #1e293b; margin-top: 0;">Payment Method Details:</h3>
-        <p><strong>Card Type:</strong> ${cardBrand}</p>
-        <p><strong>Card Number:</strong> •••• •••• •••• ${cardLast4}</p>
-        <p><strong>Status:</strong> <span style="color: #059669; font-weight: bold;">Verified & Active</span></p>
-      </div>
-      
-      <div class="security-badge" style="display: block; text-align: center;">
-        <span>🔒 Secured by Square Payment Processing</span>
-      </div>
-      
-      <div style="background-color: #eff6ff; padding: 20px; border-radius: 8px; margin: 25px 0;">
-        <h3 style="color: #1e40af; margin-top: 0;">What's Next?</h3>
-        <p style="color: #374151; margin-bottom: 0;">You're all set to start playing! Your card will be charged only when you choose to play a number on the wheel. All transactions are instant and secure.</p>
-      </div>
-      
-      <div style="text-align: center; margin: 30px 0;">
-        <a href="https://prizeplugz.com/games" style="display: inline-block; background: linear-gradient(135deg, #10b981, #059669); color: white; padding: 16px 32px; text-decoration: none; border-radius: 8px; font-weight: bold;">Start Playing Now!</a>
-      </div>
-    </div>
-    
-    <div class="footer">
-      <p><strong>Prize Plugz Team</strong></p>
-      <p>Need help? Contact us at admin@prizeplugz.com</p>
-      <p style="margin-top: 20px; color: #94a3b8; font-size: 12px;">Your payment information is encrypted and secure. We never store your full card details.</p>
-    </div>
-  </div>
-</body>
-</html>`;
-  }
-
-  private getPaymentReceiptTemplate(userName: string, amount: string, gameNumber: number, transactionId: string): string {
-    const date = new Date().toLocaleDateString('en-US', { 
-      year: 'numeric', 
-      month: 'long', 
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-    
-    return `
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Payment Receipt</title>
-  <style>
-    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; background-color: #f8fafc; }
-    .container { max-width: 600px; margin: 0 auto; background-color: white; }
-    .header { background: linear-gradient(135deg, #3b82f6 0%, #6366f1 50%, #8b5cf6 100%); padding: 40px 20px; text-align: center; }
-    .header h1 { color: white; margin: 0; font-size: 28px; font-weight: bold; text-shadow: 0 2px 4px rgba(0,0,0,0.3); }
-    .content { padding: 40px 30px; }
-    .receipt-box { background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 25px; margin: 25px 0; }
-    .transaction-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #e2e8f0; }
-    .transaction-row:last-child { border-bottom: none; font-weight: bold; font-size: 18px; }
-    .footer { background-color: #1e293b; color: white; padding: 30px; text-align: center; font-size: 14px; }
-    .game-info { background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #f59e0b; }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <div class="header">
-      <h1>🎯 Prize Plugz</h1>
-      <p style="color: rgba(255,255,255,0.9); margin: 10px 0 0 0; font-size: 16px;">Game Spin Receipt - Thank You for Playing!</p>
-    </div>
-    
-    <div class="content">
-      <h2 style="color: #1e293b;">Hi ${userName},</h2>
-      <p style="color: #374151; font-size: 16px;">Your payment has been successfully processed. Here are your transaction details:</p>
-      
-      <div class="receipt-box">
-        <h3 style="color: #1e293b; margin-top: 0;">Transaction Receipt</h3>
-        <div class="transaction-row">
-          <span>Date & Time:</span>
-          <span>${date}</span>
-        </div>
-        <div class="transaction-row">
-          <span>Game Number Played:</span>
-          <span style="font-weight: bold; color: #6366f1;">#${gameNumber}</span>
-        </div>
-        <div class="transaction-row">
-          <span>Amount Charged:</span>
-          <span style="font-weight: bold; color: #059669;">$${amount}</span>
-        </div>
-        <div class="transaction-row">
-          <span>Transaction ID:</span>
-          <span style="font-family: monospace; font-size: 14px;">${transactionId}</span>
-        </div>
-        <div class="transaction-row">
-          <span>Status:</span>
-          <span style="color: #059669; font-weight: bold;">✅ Completed</span>
-        </div>
-      </div>
-      
-      <div class="game-info">
-        <h3 style="color: #92400e; margin-top: 0;">🎮 Game Results</h3>
-        <p style="color: #78350f; margin-bottom: 0;">You successfully claimed number <strong>${gameNumber}</strong>! Check your dashboard to see if you've won any prizes. Good luck!</p>
-      </div>
-      
-      <div style="background-color: #f0f9ff; padding: 20px; border-radius: 8px; margin: 25px 0;">
-        <h3 style="color: #0369a1; margin-top: 0;">Keep Playing!</h3>
-        <p style="color: #374151; margin-bottom: 15px;">Want to try your luck again? There are more numbers available to play.</p>
-        <div style="text-align: center;">
-          <a href="https://prizeplugz.com/games" style="display: inline-block; background: linear-gradient(135deg, #3b82f6, #6366f1); color: white; padding: 16px 32px; text-decoration: none; border-radius: 8px; font-weight: bold;">Play More Games</a>
-        </div>
-      </div>
-      
-      <div style="background-color: #fef2f2; border-left: 4px solid #ef4444; padding: 15px; margin: 20px 0; border-radius: 4px;">
-        <p style="margin: 0; color: #991b1b; font-size: 14px;"><strong>Important:</strong> Keep this email as your receipt. If you have any questions about this transaction, please contact us with the transaction ID above.</p>
-      </div>
-    </div>
-    
-    <div class="footer">
-      <p><strong>Prize Plugz Team</strong></p>
-      <p>Questions about this transaction? Contact us at admin@prizeplugz.com</p>
-      <p style="margin-top: 20px; color: #94a3b8; font-size: 12px;">This is an automated receipt. All payments are processed securely through Square.</p>
-    </div>
-  </div>
-</body>
-</html>`;
-  }
-
   async sendWinnerNotification(userEmail: string, userName: string, gameName: string, winningNumber: number, prizeValue: string, prizeDescription: string): Promise<void> {
     try {
       await resend.emails.send({
         from: FROM_EMAIL,
         to: userEmail,
-        subject: `Account notification - ${gameName}`,
+        subject: `🏆 YOU WON — ${gameName}! Claim Your Prize`,
         html: this.getWinnerNotificationTemplate(userName, gameName, winningNumber, prizeValue, prizeDescription),
-        text: `Dear ${userName}, This notification confirms an account update for ${gameName}. Number ${winningNumber} has been selected. Item details: ${prizeDescription} (Value: $${prizeValue}). Our team will contact you within 48 hours. Please have identification ready. For questions contact admin@prizeplugz.com`,
+        text: `Congratulations ${userName}! You won ${gameName} with number ${winningNumber}. Prize: ${prizeDescription} (Value: $${prizeValue}). Our team will contact you within 48 hours. Questions? admin@prizeplugz.com`,
       });
       console.log(`Winner notification sent to ${userEmail}`);
     } catch (error) {
@@ -314,9 +200,9 @@ class ResendEmailService implements EmailService {
       await resend.emails.send({
         from: FROM_EMAIL,
         to: userEmail,
-        subject: `${gameName} - Status update`,
+        subject: `🎉 ${gameName} — Winner Announced!`,
         html: this.getGameCompletionTemplate(userName, gameName, winningNumber, winnerName, prizeDescription),
-        text: `Hello ${userName}, This confirms ${gameName} has completed. Selected participant: ${winnerName}, Number: ${winningNumber}, Prize: ${prizeDescription}. Thank you for your participation. Questions? Contact admin@prizeplugz.com`,
+        text: `Hi ${userName}, ${gameName} has ended. Winner: ${winnerName}, Number: ${winningNumber}, Prize: ${prizeDescription}. Thanks for playing! Visit prizeplugz.com for more games.`,
       });
       console.log(`Game completion notification sent to ${userEmail}`);
     } catch (error) {
@@ -325,85 +211,16 @@ class ResendEmailService implements EmailService {
     }
   }
 
-  private getWinnerNotificationTemplate(userName: string, gameName: string, winningNumber: number, prizeValue: string, prizeDescription: string): string {
-    return `
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Account Update</title>
-</head>
-<body style="margin: 0; padding: 20px; font-family: Arial, sans-serif; background-color: #ffffff; color: #333333;">
-  <table style="max-width: 600px; margin: 0 auto; background-color: white; border: 1px solid #dddddd;">
-    <tr>
-      <td style="background-color: #4a5568; padding: 20px; text-align: center;">
-        <h1 style="color: white; margin: 0; font-size: 20px; font-weight: normal;">Prize Plugz</h1>
-      </td>
-    </tr>
-    <tr>
-      <td style="padding: 30px;">
-        <p style="color: #333333; font-size: 16px; line-height: 1.5; margin: 0 0 20px 0;">
-          Dear ${userName},
-        </p>
-        <p style="color: #333333; font-size: 16px; line-height: 1.5; margin: 0 0 20px 0;">
-          This is to notify you of an account update. Your participation in ${gameName} has resulted in selection of number ${winningNumber}.
-        </p>
-        
-        <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
-          <tr>
-            <td style="padding: 10px; border-bottom: 1px solid #eeeeee; color: #333333;">Game:</td>
-            <td style="padding: 10px; border-bottom: 1px solid #eeeeee; color: #333333;">${gameName}</td>
-          </tr>
-          <tr>
-            <td style="padding: 10px; border-bottom: 1px solid #eeeeee; color: #333333;">Number:</td>
-            <td style="padding: 10px; border-bottom: 1px solid #eeeeee; color: #333333;">${winningNumber}</td>
-          </tr>
-          <tr>
-            <td style="padding: 10px; border-bottom: 1px solid #eeeeee; color: #333333;">Item:</td>
-            <td style="padding: 10px; border-bottom: 1px solid #eeeeee; color: #333333;">${prizeDescription}</td>
-          </tr>
-          <tr>
-            <td style="padding: 10px; border-bottom: 1px solid #eeeeee; color: #333333;">Value:</td>
-            <td style="padding: 10px; border-bottom: 1px solid #eeeeee; color: #333333;">$${prizeValue}</td>
-          </tr>
-        </table>
-        
-        <p style="color: #333333; font-size: 16px; line-height: 1.5; margin: 20px 0;">
-          Next steps:
-        </p>
-        <ul style="color: #333333; line-height: 1.5; padding-left: 20px; margin: 0 0 20px 0;">
-          <li>Our team will contact you within 48 hours</li>
-          <li>Please have identification ready for verification</li>
-          <li>Monitor your email for further instructions</li>
-        </ul>
-        
-        <p style="color: #333333; font-size: 16px; line-height: 1.5; margin: 20px 0;">
-          You can view your account details at: https://prizeplugz.com/dashboard
-        </p>
-        
-        <p style="color: #666666; font-size: 14px; margin: 30px 0 0 0; padding-top: 20px; border-top: 1px solid #eeeeee;">
-          This is an automated message from Prize Plugz. Please keep this email for your records.<br>
-          For assistance, contact: admin@prizeplugz.com
-        </p>
-      </td>
-    </tr>
-  </table>
-</body>
-</html>`;
-  }
-
   async sendGameWinnerAnnouncementToAllParticipants(gameName: string, winnerName: string, winningNumber: number, prizeDescription: string, participantEmails: Array<{email: string, name: string}>): Promise<void> {
     try {
       const emailPromises = participantEmails.map(participant =>
         resend.emails.send({
           from: FROM_EMAIL,
           to: participant.email,
-          subject: `🎉 Winner Announced - ${gameName} Results`,
+          subject: `🎉 ${gameName} — Winner Announced!`,
           html: this.getWinnerAnnouncementTemplate(participant.name, gameName, winnerName, winningNumber, prizeDescription),
         })
       );
-
       await Promise.all(emailPromises);
       console.log(`Winner announcement emails sent to ${participantEmails.length} participants for game ${gameName}`);
     } catch (error) {
@@ -412,134 +229,277 @@ class ResendEmailService implements EmailService {
     }
   }
 
-  private getWinnerAnnouncementTemplate(participantName: string, gameName: string, winnerName: string, winningNumber: number, prizeDescription: string): string {
-    return `
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Winner Announcement</title>
-</head>
-<body style="margin: 0; padding: 20px; font-family: Arial, sans-serif; background-color: #f8fafc; color: #333333;">
-  <table style="max-width: 600px; margin: 0 auto; background-color: white; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
-    <tr>
-      <td style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #d946ef 100%); padding: 30px; text-align: center;">
-        <h1 style="color: white; margin: 0; font-size: 24px; font-weight: bold;">🎉 Winner Announcement</h1>
-        <p style="color: rgba(255,255,255,0.9); margin: 10px 0 0 0; font-size: 16px;">The results are in!</p>
-      </td>
-    </tr>
-    <tr>
-      <td style="padding: 40px 30px;">
-        <p style="color: #333333; font-size: 18px; line-height: 1.5; margin: 0 0 20px 0;">
-          Hello ${participantName},
-        </p>
-        <p style="color: #333333; font-size: 16px; line-height: 1.5; margin: 0 0 25px 0;">
-          Thank you for participating in <strong>${gameName}</strong>! The winner has been selected and we're excited to share the results with all participants.
-        </p>
-        
-        <div style="background-color: #f1f5f9; border-left: 4px solid #6366f1; padding: 25px; margin: 25px 0; border-radius: 8px;">
-          <h3 style="color: #1e293b; margin: 0 0 15px 0; font-size: 18px;">🏆 Winner Details</h3>
-          <table style="width: 100%; border-collapse: collapse;">
+  /* ─── Templates ────────────────────────────────────────────────────────── */
+
+  private getWelcomeEmailTemplate(userName: string): string {
+    return shell(`
+      ${heroSection('🎁', `Welcome, ${userName}!`, 'You\'re officially part of the Prize Plugz family. Let\'s get you winning!')}
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr><td style="padding:0 32px 24px;">
+
+          <!-- Token badge -->
+          <table width="100%" cellpadding="0" cellspacing="0" border="0"
+            style="background:linear-gradient(135deg,rgba(245,158,11,0.15),rgba(249,115,22,0.15));border:1px solid rgba(245,158,11,0.4);border-radius:12px;margin:0 0 24px;">
             <tr>
-              <td style="padding: 8px 0; color: #64748b; font-weight: 500;">Game:</td>
-              <td style="padding: 8px 0; color: #1e293b; font-weight: bold;">${gameName}</td>
-            </tr>
-            <tr>
-              <td style="padding: 8px 0; color: #64748b; font-weight: 500;">Winner:</td>
-              <td style="padding: 8px 0; color: #6366f1; font-weight: bold;">${winnerName}</td>
-            </tr>
-            <tr>
-              <td style="padding: 8px 0; color: #64748b; font-weight: 500;">Winning Number:</td>
-              <td style="padding: 8px 0; color: #dc2626; font-weight: bold; font-size: 18px;">#${winningNumber}</td>
-            </tr>
-            <tr>
-              <td style="padding: 8px 0; color: #64748b; font-weight: 500;">Prize:</td>
-              <td style="padding: 8px 0; color: #059669; font-weight: bold;">${prizeDescription}</td>
+              <td style="padding:20px 24px;text-align:center;">
+                <p style="margin:0 0 4px;font-size:13px;color:#fbbf24;font-weight:700;text-transform:uppercase;letter-spacing:1px;">🎉 Your Welcome Gift</p>
+                <p style="margin:0;font-size:32px;font-weight:900;color:#f59e0b;">10 FREE Tokens</p>
+                <p style="margin:4px 0 0;font-size:13px;color:#d97706;">already added to your account!</p>
+              </td>
             </tr>
           </table>
-        </div>
-        
-        <p style="color: #333333; font-size: 16px; line-height: 1.5; margin: 25px 0;">
-          Congratulations to our winner! Thank you for being part of the Prize Plugz community.
-        </p>
-        
-        <div style="text-align: center; margin: 30px 0;">
-          <a href="https://prizeplugz.com/games" style="display: inline-block; background: linear-gradient(135deg, #6366f1, #8b5cf6); color: white; padding: 15px 25px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px;">Play More Games</a>
-        </div>
-        
-        <p style="color: #64748b; font-size: 14px; margin: 30px 0 0 0; padding-top: 20px; border-top: 1px solid #e2e8f0; text-align: center;">
-          This is an automated message from Prize Plugz.<br>
-          For questions, contact: admin@prizeplugz.com
-        </p>
-      </td>
-    </tr>
-  </table>
-</body>
-</html>`;
+
+          <p style="margin:0 0 20px;font-size:15px;color:#d1d5db;line-height:1.7;">
+            Prize Plugz is where real prizes get won every day. Pick your lucky number on a live game wheel — when all numbers are claimed, one winner takes it all. 100% transparent. 100% real.
+          </p>
+
+          <table width="100%" cellpadding="0" cellspacing="0" border="0"
+            style="background:rgba(255,255,255,0.04);border:1px solid rgba(124,58,237,0.2);border-radius:12px;padding:4px;margin:0 0 24px;">
+            <tr><td style="padding:16px 20px;">
+              <p style="margin:0 0 14px;font-size:13px;font-weight:800;color:#a78bfa;text-transform:uppercase;letter-spacing:1px;">How it works</p>
+              ${featureList([
+                ['🎰', 'Browse live games and pick your lucky number'],
+                ['💰', 'Each number has a fixed token cost — no hidden fees'],
+                ['🏆', 'When all numbers fill up, a winner is auto-selected instantly'],
+                ['📧', 'Winners are notified by email and receive their prize within 48 hours'],
+              ])}
+            </td></tr>
+          </table>
+
+          <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 24px;">
+            <tr><td style="text-align:center;">
+              ${ctaButton('🎮  Start Playing Now', 'https://prizeplugz.com/games')}
+            </td></tr>
+          </table>
+
+          ${alertBox('Prize Plugz is a skill-free sweepstakes platform. No purchase is necessary to enter or win. See our <a href="https://prizeplugz.com/official-rules" style="color:#fbbf24;">Official Rules</a> for details.', '📋', 'rgba(124,58,237,0.1)', 'rgba(124,58,237,0.4)')}
+
+        </td></tr>
+      </table>
+    `);
+  }
+
+  private getCardSetupTemplate(userName: string, cardLast4: string, cardBrand: string): string {
+    return shell(`
+      ${heroSection('✅', 'Payment Method Added!', `Your ${cardBrand} card ending in ${cardLast4} is verified and ready to use.`, '#059669', '#10b981')}
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr><td style="padding:0 32px 24px;">
+
+          <p style="margin:0 0 20px;font-size:15px;color:#d1d5db;line-height:1.7;">Hi <strong style="color:#f3f4f6;">${userName}</strong>, your payment card has been securely verified. Here's a summary:</p>
+
+          ${infoCard([
+            ['Card Brand', cardBrand],
+            ['Card Number', `•••• •••• •••• ${cardLast4}`],
+            ['Status', '✅ Verified & Active'],
+          ])}
+
+          <table width="100%" cellpadding="0" cellspacing="0" border="0"
+            style="background:rgba(5,150,105,0.1);border:1px solid rgba(16,185,129,0.3);border-radius:10px;margin:0 0 24px;">
+            <tr><td style="padding:16px 20px;">
+              <p style="margin:0 0 12px;font-size:13px;font-weight:800;color:#34d399;text-transform:uppercase;letter-spacing:1px;">🔒 Your security, guaranteed</p>
+              ${featureList([
+                ['🛡️', 'Your full card number is never stored on our servers'],
+                ['🔐', 'All payments are encrypted end-to-end'],
+                ['💳', 'Your card is only charged when you choose to play a number'],
+              ])}
+            </td></tr>
+          </table>
+
+          <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 24px;">
+            <tr><td style="text-align:center;">
+              ${ctaButton('🎮  Browse Live Games', 'https://prizeplugz.com/games')}
+            </td></tr>
+          </table>
+
+          ${alertBox('If you did not add this card, please contact us immediately at admin@prizeplugz.com so we can secure your account.', '⚠️', 'rgba(239,68,68,0.08)', 'rgba(239,68,68,0.35)')}
+
+        </td></tr>
+      </table>
+    `);
+  }
+
+  private getPaymentReceiptTemplate(userName: string, amount: string, gameNumber: number, transactionId: string): string {
+    const date = new Date().toLocaleDateString('en-US', {
+      year: 'numeric', month: 'long', day: 'numeric',
+      hour: '2-digit', minute: '2-digit'
+    });
+    return shell(`
+      ${heroSection('🎯', `You Picked #${gameNumber}!`, 'Your payment is confirmed. Good luck — you\'re in the game!', '#2563eb', '#7c3aed')}
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr><td style="padding:0 32px 24px;">
+
+          <p style="margin:0 0 20px;font-size:15px;color:#d1d5db;line-height:1.7;">Hi <strong style="color:#f3f4f6;">${userName}</strong>, here's your official receipt. Keep this for your records.</p>
+
+          ${infoCard([
+            ['Date & Time', date],
+            ['Number Claimed', `<span style="color:#a78bfa;font-size:18px;font-weight:900;">#${gameNumber}</span>`],
+            ['Amount Charged', `<span style="color:#34d399;">$${amount}</span>`],
+            ['Transaction ID', `<span style="font-family:monospace;font-size:12px;color:#9ca3af;">${transactionId}</span>`],
+            ['Status', '<span style="color:#34d399;">✅ Completed</span>'],
+          ])}
+
+          <table width="100%" cellpadding="0" cellspacing="0" border="0"
+            style="background:linear-gradient(135deg,rgba(124,58,237,0.12),rgba(219,39,119,0.12));border:1px solid rgba(124,58,237,0.3);border-radius:12px;margin:0 0 24px;">
+            <tr><td style="padding:20px 24px;text-align:center;">
+              <p style="margin:0 0 4px;font-size:13px;color:#c084fc;font-weight:700;text-transform:uppercase;letter-spacing:1px;">Your Lucky Number</p>
+              <p style="margin:0;font-size:56px;font-weight:900;color:#f3f4f6;line-height:1;">#${gameNumber}</p>
+              <p style="margin:6px 0 0;font-size:13px;color:#9ca3af;">Watch the game page to see it fill up!</p>
+            </td></tr>
+          </table>
+
+          <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 24px;">
+            <tr><td style="text-align:center;">
+              ${ctaButton('🎮  View Game Progress', 'https://prizeplugz.com/games')}
+            </td></tr>
+          </table>
+
+          ${alertBox('Save this email as your receipt. If you have a question about this charge, reply with your Transaction ID and we\'ll help right away.', '📌')}
+
+        </td></tr>
+      </table>
+    `);
+  }
+
+  private getWinnerNotificationTemplate(userName: string, gameName: string, winningNumber: number, prizeValue: string, prizeDescription: string): string {
+    return shell(`
+      <!-- Gold winner banner -->
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td style="background:linear-gradient(135deg,#78350f,#b45309,#d97706);padding:28px 32px;text-align:center;">
+            <p style="margin:0;font-size:44px;line-height:1;">🏆</p>
+            <p style="margin:8px 0 4px;font-size:28px;font-weight:900;color:#fef3c7;letter-spacing:-0.5px;">YOU WON!</p>
+            <p style="margin:0;font-size:14px;color:#fde68a;font-weight:600;text-transform:uppercase;letter-spacing:2px;">Congratulations, ${userName}!</p>
+          </td>
+        </tr>
+      </table>
+
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr><td style="padding:28px 32px 24px;">
+
+          <p style="margin:0 0 20px;font-size:15px;color:#d1d5db;line-height:1.7;">
+            Your lucky number was selected as the winner of <strong style="color:#f3f4f6;">${gameName}</strong>. Here are your winning details:
+          </p>
+
+          <!-- Prize highlight -->
+          <table width="100%" cellpadding="0" cellspacing="0" border="0"
+            style="background:linear-gradient(135deg,rgba(245,158,11,0.15),rgba(251,191,36,0.1));border:2px solid rgba(245,158,11,0.5);border-radius:14px;margin:0 0 20px;">
+            <tr><td style="padding:24px;text-align:center;">
+              <p style="margin:0 0 6px;font-size:12px;color:#fbbf24;font-weight:700;text-transform:uppercase;letter-spacing:2px;">Your Prize</p>
+              <p style="margin:0 0 4px;font-size:22px;font-weight:900;color:#f3f4f6;">${prizeDescription}</p>
+              <p style="margin:0;font-size:28px;font-weight:900;color:#f59e0b;">$${prizeValue} Value</p>
+            </td></tr>
+          </table>
+
+          ${infoCard([
+            ['Game', gameName],
+            ['Winning Number', `<span style="color:#f59e0b;font-size:20px;font-weight:900;">#${winningNumber}</span>`],
+            ['Prize', prizeDescription],
+            ['Value', `<span style="color:#34d399;">$${prizeValue}</span>`],
+          ], '#f59e0b')}
+
+          <table width="100%" cellpadding="0" cellspacing="0" border="0"
+            style="background:rgba(255,255,255,0.04);border:1px solid rgba(124,58,237,0.2);border-radius:12px;margin:0 0 24px;">
+            <tr><td style="padding:20px 24px;">
+              <p style="margin:0 0 12px;font-size:13px;font-weight:800;color:#a78bfa;text-transform:uppercase;letter-spacing:1px;">⚡ Next Steps</p>
+              ${featureList([
+                ['📧', 'Our team will email you within 48 hours with claim instructions'],
+                ['🪪', 'Have a valid photo ID ready for winner verification'],
+                ['🎁', 'Your prize will be dispatched once verification is complete'],
+              ])}
+            </td></tr>
+          </table>
+
+          <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 24px;">
+            <tr><td style="text-align:center;">
+              ${ctaButton('🏆  View Your Dashboard', 'https://prizeplugz.com/dashboard')}
+            </td></tr>
+          </table>
+
+          ${alertBox('If you have questions about claiming your prize, reply to this email or contact admin@prizeplugz.com with your name and winning game.', '💬', 'rgba(124,58,237,0.1)', 'rgba(124,58,237,0.4)')}
+
+        </td></tr>
+      </table>
+    `);
+  }
+
+  private getWinnerAnnouncementTemplate(participantName: string, gameName: string, winnerName: string, winningNumber: number, prizeDescription: string): string {
+    return shell(`
+      ${heroSection('🎉', 'Winner Announced!', `The results are in for <strong style="color:#f3f4f6;">${gameName}</strong>`)}
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr><td style="padding:0 32px 24px;">
+
+          <p style="margin:0 0 20px;font-size:15px;color:#d1d5db;line-height:1.7;">
+            Hi <strong style="color:#f3f4f6;">${participantName}</strong>, thank you for playing <strong style="color:#f3f4f6;">${gameName}</strong>! All numbers have been claimed and a winner has been selected.
+          </p>
+
+          <!-- Winner spotlight -->
+          <table width="100%" cellpadding="0" cellspacing="0" border="0"
+            style="background:linear-gradient(135deg,rgba(124,58,237,0.15),rgba(219,39,119,0.15));border:2px solid rgba(124,58,237,0.4);border-radius:14px;margin:0 0 20px;">
+            <tr><td style="padding:24px;text-align:center;">
+              <p style="margin:0 0 10px;font-size:36px;">🏆</p>
+              <p style="margin:0 0 4px;font-size:13px;color:#c084fc;font-weight:700;text-transform:uppercase;letter-spacing:2px;">Winner</p>
+              <p style="margin:0 0 4px;font-size:24px;font-weight:900;color:#f3f4f6;">${winnerName}</p>
+              <p style="margin:0;font-size:15px;color:#a78bfa;">Number <strong style="color:#f59e0b;font-size:20px;">#${winningNumber}</strong></p>
+            </td></tr>
+          </table>
+
+          ${infoCard([
+            ['Game', gameName],
+            ['Winner', `<span style="color:#c084fc;font-weight:900;">${winnerName}</span>`],
+            ['Winning Number', `<span style="color:#f59e0b;font-size:18px;font-weight:900;">#${winningNumber}</span>`],
+            ['Prize', prizeDescription],
+          ])}
+
+          <p style="margin:0 0 24px;font-size:15px;color:#d1d5db;line-height:1.7;">
+            Thanks for being part of the Prize Plugz community! New games go live all the time — head back and try your luck again.
+          </p>
+
+          <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 24px;">
+            <tr><td style="text-align:center;">
+              ${ctaButton('🎮  Play More Games', 'https://prizeplugz.com/games')}
+            </td></tr>
+          </table>
+
+          ${alertBox('Every game at Prize Plugz has a guaranteed winner. The more you play, the closer you get! 🍀', '✨', 'rgba(16,185,129,0.08)', 'rgba(16,185,129,0.3)')}
+
+        </td></tr>
+      </table>
+    `);
   }
 
   private getGameCompletionTemplate(userName: string, gameName: string, winningNumber: number, winnerName: string, prizeDescription: string): string {
-    return `
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Status Update</title>
-</head>
-<body style="margin: 0; padding: 20px; font-family: Arial, sans-serif; background-color: #ffffff; color: #333333;">
-  <table style="max-width: 600px; margin: 0 auto; background-color: white; border: 1px solid #dddddd;">
-    <tr>
-      <td style="background-color: #4a5568; padding: 20px; text-align: center;">
-        <h1 style="color: white; margin: 0; font-size: 20px; font-weight: normal;">Prize Plugz</h1>
-      </td>
-    </tr>
-    <tr>
-      <td style="padding: 30px;">
-        <p style="color: #333333; font-size: 16px; line-height: 1.5; margin: 0 0 20px 0;">
-          Dear ${userName},
-        </p>
-        <p style="color: #333333; font-size: 16px; line-height: 1.5; margin: 0 0 20px 0;">
-          This message confirms that ${gameName} has been completed. The final results are now available.
-        </p>
-        
-        <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
-          <tr>
-            <td style="padding: 10px; border-bottom: 1px solid #eeeeee; color: #333333;">Game:</td>
-            <td style="padding: 10px; border-bottom: 1px solid #eeeeee; color: #333333;">${gameName}</td>
-          </tr>
-          <tr>
-            <td style="padding: 10px; border-bottom: 1px solid #eeeeee; color: #333333;">Selected Participant:</td>
-            <td style="padding: 10px; border-bottom: 1px solid #eeeeee; color: #333333;">${winnerName}</td>
-          </tr>
-          <tr>
-            <td style="padding: 10px; border-bottom: 1px solid #eeeeee; color: #333333;">Number:</td>
-            <td style="padding: 10px; border-bottom: 1px solid #eeeeee; color: #333333;">${winningNumber}</td>
-          </tr>
-          <tr>
-            <td style="padding: 10px; border-bottom: 1px solid #eeeeee; color: #333333;">Item:</td>
-            <td style="padding: 10px; border-bottom: 1px solid #eeeeee; color: #333333;">${prizeDescription}</td>
-          </tr>
-        </table>
-        
-        <p style="color: #333333; font-size: 16px; line-height: 1.5; margin: 20px 0;">
-          Thank you for your participation in this activity.
-        </p>
-        
-        <p style="color: #333333; font-size: 16px; line-height: 1.5; margin: 20px 0;">
-          You can view available activities at: https://prizeplugz.com/games
-        </p>
-        
-        <p style="color: #666666; font-size: 14px; margin: 30px 0 0 0; padding-top: 20px; border-top: 1px solid #eeeeee;">
-          This is an automated message from Prize Plugz.<br>
-          For assistance, contact: admin@prizeplugz.com
-        </p>
-      </td>
-    </tr>
-  </table>
-</body>
-</html>`;
+    return shell(`
+      ${heroSection('🎊', `${gameName} Complete!`, 'The final results have been confirmed.')}
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr><td style="padding:0 32px 24px;">
+
+          <p style="margin:0 0 20px;font-size:15px;color:#d1d5db;line-height:1.7;">
+            Hi <strong style="color:#f3f4f6;">${userName}</strong>, this game has officially ended. Here's a summary of the final results:
+          </p>
+
+          ${infoCard([
+            ['Game', gameName],
+            ['Selected Winner', `<span style="color:#c084fc;font-weight:900;">${winnerName}</span>`],
+            ['Winning Number', `<span style="color:#f59e0b;font-size:18px;font-weight:900;">#${winningNumber}</span>`],
+            ['Prize', prizeDescription],
+            ['Status', '<span style="color:#34d399;">✅ Completed</span>'],
+          ])}
+
+          <p style="margin:0 0 24px;font-size:15px;color:#d1d5db;line-height:1.7;">
+            Congratulations to <strong style="color:#c084fc;">${winnerName}</strong>! Thank you for participating — we hope to see you in the next game. There's always another chance to win.
+          </p>
+
+          <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 24px;">
+            <tr><td style="text-align:center;">
+              ${ctaButton('🎮  Find Your Next Game', 'https://prizeplugz.com/games')}
+            </td></tr>
+          </table>
+
+          ${alertBox('Every number has an equal chance of winning. New games go live daily — stay in the game and keep playing! 🎯', '🍀', 'rgba(16,185,129,0.08)', 'rgba(16,185,129,0.3)')}
+
+        </td></tr>
+      </table>
+    `);
   }
 }
 
