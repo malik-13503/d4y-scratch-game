@@ -2834,8 +2834,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const userId = (req.session as any)?.userId;
     if (!userId) return res.status(401).json({ message: "Not authenticated" });
     try {
-      const user = await storage.getUser(userId);
+      let user = await storage.getUser(userId);
       if (!user) return res.status(404).json({ message: "User not found" });
+      // Auto-generate a referral code for legacy users who don't have one
+      if (!user.referralCode) {
+        const newCode = Math.random().toString(36).substring(2, 6).toUpperCase() +
+          Math.random().toString(36).substring(2, 6).toUpperCase();
+        user = await storage.updateUser(userId, { referralCode: newCode }) || user;
+      }
       res.json({ referralCode: user.referralCode || null });
     } catch (err) {
       res.status(500).json({ message: "Failed to load referral code" });
