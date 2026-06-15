@@ -1531,20 +1531,47 @@ function DailyTokensAndPromoSection() {
                   <div className="bg-amber-900/50 border border-amber-500/40 rounded-lg px-3 py-2 text-amber-100 text-xs font-mono tracking-wide truncate">
                     {referralLink}
                   </div>
-                  <Button
-                    onClick={() => {
-                      navigator.clipboard.writeText(referralLink);
-                      setCopiedReferral(true);
-                      setTimeout(() => setCopiedReferral(false), 2000);
-                    }}
-                    className="w-full bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white font-bold shadow-lg transition-all duration-300"
-                  >
-                    {copiedReferral ? (
-                      <span className="flex items-center"><CheckCircle className="h-4 w-4 mr-2" />Copied!</span>
-                    ) : (
-                      <span className="flex items-center"><Copy className="h-4 w-4 mr-2" />Copy Link</span>
+                  <div className="flex gap-2">
+                    {typeof navigator !== "undefined" && typeof (navigator as any).share === "function" && (
+                      <Button
+                        onClick={async () => {
+                          try {
+                            await (navigator as any).share({
+                              title: "Join me on Prize Plugz!",
+                              text: "Sign up using my referral link and we both get 5 FREE bonus tokens! 🎉",
+                              url: referralLink,
+                            });
+                          } catch (_) {}
+                        }}
+                        className="flex-1 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white font-bold shadow-lg transition-all duration-300"
+                      >
+                        <span className="flex items-center justify-center"><Share2 className="h-4 w-4 mr-2" />Share</span>
+                      </Button>
                     )}
-                  </Button>
+                    <Button
+                      onClick={() => {
+                        try {
+                          navigator.clipboard.writeText(referralLink);
+                        } catch (_) {
+                          const el = document.createElement("textarea");
+                          el.value = referralLink;
+                          document.body.appendChild(el);
+                          el.select();
+                          document.execCommand("copy");
+                          document.body.removeChild(el);
+                        }
+                        setCopiedReferral(true);
+                        setTimeout(() => setCopiedReferral(false), 2000);
+                      }}
+                      className="flex-1 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white font-bold shadow-lg transition-all duration-300"
+                    >
+                      {copiedReferral ? (
+                        <span className="flex items-center justify-center"><CheckCircle className="h-4 w-4 mr-2" />Copied!</span>
+                      ) : (
+                        <span className="flex items-center justify-center"><Copy className="h-4 w-4 mr-2" />Copy Link</span>
+                      )}
+                    </Button>
+                  </div>
                 </div>
               ) : (
                 <div className="h-16 bg-amber-700/30 rounded-lg animate-pulse" />
