@@ -2300,9 +2300,12 @@ export default function AdminDashboard() {
                               >
                                 Tokens Per Play
                               </Label>
-                              <select
+                              <Input
                                 id="edit-tokenCostPerEntry"
                                 name="tokenCostPerEntry"
+                                type="number"
+                                min="1"
+                                step="1"
                                 value={editData.tokenCostPerEntry}
                                 onChange={(e) =>
                                   handleEditFieldChange(
@@ -2310,12 +2313,12 @@ export default function AdminDashboard() {
                                     e.target.value,
                                   )
                                 }
-                                className="w-full h-10 rounded-md border border-purple-500/30 bg-white/10 px-3 py-2 text-sm text-white"
-                              >
-                                <option value="5" className="bg-gray-800">5 tokens</option>
-                                <option value="10" className="bg-gray-800">10 tokens</option>
-                                <option value="20" className="bg-gray-800">20 tokens</option>
-                              </select>
+                                className="bg-white/10 border-purple-500/30"
+                                placeholder="e.g. 60"
+                              />
+                              <p className="text-gray-500 text-xs mt-1">
+                                1 token = $0.50 &nbsp;·&nbsp; {editData.tokenCostPerEntry ? `${editData.tokenCostPerEntry} tokens = $${(parseInt(editData.tokenCostPerEntry) * 0.5).toFixed(2)}` : "enter amount"}
+                              </p>
                             </div>
                             <div>
                               <Label
@@ -2691,9 +2694,12 @@ export default function AdminDashboard() {
                               >
                                 Tokens Per Play
                               </Label>
-                              <select
+                              <Input
                                 id="edit-tokenCostPerEntry"
                                 name="tokenCostPerEntry"
+                                type="number"
+                                min="1"
+                                step="1"
                                 value={editData.tokenCostPerEntry}
                                 onChange={(e) =>
                                   handleEditFieldChange(
@@ -2701,12 +2707,12 @@ export default function AdminDashboard() {
                                     e.target.value,
                                   )
                                 }
-                                className="w-full h-10 rounded-md border border-purple-500/30 bg-white/10 px-3 py-2 text-sm text-white"
-                              >
-                                <option value="5" className="bg-gray-800">5 tokens</option>
-                                <option value="10" className="bg-gray-800">10 tokens</option>
-                                <option value="20" className="bg-gray-800">20 tokens</option>
-                              </select>
+                                className="bg-white/10 border-purple-500/30"
+                                placeholder="e.g. 60"
+                              />
+                              <p className="text-gray-500 text-xs mt-1">
+                                1 token = $0.50 &nbsp;·&nbsp; {editData.tokenCostPerEntry ? `${editData.tokenCostPerEntry} tokens = $${(parseInt(editData.tokenCostPerEntry) * 0.5).toFixed(2)}` : "enter amount"}
+                              </p>
                             </div>
                             <div>
                               <Label
