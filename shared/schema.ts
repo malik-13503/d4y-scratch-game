@@ -29,6 +29,8 @@ export const users = pgTable("users", {
   // Referral system
   referralCode: text("referral_code").unique(),
   referredBy: integer("referred_by"), // userId of the person who referred this user
+  // Email notification preferences (null = all enabled by default)
+  emailNotifications: json("email_notifications").$type<Record<string, boolean>>(),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
@@ -115,6 +117,7 @@ export const games = pgTable("games", {
   emoji: text("emoji").notNull().default("🎮"),
   prizeImageUrl: text("prize_image_url"), // New field for real prize images
   backgroundImage: text("background_image"),
+  isGameOfTheDay: boolean("is_game_of_the_day").notNull().default(false),
   createdBy: integer("created_by").notNull(),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),

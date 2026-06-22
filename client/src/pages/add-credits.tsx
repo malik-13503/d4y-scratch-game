@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { apiRequest } from "@/lib/queryClient";
@@ -58,6 +58,29 @@ export default function AddCreditsPage() {
   const [showCardForm, setShowCardForm] = useState(false);
   const [isProcessingCard, setIsProcessingCard] = useState(false);
   const [cardResult, setCardResult] = useState<{ tokens: number; newBalance: number } | null>(null);
+
+  // Flash sale countdown — 2-hour timer stored in sessionStorage
+  const [flashSecsLeft, setFlashSecsLeft] = useState<number>(() => {
+    try {
+      const stored = sessionStorage.getItem("pp_flash_expiry");
+      if (stored) {
+        const rem = parseInt(stored) - Math.floor(Date.now() / 1000);
+        if (rem > 0) return rem;
+      }
+      const expiry = Math.floor(Date.now() / 1000) + 2 * 60 * 60;
+      sessionStorage.setItem("pp_flash_expiry", String(expiry));
+      return 2 * 60 * 60;
+    } catch { return 0; }
+  });
+  useEffect(() => {
+    if (flashSecsLeft <= 0) return;
+    const t = setInterval(() => setFlashSecsLeft(s => Math.max(0, s - 1)), 1000);
+    return () => clearInterval(t);
+  }, [flashSecsLeft > 0]);
+  const flashMins = Math.floor(flashSecsLeft / 60);
+  const flashSecs = flashSecsLeft % 60;
+  const showFlash = flashSecsLeft > 0;
+  const FLASH_PKG = PACKAGES[2]; // Power pack — $20 base, show as 75 tokens
 
   const submitMutation = useMutation({
     mutationFn: async () => {
@@ -182,6 +205,38 @@ export default function AddCreditsPage() {
           <p className="text-purple-300/70 text-sm">More tokens = more plays = more chances to WIN</p>
         </div>
       </div>
+
+      {/* Flash Sale Banner */}
+      {showFlash && (
+        <div className="relative overflow-hidden rounded-2xl mb-5 p-4 cursor-pointer transition-all hover:scale-[1.01]"
+          style={{background:"linear-gradient(135deg,#1a0845,#2d1060,#1a0845)",border:"1px solid rgba(245,158,11,0.5)",boxShadow:"0 0 30px rgba(245,158,11,0.15)"}}
+          onClick={() => { setPkg(FLASH_PKG); setStep("method"); }}>
+          <div className="absolute inset-0 pointer-events-none" style={{background:"radial-gradient(circle at 30% 50%,rgba(245,158,11,0.08),transparent 70%)"}} />
+          <div className="relative flex items-center gap-4">
+            <div className="shrink-0 flex flex-col items-center justify-center w-16 h-16 rounded-xl"
+              style={{background:"linear-gradient(135deg,#f59e0b,#f97316)",boxShadow:"0 0 20px rgba(245,158,11,0.5)"}}>
+              <span className="text-black text-xl font-black">⚡</span>
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-0.5">
+                <span className="text-yellow-400 font-black text-sm tracking-wide">FLASH SALE</span>
+                <span className="text-[10px] px-2 py-0.5 rounded-full font-black text-black" style={{background:"#f59e0b"}}>LIMITED TIME</span>
+              </div>
+              <p className="text-white font-black text-lg leading-tight">
+                {FLASH_PKG.dollars && `$${FLASH_PKG.dollars}`} Power Pack
+                <span className="text-green-400 ml-2 text-sm">+15 bonus tokens!</span>
+              </p>
+              <p className="text-yellow-200/70 text-xs mt-0.5">{FLASH_PKG.credits} tokens → flash deal: 75 tokens</p>
+            </div>
+            <div className="shrink-0 text-right">
+              <div className="text-yellow-300 font-black tabular-nums text-lg leading-none">
+                {String(flashMins).padStart(2,"0")}:{String(flashSecs).padStart(2,"0")}
+              </div>
+              <div className="text-yellow-500/70 text-[10px]">remaining</div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Package grid */}
       <div className="grid grid-cols-2 gap-3 mb-4">

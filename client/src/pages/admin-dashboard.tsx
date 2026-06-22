@@ -3008,6 +3008,26 @@ export default function AdminDashboard() {
                           <Button
                             size="sm"
                             variant="outline"
+                            title={game.isGameOfTheDay ? "Remove Game of the Day" : "Set as Game of the Day"}
+                            className={`px-2 sm:px-3 text-xs sm:text-sm ${game.isGameOfTheDay ? "border-yellow-400/70 text-yellow-300 bg-yellow-500/10 hover:bg-yellow-500/20" : "border-yellow-500/30 text-yellow-600 hover:bg-yellow-500/10 hover:text-yellow-300"}`}
+                            onClick={async () => {
+                              try {
+                                await fetch(`/api/admin/games/${game.id}/game-of-the-day`, {
+                                  method: "PUT",
+                                  headers: { "Content-Type": "application/json" },
+                                  credentials: "include",
+                                  body: JSON.stringify({ value: !game.isGameOfTheDay }),
+                                });
+                                queryClient.invalidateQueries({ queryKey: ["/api/games"] });
+                                queryClient.invalidateQueries({ queryKey: ["/api/games/game-of-the-day"] });
+                              } catch (_) {}
+                            }}
+                          >
+                            ⭐
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
                             className="border-red-500/50 text-red-400 hover:bg-red-500/20 text-xs sm:text-sm px-2 sm:px-3"
                             onClick={() => handleDeleteGame(game)}
                           >

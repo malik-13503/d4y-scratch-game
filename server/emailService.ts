@@ -14,6 +14,10 @@ export interface EmailService {
   sendWinnerNotification(userEmail: string, userName: string, gameName: string, winningNumber: number, prizeValue: string, prizeDescription: string): Promise<void>;
   sendGameCompletionNotification(userEmail: string, userName: string, gameName: string, winningNumber: number, winnerName: string, prizeDescription: string): Promise<void>;
   sendGameWinnerAnnouncementToAllParticipants(gameName: string, winnerName: string, winningNumber: number, prizeDescription: string, participantEmails: Array<{email: string, name: string}>): Promise<void>;
+  sendLowTokenWarning(userEmail: string, userName: string, balance: number): Promise<void>;
+  sendGameClosingSoon(userEmail: string, userName: string, gameName: string, pctFull: number): Promise<void>;
+  sendNewGameLive(userEmail: string, userName: string, gameName: string, prize: string): Promise<void>;
+  sendReferralBonusEmail(userEmail: string, userName: string, referredName: string, tokensEarned: number): Promise<void>;
 }
 
 /* ─── Shared brand shell ─────────────────────────────────────────────────── */
@@ -465,6 +469,111 @@ class ResendEmailService implements EmailService {
         </td></tr>
       </table>
     `);
+  }
+
+  async sendLowTokenWarning(userEmail: string, userName: string, balance: number): Promise<void> {
+    try {
+      await resend.emails.send({
+        from: FROM_EMAIL,
+        to: userEmail,
+        subject: '⚠️ Low Tokens — Top Up & Keep Playing!',
+        html: shell(`
+          ${heroSection('⚡', 'Your tokens are running low!', `You have ${balance} token${balance === 1 ? '' : 's'} remaining.`, '#d97706', '#b45309')}
+          <table width="100%" cellpadding="0" cellspacing="0" border="0">
+            <tr><td style="padding:0 32px 24px;">
+              <p style="margin:0 0 20px;font-size:15px;color:#d1d5db;line-height:1.7;">
+                Hi <strong style="color:#f3f4f6;">${userName}</strong>, you're almost out of tokens. Don't miss your chance to win — top up now and stay in the game!
+              </p>
+              ${alertBox(`You currently have <strong>${balance} token${balance === 1 ? '' : 's'}</strong>. Each spin costs tokens, so grab a pack and keep playing.`, '🪙', 'rgba(245,158,11,0.08)', 'rgba(245,158,11,0.4)')}
+              <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 24px;">
+                <tr><td style="text-align:center;">
+                  ${ctaButton('🛒  Buy More Tokens', 'https://prizeplugz.com/add-credits')}
+                </td></tr>
+              </table>
+            </td></tr>
+          </table>
+        `),
+      });
+    } catch (error) { console.error('Failed to send low token warning:', error); }
+  }
+
+  async sendGameClosingSoon(userEmail: string, userName: string, gameName: string, pctFull: number): Promise<void> {
+    try {
+      await resend.emails.send({
+        from: FROM_EMAIL,
+        to: userEmail,
+        subject: `🔥 ${gameName} is ${pctFull}% Full — Last Chance!`,
+        html: shell(`
+          ${heroSection('🔥', 'Game Closing Soon!', `${gameName} is ${pctFull}% full.`, '#dc2626', '#b91c1c')}
+          <table width="100%" cellpadding="0" cellspacing="0" border="0">
+            <tr><td style="padding:0 32px 24px;">
+              <p style="margin:0 0 20px;font-size:15px;color:#d1d5db;line-height:1.7;">
+                Hi <strong style="color:#f3f4f6;">${userName}</strong>, <strong style="color:#f97316;">${gameName}</strong> is ${pctFull}% full and closing fast! Grab your entries before it's too late.
+              </p>
+              ${alertBox('When the game fills up, a winner is automatically selected. The fewer spots left, the better your odds!', '🎯', 'rgba(239,68,68,0.08)', 'rgba(239,68,68,0.4)')}
+              <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 24px;">
+                <tr><td style="text-align:center;">
+                  ${ctaButton('⚡  Claim Your Spot Now', 'https://prizeplugz.com/games')}
+                </td></tr>
+              </table>
+            </td></tr>
+          </table>
+        `),
+      });
+    } catch (error) { console.error('Failed to send game closing soon email:', error); }
+  }
+
+  async sendNewGameLive(userEmail: string, userName: string, gameName: string, prize: string): Promise<void> {
+    try {
+      await resend.emails.send({
+        from: FROM_EMAIL,
+        to: userEmail,
+        subject: `🎮 New Game Live: ${gameName} — Be First In!`,
+        html: shell(`
+          ${heroSection('🎮', 'New Game Just Launched!', `${gameName} is now live.`, '#7c3aed', '#4f46e5')}
+          <table width="100%" cellpadding="0" cellspacing="0" border="0">
+            <tr><td style="padding:0 32px 24px;">
+              <p style="margin:0 0 20px;font-size:15px;color:#d1d5db;line-height:1.7;">
+                Hi <strong style="color:#f3f4f6;">${userName}</strong>, a brand new game just went live on Prize Plugz. Be one of the first to enter for the best odds!
+              </p>
+              ${infoCard([['Game', gameName], ['Prize', prize], ['Status', '<span style="color:#34d399;">🟢 Now Live</span>']])}
+              <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 24px;">
+                <tr><td style="text-align:center;">
+                  ${ctaButton('🎯  Enter Now', 'https://prizeplugz.com/games')}
+                </td></tr>
+              </table>
+            </td></tr>
+          </table>
+        `),
+      });
+    } catch (error) { console.error('Failed to send new game live email:', error); }
+  }
+
+  async sendReferralBonusEmail(userEmail: string, userName: string, referredName: string, tokensEarned: number): Promise<void> {
+    try {
+      await resend.emails.send({
+        from: FROM_EMAIL,
+        to: userEmail,
+        subject: `🎉 ${referredName} joined — You earned ${tokensEarned} bonus tokens!`,
+        html: shell(`
+          ${heroSection('🎉', 'Referral Bonus Earned!', `${referredName} signed up with your link.`, '#059669', '#047857')}
+          <table width="100%" cellpadding="0" cellspacing="0" border="0">
+            <tr><td style="padding:0 32px 24px;">
+              <p style="margin:0 0 20px;font-size:15px;color:#d1d5db;line-height:1.7;">
+                Hi <strong style="color:#f3f4f6;">${userName}</strong>, great news — <strong style="color:#34d399;">${referredName}</strong> just signed up using your referral link!
+              </p>
+              ${infoCard([['Referred Friend', referredName], ['Tokens Earned', `<span style="color:#f59e0b;font-size:18px;font-weight:900;">+${tokensEarned} tokens</span>`]], '#059669')}
+              ${alertBox('Keep sharing your referral link — every friend who signs up earns you more bonus tokens!', '🔗', 'rgba(5,150,105,0.08)', 'rgba(5,150,105,0.4)')}
+              <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 24px;">
+                <tr><td style="text-align:center;">
+                  ${ctaButton('🎮  Use Your Tokens', 'https://prizeplugz.com/games')}
+                </td></tr>
+              </table>
+            </td></tr>
+          </table>
+        `),
+      });
+    } catch (error) { console.error('Failed to send referral bonus email:', error); }
   }
 
   private getGameCompletionTemplate(userName: string, gameName: string, winningNumber: number, winnerName: string, prizeDescription: string): string {

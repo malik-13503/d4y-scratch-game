@@ -15,7 +15,7 @@ import { chargeCreditCard } from "./authorizeNetService";
 import session from "express-session";
 import connectPgSimple from "connect-pg-simple";
 import { db } from "./db";
-import { eq, desc, sql } from "drizzle-orm";
+import { eq, desc, sql, and, like } from "drizzle-orm";
 
 // Helper function to format time ago
 function getTimeAgo(date: Date): string {
@@ -2436,10 +2436,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Get updated token balance for response
       const newTokenBalance = await storage.getUserTokenBalance(userId);
 
+      // ── NOTIFICATION HOOK: Low token warning ──────────────────────────────
+      if (typeof newTokenBalance === 'number' && newTokenBalance < 5) {
+        try {
+          const prefs = (user.emailNotifications as Record<string, boolean>) || {};
+          if (prefs.lowTokenWarning !== false) {
+            emailService.sendLowTokenWarning(user.email, user.firstName, newTokenBalance).catch(() => {});
+          }
+        } catch (_) {}
+      }
+
       // AUTO-CLOSE GAME: Check if token threshold reached OR all spots are taken
       const updatedGame = await storage.getGame(gameId);
       const remainingNumbers = await storage.getAvailableNumbers(gameId);
       let gameCompleted = false;
+
+      // ── NOTIFICATION HOOK: Game closing soon (first time crossing 90%) ─────
+      if (updatedGame && updatedGame.tokenThreshold > 0) {
+        const prevPct = game.tokenThreshold > 0 ? game.tokensCollected / game.tokenThreshold : 0;
+        const currPct = updatedGame.tokensCollected / updatedGame.tokenThreshold;
+        if (prevPct < 0.9 && currPct >= 0.9) {
+          storage.getPlayersByGameId(gameId).then(async (participants) => {
+            for (const p of participants) {
+              if (!p.userId) continue;
+              const pUser = await storage.getUser(p.userId);
+              if (!pUser) continue;
+              const prefs = (pUser.emailNotifications as Record<string, boolean>) || {};
+              if (prefs.gameClosingSoon !== false) {
+                emailService.sendGameClosingSoon(pUser.email, pUser.firstName, game.name, Math.round(currPct * 100)).catch(() => {});
+              }
+            }
+          }).catch(() => {});
+        }
+      }
+
       const allSpotsTaken = remainingNumbers.length === 0;
       const thresholdReached = updatedGame && updatedGame.tokenThreshold > 0 &&
           updatedGame.tokensCollected >= updatedGame.tokenThreshold;
@@ -2846,6 +2876,81 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (err) {
       res.status(500).json({ message: "Failed to load referral code" });
     }
+  });
+
+  // ── EMAIL NOTIFICATION PREFERENCES ────────────────────────────────────────
+  const DEFAULT_PREFS = { lowTokenWarning: true, tokenPurchaseReceipt: true, gameClosingSoon: true, winnerAnnounced: true, newGameLive: false, referralConfirmed: true };
+
+  app.get("/api/user/notification-preferences", async (req, res) => {
+    const userId = (req.session as any)?.userId;
+    if (!userId) return res.status(401).json({ message: "Not authenticated" });
+    try {
+      const user = await storage.getUser(userId);
+      if (!user) return res.status(404).json({ message: "User not found" });
+      res.json({ ...DEFAULT_PREFS, ...(user.emailNotifications || {}) });
+    } catch (_) { res.status(500).json({ message: "Failed to load preferences" }); }
+  });
+
+  app.put("/api/user/notification-preferences", async (req, res) => {
+    const userId = (req.session as any)?.userId;
+    if (!userId) return res.status(401).json({ message: "Not authenticated" });
+    try {
+      await storage.updateUser(userId, { emailNotifications: req.body });
+      res.json({ success: true });
+    } catch (_) { res.status(500).json({ message: "Failed to save preferences" }); }
+  });
+
+  // ── REFERRAL STATS ─────────────────────────────────────────────────────────
+  app.get("/api/user/referral-stats", async (req, res) => {
+    const userId = (req.session as any)?.userId;
+    if (!userId) return res.status(401).json({ message: "Not authenticated" });
+    try {
+      const referredUsers = await db.select({ id: users.id }).from(users).where(eq(users.referredBy, userId));
+      const referralTxns = await db.select({ amount: tokenTransactions.amount }).from(tokenTransactions)
+        .where(and(eq(tokenTransactions.userId, userId), eq(tokenTransactions.transactionType, 'bonus'), like(tokenTransactions.description, '%Referral bonus%')));
+      const tokensEarned = referralTxns.reduce((s, t) => s + (t.amount > 0 ? t.amount : 0), 0);
+      res.json({ referredCount: referredUsers.length, tokensEarned });
+    } catch (_) { res.status(500).json({ message: "Failed to load referral stats" }); }
+  });
+
+  // ── CLOSING SOON GAMES ─────────────────────────────────────────────────────
+  app.get("/api/games/closing-soon", async (req, res) => {
+    try {
+      const allGames = await storage.getActiveGames();
+      const closing = allGames
+        .filter(g => g.tokenThreshold > 0 && g.tokensCollected < g.tokenThreshold)
+        .map(g => ({ ...g, pct: g.tokensCollected / g.tokenThreshold }))
+        .sort((a, b) => b.pct - a.pct)
+        .slice(0, 3);
+      res.json(closing);
+    } catch (_) { res.status(500).json({ message: "Failed to load closing soon games" }); }
+  });
+
+  // ── GAME OF THE DAY ────────────────────────────────────────────────────────
+  app.get("/api/games/game-of-the-day", async (req, res) => {
+    try {
+      const allGames = await storage.getActiveGames();
+      const gotd = allGames.find(g => (g as any).isGameOfTheDay);
+      res.json(gotd || null);
+    } catch (_) { res.status(500).json({ message: "Failed to load game of the day" }); }
+  });
+
+  app.put("/api/admin/games/:id/game-of-the-day", requireAuth, async (req, res) => {
+    try {
+      const gameId = parseInt(req.params.id);
+      const setValue = req.body.value !== false;
+      // Clear existing GOTD if setting a new one
+      if (setValue) {
+        const allGames = await storage.getActiveGames();
+        for (const g of allGames) {
+          if ((g as any).isGameOfTheDay && g.id !== gameId) {
+            await storage.updateGame(g.id, { isGameOfTheDay: false } as any);
+          }
+        }
+      }
+      const updated = await storage.updateGame(gameId, { isGameOfTheDay: setValue } as any);
+      res.json(updated);
+    } catch (_) { res.status(500).json({ message: "Failed to update game of the day" }); }
   });
 
   app.get("/api/wallet/destinations", async (req, res) => {

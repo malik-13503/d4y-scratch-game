@@ -334,6 +334,14 @@ export default function HomePage() {
     queryKey: ["/api/winners"],
     refetchInterval: 60000,
   });
+  const { data: closingSoonGames } = useQuery<(Game & { pct: number })[]>({
+    queryKey: ["/api/games/closing-soon"],
+    refetchInterval: 30000,
+  });
+  const { data: gameOfTheDay } = useQuery<Game | null>({
+    queryKey: ["/api/games/game-of-the-day"],
+    refetchInterval: 60000,
+  });
   const { data: notifsData, refetch: refetchNotifs } = useQuery<{ notifications: any[]; unreadCount: number }>({
     queryKey: ["/api/notifications"],
     refetchInterval: 30000,
@@ -738,6 +746,90 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* ── GAME OF THE DAY ──────────────────────────────────────────── */}
+      {gameOfTheDay && (
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 pt-10 pb-4">
+          <div className="relative overflow-hidden rounded-2xl p-5 sm:p-7 flex flex-col sm:flex-row items-center gap-6"
+            style={{background:"linear-gradient(135deg,#1a0f3d 0%,#2d1b69 40%,#1a0845 100%)",border:"1px solid rgba(245,158,11,0.4)",boxShadow:"0 0 40px rgba(245,158,11,0.12)"}}>
+            <div className="absolute inset-0 pointer-events-none" style={{background:"radial-gradient(circle at 80% 50%,rgba(245,158,11,0.07),transparent 60%)"}} />
+            <div className="shrink-0 flex flex-col items-center sm:items-start gap-1 relative z-10">
+              <span className="text-yellow-400 text-xs font-black tracking-[0.3em] uppercase">⭐ Game of the Day</span>
+              <div className="flex items-center gap-2 mt-1">
+                <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+                <span className="text-green-400 text-xs font-bold">Live Now</span>
+              </div>
+            </div>
+            <div className="flex-1 min-w-0 relative z-10 text-center sm:text-left">
+              <h2 className="text-white font-black text-2xl leading-tight truncate">{gameOfTheDay.name}</h2>
+              <p className="text-yellow-300/80 text-sm mt-0.5">{gameOfTheDay.prize} — worth ${gameOfTheDay.prizeValue}</p>
+              {gameOfTheDay.tokenThreshold > 0 && (
+                <div className="mt-3 max-w-xs">
+                  <div className="flex justify-between text-xs text-gray-400 mb-1">
+                    <span>{Math.round((gameOfTheDay.tokensCollected / gameOfTheDay.tokenThreshold) * 100)}% full</span>
+                    <span>{gameOfTheDay.numbersLeft} spots left</span>
+                  </div>
+                  <div className="h-2 rounded-full overflow-hidden" style={{background:"rgba(255,255,255,0.1)"}}>
+                    <div className="h-full rounded-full transition-all"
+                      style={{width:`${Math.min(100, (gameOfTheDay.tokensCollected / gameOfTheDay.tokenThreshold)*100)}%`,background:"linear-gradient(90deg,#f59e0b,#f97316)"}} />
+                  </div>
+                </div>
+              )}
+            </div>
+            {gameOfTheDay.prizeImageUrl && (
+              <img src={gameOfTheDay.prizeImageUrl} alt={gameOfTheDay.name}
+                className="w-20 h-20 object-contain rounded-xl shrink-0 relative z-10" />
+            )}
+            <button onClick={() => setLocation(`/game/${gameOfTheDay.id}`)}
+              className="shrink-0 font-black text-black px-7 py-3.5 rounded-xl transition-all hover:scale-105 relative z-10"
+              style={{background:"linear-gradient(135deg,#f59e0b,#f97316)",boxShadow:"0 0 20px rgba(245,158,11,0.4)"}}>
+              PLAY NOW
+            </button>
+          </div>
+        </section>
+      )}
+
+      {/* ── CLOSING SOON ─────────────────────────────────────────────── */}
+      {closingSoonGames && closingSoonGames.length > 0 && (
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 pt-6 pb-2">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="p-2 rounded-xl" style={{background:"rgba(239,68,68,0.12)",border:"1px solid rgba(239,68,68,0.25)"}}>
+              <Timer className="h-4 w-4 text-red-400" />
+            </div>
+            <div>
+              <h2 className="text-white font-black text-xl leading-none">Closing Soon</h2>
+              <p className="text-gray-600 text-xs mt-0.5">These games are almost full — get in now</p>
+            </div>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            {closingSoonGames.map(g => {
+              const pct = Math.round(g.pct * 100);
+              const barColor = pct >= 95 ? "#ef4444" : pct >= 80 ? "#f97316" : "#f59e0b";
+              return (
+                <div key={g.id} onClick={() => setLocation(`/game/${g.id}`)}
+                  className="relative overflow-hidden rounded-2xl p-4 cursor-pointer transition-all hover:scale-[1.02]"
+                  style={{background:"linear-gradient(145deg,#120e2a,#1c1340)",border:"1px solid rgba(239,68,68,0.2)",boxShadow:"0 0 20px rgba(239,68,68,0.06)"}}>
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="min-w-0 flex-1">
+                      <p className="text-white font-black text-sm truncate">{g.name}</p>
+                      <p className="text-gray-500 text-xs">{g.prize}</p>
+                    </div>
+                    <span className="ml-2 text-xs font-black px-2 py-0.5 rounded-full shrink-0"
+                      style={{background:`${barColor}20`,color:barColor,border:`1px solid ${barColor}40`}}>
+                      {pct}%
+                    </span>
+                  </div>
+                  <div className="h-2 rounded-full overflow-hidden mb-2" style={{background:"rgba(255,255,255,0.07)"}}>
+                    <div className="h-full rounded-full transition-all"
+                      style={{width:`${pct}%`,background:`linear-gradient(90deg,${barColor},${barColor}cc)`}} />
+                  </div>
+                  <p className="text-gray-600 text-xs">{g.numbersLeft} spots left · {g.tokenCostPerEntry} tokens/play</p>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+      )}
 
       {/* ── LIVE GAMES ───────────────────────────────────────────────── */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 py-12">

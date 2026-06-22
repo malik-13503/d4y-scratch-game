@@ -42,6 +42,7 @@ import {
   Timer,
   Copy,
   Share2,
+  Bell,
 } from "lucide-react";
 import logoPath from "@assets/logo_1777237644041.png";
 
@@ -1421,6 +1422,27 @@ function DailyTokensAndPromoSection() {
   const referralCode = referralData?.referralCode;
   const referralLink = referralCode ? `${window.location.origin}/?ref=${referralCode}` : null;
 
+  const { data: referralStats } = useQuery<{ referredCount: number; tokensEarned: number }>({
+    queryKey: ["/api/user/referral-stats"],
+  });
+
+  const { data: emailPrefs, refetch: refetchPrefs } = useQuery<Record<string, boolean>>({
+    queryKey: ["/api/user/notification-preferences"],
+  });
+  const [savingPrefs, setSavingPrefs] = useState(false);
+  const [localPrefs, setLocalPrefs] = useState<Record<string, boolean> | null>(null);
+  const prefs = localPrefs ?? emailPrefs ?? {};
+
+  async function togglePref(key: string, val: boolean) {
+    const updated = { ...prefs, [key]: val };
+    setLocalPrefs(updated);
+    setSavingPrefs(true);
+    try {
+      await apiRequest("PUT", "/api/user/notification-preferences", updated);
+    } catch (_) {}
+    setSavingPrefs(false);
+  }
+
   const { data: dailyStatus, isLoading: statusLoading, refetch: refetchStatus } = useQuery<{
     canClaim: boolean;
     nextClaimAt: string | null;
@@ -1572,10 +1594,43 @@ function DailyTokensAndPromoSection() {
                       )}
                     </Button>
                   </div>
+                  {/* Social share buttons */}
+                  <div className="flex gap-2 mt-2">
+                    <a href={`https://wa.me/?text=${encodeURIComponent(`Join me on Prize Plugz! Sign up with my referral link and we both get 5 FREE bonus tokens 🎉 ${referralLink}`)}`}
+                      target="_blank" rel="noopener noreferrer"
+                      className="flex-1 py-2 rounded-lg text-center text-xs font-bold text-white transition-all hover:brightness-110"
+                      style={{background:"rgba(37,211,102,0.15)",border:"1px solid rgba(37,211,102,0.4)"}}>
+                      📱 WhatsApp
+                    </a>
+                    <a href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(`Sign up using my referral link and we both get 5 FREE bonus tokens! 🎉 ${referralLink}`)}`}
+                      target="_blank" rel="noopener noreferrer"
+                      className="flex-1 py-2 rounded-lg text-center text-xs font-bold text-white transition-all hover:brightness-110"
+                      style={{background:"rgba(29,161,242,0.15)",border:"1px solid rgba(29,161,242,0.4)"}}>
+                      𝕏 Twitter
+                    </a>
+                  </div>
                 </div>
               ) : (
                 <div className="h-16 bg-amber-700/30 rounded-lg animate-pulse" />
               )}
+
+              {/* Referral Stats */}
+              <div className="flex items-center gap-6 mt-3 pt-3 border-t border-amber-500/20">
+                <div className="text-center">
+                  <p className="text-yellow-300 font-black text-2xl leading-none">{referralStats?.referredCount ?? 0}</p>
+                  <p className="text-amber-200/60 text-[11px] mt-0.5">Friends referred</p>
+                </div>
+                <div className="w-px h-8 bg-amber-500/25" />
+                <div className="text-center">
+                  <p className="text-yellow-300 font-black text-2xl leading-none">+{referralStats?.tokensEarned ?? 0}</p>
+                  <p className="text-amber-200/60 text-[11px] mt-0.5">Tokens earned</p>
+                </div>
+                <div className="w-px h-8 bg-amber-500/25" />
+                <div className="text-center">
+                  <p className="text-yellow-300 font-black text-2xl leading-none">{(referralStats?.tokensEarned ?? 0) > 0 ? `$${((referralStats?.tokensEarned ?? 0) * 0.5).toFixed(0)}` : "$0"}</p>
+                  <p className="text-amber-200/60 text-[11px] mt-0.5">Value earned</p>
+                </div>
+              </div>
             </div>
           </div>
         </CardContent>
@@ -1609,6 +1664,45 @@ function DailyTokensAndPromoSection() {
                 </Button>
               </div>
             </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Email Notification Preferences Card */}
+      <Card className="relative overflow-hidden bg-gradient-to-br from-slate-900/90 to-violet-950/90 border-violet-500/30 backdrop-blur-xl shadow-2xl">
+        <div className="absolute inset-0 bg-gradient-to-br from-violet-800/10 to-slate-800/10 blur-xl" />
+        <CardContent className="relative p-6">
+          <div className="flex items-start space-x-4 mb-5">
+            <div className="p-3 bg-gradient-to-br from-violet-600 to-purple-700 rounded-xl shadow-lg shrink-0">
+              <Bell className="h-7 w-7 text-white" />
+            </div>
+            <div>
+              <h3 className="text-lg font-bold text-white mb-0.5">Email Notifications</h3>
+              <p className="text-violet-300/70 text-sm">Choose which emails you receive from us.</p>
+            </div>
+          </div>
+          <div className="space-y-1">
+            {([
+              { key: "lowTokenWarning",      label: "Low token warning",     desc: "When you have fewer than 5 tokens" },
+              { key: "tokenPurchaseReceipt", label: "Purchase receipts",     desc: "After every token purchase" },
+              { key: "gameClosingSoon",      label: "Game closing soon",     desc: "When a game you're in hits 90% full" },
+              { key: "winnerAnnounced",      label: "Winner announcements",  desc: "When a game you played is won" },
+              { key: "newGameLive",          label: "New game launches",     desc: "When a brand-new game goes live" },
+              { key: "referralConfirmed",    label: "Referral bonus emails", desc: "When a friend you referred signs up" },
+            ] as { key: string; label: string; desc: string }[]).map(({ key, label, desc }) => (
+              <div key={key} className="flex items-center justify-between gap-4 py-3 border-b border-white/5 last:border-0">
+                <div className="min-w-0">
+                  <p className="text-white text-sm font-semibold leading-none">{label}</p>
+                  <p className="text-gray-500 text-xs mt-0.5">{desc}</p>
+                </div>
+                <Switch
+                  checked={prefs[key] !== false}
+                  onCheckedChange={v => togglePref(key, v)}
+                  disabled={savingPrefs}
+                  className="shrink-0 data-[state=checked]:bg-violet-600"
+                />
+              </div>
+            ))}
           </div>
         </CardContent>
       </Card>
