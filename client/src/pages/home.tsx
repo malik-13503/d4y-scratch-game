@@ -2,13 +2,14 @@ import { useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { useState, useEffect, useRef } from "react";
 import {
-  Zap, Trophy, Users, Bell, LogOut, Coins,
+  Zap, Trophy, Users, Bell, LogOut,
   ChevronRight, Home, Wallet, User,
   Copy, CheckCircle, Timer, Star,
   ShoppingBag, Play, BadgeCheck,
 } from "lucide-react";
 import { logout } from "@/lib/auth";
 import type { Game } from "@shared/schema";
+import logoPath    from "@assets/logo_1777237644041.png";
 import imgTreasure from "@assets/hero-treasure.png";
 import imgCash     from "@assets/prize-cash.png";
 import imgPs5      from "@assets/prize-ps5.png";
@@ -331,14 +332,8 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center gap-6">
 
           {/* Logo */}
-          <button onClick={()=>setLocation("/")} className="flex items-center gap-2 shrink-0">
-            <div className="w-8 h-8 rounded-lg flex items-center justify-center"
-              style={{background:"linear-gradient(135deg,#7c3aed,#6d28d9)"}}>
-              <Zap className="h-4 w-4 text-yellow-300" fill="currentColor" />
-            </div>
-            <span className="font-black text-lg tracking-tight">
-              PRIZE<span style={{color:"#a78bfa"}}>PLUGZ</span>
-            </span>
+          <button onClick={()=>setLocation("/")} className="shrink-0">
+            <img src={logoPath} alt="Prize Plugz" className="h-10 w-auto object-contain" />
           </button>
 
           {/* Desktop nav */}
