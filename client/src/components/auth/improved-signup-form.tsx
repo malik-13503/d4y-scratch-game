@@ -279,7 +279,7 @@ export function ImprovedSignupForm({ onSuccess, onSwitchToLogin, initialReferral
           style={{ background: "rgba(16,185,129,0.08)", border: "1px solid rgba(16,185,129,0.25)" }}>
           <Gift className="h-4 w-4 text-emerald-400 shrink-0" />
           <p className="text-emerald-300 text-xs font-medium">
-            🎉 You'll get <strong>10 free tokens</strong> the moment your account is created!
+            🎉 You'll get <strong>5 free tokens</strong> the moment your account is created!
           </p>
         </div>
 

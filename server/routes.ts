@@ -108,24 +108,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
         referredBy: referrerId ?? undefined,
       });
 
-      // Grant 10 free welcome tokens to new users
+      // Grant 5 free welcome tokens to new users
       try {
         await storage.createTokenTransaction({
           userId: user.id,
           transactionType: 'bonus',
-          amount: 10,
-          description: 'Welcome bonus: 10 free tokens for new user',
+          amount: 5,
+          description: 'Welcome bonus: 5 free tokens for new user',
           status: 'completed'
         });
-        await storage.updateUserTokenBalance(user.id, 10);
+        await storage.updateUserTokenBalance(user.id, 5);
         await storage.createUserNotification({
           userId: user.id,
           type: 'welcome',
           title: '🎁 Welcome to Prize Plugz!',
-          message: 'You received 10 free tokens. Use them to enter live games and win big!',
+          message: 'You received 5 free tokens. Use them to enter live games and win big!',
           isRead: false,
         });
-        console.log(`✅ Granted 10 free welcome tokens to: ${user.email}`);
+        console.log(`✅ Granted 5 free welcome tokens to: ${user.email}`);
       } catch (tokenErr) {
         console.error("Failed to grant welcome tokens:", tokenErr);
       }
