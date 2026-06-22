@@ -177,49 +177,23 @@ export default function AuthLandingPage() {
     <>
       <style dangerouslySetInnerHTML={{__html: AUTH_CSS}} />
 
-      <div className="min-h-screen relative overflow-hidden"
-        style={{background:"linear-gradient(135deg,#180430 0%,#0e0626 40%,#1c0b42 70%,#110426 100%)"}}>
+      <div className="min-h-screen relative overflow-hidden" style={{background:"#0d0d14"}}>
 
         {/* ── BACKGROUND ──────────────────────────────────────────── */}
-        {/* Strong glow blobs */}
+        {/* Subtle glow blobs */}
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
-          <div className="absolute rounded-full af1" style={{width:800,height:800,top:-250,left:-250,background:"radial-gradient(circle,rgba(124,58,237,0.52) 0%,transparent 65%)"}} />
-          <div className="absolute rounded-full af2" style={{width:650,height:650,top:"5%",right:-200,background:"radial-gradient(circle,rgba(236,72,153,0.38) 0%,transparent 65%)"}} />
-          <div className="absolute rounded-full af3" style={{width:550,height:550,bottom:-130,left:"25%",background:"radial-gradient(circle,rgba(245,158,11,0.2) 0%,transparent 65%)"}} />
-          <div className="absolute rounded-full" style={{width:400,height:400,top:"40%",left:"18%",background:"radial-gradient(circle,rgba(99,102,241,0.18) 0%,transparent 65%)"}} />
-        </div>
-
-        {/* Spinning wheel — decorative background element */}
-        <div className="absolute pointer-events-none" style={{top:"-8%",right:"-10%",width:"55vw",maxWidth:700,opacity:.07}}>
-          <img src={imgWheel} alt="" className="w-full h-full object-contain a-wheel"
-            style={{filter:"saturate(2) hue-rotate(270deg)"}} />
+          <div className="absolute rounded-full af1" style={{width:700,height:700,top:-200,left:-200,background:"radial-gradient(circle,rgba(124,58,237,0.2) 0%,transparent 65%)"}} />
+          <div className="absolute rounded-full af2" style={{width:600,height:600,top:"5%",right:-150,background:"radial-gradient(circle,rgba(109,40,217,0.15) 0%,transparent 65%)"}} />
+          <div className="absolute rounded-full af3" style={{width:500,height:500,bottom:-100,left:"25%",background:"radial-gradient(circle,rgba(124,58,237,0.1) 0%,transparent 65%)"}} />
         </div>
 
         {/* Neon grid */}
         <div className="absolute inset-0 pointer-events-none"
-          style={{backgroundImage:"linear-gradient(rgba(139,92,246,0.1) 1px,transparent 1px),linear-gradient(90deg,rgba(139,92,246,0.1) 1px,transparent 1px)",backgroundSize:"75px 75px"}} />
+          style={{backgroundImage:"linear-gradient(rgba(124,58,237,0.05) 1px,transparent 1px),linear-gradient(90deg,rgba(124,58,237,0.05) 1px,transparent 1px)",backgroundSize:"60px 60px"}} />
 
-        {/* Top rainbow bar */}
+        {/* Top accent bar */}
         <div className="absolute top-0 inset-x-0 h-0.5 pointer-events-none"
-          style={{background:"linear-gradient(90deg,transparent,#7c3aed 20%,#ec4899 50%,#f59e0b 80%,transparent)"}} />
-
-        {/* Floating neon dots */}
-        <div className="absolute inset-0 pointer-events-none overflow-hidden">
-          {[
-            {s:8, top:"10%",left:"5%",   c:"#a78bfa",a:"af1"},
-            {s:5, top:"60%",left:"2%",   c:"#f472b6",a:"af2"},
-            {s:7, top:"82%",left:"8%",   c:"#fbbf24",a:"af3"},
-            {s:4, top:"28%",left:"42%",  c:"#34d399",a:"af1"},
-            {s:8, top:"72%",left:"55%",  c:"#818cf8",a:"af2"},
-            {s:5, top:"6%", left:"80%",  c:"#fb923c",a:"af3"},
-            {s:6, top:"55%",left:"94%",  c:"#c084fc",a:"af1"},
-            {s:4, top:"38%",left:"88%",  c:"#f472b6",a:"af2"},
-          ].map((p,i) => (
-            <div key={i} className={`absolute rounded-full ${p.a}`}
-              style={{width:p.s,height:p.s,top:p.top,left:p.left,background:p.c,
-                      boxShadow:`0 0 ${p.s*5}px ${p.c}`,opacity:.8}} />
-          ))}
-        </div>
+          style={{background:"linear-gradient(90deg,transparent,#7c3aed 30%,#a78bfa 60%,transparent)"}} />
 
         {/* ── LAYOUT ──────────────────────────────────────────────── */}
         <div className="relative z-10 min-h-screen flex flex-col">
@@ -238,18 +212,19 @@ export default function AuthLandingPage() {
 
                 {/* Headline */}
                 <div>
-                  <p className="text-violet-400 text-xs font-black tracking-[0.4em] uppercase mb-2 flex items-center gap-2">
-                    <span className="w-6 h-px bg-violet-400" />PRIZE PLUGZ<span className="w-6 h-px bg-violet-400" />
-                  </p>
-                  <h1 className="font-black leading-[0.86] tracking-tighter"
-                    style={{fontSize:"clamp(3rem,4.5vw,5rem)"}}>
-                    <span className="text-white block">YOUR NEXT</span>
-                    <span className="a-shimmer-gold block">BIG WIN</span>
-                    <span className="text-white block">STARTS HERE.</span>
+                  <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold mb-4"
+                    style={{background:"rgba(124,58,237,0.12)",border:"1px solid rgba(124,58,237,0.3)",color:"#a78bfa"}}>
+                    <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
+                    LIVE DROPS HAPPENING NOW
+                  </div>
+                  <h1 className="font-black leading-tight text-white"
+                    style={{fontSize:"clamp(2.4rem,4vw,4rem)"}}>
+                    Join Creator Drops.<br />
+                    <span className="a-shimmer-purple">Win Epic Rewards.</span>
                   </h1>
                   <p className="text-gray-500 text-base mt-4 max-w-md leading-relaxed">
-                    Buy tokens, watch the jackpot fill live, and walk away with{" "}
-                    <span className="text-gray-200 font-semibold">real cash & amazing prizes</span>.
+                    Use tokens to join interactive drops and win{" "}
+                    <span className="text-gray-300 font-semibold">real cash, gadgets & luxury prizes</span>.
                     100% transparent — auto winner every time.
                   </p>
                 </div>
@@ -364,7 +339,7 @@ export default function AuthLandingPage() {
                 {/* Rotating border wrapper */}
                 <div className="auth-card-wrap a-glow-pulse">
                   <div className="auth-card-inner"
-                    style={{background:"linear-gradient(145deg,#0f0c22,#180f38)"}}>
+                    style={{background:"#13131f"}}>
 
                     {/* Inner top shimmer line */}
                     <div className="h-px w-full"
