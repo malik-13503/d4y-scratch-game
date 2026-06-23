@@ -203,13 +203,13 @@ function GameCard({ game, onPlay, rank }: { game: Game; onPlay: () => void; rank
       </div>
 
       {/* Image */}
-      <div className="relative overflow-hidden" style={{ height: 160, background: "#1a1535", flexShrink: 0 }}>
-        {game.prizeImageUrl
-          ? <img src={game.prizeImageUrl} alt={game.name} className="w-full h-full object-cover" />
-          : <img src={fallback} alt={game.name} className="w-full h-full object-contain p-4" />
-        }
-        <div className="absolute inset-0 pointer-events-none"
-          style={{ background: "linear-gradient(to top,rgba(19,17,36,.9) 0%,transparent 60%)" }} />
+      <div className="relative overflow-hidden" style={{ height: 170, background: "#1a1535", flexShrink: 0 }}>
+        <img
+          src={game.prizeImageUrl || fallback}
+          alt={game.name}
+          className="w-full h-full object-cover"
+          style={{ objectPosition: "center" }}
+        />
 
         {/* Timer badge */}
         <div className="absolute top-2 right-2 flex items-center gap-1 px-2 py-1 rounded-full text-xs font-bold"
@@ -560,7 +560,7 @@ export default function HomePage() {
         </div>
 
         {isLoading ? (
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {[1, 2, 3, 4].map(i => (
               <div key={i} className="rounded-2xl overflow-hidden" style={{ background: "#131124" }}>
                 <div className="h-6 animate-pulse" style={{ background: "#7c3aed40" }} />
@@ -585,7 +585,7 @@ export default function HomePage() {
             </button>
           </div>
         ) : (
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {activeGames.slice(0, 8).map((g, i) => (
               <GameCard key={g.id} game={g} onPlay={() => setLocation(`/game/${g.id}`)} rank={i} />
             ))}
@@ -655,7 +655,7 @@ export default function HomePage() {
                 style={{ background: "#1a1535", border: "1px solid rgba(255,255,255,.07)" }}>
                 <div className="relative overflow-hidden" style={{ height: 120 }}>
                   <img src={w.img} alt={w.name} className="w-full h-full object-cover object-top" />
-                  <div className="absolute inset-0" style={{ background: "linear-gradient(to top,rgba(26,21,53,.85),transparent 55%)" }} />
+                  <div className="absolute bottom-0 inset-x-0 h-8 pointer-events-none" style={{ background: "linear-gradient(to top,rgba(26,21,53,.6),transparent)" }} />
                   <div className="absolute top-2 left-2 flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[9px] font-black text-white uppercase"
                     style={{ background: w.color, letterSpacing: ".04em" }}>
                     <CheckCircle className="h-2.5 w-2.5" />VERIFIED WINNER
