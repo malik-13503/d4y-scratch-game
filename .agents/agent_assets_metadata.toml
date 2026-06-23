@@ -54,6 +54,42 @@ uri = "file://attached_assets/hero-wheel.png"
 type = "image"
 title = "glowing prize wheel"
 
+[[generated]]
+id = "hBBP9GRhwKlV2ksnBVTke"
+uri = "file://attached_assets/creator_addy.png"
+type = "image"
+title = "creator addy portrait"
+
+[[generated]]
+id = "zIxZepxyUcMnm-asqK9aC"
+uri = "file://attached_assets/creator_taylor.png"
+type = "image"
+title = "creator taylor portrait"
+
+[[generated]]
+id = "Ut2y9niNowTkZMbALY0JO"
+uri = "file://attached_assets/creator_jay.png"
+type = "image"
+title = "creator jay portrait"
+
+[[generated]]
+id = "ZVEPqVxD8gmc5EKXryhkk"
+uri = "file://attached_assets/creator_maya.png"
+type = "image"
+title = "creator maya portrait"
+
+[[generated]]
+id = "6Jh1BZrNUI3wgimCOO1ej"
+uri = "file://attached_assets/hero_prizebox.png"
+type = "image"
+title = "hero prize box glow"
+
+[[generated]]
+id = "ZWIhxuVgB8NMv_IW41X3L"
+uri = "file://attached_assets/hero_bg_space.png"
+type = "image"
+title = "dark space purple background"
+
 [[outputs]]
 id = "ruAn-cWF3HxzLHgpbGRwY"
 uri = "file://prizeplugz-client.zip"
