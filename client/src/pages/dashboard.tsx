@@ -209,7 +209,7 @@ export default function Dashboard() {
 
   if (userLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{background:"#08080f"}}>
+      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950 to-slate-950 flex items-center justify-center">
         <div className="animate-spin w-12 h-12 border-4 border-purple-500 border-t-transparent rounded-full" />
       </div>
     );
@@ -311,367 +311,629 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen" style={{background:"#08080f"}}>
-      {/* Background glow orbs matching homepage */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none" style={{zIndex:0}}>
-        <div className="absolute top-0 left-1/4 w-96 h-96 rounded-full" style={{background:"radial-gradient(circle,rgba(124,58,237,0.12) 0%,transparent 70%)",filter:"blur(40px)"}}/>
-        <div className="absolute bottom-1/4 right-1/4 w-80 h-80 rounded-full" style={{background:"radial-gradient(circle,rgba(59,130,246,0.08) 0%,transparent 70%)",filter:"blur(40px)"}}/>
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950 to-slate-950">
+      {/* Background Effects */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-20 left-10 w-72 h-72 bg-purple-500/10 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-20 right-10 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
       </div>
 
-      {/* Header — matches homepage nav */}
-      <header className="relative z-10 sticky top-0" style={{background:"rgba(8,8,15,0.85)", backdropFilter:"blur(20px)", borderBottom:"1px solid rgba(124,58,237,0.2)"}}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3">
-          <div className="flex items-center justify-between gap-3">
-            <div className="flex items-center gap-3">
-              <button
-                onClick={() => setLocation("/games")}
-                className="flex items-center gap-1.5 text-gray-400 hover:text-white transition-colors text-sm font-medium"
-              >
-                <ArrowLeft className="h-4 w-4" />
-                <span className="hidden sm:inline">Games</span>
-              </button>
-              <div className="w-px h-5 bg-white/10" />
-              <img src={logoPath} alt="Prize Plugz" className="h-7 w-auto" />
-              <h1 className="text-base sm:text-lg font-black text-white tracking-tight">My Dashboard</h1>
+      {/* Responsive Header */}
+      <header className="relative z-10 bg-black/20 backdrop-blur-xl border-b border-purple-500/30">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4">
+          <div className="flex flex-col space-y-4 sm:space-y-0 sm:flex-row sm:items-center sm:justify-between">
+            
+            {/* Top Row: Back Button + Logo + Title */}
+            <div className="flex items-center justify-between sm:justify-start sm:space-x-4">
+              <div className="flex items-center space-x-2 sm:space-x-4">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setLocation("/games")}
+                  className="text-gray-300 hover:text-white hover:bg-white/10 px-2 sm:px-3"
+                >
+                  <ArrowLeft className="h-4 w-4 sm:mr-2" />
+                  <span className="hidden sm:inline">Back to Games</span>
+                </Button>
+                <img src={logoPath} alt="Prize Plugz" className="h-6 w-auto sm:h-8" />
+                <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-white drop-shadow-lg">
+                  My Dashboard
+                </h1>
+              </div>
+              
+              {/* Mobile Actions */}
+              <div className="sm:hidden flex items-center space-x-2">
+                <Button
+                  onClick={refreshData}
+                  size="sm"
+                  className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white border-0 shadow-lg px-3"
+                >
+                  <RefreshCw className="h-4 w-4" />
+                </Button>
+                <Button
+                  onClick={() => logout()}
+                  size="sm"
+                  variant="outline"
+                  className="text-gray-300 border-gray-600 hover:bg-red-500/20 hover:border-red-500 hover:text-red-300 px-3"
+                >
+                  <LogOut className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
-            <div className="flex items-center gap-2">
-              <button
+            
+            {/* Desktop Actions */}
+            <div className="hidden sm:flex items-center space-x-3">
+              <Button
                 onClick={refreshData}
-                className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold text-white transition-all"
-                style={{background:"rgba(124,58,237,0.25)", border:"1px solid rgba(124,58,237,0.4)"}}
+                size="sm"
+                className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white border-0 shadow-lg"
               >
-                <RefreshCw className="h-3.5 w-3.5" />
-                <span className="hidden sm:inline">Refresh</span>
-              </button>
-              <button
+                <RefreshCw className="h-4 w-4 mr-2" />
+                Refresh
+              </Button>
+              <Button
                 onClick={() => logout()}
-                className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold text-red-400 transition-all hover:text-red-300"
-                style={{background:"rgba(239,68,68,0.1)", border:"1px solid rgba(239,68,68,0.25)"}}
+                size="sm"
+                variant="outline"
+                className="text-gray-300 border-gray-600 hover:bg-red-500/20 hover:border-red-500 hover:text-red-300"
               >
-                <LogOut className="h-3.5 w-3.5" />
-                <span className="hidden sm:inline">Logout</span>
-              </button>
+                <LogOut className="h-4 w-4 mr-2" />
+                Logout
+              </Button>
             </div>
           </div>
         </div>
       </header>
 
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 py-8">
-        {/* User Profile Section */}
-        <div className="mb-6 rounded-2xl p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center gap-5"
-          style={{background:"#131124", border:"1px solid rgba(124,58,237,0.3)", boxShadow:"0 0 40px rgba(124,58,237,0.08)"}}>
-          {/* Avatar */}
-          <div className="relative flex-shrink-0">
-            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full flex items-center justify-center"
-              style={{background:"linear-gradient(135deg,#7c3aed,#3b82f6)", boxShadow:"0 0 24px rgba(124,58,237,0.5)"}}>
-              <User className="h-8 w-8 sm:h-10 sm:w-10 text-white" />
+        {/* Responsive Enhanced User Profile Section */}
+        <Card className="mb-8 relative overflow-hidden bg-gradient-to-br from-slate-800/80 to-slate-900/80 border-purple-400/40 backdrop-blur-xl shadow-2xl">
+          <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-blue-500/10 blur-2xl"></div>
+          <CardHeader className="relative p-4 sm:p-6">
+            <div className="flex flex-col sm:flex-row sm:items-center space-y-4 sm:space-y-0 sm:space-x-6">
+              
+              {/* Avatar and Mobile User Info */}
+              <div className="flex items-center space-x-4 sm:space-x-0">
+                <div className="relative flex-shrink-0">
+                  <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center shadow-2xl">
+                    <User className="h-8 w-8 sm:h-10 sm:w-10 text-white drop-shadow-lg" />
+                  </div>
+                  <div className="absolute -inset-1 sm:-inset-2 bg-gradient-to-br from-purple-400/30 to-blue-400/30 rounded-full blur-lg"></div>
+                </div>
+                
+                {/* Mobile User Details */}
+                <div className="sm:hidden min-w-0">
+                  <CardTitle className="text-xl font-black bg-gradient-to-r from-white to-gray-200 bg-clip-text text-transparent drop-shadow-lg truncate">
+                    {(user as any).firstName && (user as any).lastName ? `${(user as any).firstName} ${(user as any).lastName}` : 'Player'}
+                  </CardTitle>
+                  <p className="text-gray-200 text-sm font-medium truncate">{(user as any).email}</p>
+                </div>
+              </div>
+              
+              {/* Desktop User Details */}
+              <div className="hidden sm:block flex-1 min-w-0">
+                <CardTitle className="text-2xl lg:text-3xl font-black bg-gradient-to-r from-white to-gray-200 bg-clip-text text-transparent drop-shadow-lg truncate">
+                  {(user as any).firstName && (user as any).lastName ? `${(user as any).firstName} ${(user as any).lastName}` : 'Player'}
+                </CardTitle>
+                <p className="text-gray-200 text-base lg:text-lg font-medium truncate">{(user as any).email}</p>
+              </div>
+              
+              {/* Responsive Status Badges */}
+              <div className="flex flex-wrap gap-2 sm:gap-3">
+                <Badge className={`${(user as any).cardOnFile ? "bg-gradient-to-r from-emerald-500 to-green-500 text-white" : "bg-gradient-to-r from-red-500 to-pink-500 text-white"} border-0 px-3 py-2 sm:px-4 sm:py-2 font-bold shadow-lg text-xs sm:text-sm`}>
+                  <CreditCard className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                  <span className="drop-shadow-sm whitespace-nowrap">
+                    {(user as any).cardOnFile ? "Payment Verified" : "Payment Required"}
+                  </span>
+                </Badge>
+                <div className="flex items-center space-x-2 bg-gradient-to-r from-blue-500/20 to-green-500/20 px-3 py-2 sm:px-4 sm:py-2 rounded-full border border-green-400/30">
+                  <div className="w-2 h-2 sm:w-3 sm:h-3 bg-green-400 rounded-full animate-pulse"></div>
+                  <span className="text-green-300 font-bold text-xs sm:text-sm drop-shadow-sm">ONLINE</span>
+                </div>
+              </div>
             </div>
-            <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full border-2 flex items-center justify-center"
-              style={{background:"#22c55e", borderColor:"#08080f"}}>
-              <div className="w-2 h-2 rounded-full bg-white animate-pulse" />
-            </div>
-          </div>
-
-          {/* User info */}
-          <div className="flex-1 min-w-0">
-            <h2 className="text-xl sm:text-2xl font-black text-white truncate">
-              {(user as any).firstName && (user as any).lastName ? `${(user as any).firstName} ${(user as any).lastName}` : 'Player'}
-            </h2>
-            <p className="text-gray-400 text-sm truncate">{(user as any).email}</p>
-            <div className="flex items-center gap-2 mt-2">
-              <span className="text-[10px] font-black text-green-300 uppercase tracking-widest px-2 py-0.5 rounded-full"
-                style={{background:"rgba(34,197,94,0.12)", border:"1px solid rgba(34,197,94,0.3)"}}>● ONLINE</span>
-            </div>
-          </div>
-
-          {/* Status badge */}
-          <div className="flex-shrink-0">
-            <span className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold ${(user as any).cardOnFile ? "text-emerald-300" : "text-red-300"}`}
-              style={(user as any).cardOnFile
-                ? {background:"rgba(16,185,129,0.12)", border:"1px solid rgba(16,185,129,0.3)"}
-                : {background:"rgba(239,68,68,0.12)", border:"1px solid rgba(239,68,68,0.3)"}}>
-              <CreditCard className="h-4 w-4" />
-              {(user as any).cardOnFile ? "Payment Verified" : "Payment Required"}
-            </span>
-          </div>
-        </div>
+          </CardHeader>
+        </Card>
 
         {/* Tabs for Dashboard Sections */}
         <Tabs value={currentTab} onValueChange={handleTabChange} className="w-full">
-          {/* Tabs — unified scrollable bar matching homepage pill style */}
-          <div className="overflow-x-auto scrollbar-hide mb-6">
-            <TabsList className="flex gap-1 p-1.5 rounded-2xl min-w-max"
-              style={{background:"#131124", border:"1px solid rgba(255,255,255,0.06)"}}>
-              {[
-                { value:"overview",      icon: Gauge,      label:"Overview"     },
-                { value:"transactions",  icon: Activity,   label:"Transactions" },
-                { value:"achievements",  icon: Award,      label:"Achievements" },
-                { value:"payment",       icon: CreditCard, label:"Payment"      },
-                { value:"cards",         icon: Shield,     label:"My Cards"     },
-                { value:"system",        icon: Settings,   label:"System"       },
-              ].map(({ value, icon: Icon, label }) => (
-                <TabsTrigger key={value} value={value}
-                  className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold text-gray-400 transition-all whitespace-nowrap data-[state=active]:text-white"
-                  style={{} as any}>
-                  <Icon className="h-4 w-4" />{label}
+          {/* Mobile Tabs - Scrollable */}
+          <div className="lg:hidden">
+            <TabsList className="flex w-full overflow-x-auto bg-black/40 backdrop-blur-xl border border-purple-500/30 rounded-2xl p-2 scrollbar-hide">
+              <div className="flex gap-2 min-w-max">
+                <TabsTrigger value="overview" className="text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-blue-600 rounded-xl transition-all duration-200 whitespace-nowrap px-3 py-2">
+                  <Gauge className="h-4 w-4 mr-1 sm:mr-2" />
+                  <span className="text-xs sm:text-sm">Overview</span>
                 </TabsTrigger>
-              ))}
+                <TabsTrigger value="transactions" className="text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-blue-600 rounded-xl transition-all duration-200 whitespace-nowrap px-3 py-2">
+                  <Activity className="h-4 w-4 mr-1 sm:mr-2" />
+                  <span className="text-xs sm:text-sm">Transactions</span>
+                </TabsTrigger>
+                <TabsTrigger value="achievements" className="text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-blue-600 rounded-xl transition-all duration-200 whitespace-nowrap px-3 py-2">
+                  <Award className="h-4 w-4 mr-1 sm:mr-2" />
+                  <span className="text-xs sm:text-sm">Achievements</span>
+                </TabsTrigger>
+                <TabsTrigger value="payment" className="text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-blue-600 rounded-xl transition-all duration-200 whitespace-nowrap px-3 py-2">
+                  <CreditCard className="h-4 w-4 mr-1 sm:mr-2" />
+                  <span className="text-xs sm:text-sm">Payment</span>
+                </TabsTrigger>
+                <TabsTrigger value="cards" className="text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-blue-600 rounded-xl transition-all duration-200 whitespace-nowrap px-3 py-2">
+                  <Shield className="h-4 w-4 mr-1 sm:mr-2" />
+                  <span className="text-xs sm:text-sm">My Cards</span>
+                </TabsTrigger>
+                <TabsTrigger value="system" className="text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-blue-600 rounded-xl transition-all duration-200 whitespace-nowrap px-3 py-2">
+                  <Settings className="h-4 w-4 mr-1 sm:mr-2" />
+                  <span className="text-xs sm:text-sm">System</span>
+                </TabsTrigger>
+              </div>
+            </TabsList>
+          </div>
+
+          {/* Desktop Tabs - Grid */}
+          <div className="hidden lg:block">
+            <TabsList className="grid w-full grid-cols-6 bg-black/40 backdrop-blur-xl border border-purple-500/30 rounded-2xl p-2">
+              <TabsTrigger value="overview" className="text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-blue-600 rounded-xl transition-all duration-200">
+                <Gauge className="h-4 w-4 mr-2" />
+                Overview
+              </TabsTrigger>
+              <TabsTrigger value="transactions" className="text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-blue-600 rounded-xl transition-all duration-200">
+                <Activity className="h-4 w-4 mr-2" />
+                Transactions
+              </TabsTrigger>
+              <TabsTrigger value="achievements" className="text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-blue-600 rounded-xl transition-all duration-200">
+                <Award className="h-4 w-4 mr-2" />
+                Achievements
+              </TabsTrigger>
+              <TabsTrigger value="payment" className="text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-blue-600 rounded-xl transition-all duration-200">
+                <CreditCard className="h-4 w-4 mr-2" />
+                Payment Setup
+              </TabsTrigger>
+              <TabsTrigger value="cards" className="text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-blue-600 rounded-xl transition-all duration-200">
+                <Shield className="h-4 w-4 mr-2" />
+                My Cards
+              </TabsTrigger>
+              <TabsTrigger value="system" className="text-white data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-blue-600 rounded-xl transition-all duration-200">
+                <Settings className="h-4 w-4 mr-2" />
+                System
+              </TabsTrigger>
             </TabsList>
           </div>
 
           {/* Overview Tab */}
           <TabsContent value="overview" className="space-y-8">
-            {/* Stats row — dark cards matching homepage */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 mb-2">
-              {/* Buy Tokens CTA */}
-              <div className="col-span-2 sm:col-span-1 rounded-2xl p-5 cursor-pointer hover:scale-[1.02] transition-all group"
-                style={{background:"linear-gradient(135deg,rgba(234,179,8,0.18),rgba(234,88,12,0.18))", border:"1px solid rgba(234,179,8,0.35)", boxShadow:"0 0 20px rgba(234,179,8,0.08)"}}
-                onClick={() => window.location.href = '/tokens'}>
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="p-2.5 rounded-xl" style={{background:"linear-gradient(135deg,#eab308,#ea580c)"}}>
-                    <Coins className="h-5 w-5 text-white" />
-                  </div>
-                  <p className="text-yellow-200 text-sm font-bold">Buy Tokens</p>
-                </div>
-                <button className="w-full py-2 rounded-xl text-xs font-black text-white"
-                  style={{background:"linear-gradient(135deg,#eab308,#ea580c)"}}>
-                  Purchase Tokens →
-                </button>
-              </div>
-
-              {[
-                { label:"Wins", value: statsLoading ? "..." : String((userStats as any)?.totalWins || 0), icon: Trophy, color:"#10b981", bg:"rgba(16,185,129,0.15)", border:"rgba(16,185,129,0.3)" },
-                { label:"Total Spent", value: `$${statsLoading ? "..." : ((userStats as any)?.totalSpent || 0).toFixed(2)}`, icon: DollarSign, color:"#3b82f6", bg:"rgba(59,130,246,0.15)", border:"rgba(59,130,246,0.3)" },
-                { label:"Spins", value: statsLoading ? "..." : String((userStats as any)?.totalSpins || 0), icon: Target, color:"#a78bfa", bg:"rgba(167,139,250,0.15)", border:"rgba(167,139,250,0.3)" },
-                { label:"Free Spins", value: statsLoading ? "..." : String((userStats as any)?.freeSpins || 0), icon: Award, color:"#f59e0b", bg:"rgba(245,158,11,0.15)", border:"rgba(245,158,11,0.3)" },
-              ].map(({ label, value, icon: Icon, color, bg, border }) => (
-                <div key={label} className="rounded-2xl p-5 flex flex-col gap-2"
-                  style={{background:"#131124", border:`1px solid ${border}`, boxShadow:`0 0 16px ${bg}`}}>
-                  <div className="p-2.5 rounded-xl w-fit" style={{background:bg}}>
-                    <Icon className="h-5 w-5" style={{color}} />
-                  </div>
-                  <p className="text-gray-400 text-xs font-semibold">{label}</p>
-                  <p className="text-2xl font-black text-white">{value}</p>
-                </div>
-              ))}
-            </div>
-
-        {/* Quick Action Cards */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-2">
-          {[
-            { label:"Play Games",   sub:"Spin & win prizes",    icon: Target,   color:"#7c3aed", bg:"rgba(124,58,237,0.15)", border:"rgba(124,58,237,0.3)", btnLabel:"Play Now",       action: () => setLocation("/games") },
-            { label:"Transactions", sub:"Payment history",      icon: CreditCard, color:"#10b981", bg:"rgba(16,185,129,0.15)", border:"rgba(16,185,129,0.3)", btnLabel:"View History",  action: () => setLocation("/transactions") },
-            { label:"Achievements", sub:"Track milestones",     icon: Trophy,   color:"#f59e0b", bg:"rgba(245,158,11,0.15)", border:"rgba(245,158,11,0.3)", btnLabel:"View Progress", action: () => handleTabChange("achievements") },
-            { label:"My Numbers",   sub:"View all your spins",  icon: Hash,     color:"#06b6d4", bg:"rgba(6,182,212,0.15)", border:"rgba(6,182,212,0.3)", btnLabel:"View Numbers",  action: () => setLocation("/my-numbers") },
-          ].map(({ label, sub, icon: Icon, color, bg, border, btnLabel, action }) => (
-            <div key={label} className="rounded-2xl p-5 flex flex-col gap-4 cursor-pointer hover:scale-[1.02] transition-all"
-              style={{background:"#131124", border:`1px solid ${border}`}}
-              onClick={action}>
-              <div className="flex items-center gap-3">
-                <div className="p-3 rounded-xl" style={{background:bg}}>
-                  <Icon className="h-6 w-6" style={{color}} />
+            {/* Enhanced Stats Overview with eye-catching gradients */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              
+          {/* Token Purchase Card - Featured */}
+          <Card className="relative overflow-hidden bg-gradient-to-br from-yellow-900/60 to-orange-900/60 border-yellow-400/40 backdrop-blur-xl shadow-2xl hover:shadow-yellow-500/20 hover:scale-105 transition-all duration-300 cursor-pointer group">
+            <div className="absolute inset-0 bg-gradient-to-br from-yellow-800/20 to-orange-800/20 blur-xl"></div>
+            <CardContent 
+              className="relative p-6 h-full flex flex-col justify-between"
+              onClick={() => window.location.href = '/tokens'}
+            >
+              <div className="flex items-center space-x-4">
+                <div className="p-3 bg-gradient-to-br from-yellow-500 to-orange-600 rounded-xl shadow-lg group-hover:scale-110 transition-transform duration-300">
+                  <Coins className="h-8 w-8 text-white drop-shadow-lg" />
                 </div>
                 <div>
-                  <p className="text-white font-bold text-sm">{label}</p>
-                  <p className="text-gray-500 text-xs">{sub}</p>
+                  <p className="text-white text-lg font-black tracking-wide drop-shadow-lg">Buy Tokens</p>
+                  <p className="text-2xl font-black text-yellow-300 drop-shadow-lg">
+                    Get Started
+                  </p>
                 </div>
               </div>
-              <button className="w-full py-2 rounded-xl text-xs font-black text-white transition-all"
-                style={{background:bg, border:`1px solid ${border}`}}>
-                {btnLabel} →
-              </button>
-            </div>
-          ))}
+              <div className="mt-4 text-center">
+                <Button 
+                  className="w-full bg-gradient-to-r from-yellow-500 to-orange-600 hover:from-yellow-600 hover:to-orange-700 text-white font-bold py-2 px-4 rounded-lg shadow-lg"
+                  data-testid="button-buy-tokens-dashboard"
+                >
+                  Purchase Tokens →
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Low Numbers Card (1-50) */}
+          <Card className="relative overflow-hidden bg-gradient-to-br from-emerald-900/60 to-green-900/60 border-emerald-400/40 backdrop-blur-xl shadow-2xl hover:shadow-emerald-500/20 transition-all duration-300">
+            <div className="absolute inset-0 bg-gradient-to-br from-emerald-800/20 to-green-800/20 blur-xl"></div>
+            <CardContent className="relative p-6">
+              <div className="flex items-center space-x-4">
+                <div className="p-3 bg-gradient-to-br from-emerald-500 to-green-600 rounded-xl shadow-lg">
+                  <Trophy className="h-8 w-8 text-white drop-shadow-lg" />
+                </div>
+                <div>
+                  <p className="text-white text-lg font-black tracking-wide drop-shadow-lg">Low Numbers</p>
+                  <p className="text-4xl font-black text-white drop-shadow-lg">
+                    {statsLoading ? '...' : ((userStats as any)?.totalWins || 0)}
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Total Spent Card */}
+          <Card className="relative overflow-hidden bg-gradient-to-br from-blue-900/60 to-cyan-900/60 border-blue-400/40 backdrop-blur-xl shadow-2xl hover:shadow-blue-500/20 transition-all duration-300">
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-800/20 to-cyan-800/20 blur-xl"></div>
+            <CardContent className="relative p-6">
+              <div className="flex items-center space-x-4">
+                <div className="p-3 bg-gradient-to-br from-blue-500 to-cyan-600 rounded-xl shadow-lg">
+                  <DollarSign className="h-8 w-8 text-white drop-shadow-lg" />
+                </div>
+                <div>
+                  <p className="text-white text-lg font-black tracking-wide drop-shadow-lg">Total Spent</p>
+                  <p className="text-4xl font-black text-white drop-shadow-lg">
+                    ${statsLoading ? '...' : ((userStats as any)?.totalSpent || 0).toFixed(2)}
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Total Spins Card */}
+          <Card className="relative overflow-hidden bg-gradient-to-br from-purple-900/60 to-pink-900/60 border-purple-400/40 backdrop-blur-xl shadow-2xl hover:shadow-purple-500/20 transition-all duration-300">
+            <div className="absolute inset-0 bg-gradient-to-br from-purple-800/20 to-pink-800/20 blur-xl"></div>
+            <CardContent className="relative p-6">
+              <div className="flex items-center space-x-4">
+                <div className="p-3 bg-gradient-to-br from-purple-500 to-pink-600 rounded-xl shadow-lg">
+                  <Target className="h-8 w-8 text-white drop-shadow-lg" />
+                </div>
+                <div>
+                  <p className="text-white text-lg font-black tracking-wide drop-shadow-lg">Total Spins</p>
+                  <p className="text-4xl font-black text-white drop-shadow-lg">
+                    {statsLoading ? '...' : ((userStats as any)?.totalSpins || 0)}
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Free Spins Card */}
+          <Card className="relative overflow-hidden bg-gradient-to-br from-yellow-900/60 to-orange-900/60 border-yellow-400/40 backdrop-blur-xl shadow-2xl hover:shadow-yellow-500/20 transition-all duration-300">
+            <div className="absolute inset-0 bg-gradient-to-br from-yellow-800/20 to-orange-800/20 blur-xl"></div>
+            <CardContent className="relative p-6">
+              <div className="flex items-center space-x-4">
+                <div className="p-3 bg-gradient-to-br from-yellow-500 to-orange-600 rounded-xl shadow-lg">
+                  <Award className="h-8 w-8 text-white drop-shadow-lg" />
+                </div>
+                <div>
+                  <p className="text-white text-lg font-black tracking-wide drop-shadow-lg">Free Spins</p>
+                  <p className="text-4xl font-black text-white drop-shadow-lg">
+                    {statsLoading ? '...' : ((userStats as any)?.freeSpins || 0)}
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Quick Action Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <Card className="relative overflow-hidden bg-gradient-to-br from-purple-900/70 to-blue-900/70 border-purple-400/40 backdrop-blur-xl shadow-2xl hover:shadow-purple-500/20 transition-all duration-300">
+            <div className="absolute inset-0 bg-gradient-to-br from-purple-800/30 to-blue-800/30 blur-xl"></div>
+            <CardContent className="relative p-6">
+              <div className="text-center">
+                <div className="p-4 bg-gradient-to-br from-purple-500 to-blue-600 rounded-xl mx-auto w-fit mb-4 shadow-lg">
+                  <Target className="h-8 w-8 text-white" />
+                </div>
+                <h3 className="text-lg font-bold text-white mb-2">Play Games</h3>
+                <p className="text-gray-200 text-sm mb-4">Spin the wheel and win amazing prizes</p>
+                <Button 
+                  onClick={() => setLocation("/games")}
+                  className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-bold px-6 py-2 rounded-xl shadow-lg transition-all duration-300"
+                >
+                  Play Now
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="relative overflow-hidden bg-gradient-to-br from-emerald-900/70 to-green-900/70 border-emerald-400/40 backdrop-blur-xl shadow-2xl hover:shadow-emerald-500/20 transition-all duration-300">
+            <div className="absolute inset-0 bg-gradient-to-br from-emerald-800/30 to-green-800/30 blur-xl"></div>
+            <CardContent className="relative p-6">
+              <div className="text-center">
+                <div className="p-4 bg-gradient-to-br from-emerald-500 to-green-600 rounded-xl mx-auto w-fit mb-4 shadow-lg">
+                  <CreditCard className="h-8 w-8 text-white" />
+                </div>
+                <h3 className="text-lg font-bold text-white mb-2">Transactions</h3>
+                <p className="text-gray-200 text-sm mb-4">View your payment history and spins</p>
+                <Button 
+                  onClick={() => setLocation("/transactions")}
+                  className="bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 text-white font-bold px-6 py-2 rounded-xl shadow-lg transition-all duration-300"
+                >
+                  View History
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="relative overflow-hidden bg-gradient-to-br from-yellow-900/70 to-orange-900/70 border-yellow-400/40 backdrop-blur-xl shadow-2xl hover:shadow-yellow-500/20 transition-all duration-300">
+            <div className="absolute inset-0 bg-gradient-to-br from-yellow-800/30 to-orange-800/30 blur-xl"></div>
+            <CardContent className="relative p-6">
+              <div className="text-center">
+                <div className="p-4 bg-gradient-to-br from-yellow-500 to-orange-600 rounded-xl mx-auto w-fit mb-4 shadow-lg">
+                  <Trophy className="h-8 w-8 text-white" />
+                </div>
+                <h3 className="text-lg font-bold text-white mb-2">Achievements</h3>
+                <p className="text-gray-200 text-sm mb-4">Track your wins and milestones</p>
+                <Button 
+                  onClick={() => setLocation("/achievements")}
+                  className="bg-gradient-to-r from-yellow-600 to-orange-600 hover:from-yellow-700 hover:to-orange-700 text-white font-bold px-6 py-2 rounded-xl shadow-lg transition-all duration-300"
+                >
+                  View Progress
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card 
+            className="relative overflow-hidden bg-gradient-to-br from-cyan-900/60 to-teal-900/60 border-cyan-400/30 backdrop-blur-xl shadow-2xl cursor-pointer hover:scale-105 transition-all duration-300 group"
+            onClick={() => setLocation('/my-numbers')}
+          >
+            <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/10 to-teal-500/10 blur-2xl group-hover:blur-xl transition-all duration-300"></div>
+            <CardContent className="relative p-6">
+              <div className="flex items-center space-x-4">
+                <div className="p-3 bg-gradient-to-br from-cyan-500 to-teal-600 rounded-xl shadow-lg group-hover:shadow-2xl transition-all duration-300">
+                  <Hash className="h-8 w-8 text-white drop-shadow-lg" />
+                </div>
+                <div>
+                  <h3 className="text-white font-bold text-xl drop-shadow-lg">My Numbers</h3>
+                  <p className="text-gray-200 drop-shadow-sm">View all your spins</p>
+                </div>
+                <ChevronRight className="h-6 w-6 text-white/70 ml-auto group-hover:translate-x-1 transition-all duration-300" />
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
         {/* Daily Tokens + Promo Code Section */}
         <DailyTokensAndPromoSection />
 
-        {/* Live Activity */}
-        <div className="rounded-2xl overflow-hidden mb-4" style={{background:"#131124", border:"1px solid rgba(255,255,255,0.06)"}}>
-          <div className="flex items-center justify-between px-5 py-4 border-b" style={{borderColor:"rgba(255,255,255,0.06)"}}>
-            <div className="flex items-center gap-2">
-              <div className="p-2 rounded-lg" style={{background:"rgba(124,58,237,0.2)"}}>
-                <Activity className="h-4 w-4 text-purple-400" />
+        {/* Real-time Activity Feed */}
+        <Card className="mb-8 relative overflow-hidden bg-gradient-to-br from-slate-800/80 to-slate-900/80 border-slate-600/40 backdrop-blur-xl shadow-2xl">
+          <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-purple-500/5 blur-2xl"></div>
+          <CardHeader className="relative">
+            <CardTitle className="text-2xl font-bold bg-gradient-to-r from-white to-gray-200 bg-clip-text text-transparent flex items-center">
+              <div className="p-2 bg-gradient-to-br from-blue-500 to-purple-500 rounded-lg mr-3 shadow-lg">
+                <Activity className="h-6 w-6 text-white" />
               </div>
-              <span className="text-white font-black text-base">Live Activity</span>
+              Live Activity
+              <div className="flex items-center space-x-2 ml-auto">
+                <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
+                <span className="text-green-300 font-bold text-sm">LIVE</span>
+              </div>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="relative">
+            <div className="space-y-3">
+              <div className="p-4 bg-gradient-to-r from-slate-700/50 to-slate-800/50 rounded-xl border border-slate-600/30">
+                <p className="text-gray-200 font-medium">Welcome to your dashboard! Start playing games to see your activity here.</p>
+                <p className="text-gray-400 text-sm mt-1">Your spins and wins will appear in real-time</p>
+              </div>
             </div>
-            <span className="flex items-center gap-1.5 text-xs font-bold text-green-300">
-              <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse inline-block" />LIVE
-            </span>
-          </div>
-          <div className="p-5">
-            <div className="rounded-xl p-4" style={{background:"rgba(255,255,255,0.03)", border:"1px solid rgba(255,255,255,0.05)"}}>
-              <p className="text-gray-300 font-medium text-sm">Welcome to your dashboard! Start playing games to see your activity here.</p>
-              <p className="text-gray-600 text-xs mt-1">Your spins and wins will appear in real-time</p>
-            </div>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
 
-        {/* Game History */}
-        <div className="rounded-2xl overflow-hidden" style={{background:"#131124", border:"1px solid rgba(255,255,255,0.06)"}}>
-          <div className="flex items-center gap-2 px-5 py-4 border-b" style={{borderColor:"rgba(255,255,255,0.06)"}}>
-            <div className="p-2 rounded-lg" style={{background:"rgba(124,58,237,0.2)"}}>
-              <Gamepad2 className="h-4 w-4 text-purple-400" />
-            </div>
-            <span className="text-white font-black text-base">Recent Game History</span>
-          </div>
-          <div className="p-5">
+        {/* Enhanced Game History */}
+        <Card className="relative overflow-hidden bg-gradient-to-br from-slate-800/80 to-slate-900/80 border-slate-600/40 backdrop-blur-xl shadow-2xl">
+          <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-blue-500/5 blur-2xl"></div>
+          <CardHeader className="relative">
+            <CardTitle className="text-2xl font-bold bg-gradient-to-r from-white to-gray-200 bg-clip-text text-transparent flex items-center">
+              <div className="p-2 bg-gradient-to-br from-purple-500 to-blue-500 rounded-lg mr-3 shadow-lg">
+                <Activity className="h-6 w-6 text-white" />
+              </div>
+              Recent Game History
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="relative">
             {historyLoading ? (
-              <div className="flex items-center justify-center py-10 gap-3">
-                <div className="animate-spin w-7 h-7 border-4 border-purple-500 border-t-transparent rounded-full" />
-                <p className="text-gray-400">Loading history...</p>
+              <div className="flex items-center justify-center py-12">
+                <div className="relative">
+                  <div className="animate-spin w-8 h-8 border-4 border-purple-500 border-t-transparent rounded-full" />
+                  <div className="absolute inset-0 animate-ping w-8 h-8 border-4 border-purple-400/30 rounded-full" />
+                </div>
+                <p className="ml-4 text-gray-200 font-medium">Loading game history...</p>
               </div>
             ) : !gameHistory || (gameHistory as any).length === 0 ? (
-              <div className="text-center py-12">
-                <Gamepad2 className="h-14 w-14 text-gray-700 mx-auto mb-4" />
-                <h3 className="text-xl font-black text-white mb-2">No Games Played Yet</h3>
-                <p className="text-gray-500 text-sm mb-6">Start playing to see your game history here!</p>
-                <button onClick={() => setLocation('/games')}
-                  className="px-6 py-3 rounded-xl font-black text-sm text-white"
-                  style={{background:"linear-gradient(135deg,#7c3aed,#3b82f6)"}}>
-                  🎮 Start Playing Now
-                </button>
+              <div className="text-center py-16">
+                <div className="relative inline-block mb-6">
+                  <div className="absolute inset-0 bg-gradient-to-br from-gray-500/20 to-gray-600/20 blur-2xl rounded-full"></div>
+                  <Gamepad2 className="relative h-20 w-20 text-gray-400 mx-auto drop-shadow-lg" />
+                </div>
+                <h3 className="text-2xl font-bold text-white mb-4">No Games Played Yet</h3>
+                <p className="text-gray-200 text-lg mb-8">Start playing to see your game history here!</p>
+                <Button 
+                  onClick={() => setLocation('/games')}
+                  className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-bold px-8 py-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 text-lg"
+                >
+                  <Gamepad2 className="h-5 w-5 mr-2" />
+                  Start Playing Now
+                </Button>
               </div>
             ) : (
-              <div className="divide-y" style={{borderColor:"rgba(255,255,255,0.05)"}}>
+              <div className="space-y-4">
                 {(gameHistory as any).slice(0, 5).map((game: any, index: number) => (
-                  <div key={index} className="flex items-center justify-between py-4 first:pt-0 last:pb-0">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2.5 rounded-xl" style={{background:"rgba(124,58,237,0.15)"}}>
-                        <Gamepad2 className="h-4 w-4 text-purple-400" />
-                      </div>
+                  <div key={index} className="p-4 bg-gradient-to-r from-slate-700/50 to-slate-800/50 rounded-xl border border-slate-600/30">
+                    <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-white font-semibold text-sm">Game #{game.id}</p>
-                        <p className="text-gray-500 text-xs">Recent activity</p>
+                        <p className="text-white font-semibold">Game #{game.id}</p>
+                        <p className="text-gray-400 text-sm">Recent activity</p>
                       </div>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-purple-400 font-bold text-sm">${game.amount}</p>
-                      <p className="text-gray-600 text-xs">{new Date(game.createdAt).toLocaleDateString()}</p>
+                      <div className="text-right">
+                        <p className="text-purple-400 font-bold">${game.amount}</p>
+                        <p className="text-gray-400 text-sm">{new Date(game.createdAt).toLocaleDateString()}</p>
+                      </div>
                     </div>
                   </div>
                 ))}
               </div>
             )}
-          </div>
-        </div>
+          </CardContent>
+        </Card>
           </TabsContent>
 
           {/* Transactions Tab */}
-          <TabsContent value="transactions">
-            <div className="rounded-2xl overflow-hidden" style={{background:"#131124", border:"1px solid rgba(255,255,255,0.06)"}}>
-              <div className="flex items-center gap-2 px-5 py-4 border-b" style={{borderColor:"rgba(255,255,255,0.06)"}}>
-                <div className="p-2 rounded-lg" style={{background:"rgba(59,130,246,0.2)"}}>
-                  <DollarSign className="h-4 w-4 text-blue-400" />
-                </div>
-                <span className="text-white font-black text-base">Transaction History</span>
-              </div>
-              <div className="p-5">
+          <TabsContent value="transactions" className="space-y-8">
+            <Card className="relative overflow-hidden bg-gradient-to-br from-slate-800/80 to-slate-900/80 border-blue-400/40 backdrop-blur-xl shadow-2xl">
+              <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-cyan-500/10 blur-2xl"></div>
+              <CardHeader className="relative">
+                <CardTitle className="text-2xl font-bold bg-gradient-to-r from-white to-gray-200 bg-clip-text text-transparent flex items-center">
+                  <div className="p-2 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-lg mr-3 shadow-lg">
+                    <DollarSign className="h-6 w-6 text-white" />
+                  </div>
+                  Transaction History
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="relative">
                 {transactionsLoading ? (
-                  <div className="flex items-center justify-center py-10 gap-3">
-                    <div className="animate-spin w-7 h-7 border-4 border-blue-500 border-t-transparent rounded-full" />
-                    <p className="text-gray-400">Loading transactions...</p>
+                  <div className="flex items-center justify-center py-12">
+                    <div className="relative">
+                      <div className="animate-spin w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full" />
+                      <div className="absolute inset-0 animate-ping w-8 h-8 border-4 border-blue-400/30 rounded-full" />
+                    </div>
+                    <p className="ml-4 text-gray-200 font-medium">Loading transactions...</p>
                   </div>
                 ) : !transactions || (transactions as any).length === 0 ? (
-                  <div className="text-center py-12">
-                    <DollarSign className="h-14 w-14 text-gray-700 mx-auto mb-4" />
-                    <h3 className="text-xl font-black text-white mb-2">No Transactions Yet</h3>
-                    <p className="text-gray-500 text-sm mb-6">Start playing games to see your transaction history!</p>
-                    <button onClick={() => setLocation('/games')}
-                      className="px-6 py-3 rounded-xl font-black text-sm text-white"
-                      style={{background:"linear-gradient(135deg,#3b82f6,#06b6d4)"}}>
-                      🎮 Start Playing Now
-                    </button>
+                  <div className="text-center py-16">
+                    <div className="relative inline-block mb-6">
+                      <div className="absolute inset-0 bg-gradient-to-br from-blue-500/20 to-cyan-500/20 blur-2xl rounded-full"></div>
+                      <DollarSign className="relative h-20 w-20 text-gray-400 mx-auto drop-shadow-lg" />
+                    </div>
+                    <h3 className="text-2xl font-bold text-white mb-4">No Transactions Yet</h3>
+                    <p className="text-gray-200 text-lg mb-8">Start playing games to see your transaction history!</p>
+                    <Button 
+                      onClick={() => setLocation('/games')}
+                      className="bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white font-bold px-8 py-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 text-lg"
+                    >
+                      <Gamepad2 className="h-5 w-5 mr-2" />
+                      Start Playing Now
+                    </Button>
                   </div>
                 ) : (
-                  <div className="divide-y" style={{borderColor:"rgba(255,255,255,0.05)"}}>
-                    {(transactions as any).map((transaction: any, index: number) => {
-                      const isFree = parseFloat(transaction.amount) === 0;
-                      return (
-                        <div key={index} className="flex items-center justify-between py-4 first:pt-0 last:pb-0">
-                          <div className="flex items-center gap-3">
-                            <div className="p-2.5 rounded-xl" style={{background: isFree ? "rgba(16,185,129,0.15)" : "rgba(59,130,246,0.15)"}}>
-                              {isFree ? <Trophy className="h-4 w-4 text-emerald-400" /> : <DollarSign className="h-4 w-4 text-blue-400" />}
+                  <div className="space-y-4">
+                    {(transactions as any).map((transaction: any, index: number) => (
+                      <div key={index} className="p-6 bg-gradient-to-r from-slate-700/50 to-slate-800/50 rounded-xl border border-slate-600/30 hover:border-blue-500/50 transition-all duration-300">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center space-x-4">
+                            <div className={`p-3 rounded-xl shadow-lg ${
+                              parseFloat(transaction.amount) === 0 
+                                ? 'bg-gradient-to-br from-green-500 to-emerald-600' 
+                                : 'bg-gradient-to-br from-blue-500 to-cyan-600'
+                            }`}>
+                              {parseFloat(transaction.amount) === 0 ? (
+                                <Trophy className="h-6 w-6 text-white" />
+                              ) : (
+                                <DollarSign className="h-6 w-6 text-white" />
+                              )}
                             </div>
                             <div>
-                              <p className="text-white font-semibold text-sm">Game Spin #{transaction.id}</p>
-                              <p className="text-gray-500 text-xs">{isFree ? 'Free Play' : `Paid Spin - #${transaction.spunNumber || '?'}`}</p>
-                              <p className="text-gray-700 text-xs">{new Date(transaction.createdAt).toLocaleString()}</p>
+                              <p className="text-white font-semibold">
+                                Game Spin #{transaction.id}
+                              </p>
+                              <p className="text-gray-400 text-sm">
+                                {parseFloat(transaction.amount) === 0 ? 'Free Play' : `Paid Spin - Number ${transaction.spunNumber || 'Unknown'}`}
+                              </p>
+                              <p className="text-gray-500 text-xs">
+                                {new Date(transaction.createdAt).toLocaleString()}
+                              </p>
                             </div>
                           </div>
                           <div className="text-right">
-                            <p className={`font-black text-sm ${isFree ? "text-emerald-400" : "text-blue-400"}`}>
-                              {isFree ? "FREE" : `$${parseFloat(transaction.amount).toFixed(2)}`}
-                            </p>
-                            <span className={`text-[10px] px-2 py-0.5 rounded-full font-semibold ${isFree ? "bg-emerald-500/20 text-emerald-300" : "bg-blue-500/20 text-blue-300"}`}>
-                              {isFree ? "Free" : "Paid"}
-                            </span>
+                            <div className={`text-xl font-bold ${
+                              parseFloat(transaction.amount) === 0 
+                                ? 'text-green-400' 
+                                : 'text-blue-400'
+                            }`}>
+                              {parseFloat(transaction.amount) === 0 ? 'FREE' : `$${parseFloat(transaction.amount).toFixed(2)}`}
+                            </div>
+                            <Badge className={`${
+                              parseFloat(transaction.amount) === 0 
+                                ? 'bg-gradient-to-r from-green-500 to-emerald-500' 
+                                : 'bg-gradient-to-r from-blue-500 to-cyan-500'
+                            } text-white`}>
+                              {parseFloat(transaction.amount) === 0 ? 'Free Play' : 'Paid'}
+                            </Badge>
                           </div>
                         </div>
-                      );
-                    })}
+                      </div>
+                    ))}
                   </div>
                 )}
-              </div>
-            </div>
+              </CardContent>
+            </Card>
           </TabsContent>
 
           {/* Achievements Tab */}
-          <TabsContent value="achievements">
-            <div className="rounded-2xl overflow-hidden" style={{background:"#131124", border:"1px solid rgba(255,255,255,0.06)"}}>
-              <div className="flex items-center gap-2 px-5 py-4 border-b" style={{borderColor:"rgba(255,255,255,0.06)"}}>
-                <div className="p-2 rounded-lg" style={{background:"rgba(245,158,11,0.2)"}}>
-                  <Trophy className="h-4 w-4 text-yellow-400" />
-                </div>
-                <span className="text-white font-black text-base">Your Achievements</span>
-              </div>
-              <div className="p-5">
+          <TabsContent value="achievements" className="space-y-8">
+            <Card className="relative overflow-hidden bg-gradient-to-br from-slate-800/80 to-slate-900/80 border-yellow-400/40 backdrop-blur-xl shadow-2xl">
+              <div className="absolute inset-0 bg-gradient-to-br from-yellow-500/10 to-orange-500/10 blur-2xl"></div>
+              <CardHeader className="relative">
+                <CardTitle className="text-2xl font-bold bg-gradient-to-r from-white to-gray-200 bg-clip-text text-transparent flex items-center">
+                  <div className="p-2 bg-gradient-to-br from-yellow-500 to-orange-500 rounded-lg mr-3 shadow-lg">
+                    <Trophy className="h-6 w-6 text-white" />
+                  </div>
+                  Your Achievements
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="relative">
                 {achievementsLoading ? (
-                  <div className="flex items-center justify-center py-10 gap-3">
-                    <div className="animate-spin w-7 h-7 border-4 border-yellow-500 border-t-transparent rounded-full" />
-                    <p className="text-gray-400">Loading achievements...</p>
+                  <div className="flex items-center justify-center py-12">
+                    <div className="relative">
+                      <div className="animate-spin w-8 h-8 border-4 border-yellow-500 border-t-transparent rounded-full" />
+                      <div className="absolute inset-0 animate-ping w-8 h-8 border-4 border-yellow-400/30 rounded-full" />
+                    </div>
+                    <p className="ml-4 text-gray-200 font-medium">Loading achievements...</p>
                   </div>
                 ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {getAchievements(achievementData).map((achievement: any) => (
-                      <div key={achievement.id} className="rounded-xl p-5 transition-all"
-                        style={achievement.completed
-                          ? {background:"rgba(245,158,11,0.08)", border:"1px solid rgba(245,158,11,0.3)"}
-                          : {background:"rgba(255,255,255,0.03)", border:"1px solid rgba(255,255,255,0.06)"}}>
-                        <div className="flex items-start gap-4">
-                          <div className="p-3 rounded-xl flex-shrink-0"
-                            style={achievement.completed
-                              ? {background:"linear-gradient(135deg,#f59e0b,#ea580c)"}
-                              : {background:"rgba(255,255,255,0.07)"}}>
-                            <achievement.icon className="h-5 w-5 text-white" />
+                      <div key={achievement.id} className={`relative p-6 rounded-xl border transition-all duration-300 ${
+                        achievement.completed 
+                          ? 'bg-gradient-to-r from-yellow-900/40 to-orange-900/40 border-yellow-500/50' 
+                          : 'bg-gradient-to-r from-slate-700/50 to-slate-800/50 border-slate-600/30'
+                      }`}>
+                        <div className="flex items-start space-x-4">
+                          <div className={`p-3 rounded-xl shadow-lg ${
+                            achievement.completed 
+                              ? 'bg-gradient-to-br from-yellow-500 to-orange-600' 
+                              : 'bg-gradient-to-br from-gray-500 to-gray-600'
+                          }`}>
+                            <achievement.icon className="h-6 w-6 text-white" />
                           </div>
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center justify-between gap-2 mb-1">
-                              <h3 className="text-white font-black text-sm">{achievement.title}</h3>
+                          <div className="flex-1">
+                            <div className="flex items-center justify-between mb-2">
+                              <h3 className="text-white font-bold text-lg">{achievement.title}</h3>
                               {achievement.completed && (
-                                <span className="text-[10px] px-2 py-0.5 rounded-full font-black text-yellow-300 flex-shrink-0"
-                                  style={{background:"rgba(245,158,11,0.2)"}}>✓ Done</span>
+                                <Badge className="bg-gradient-to-r from-yellow-500 to-orange-500 text-white">
+                                  Completed
+                                </Badge>
                               )}
                             </div>
-                            <p className="text-gray-500 text-xs mb-3">{achievement.description}</p>
-                            <div className="space-y-1.5">
-                              <div className="flex justify-between text-xs">
-                                <span className="text-gray-600">Progress</span>
-                                <span className="text-gray-400 font-medium">{achievement.current} / {achievement.target}</span>
+                            <p className="text-gray-300 text-sm mb-3">{achievement.description}</p>
+                            <div className="space-y-2">
+                              <div className="flex justify-between text-sm">
+                                <span className="text-gray-400">Progress</span>
+                                <span className="text-white font-medium">
+                                  {achievement.current} / {achievement.target}
+                                </span>
                               </div>
-                              <div className="h-1.5 rounded-full overflow-hidden" style={{background:"rgba(255,255,255,0.07)"}}>
-                                <div className="h-full rounded-full transition-all"
+                              <div className="w-full bg-gray-700 rounded-full h-2">
+                                <div 
+                                  className={`h-2 rounded-full transition-all duration-300 ${
+                                    achievement.completed 
+                                      ? 'bg-gradient-to-r from-yellow-500 to-orange-500' 
+                                      : 'bg-gradient-to-r from-blue-500 to-cyan-500'
+                                  }`}
                                   style={{
-                                    width:`${Math.min((achievement.current / achievement.target) * 100, 100)}%`,
-                                    background: achievement.completed ? "linear-gradient(90deg,#f59e0b,#ea580c)" : "linear-gradient(90deg,#7c3aed,#3b82f6)"
-                                  }} />
+                                    width: `${Math.min((achievement.current / achievement.target) * 100, 100)}%`
+                                  }}
+                                ></div>
                               </div>
                             </div>
                             {achievement.reward && (
-                              <div className="mt-2 px-3 py-1.5 rounded-lg text-xs text-blue-300"
-                                style={{background:"rgba(59,130,246,0.08)", border:"1px solid rgba(59,130,246,0.2)"}}>
-                                🎁 <span className="font-semibold">Reward:</span> {achievement.reward}
+                              <div className="mt-3 p-2 bg-blue-900/30 rounded-lg border border-blue-500/30">
+                                <p className="text-blue-300 text-xs">
+                                  <span className="font-semibold">Reward:</span> {achievement.reward}
+                                </p>
                               </div>
                             )}
                           </div>
@@ -680,8 +942,8 @@ export default function Dashboard() {
                     ))}
                   </div>
                 )}
-              </div>
-            </div>
+              </CardContent>
+            </Card>
           </TabsContent>
 
           {/* Payment Tab */}
@@ -800,82 +1062,103 @@ export default function Dashboard() {
 
 
           {/* System Tab */}
-          <TabsContent value="system" className="space-y-4">
-            <div className="rounded-2xl overflow-hidden" style={{background:"#131124", border:"1px solid rgba(255,255,255,0.06)"}}>
-              <div className="flex items-center gap-2 px-5 py-4 border-b" style={{borderColor:"rgba(255,255,255,0.06)"}}>
-                <div className="p-2 rounded-lg" style={{background:"rgba(124,58,237,0.2)"}}>
-                  <Settings className="h-4 w-4 text-purple-400" />
-                </div>
-                <span className="text-white font-black text-base">Account Settings</span>
-              </div>
-              <div className="p-5 space-y-4">
+          <TabsContent value="system" className="space-y-8">
+            <Card className="relative overflow-hidden bg-gradient-to-br from-slate-800/80 to-slate-900/80 border-purple-400/40 backdrop-blur-xl shadow-2xl">
+              <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-blue-500/10 blur-2xl"></div>
+              <CardHeader className="relative">
+                <CardTitle className="text-2xl font-bold bg-gradient-to-r from-white to-gray-200 bg-clip-text text-transparent flex items-center">
+                  <div className="p-2 bg-gradient-to-br from-purple-500 to-blue-500 rounded-lg mr-3 shadow-lg">
+                    <Settings className="h-6 w-6 text-white" />
+                  </div>
+                  Account Settings
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="relative">
+                <div className="space-y-6">
                   {/* Account Information */}
-                  <div className="p-5 rounded-xl" style={{background:"rgba(255,255,255,0.03)", border:"1px solid rgba(255,255,255,0.06)"}}>
-                    <h3 className="text-white font-black text-sm mb-4 uppercase tracking-wider">Account Information</h3>
+                  <div className="p-6 bg-slate-700/50 rounded-xl border border-slate-600/30">
+                    <h3 className="text-white font-bold text-lg mb-4">Account Information</h3>
                     <div className="space-y-3">
-                      {[
-                        { label:"Email", value:(user as any).email },
-                        { label:"Name", value:(user as any).firstName && (user as any).lastName ? `${(user as any).firstName} ${(user as any).lastName}` : "Not set" },
-                      ].map(({ label, value }) => (
-                        <div key={label} className="flex justify-between items-center">
-                          <span className="text-gray-500 text-sm">{label}</span>
-                          <span className="text-white font-medium text-sm">{value}</span>
-                        </div>
-                      ))}
                       <div className="flex justify-between items-center">
-                        <span className="text-gray-500 text-sm">Status</span>
-                        <span className="text-[11px] px-2.5 py-1 rounded-full font-black text-emerald-300"
-                          style={{background:"rgba(16,185,129,0.12)", border:"1px solid rgba(16,185,129,0.3)"}}>● Active</span>
+                        <span className="text-gray-300">Email:</span>
+                        <span className="text-white font-medium">{(user as any).email}</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-gray-300">Name:</span>
+                        <span className="text-white font-medium">
+                          {(user as any).firstName && (user as any).lastName ? `${(user as any).firstName} ${(user as any).lastName}` : 'Not set'}
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-gray-300">Account Status:</span>
+                        <Badge className="bg-gradient-to-r from-emerald-500 to-green-500 text-white">
+                          Active
+                        </Badge>
                       </div>
                     </div>
-                    <button className="w-full mt-4 py-2.5 rounded-xl text-sm font-bold text-purple-300 transition-all"
-                      style={{background:"rgba(124,58,237,0.1)", border:"1px solid rgba(124,58,237,0.3)"}}>
+                    <Button variant="outline" className="w-full mt-4 border-purple-500 text-black-300">
                       Edit Profile
-                    </button>
+                    </Button>
                   </div>
 
                   {/* Game Preferences */}
-                  <div className="p-5 rounded-xl" style={{background:"rgba(255,255,255,0.03)", border:"1px solid rgba(255,255,255,0.06)"}}>
-                    <h3 className="text-white font-black text-sm mb-4 uppercase tracking-wider">Game Preferences</h3>
+                  <div className="p-6 bg-slate-700/50 rounded-xl border border-slate-600/30">
+                    <h3 className="text-white font-bold text-lg mb-4">Game Preferences</h3>
                     <div className="space-y-4">
-                      {[
-                        { label:"Sound Effects", desc:"Play sound effects during games", defaultOn:true },
-                        { label:"Auto-Spin", desc:"Enable automatic spinning", defaultOn:false },
-                        { label:"Confetti Effects", desc:"Show celebration animations", defaultOn:true },
-                      ].map(({ label, desc, defaultOn }) => (
-                        <div key={label} className="flex justify-between items-center">
-                          <div>
-                            <p className="text-white font-semibold text-sm">{label}</p>
-                            <p className="text-gray-600 text-xs">{desc}</p>
-                          </div>
-                          <Switch defaultChecked={defaultOn} />
+                      <div className="flex justify-between items-center">
+                        <div>
+                          <span className="text-white font-medium">Sound Effects</span>
+                          <p className="text-gray-400 text-sm">Play sound effects during games</p>
                         </div>
-                      ))}
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <div>
+                          <span className="text-white font-medium">Auto-Spin</span>
+                          <p className="text-gray-400 text-sm">Enable automatic spinning</p>
+                        </div>
+                        <Switch />
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <div>
+                          <span className="text-white font-medium">Confetti Effects</span>
+                          <p className="text-gray-400 text-sm">Show celebration animations</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
                     </div>
                   </div>
 
                   {/* Notifications */}
-                  <div className="p-5 rounded-xl" style={{background:"rgba(255,255,255,0.03)", border:"1px solid rgba(255,255,255,0.06)"}}>
-                    <h3 className="text-white font-black text-sm mb-4 uppercase tracking-wider">Notifications</h3>
+                  <div className="p-6 bg-slate-700/50 rounded-xl border border-slate-600/30">
+                    <h3 className="text-white font-bold text-lg mb-4">Notifications</h3>
                     <div className="space-y-4">
-                      {[
-                        { label:"Email Notifications", desc:"Receive game updates via email", defaultOn:true },
-                        { label:"Win Notifications", desc:"Get notified when you win", defaultOn:true },
-                        { label:"Daily Bonuses", desc:"Reminder for daily free spins", defaultOn:false },
-                      ].map(({ label, desc, defaultOn }) => (
-                        <div key={label} className="flex justify-between items-center">
-                          <div>
-                            <p className="text-white font-semibold text-sm">{label}</p>
-                            <p className="text-gray-600 text-xs">{desc}</p>
-                          </div>
-                          <Switch defaultChecked={defaultOn} />
+                      <div className="flex justify-between items-center">
+                        <div>
+                          <span className="text-white font-medium">Email Notifications</span>
+                          <p className="text-gray-400 text-sm">Receive game updates via email</p>
                         </div>
-                      ))}
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <div>
+                          <span className="text-white font-medium">Win Notifications</span>
+                          <p className="text-gray-400 text-sm">Get notified when you win</p>
+                        </div>
+                        <Switch defaultChecked />
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <div>
+                          <span className="text-white font-medium">Daily Bonuses</span>
+                          <p className="text-gray-400 text-sm">Reminder for daily free spins</p>
+                        </div>
+                        <Switch />
+                      </div>
                     </div>
                   </div>
 
                   {/* Privacy & Security */}
-                  <div className="p-5 rounded-xl" style={{background:"rgba(255,255,255,0.03)", border:"1px solid rgba(255,255,255,0.06)"}}>
+                  <div className="p-6 bg-slate-700/50 rounded-xl border border-slate-600/30">
                     <h3 className="text-white font-bold text-lg mb-4">Privacy & Security</h3>
                     <div className="space-y-4">
                       <Dialog open={changePasswordOpen} onOpenChange={setChangePasswordOpen}>
@@ -1104,17 +1387,16 @@ export default function Dashboard() {
                     </div>
                   </div>
                 </div>
-              </div>
+              </CardContent>
+            </Card>
           </TabsContent>
 
           {/* Cards Tab */}
-          <TabsContent value="cards">
-            <div className="rounded-2xl p-10 text-center" style={{background:"#131124", border:"1px solid rgba(124,58,237,0.25)"}}>
-              <div className="p-4 rounded-2xl w-fit mx-auto mb-4" style={{background:"rgba(124,58,237,0.15)"}}>
-                <CreditCard className="h-10 w-10 text-purple-400" />
-              </div>
-              <h3 className="text-white font-black text-xl mb-2">Payment Methods</h3>
-              <p className="text-gray-500 text-sm">A new payment system is being set up. Check back soon!</p>
+          <TabsContent value="cards" className="mt-6">
+            <div className="text-center p-12 bg-slate-800/50 border border-purple-500/30 rounded-xl">
+              <CreditCard className="h-12 w-12 text-purple-400 mx-auto mb-4" />
+              <h3 className="text-white font-bold text-xl mb-2">Payment Methods</h3>
+              <p className="text-gray-300">A new payment system is being set up. Check back soon!</p>
             </div>
           </TabsContent>
         </Tabs>
