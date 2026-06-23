@@ -90,6 +90,36 @@ uri = "file://attached_assets/hero_bg_space.png"
 type = "image"
 title = "dark space purple background"
 
+[[generated]]
+id = "CevvERCustAobQDxF_wyt"
+uri = "file://attached_assets/winner_james.png"
+type = "image"
+title = "winner james cash celebration"
+
+[[generated]]
+id = "GdnA6yKq3zluZu4JE5ti5"
+uri = "file://attached_assets/winner_sarah.png"
+type = "image"
+title = "winner sarah celebration"
+
+[[generated]]
+id = "FN9A_Eon--xFo14BM3z4o"
+uri = "file://attached_assets/winner_mike.png"
+type = "image"
+title = "winner mike ps5 prize"
+
+[[generated]]
+id = "-YbRWf5emlMhU7hLf7wxw"
+uri = "file://attached_assets/winner_ashley.png"
+type = "image"
+title = "winner ashley luxury bag"
+
+[[generated]]
+id = "SR-cRRFFWzFFUV76X_2yn"
+uri = "file://attached_assets/hero_winner_banner.png"
+type = "image"
+title = "hero winner banner cash"
+
 [[outputs]]
 id = "ruAn-cWF3HxzLHgpbGRwY"
 uri = "file://prizeplugz-client.zip"
