@@ -362,102 +362,126 @@ function GameCard({
 
   return (
     <div
-      className="game-card rounded-2xl overflow-hidden flex flex-col relative group"
+      className="game-card rounded-3xl overflow-hidden flex flex-col relative group cursor-pointer"
       style={{
-        background: "linear-gradient(160deg,#111028,#0d0b20,#09070f)",
-        border: `1px solid ${borderCol}`,
-        boxShadow: `0 4px 28px rgba(0,0,0,.5), 0 0 0 0 ${borderGlow}`,
+        background: "linear-gradient(175deg,#13102e,#0f0c24,#080614)",
+        border: `1.5px solid ${borderCol}`,
+        boxShadow: `0 8px 40px rgba(0,0,0,.65), 0 0 30px ${borderGlow.replace('.3)', '.08)').replace('.45)', '.1)').replace('.35)', '.08)')}`,
         minWidth: 220,
       }}
       onClick={onPlay}
     >
-      {/* Top ambient glow bloom */}
-      <div className="absolute top-0 inset-x-0 h-24 pointer-events-none z-10"
-        style={{ background: `radial-gradient(ellipse 80% 100% at 50% 0%,${topGlow},transparent 70%)` }} />
+      {/* Top ambient bloom */}
+      <div className="absolute top-0 inset-x-0 h-32 pointer-events-none z-10"
+        style={{ background: `radial-gradient(ellipse 100% 100% at 50% 0%,${topGlow},transparent 75%)` }} />
 
-      {/* ── IMAGE AREA ─────────────────────────────────────────── */}
-      <div className="relative overflow-hidden" style={{ height: 185, background: "#1a1535", flexShrink: 0 }}>
+      {/* ── IMAGE ───────────────────────────────────────────────── */}
+      <div className="relative overflow-hidden" style={{ height: 220, background: "#1a1535", flexShrink: 0 }}>
         <img
           src={game.prizeImageUrl || fallback}
           alt={game.name}
-          className="w-full h-full object-cover"
+          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
           style={{ objectPosition: "center" }}
         />
 
-        {/* Dark gradient overlay for text legibility */}
+        {/* Deep scrim — bottom heavy for text */}
         <div className="absolute inset-0"
-          style={{ background: "linear-gradient(to top,rgba(9,7,15,.92) 0%,rgba(9,7,15,.1) 45%,transparent 70%)" }} />
+          style={{ background: "linear-gradient(to top,rgba(8,6,20,.97) 0%,rgba(8,6,20,.5) 38%,rgba(8,6,20,.05) 65%,transparent 100%)" }} />
 
-        {/* LIVE pulse dot — top left */}
-        <div className="absolute top-2.5 left-2.5 z-20 flex items-center gap-1.5 px-2 py-1 rounded-full"
-          style={{ background: "rgba(0,0,0,.6)", backdropFilter: "blur(8px)", border: "1px solid rgba(255,255,255,.1)" }}>
-          <div className="relative w-2 h-2">
-            <div className="absolute inset-0 rounded-full bg-green-400 animate-ping opacity-60" style={{ animationDuration: "1.5s" }} />
+        {/* Side glow tint matching urgency */}
+        <div className="absolute inset-0 pointer-events-none"
+          style={{ background: `linear-gradient(to right,${borderCol.replace('.5)', '.12)').replace('.45)', '.08)').replace('.25)', '.06)')},transparent 40%)` }} />
+
+        {/* ── TOP BADGES ── */}
+        {/* LIVE badge */}
+        <div className="absolute top-3 left-3 z-20 flex items-center gap-1.5 px-2.5 py-1 rounded-full"
+          style={{ background: "rgba(0,0,0,.7)", backdropFilter: "blur(10px)", border: "1px solid rgba(52,211,153,.25)" }}>
+          <div className="relative w-2 h-2 shrink-0">
+            <div className="absolute inset-0 rounded-full bg-green-400 animate-ping opacity-70" style={{ animationDuration: "1.6s" }} />
             <div className="w-2 h-2 rounded-full bg-green-400" />
           </div>
-          <span className="text-green-400 font-black text-[9px] uppercase tracking-widest">Live</span>
+          <span className="text-green-300 font-black text-[9px] uppercase tracking-widest">Live Now</span>
         </div>
 
-        {/* Rank badge — top right */}
+        {/* Rank badge */}
         {rank !== undefined && rank < 3 && (
-          <div className="absolute top-2.5 right-2.5 z-20 px-2 py-0.5 rounded-full font-black text-[9px] uppercase tracking-wide text-white"
-            style={{ background: rank === 0 ? "linear-gradient(135deg,#f59e0b,#d97706)" : "rgba(0,0,0,.6)", border: rank === 0 ? "none" : "1px solid rgba(255,255,255,.15)", backdropFilter: "blur(8px)" }}>
+          <div className="absolute top-3 right-3 z-20 flex items-center gap-1 px-2.5 py-1 rounded-full font-black text-[10px] text-white"
+            style={{
+              background: rank === 0 ? "linear-gradient(135deg,#f59e0b,#d97706)" : rank === 1 ? "rgba(148,163,184,.15)" : "rgba(180,120,60,.15)",
+              border: rank === 0 ? "1px solid rgba(245,158,11,.6)" : "1px solid rgba(255,255,255,.15)",
+              backdropFilter: "blur(8px)",
+              boxShadow: rank === 0 ? "0 0 14px rgba(245,158,11,.4)" : "none",
+            }}>
             {RANK_LABELS[rank]}
           </div>
         )}
 
-        {/* Prize name on image (bottom) */}
-        <div className="absolute bottom-2.5 left-3 right-3 z-20">
-          <h3 className="text-white font-black text-sm uppercase tracking-wide leading-tight drop-shadow-lg line-clamp-2">
+        {/* Countdown badge — bottom left */}
+        <div className="absolute bottom-14 left-3 z-20 flex items-center gap-1.5 px-2.5 py-1 rounded-full"
+          style={{ background: "rgba(0,0,0,.7)", backdropFilter: "blur(10px)", border: `1px solid ${borderCol}` }}>
+          <Timer className="h-3 w-3 shrink-0" style={{ color: barColor }} />
+          <span className="text-white font-black text-xs">{countdown}</span>
+        </div>
+
+        {/* ── GAME TITLE overlaid on image bottom ── */}
+        <div className="absolute bottom-3 left-3 right-3 z-20">
+          <h3 className="text-white font-black text-base uppercase tracking-wide leading-tight line-clamp-2"
+            style={{ textShadow: "0 2px 12px rgba(0,0,0,.9)" }}>
             {game.name}
           </h3>
         </div>
-
-        {/* Countdown — floating pill bottom right */}
-        <div className="absolute bottom-2.5 right-2.5 z-20 flex items-center gap-1 px-2 py-0.5 rounded-full"
-          style={{ background: "rgba(0,0,0,.65)", backdropFilter: "blur(8px)", border: `1px solid ${borderCol}` }}>
-          <Timer className="h-2.5 w-2.5" style={{ color: barColor, flexShrink: 0 }} />
-          <span className="text-white font-black text-[10px]">{countdown}</span>
-        </div>
       </div>
 
-      {/* ── INFO ────────────────────────────────────────────────── */}
-      <div className="p-3.5 flex flex-col gap-2.5 flex-1">
+      {/* ── INFO BODY ───────────────────────────────────────────── */}
+      <div className="p-4 flex flex-col gap-3 flex-1">
 
-        {/* Urgency strip */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full"
-            style={{ background: `${barColor}18`, border: `1px solid ${barColor}40` }}>
-            <span className="text-[10px]">{isCritical ? "🔥" : isHot ? "⚡" : "🎮"}</span>
-            <span className="font-black text-[9px] uppercase tracking-widest" style={{ color: barColor }}>
-              {isCritical ? `${spotsLeft} SPOT LEFT!` : isHot ? `${spotsLeft} spots left` : `${spotsLeft} open spots`}
+        {/* Spots + token cost row */}
+        <div className="flex items-center justify-between gap-2">
+          {/* Spots urgency pill */}
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl flex-1"
+            style={{ background: `${barColor}15`, border: `1px solid ${barColor}35` }}>
+            <span className="text-sm leading-none">{isCritical ? "🔥" : isHot ? "⚡" : "🎮"}</span>
+            <span className="font-black text-xs uppercase tracking-wide" style={{ color: barColor }}>
+              {isCritical ? `Only ${spotsLeft} left!` : isHot ? `${spotsLeft} spots left` : `${spotsLeft} open`}
             </span>
           </div>
-          {/* Token cost badge */}
-          <div className="flex items-center gap-1 px-2 py-0.5 rounded-full"
-            style={{ background: "rgba(124,58,237,.15)", border: "1px solid rgba(124,58,237,.3)" }}>
-            <Zap className="h-2.5 w-2.5 text-yellow-400" fill="currentColor" />
-            <span className="text-yellow-300 font-black text-[9px]">{game.tokenCostPerEntry} TKN</span>
+          {/* Token cost */}
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl shrink-0"
+            style={{ background: "rgba(124,58,237,.18)", border: "1px solid rgba(124,58,237,.4)" }}>
+            <Zap className="h-3.5 w-3.5 text-yellow-400 shrink-0" fill="currentColor" />
+            <span className="text-yellow-300 font-black text-xs">{game.tokenCostPerEntry} TKN</span>
           </div>
         </div>
 
-        {/* Progress bar */}
-        <div className="space-y-1">
+        {/* Progress bar block */}
+        <div className="space-y-2">
           <div className="flex justify-between items-center">
-            <span className="text-gray-500 text-[10px]">{filled}/{total} filled</span>
-            <span className="font-black text-[10px]" style={{ color: barColor }}>{Math.round(pct)}% full</span>
+            <span className="text-gray-300 font-semibold text-xs">{filled} of {total} spots filled</span>
+            <span className="font-black text-xs px-1.5 py-0.5 rounded" style={{ color: barColor, background: `${barColor}15` }}>
+              {Math.round(pct)}% full
+            </span>
           </div>
-          <div className="h-1.5 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,.06)" }}>
+          {/* Track */}
+          <div className="h-2.5 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,.07)" }}>
             <div className="h-full rounded-full transition-all progress-bar"
-              style={{ width: `${pct}%`, background: `linear-gradient(90deg,${barColor}aa,${barColor})`, boxShadow: `0 0 10px ${barColor}` }} />
+              style={{ width: `${pct}%`, background: `linear-gradient(90deg,${barColor}88,${barColor})`, boxShadow: `0 0 12px ${barColor}99` }} />
           </div>
+          {/* Sub-label */}
+          <p className="text-gray-400 text-xs">
+            <span className="text-white font-bold">{spotsLeft}</span> spots remaining — enter before it fills up!
+          </p>
         </div>
 
         {/* CTA */}
         <button
           onClick={(e) => { e.stopPropagation(); onPlay(); }}
-          className="mt-auto w-full py-2.5 rounded-xl font-black text-sm text-white flex items-center justify-center gap-2 transition-all hover:scale-[1.03]"
-          style={{ background: `linear-gradient(135deg,#7c3aed,#6d28d9)`, boxShadow: `0 4px 20px rgba(124,58,237,.45)` }}>
+          className="mt-auto w-full py-3.5 rounded-2xl font-black text-sm text-white flex items-center justify-center gap-2 transition-all hover:scale-[1.02] hover:brightness-110"
+          style={{
+            background: `linear-gradient(135deg,#7c3aed,#6d28d9,#5b21b6)`,
+            boxShadow: `0 6px 28px rgba(124,58,237,.55), inset 0 1px 0 rgba(255,255,255,.1)`,
+            letterSpacing: "0.05em",
+          }}>
+          <Zap className="h-4 w-4 text-yellow-300" fill="currentColor" />
           ENTER NOW
           <ChevronRight className="h-4 w-4" />
         </button>
