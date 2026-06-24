@@ -1206,65 +1206,180 @@ export default function HomePage() {
       ═══════════════════════════════════════════════════════════════ */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 pb-8 grid grid-cols-1 sm:grid-cols-2 gap-4 section-in">
 
-        {/* Refer & Earn */}
-        <div className="relative overflow-hidden rounded-2xl p-5 flex items-center justify-between gap-4"
-          style={{ background: "linear-gradient(135deg,#1a0a0a,#2d1010,#1a0a0a)", border: "1px solid rgba(239,68,68,.25)" }}>
-          <div className="absolute inset-0 pointer-events-none"
-            style={{ background: "radial-gradient(circle at 20% 50%,rgba(239,68,68,.08),transparent 60%)" }} />
-          <div className="relative z-10">
-            <div className="flex items-center gap-1.5 mb-1">
-              <Zap className="h-4 w-4 text-yellow-400" fill="currentColor" />
-              <p className="text-white font-black text-sm uppercase">Refer & Earn More Tokens!</p>
+        {/* ── REFER & EARN ──────────────────────────────────── */}
+        <div className="relative overflow-hidden rounded-3xl"
+          style={{ background: "linear-gradient(135deg,#1c0808,#2d1010,#180606)", border: "1px solid rgba(239,68,68,.3)", boxShadow: "0 0 60px rgba(239,68,68,.07), inset 0 1px 0 rgba(255,255,255,.04)" }}>
+
+          {/* BG glows */}
+          <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(ellipse 70% 80% at 0% 50%,rgba(239,68,68,.12),transparent 65%)" }} />
+          <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(ellipse 40% 60% at 100% 20%,rgba(245,158,11,.06),transparent 60%)" }} />
+
+          {/* Floating token coins (decorative) */}
+          <div className="absolute right-4 top-3 text-2xl opacity-10 pointer-events-none float" style={{ animationDuration: "5s" }}>🪙</div>
+          <div className="absolute right-10 bottom-3 text-xl opacity-10 pointer-events-none float" style={{ animationDuration: "7s", animationDelay: "1s" }}>🪙</div>
+
+          <div className="relative z-10 p-5 sm:p-6">
+            {/* Header */}
+            <div className="flex items-center gap-2 mb-3">
+              <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
+                style={{ background: "linear-gradient(135deg,rgba(239,68,68,.3),rgba(239,68,68,.15))", border: "1px solid rgba(239,68,68,.4)", boxShadow: "0 0 16px rgba(239,68,68,.3)" }}>
+                <Send className="h-4 w-4 text-red-400" />
+              </div>
+              <div>
+                <p className="text-white font-black text-sm uppercase tracking-wide">Refer & Earn Tokens!</p>
+                <p className="text-gray-500 text-xs">You earn <span className="text-yellow-400 font-bold">+5 tokens</span> per friend who joins</p>
+              </div>
             </div>
-            <p className="text-gray-500 text-xs">Invite your friends and earn free tokens.</p>
-            <p className="text-gray-600 text-xs mt-0.5 font-mono">Code: <span className="text-yellow-400 font-black">{referralCode}</span></p>
+
+            {/* Referral code box */}
+            <div className="flex items-center gap-2 mb-4 p-3 rounded-2xl"
+              style={{ background: "rgba(0,0,0,.3)", border: "1px solid rgba(239,68,68,.2)" }}>
+              <div className="flex-1">
+                <p className="text-gray-600 text-[10px] uppercase tracking-widest mb-0.5">Your Code</p>
+                <p className="text-yellow-400 font-black text-lg tracking-[.2em] font-mono">{referralCode}</p>
+              </div>
+              <button onClick={copyReferral}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-black text-xs transition-all hover:scale-105"
+                style={{ background: copied ? "rgba(16,185,129,.2)" : "rgba(245,158,11,.15)", border: `1px solid ${copied ? "rgba(16,185,129,.4)" : "rgba(245,158,11,.35)"}`, color: copied ? "#34d399" : "#fbbf24" }}>
+                {copied ? <CheckCircle className="h-3.5 w-3.5" /> : <Hash className="h-3.5 w-3.5" />}
+                {copied ? "Copied!" : "Copy"}
+              </button>
+            </div>
+
+            {/* Reward tiers */}
+            <div className="flex items-center gap-2 mb-4">
+              {[["1 friend","5 🪙"],["3 friends","20 🪙"],["10 friends","75 🪙"]].map(([tier, reward], ti) => (
+                <div key={ti} className="flex-1 text-center py-2 rounded-xl"
+                  style={{ background: "rgba(239,68,68,.08)", border: "1px solid rgba(239,68,68,.15)" }}>
+                  <p className="text-yellow-400 font-black text-xs">{reward}</p>
+                  <p className="text-gray-600 text-[9px] mt-0.5">{tier}</p>
+                </div>
+              ))}
+            </div>
+
+            {/* CTA */}
+            <button onClick={copyReferral}
+              className="w-full flex items-center justify-center gap-2.5 py-3 rounded-2xl font-black text-sm text-white transition-all hover:scale-[1.02]"
+              style={{ background: "linear-gradient(135deg,#ef4444,#dc2626,#b91c1c)", boxShadow: "0 6px 24px rgba(239,68,68,.45)" }}>
+              {copied ? <CheckCircle className="h-4 w-4" /> : <Send className="h-4 w-4" />}
+              {copied ? "LINK COPIED — SHARE IT!" : "COPY & START EARNING"}
+              <Zap className="h-3.5 w-3.5" fill="currentColor" />
+            </button>
           </div>
-          <button onClick={copyReferral}
-            className="enter-btn shrink-0 flex items-center gap-2 px-5 py-2.5 rounded-xl font-black text-sm text-white"
-            style={{ background: "linear-gradient(135deg,#ef4444,#dc2626)", boxShadow: "0 4px 18px rgba(239,68,68,.4)" }}>
-            {copied ? <CheckCircle className="h-4 w-4" /> : <Send className="h-4 w-4" />}
-            {copied ? "COPIED!" : "START EARNING"}
-          </button>
         </div>
 
-        {/* Daily Free Bonus */}
-        <div className="relative overflow-hidden rounded-2xl p-5 flex items-center justify-between gap-4"
-          style={{ background: "linear-gradient(135deg,#0a1a0a,#102d10,#0a1a0a)", border: "1px solid rgba(16,185,129,.25)" }}>
-          <div className="absolute inset-0 pointer-events-none"
-            style={{ background: "radial-gradient(circle at 20% 50%,rgba(16,185,129,.08),transparent 60%)" }} />
-          <div className="relative z-10 flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl flex items-center justify-center text-xl shrink-0"
-              style={{ background: "rgba(16,185,129,.2)", border: "1px solid rgba(16,185,129,.3)" }}>
-              🎁
+        {/* ── DAILY FREE BONUS ──────────────────────────────── */}
+        <div className="relative overflow-hidden rounded-3xl"
+          style={{ background: "linear-gradient(135deg,#061a0e,#0e2b18,#041208)", border: "1px solid rgba(16,185,129,.3)", boxShadow: "0 0 60px rgba(16,185,129,.07), inset 0 1px 0 rgba(255,255,255,.04)" }}>
+
+          {/* BG glows */}
+          <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(ellipse 70% 80% at 100% 50%,rgba(16,185,129,.12),transparent 65%)" }} />
+          <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(ellipse 40% 60% at 0% 20%,rgba(124,58,237,.06),transparent 60%)" }} />
+
+          {/* Floating gift (decorative) */}
+          <div className="absolute left-4 top-3 text-2xl opacity-10 pointer-events-none float" style={{ animationDuration: "6s" }}>🎁</div>
+          <div className="absolute left-12 bottom-4 text-xl opacity-10 pointer-events-none float" style={{ animationDuration: "8s", animationDelay: "2s" }}>✨</div>
+
+          <div className="relative z-10 p-5 sm:p-6">
+            {/* Header */}
+            <div className="flex items-center gap-2 mb-3">
+              <div className="relative w-9 h-9 rounded-xl flex items-center justify-center text-xl shrink-0"
+                style={{ background: "linear-gradient(135deg,rgba(16,185,129,.3),rgba(16,185,129,.15))", border: "1px solid rgba(16,185,129,.4)", boxShadow: "0 0 16px rgba(16,185,129,.3)" }}>
+                🎁
+                <div className="absolute inset-0 rounded-xl animate-ping opacity-20" style={{ background: "#10b981", animationDuration: "2s" }} />
+              </div>
+              <div>
+                <p className="text-white font-black text-sm uppercase tracking-wide">Daily Free Bonus</p>
+                <p className="text-gray-500 text-xs">Free tokens reset every <span className="text-green-400 font-bold">24 hours</span></p>
+              </div>
             </div>
-            <div>
-              <p className="text-white font-black text-sm uppercase">Daily Free Bonus</p>
-              <p className="text-gray-500 text-xs">Claim your free tokens every day!</p>
+
+            {/* Token reward display */}
+            <div className="flex items-center gap-3 mb-4 p-3 rounded-2xl"
+              style={{ background: "rgba(0,0,0,.3)", border: "1px solid rgba(16,185,129,.2)" }}>
+              <div className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl"
+                style={{ background: "linear-gradient(135deg,rgba(16,185,129,.25),rgba(16,185,129,.1))", border: "1px solid rgba(16,185,129,.3)" }}>
+                🪙
+              </div>
+              <div>
+                <p className="text-green-400 font-black text-2xl leading-none">+3 Tokens</p>
+                <p className="text-gray-500 text-xs mt-0.5">Free · No purchase needed</p>
+              </div>
+              <div className="ml-auto text-right">
+                <p className="text-[10px] text-gray-600 uppercase tracking-widest">Resets in</p>
+                <p className="text-white font-black text-sm">24:00:00</p>
+              </div>
             </div>
+
+            {/* Streak indicator */}
+            <div className="flex items-center gap-1.5 mb-4">
+              <p className="text-gray-600 text-xs mr-1">Streak:</p>
+              {[1,2,3,4,5,6,7].map(d => (
+                <div key={d} className="flex-1 h-1.5 rounded-full"
+                  style={{ background: d <= 3 ? "#10b981" : "rgba(255,255,255,.08)", boxShadow: d <= 3 ? "0 0 6px rgba(16,185,129,.6)" : "none" }} />
+              ))}
+              <p className="text-green-400 font-black text-xs ml-1">3🔥</p>
+            </div>
+
+            {/* CTA */}
+            <button onClick={() => setLocation("/dashboard")}
+              className="w-full flex items-center justify-center gap-2.5 py-3 rounded-2xl font-black text-sm text-white transition-all hover:scale-[1.02]"
+              style={{ background: "linear-gradient(135deg,#10b981,#059669,#047857)", boxShadow: "0 6px 24px rgba(16,185,129,.45)" }}>
+              <Sparkles className="h-4 w-4" />
+              CLAIM FREE TOKENS
+              <ChevronRight className="h-4 w-4" />
+            </button>
           </div>
-          <button onClick={() => setLocation("/dashboard")}
-            className="shrink-0 px-5 py-2.5 rounded-xl font-black text-sm text-white"
-            style={{ background: "linear-gradient(135deg,#10b981,#059669)", boxShadow: "0 4px 18px rgba(16,185,129,.4)" }}>
-            CLAIM NOW
-          </button>
         </div>
       </section>
 
       {/* ═══════════════════════════════════════════════════════════════
-          FOOTER STATS BAR
+          FOOTER STATS BAR — PREMIUM
       ═══════════════════════════════════════════════════════════════ */}
-      <div className="border-t border-b mb-20 md:mb-0" style={{ borderColor: "rgba(124,58,237,.12)", background: "#0d0b1e" }}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 grid grid-cols-4 gap-4 text-center">
+      <div className="mb-20 md:mb-0 relative overflow-hidden"
+        style={{ background: "linear-gradient(135deg,#09071a,#0e0b26,#06050f)", borderTop: "1px solid rgba(124,58,237,.18)", borderBottom: "1px solid rgba(124,58,237,.1)" }}>
+
+        {/* Ambient glow */}
+        <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(ellipse 80% 100% at 50% 50%,rgba(124,58,237,.06),transparent 70%)" }} />
+
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 py-6 grid grid-cols-2 sm:grid-cols-4 gap-0">
           {[
-            { val: 127250, prefix: "$", suffix: "+", label: "Total Prizes Paid",  color: "#f59e0b" },
-            { val: 12458,  prefix: "",  suffix: "",  label: "Active Players",     color: "#a78bfa" },
-            { val: 98623,  prefix: "",  suffix: "",  label: "Games Completed",    color: "#10b981" },
-            { val: 583,    prefix: "",  suffix: "",  label: "Winners Today",      color: "#f472b6" },
-          ].map(s => (
-            <div key={s.label} className="flex flex-col items-center gap-0.5">
-              <StatNum target={s.val} prefix={s.prefix} suffix={s.suffix} label={s.label} />
-            </div>
-          ))}
+            { val: 127250, prefix: "$", suffix: "+", label: "Total Prizes Paid",  icon: Trophy,  color: "#f59e0b", glow: "rgba(245,158,11,.3)",  trend: "↑ All time" },
+            { val: 12458,  prefix: "",  suffix: "",  label: "Active Players",     icon: Users,   color: "#a78bfa", glow: "rgba(167,139,250,.3)", trend: "🔴 Live now" },
+            { val: 98623,  prefix: "",  suffix: "",  label: "Games Completed",    icon: Sparkles,color: "#10b981", glow: "rgba(16,185,129,.3)",  trend: "↑ Growing" },
+            { val: 583,    prefix: "",  suffix: "",  label: "Winners Today",      icon: Gift,    color: "#f472b6", glow: "rgba(244,114,182,.3)", trend: "🎉 Today" },
+          ].map((s, si) => {
+            const Icon = s.icon;
+            return (
+              <div key={s.label} className="relative flex flex-col items-center justify-center py-5 px-4 text-center group"
+                style={{ borderRight: si < 3 ? "1px solid rgba(255,255,255,.05)" : "none" }}>
+                {/* Hover glow */}
+                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
+                  style={{ background: `radial-gradient(ellipse 80% 80% at 50% 50%,${s.glow.replace('.3)', '.06)')},transparent 70%)` }} />
+
+                {/* Icon orb */}
+                <div className="relative mb-2 w-10 h-10 rounded-full flex items-center justify-center"
+                  style={{ background: `radial-gradient(circle,${s.color}25,${s.color}08)`, border: `1px solid ${s.color}40`, boxShadow: `0 0 20px ${s.color}25` }}>
+                  <Icon className="h-4 w-4" style={{ color: s.color }} />
+                </div>
+
+                {/* Number */}
+                <div className="font-black leading-none mb-1"
+                  style={{ fontSize: "clamp(1.5rem,3vw,2rem)", background: `linear-gradient(135deg,#fff 20%,${s.color})`, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>
+                  {s.prefix}{si === 0 ? "127K" : si === 2 ? "98.6K" : s.val.toLocaleString()}{s.suffix}
+                </div>
+
+                {/* Label */}
+                <p className="text-gray-500 text-xs font-bold uppercase tracking-widest mb-1.5">{s.label}</p>
+
+                {/* Trend tag */}
+                <span className="px-2 py-0.5 rounded-full text-[9px] font-black uppercase"
+                  style={{ background: `${s.color}12`, border: `1px solid ${s.color}25`, color: s.color }}>
+                  {s.trend}
+                </span>
+              </div>
+            );
+          })}
         </div>
       </div>
 
