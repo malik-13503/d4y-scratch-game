@@ -77,6 +77,9 @@ import {
   Wallet,
   List,
   Coins,
+  Hash,
+  Search,
+  ChevronRight,
 } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -100,7 +103,6 @@ export default function AdminDashboard() {
   const [userToDelete, setUserToDelete] = useState<any>(null);
   const [isWinnerSelectionOpen, setIsWinnerSelectionOpen] = useState(false);
   const [winnerSelectionGame, setWinnerSelectionGame] = useState<any>(null);
-  const [gameDetailsId, setGameDetailsId] = useState<number | null>(null);
 
   // Edit form data state
   const [editFormData, setEditFormData] = useState({
@@ -880,13 +882,14 @@ export default function AdminDashboard() {
 
           <p className="text-[10px] font-semibold uppercase tracking-widest text-gray-600 px-2 pt-3 pb-1">Management</p>
           {([
-            { label:"Users",        icon:Users,      tab:"users"       },
-            { label:"Games",        icon:Gamepad2,   tab:"games"       },
-            { label:"Winners",      icon:Trophy,     tab:"winners"     },
-            { label:"Winner Wall",  icon:Star,       tab:"winner-wall" },
-            { label:"Overview",     icon:BarChart3,  tab:"overview"    },
-            { label:"Analytics",    icon:TrendingUp, tab:"analytics"   },
-            { label:"Email Center", icon:Mail,       tab:"email-center"},
+            { label:"Users",         icon:Users,      tab:"users"        },
+            { label:"Games",         icon:Gamepad2,   tab:"games"        },
+            { label:"Game Details",  icon:Hash,       tab:"game-details" },
+            { label:"Winners",       icon:Trophy,     tab:"winners"      },
+            { label:"Winner Wall",   icon:Star,       tab:"winner-wall"  },
+            { label:"Overview",      icon:BarChart3,  tab:"overview"     },
+            { label:"Analytics",     icon:TrendingUp, tab:"analytics"    },
+            { label:"Email Center",  icon:Mail,       tab:"email-center" },
           ] as const).map(item => {
             const isActive = activeTab === item.tab;
             return (
@@ -959,6 +962,7 @@ export default function AdminDashboard() {
               <option value="winners">Winners</option>
               <option value="promo-codes">Promo Codes</option>
               <option value="email-center">Email Center</option>
+              <option value="game-details">Game Details</option>
             </select>
             <Button onClick={() => logoutMutation.mutate()} variant="outline" size="sm"
               className="border-red-500/50 text-red-400 hover:bg-red-500/20 px-2">
@@ -981,6 +985,7 @@ export default function AdminDashboard() {
               <TabsTrigger value="promo-codes">Promo Codes</TabsTrigger>
               <TabsTrigger value="pending-payments">Payments</TabsTrigger>
               <TabsTrigger value="email-center">Email Center</TabsTrigger>
+              <TabsTrigger value="game-details">Game Details</TabsTrigger>
             </TabsList>
 
           {/* Overview Tab */}
@@ -3000,15 +3005,6 @@ export default function AdminDashboard() {
 
                         {/* Bottom row on mobile, second part on desktop */}
                         <div className="flex space-x-2">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            className="flex-1 border-green-500/50 text-green-400 hover:bg-green-500/20 text-xs sm:text-sm"
-                            onClick={() => setGameDetailsId(game.id)}
-                          >
-                            <Users className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
-                            <span>Details</span>
-                          </Button>
                           <Button
                             size="sm"
                             variant="outline"
@@ -5179,14 +5175,14 @@ export default function AdminDashboard() {
             <EmailCenterTab />
           </TabsContent>
 
+          {/* ── Game Details Tab ────────────────────────────────────────── */}
+          <TabsContent value="game-details" className="h-full">
+            <GameDetailsTab />
+          </TabsContent>
+
           </Tabs>
         </main>
       </div>
-
-      {/* Game Details Dialog */}
-      {gameDetailsId !== null && (
-        <GameDetailsDialog gameId={gameDetailsId} onClose={() => setGameDetailsId(null)} />
-      )}
 
       {/* Eye-catching Delete Game Confirmation Dialog */}
       <Dialog open={isDeleteGameOpen} onOpenChange={setIsDeleteGameOpen}>
@@ -6474,18 +6470,28 @@ function SendCompletionEmailsButton({ gameId, gameName, onEmailSent }: { gameId:
   );
 }
 
-// ── Game Details Dialog ─────────────────────────────────────────────────────
-function GameDetailsDialog({ gameId, onClose }: { gameId: number; onClose: () => void }) {
+// ── Game Details Tab ─────────────────────────────────────────────────────────
+function GameDetailsTab() {
+  const [selectedGameId, setSelectedGameId] = useState<number | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeSection, setActiveSection] = useState<"players" | "numbers">("players");
+  const [gameSearch, setGameSearch] = useState("");
 
+  // Fetch all games for the list panel
+  const { data: allGames = [] } = useQuery<any[]>({
+    queryKey: ["/api/admin/games"],
+    refetchInterval: 30000,
+  });
+
+  // Fetch details for selected game
   const { data, isLoading, error } = useQuery<any>({
-    queryKey: ["/api/admin/games", gameId, "full-details"],
+    queryKey: ["/api/admin/games", selectedGameId, "full-details"],
     queryFn: async () => {
-      const res = await fetch(`/api/admin/games/${gameId}/full-details`, { credentials: "include" });
+      const res = await fetch(`/api/admin/games/${selectedGameId}/full-details`, { credentials: "include" });
       if (!res.ok) throw new Error("Failed to load");
       return res.json();
     },
+    enabled: selectedGameId !== null,
     refetchInterval: 15000,
   });
 
@@ -6494,13 +6500,18 @@ function GameDetailsDialog({ gameId, onClose }: { gameId: number; onClose: () =>
   const summary = data?.summary;
   const winner = data?.winner;
 
-  const filtered = players.filter(p =>
+  const filteredPlayers = players.filter(p =>
     !searchQuery ||
     p.playerName.toLowerCase().includes(searchQuery.toLowerCase()) ||
     p.email.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  // Build a set of all claimed numbers for the grid view
+  const filteredGames = (allGames as any[]).filter((g: any) =>
+    !gameSearch ||
+    g.name.toLowerCase().includes(gameSearch.toLowerCase()) ||
+    g.code.toLowerCase().includes(gameSearch.toLowerCase())
+  );
+
   const allClaimedNumbers = new Set<number>();
   const numberOwnerMap: Record<number, string> = {};
   for (const p of players) {
@@ -6510,57 +6521,109 @@ function GameDetailsDialog({ gameId, onClose }: { gameId: number; onClose: () =>
       numberOwnerMap[num] = p.playerName;
     }
   }
-
   const totalNumbers = game?.totalNumbers || 0;
 
   return (
-    <Dialog open onOpenChange={(open) => { if (!open) onClose(); }}>
-      <DialogContent
-        className="text-white border-purple-500/30 p-0 flex flex-col"
-        style={{ background: "#0b0c18", maxWidth: "95vw", width: "1100px", maxHeight: "92vh" }}
-      >
-        {/* Header */}
-        <div className="flex-shrink-0 px-6 py-4 border-b flex items-center justify-between"
-          style={{ borderColor: "rgba(124,58,237,0.25)", background: "rgba(124,58,237,0.07)" }}>
-          <div className="flex items-center gap-3 min-w-0">
-            <span className="text-3xl">{game?.emoji || "🎮"}</span>
-            <div className="min-w-0">
-              <h2 className="text-lg font-bold text-white truncate">{game?.name || "Loading…"}</h2>
-              <div className="flex items-center gap-2 mt-0.5 flex-wrap">
-                <span className="text-xs font-mono text-gray-400">{game?.code}</span>
-                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${game?.isActive ? "bg-green-500/20 text-green-400 border border-green-500/30" : "bg-gray-500/20 text-gray-400 border border-gray-500/30"}`}>
-                  {game?.isActive ? "● LIVE" : "● ENDED"}
-                </span>
-                <span className="text-xs text-yellow-400 font-semibold">{game?.prize}</span>
-              </div>
-            </div>
+    <div className="flex h-full" style={{ minHeight: "calc(100vh - 130px)" }}>
+      {/* ── Left panel: game list ── */}
+      <div className="w-64 flex-shrink-0 border-r flex flex-col"
+        style={{ borderColor: "rgba(255,255,255,0.07)", background: "rgba(0,0,0,0.2)" }}>
+        <div className="px-3 pt-4 pb-2 flex-shrink-0">
+          <p className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-2">All Games</p>
+          <div className="relative">
+            <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-gray-500" />
+            <input
+              className="w-full text-xs rounded-lg pl-8 pr-3 py-2 bg-white/5 border border-white/10 text-white placeholder-gray-600 focus:outline-none focus:border-purple-500/50"
+              placeholder="Search games…"
+              value={gameSearch}
+              onChange={e => setGameSearch(e.target.value)}
+            />
           </div>
-          <button onClick={onClose} className="text-gray-400 hover:text-white transition-colors flex-shrink-0 ml-4">
-            <X className="h-5 w-5" />
-          </button>
         </div>
+        <div className="flex-1 overflow-y-auto px-2 pb-4 space-y-1">
+          {filteredGames.map((g: any) => (
+            <button
+              key={g.id}
+              onClick={() => { setSelectedGameId(g.id); setSearchQuery(""); setActiveSection("players"); }}
+              className={`w-full text-left rounded-lg px-3 py-2.5 transition-all ${
+                selectedGameId === g.id
+                  ? "bg-purple-600/30 border border-purple-500/40"
+                  : "hover:bg-white/5 border border-transparent"
+              }`}
+            >
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-sm font-medium text-white truncate flex items-center gap-1.5">
+                  <span>{g.emoji || "🎮"}</span>
+                  <span className="truncate">{g.name}</span>
+                </span>
+                {selectedGameId === g.id && <ChevronRight className="h-3.5 w-3.5 text-purple-400 flex-shrink-0" />}
+              </div>
+              <div className="flex items-center gap-2 mt-1">
+                <span className="text-[10px] font-mono text-gray-500">{g.code}</span>
+                <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full ${
+                  g.isActive
+                    ? "bg-green-500/20 text-green-400"
+                    : "bg-gray-500/20 text-gray-500"
+                }`}>
+                  {g.isActive ? "LIVE" : "ENDED"}
+                </span>
+              </div>
+            </button>
+          ))}
+          {filteredGames.length === 0 && (
+            <p className="text-gray-600 text-xs text-center py-8">No games found</p>
+          )}
+        </div>
+      </div>
 
-        {isLoading && (
-          <div className="flex-1 flex items-center justify-center py-20">
+      {/* ── Right panel: details ── */}
+      <div className="flex-1 overflow-y-auto">
+        {/* Placeholder when nothing selected */}
+        {selectedGameId === null && (
+          <div className="flex flex-col items-center justify-center h-full py-20 text-center">
+            <Hash className="h-16 w-16 text-gray-700 mb-4" />
+            <p className="text-gray-400 font-semibold text-lg">Select a game</p>
+            <p className="text-gray-600 text-sm mt-1">Pick any game from the list to view its full details</p>
+          </div>
+        )}
+
+        {selectedGameId !== null && isLoading && (
+          <div className="flex items-center justify-center h-full py-20">
             <Loader2 className="h-8 w-8 text-purple-400 animate-spin" />
           </div>
         )}
 
-        {error && (
-          <div className="flex-1 flex items-center justify-center py-20">
+        {selectedGameId !== null && error && (
+          <div className="flex items-center justify-center h-full py-20">
             <p className="text-red-400">Failed to load game details.</p>
           </div>
         )}
 
-        {data && (
-          <div className="flex-1 overflow-auto">
-            {/* Summary Stats */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 px-6 py-4 border-b" style={{ borderColor: "rgba(255,255,255,0.07)" }}>
+        {selectedGameId !== null && data && (
+          <div>
+            {/* Game header */}
+            <div className="px-6 py-4 border-b flex items-center gap-4 sticky top-0 z-10"
+              style={{ borderColor: "rgba(124,58,237,0.25)", background: "rgba(11,12,24,0.97)" }}>
+              <span className="text-3xl">{game?.emoji || "🎮"}</span>
+              <div className="flex-1 min-w-0">
+                <h2 className="text-lg font-bold text-white truncate">{game?.name}</h2>
+                <div className="flex items-center gap-2 flex-wrap mt-0.5">
+                  <span className="text-xs font-mono text-gray-400">{game?.code}</span>
+                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${game?.isActive ? "bg-green-500/20 text-green-400 border border-green-500/30" : "bg-gray-500/20 text-gray-400 border border-gray-500/30"}`}>
+                    {game?.isActive ? "● LIVE" : "● ENDED"}
+                  </span>
+                  <span className="text-xs text-yellow-400 font-semibold">{game?.prize}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Summary stats */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 px-6 py-4 border-b" style={{ borderColor: "rgba(255,255,255,0.07)" }}>
               {[
-                { label: "Players",        value: summary?.totalPlayers ?? 0,          icon: Users,       color: "text-blue-400" },
-                { label: "Total Spins",    value: summary?.totalSpins ?? 0,            icon: Zap,         color: "text-purple-400" },
-                { label: "Tokens Spent",   value: summary?.totalTokensSpent?.toFixed(0) ?? 0, icon: Coins, color: "text-yellow-400" },
-                { label: "% Full",         value: `${summary?.pctFull ?? 0}%`,         icon: Target,      color: "text-green-400" },
+                { label: "Players",      value: summary?.totalPlayers ?? 0,                   icon: Users,   color: "text-blue-400" },
+                { label: "Total Spins",  value: summary?.totalSpins ?? 0,                     icon: Zap,     color: "text-purple-400" },
+                { label: "Tokens Spent", value: summary?.totalTokensSpent?.toFixed(0) ?? 0,  icon: Coins,   color: "text-yellow-400" },
+                { label: "% Full",       value: `${summary?.pctFull ?? 0}%`,                  icon: Target,  color: "text-green-400" },
               ].map(stat => (
                 <div key={stat.label} className="rounded-xl p-3 flex items-center gap-3"
                   style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
@@ -6590,7 +6653,7 @@ function GameDetailsDialog({ gameId, onClose }: { gameId: number; onClose: () =>
                       ? "linear-gradient(90deg,#dc2626,#f97316)"
                       : (summary?.pctFull ?? 0) >= 80
                       ? "linear-gradient(90deg,#d97706,#f59e0b)"
-                      : "linear-gradient(90deg,#7c3aed,#3b82f6)"
+                      : "linear-gradient(90deg,#7c3aed,#3b82f6)",
                   }} />
               </div>
             </div>
@@ -6608,46 +6671,50 @@ function GameDetailsDialog({ gameId, onClose }: { gameId: number; onClose: () =>
             )}
 
             {/* Section tabs */}
-            <div className="flex gap-2 px-6 pt-4">
+            <div className="flex gap-2 px-6 pt-4 border-b pb-0" style={{ borderColor: "rgba(255,255,255,0.07)" }}>
               {([
                 { key: "players", label: "Players", icon: Users },
                 { key: "numbers", label: "Numbers Grid", icon: Hash },
               ] as const).map(s => (
                 <button key={s.key} onClick={() => setActiveSection(s.key)}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                  className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium transition-all border-b-2 -mb-px ${
                     activeSection === s.key
-                      ? "bg-purple-600 text-white"
-                      : "text-gray-400 hover:text-gray-200 hover:bg-white/5"
+                      ? "border-purple-500 text-purple-300"
+                      : "border-transparent text-gray-500 hover:text-gray-300"
                   }`}>
                   <s.icon className="h-4 w-4" />
                   {s.label}
-                  {s.key === "players" && <span className="text-[10px] bg-white/20 px-1.5 py-0.5 rounded-full">{players.length}</span>}
+                  {s.key === "players" && (
+                    <span className="text-[10px] px-1.5 py-0.5 rounded-full"
+                      style={{ background: "rgba(255,255,255,0.1)", color: "#9ca3af" }}>
+                      {players.length}
+                    </span>
+                  )}
                 </button>
               ))}
             </div>
 
-            {/* Players section */}
+            {/* Players table */}
             {activeSection === "players" && (
-              <div className="px-6 pb-6 mt-3">
-                {/* Search */}
+              <div className="px-6 pb-6 pt-4">
                 <div className="relative mb-3">
+                  <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-500" />
                   <Input
                     placeholder="Search by name or email…"
                     value={searchQuery}
                     onChange={e => setSearchQuery(e.target.value)}
-                    className="bg-white/5 border-white/10 text-white placeholder-gray-500 pl-4"
+                    className="bg-white/5 border-white/10 text-white placeholder-gray-500 pl-9"
                   />
                 </div>
 
-                {filtered.length === 0 ? (
-                  <div className="text-center py-12">
-                    <Users className="h-12 w-12 text-gray-600 mx-auto mb-3" />
+                {filteredPlayers.length === 0 ? (
+                  <div className="text-center py-16">
+                    <Users className="h-12 w-12 text-gray-700 mx-auto mb-3" />
                     <p className="text-gray-400 font-medium">No players yet</p>
-                    <p className="text-gray-600 text-sm mt-1">Players will appear here once they join the game</p>
+                    <p className="text-gray-600 text-sm mt-1">Players will appear here once they join</p>
                   </div>
                 ) : (
                   <div className="rounded-xl overflow-hidden border" style={{ borderColor: "rgba(255,255,255,0.08)" }}>
-                    {/* Table header */}
                     <div className="grid text-[11px] font-semibold uppercase tracking-widest text-gray-500 px-4 py-2.5"
                       style={{ gridTemplateColumns: "1fr 1fr auto auto auto auto", background: "rgba(255,255,255,0.03)", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
                       <span>Player</span>
@@ -6657,14 +6724,11 @@ function GameDetailsDialog({ gameId, onClose }: { gameId: number; onClose: () =>
                       <span className="text-center">Tokens</span>
                       <span className="text-center">Status</span>
                     </div>
-
-                    {/* Table rows */}
-                    <div className="divide-y" style={{ divideColor: "rgba(255,255,255,0.05)" }}>
-                      {filtered.map((player, idx) => (
+                    <div>
+                      {filteredPlayers.map((player, idx) => (
                         <div key={player.id}
-                          className="grid items-center px-4 py-3 hover:bg-white/3 transition-colors"
-                          style={{ gridTemplateColumns: "1fr 1fr auto auto auto auto", background: idx % 2 === 0 ? "transparent" : "rgba(255,255,255,0.01)" }}>
-                          {/* Name */}
+                          className="grid items-center px-4 py-3 transition-colors hover:bg-white/[0.02]"
+                          style={{ gridTemplateColumns: "1fr 1fr auto auto auto auto", background: idx % 2 === 0 ? "transparent" : "rgba(255,255,255,0.01)", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
                           <div className="flex items-center gap-2 min-w-0 pr-3">
                             <div className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 text-xs font-bold"
                               style={{ background: player.isWinner ? "rgba(250,204,21,0.2)" : "rgba(124,58,237,0.2)", color: player.isWinner ? "#facc15" : "#a78bfa" }}>
@@ -6672,13 +6736,9 @@ function GameDetailsDialog({ gameId, onClose }: { gameId: number; onClose: () =>
                             </div>
                             <span className="text-sm text-white font-medium truncate">{player.playerName}</span>
                           </div>
-
-                          {/* Email */}
                           <div className="min-w-0 pr-3">
                             <span className="text-xs text-gray-400 truncate block">{player.email}</span>
                           </div>
-
-                          {/* Numbers owned */}
                           <div className="text-center px-3">
                             <div className="inline-flex flex-wrap gap-1 justify-center max-w-[160px]">
                               {(player.ownedNumbers || []).slice(0, 6).map((n: string) => (
@@ -6693,31 +6753,19 @@ function GameDetailsDialog({ gameId, onClose }: { gameId: number; onClose: () =>
                             </div>
                             <p className="text-[10px] text-gray-600 mt-0.5">{player.numbersCount} total</p>
                           </div>
-
-                          {/* Spins */}
                           <div className="text-center px-3">
                             <span className="text-sm font-bold text-purple-300">{player.spinCount}</span>
                           </div>
-
-                          {/* Tokens spent */}
                           <div className="text-center px-3">
-                            <span className="text-sm font-bold text-yellow-400">{player.totalSpent.toFixed(0)}</span>
+                            <span className="text-sm font-bold text-yellow-400">{player.totalSpent?.toFixed(0) ?? 0}</span>
                           </div>
-
-                          {/* Status */}
                           <div className="text-center">
                             {player.isWinner ? (
-                              <span className="text-[10px] font-bold px-2 py-1 rounded-full bg-yellow-500/20 text-yellow-400 border border-yellow-500/30">
-                                🏆 Winner
-                              </span>
+                              <span className="text-[10px] font-bold px-2 py-1 rounded-full bg-yellow-500/20 text-yellow-400 border border-yellow-500/30">🏆 Winner</span>
                             ) : player.freeSpins > 0 ? (
-                              <span className="text-[10px] font-bold px-2 py-1 rounded-full bg-blue-500/20 text-blue-400 border border-blue-500/30">
-                                Free
-                              </span>
+                              <span className="text-[10px] font-bold px-2 py-1 rounded-full bg-blue-500/20 text-blue-400 border border-blue-500/30">Free</span>
                             ) : (
-                              <span className="text-[10px] font-bold px-2 py-1 rounded-full bg-green-500/10 text-green-500 border border-green-500/20">
-                                Paid
-                              </span>
+                              <span className="text-[10px] font-bold px-2 py-1 rounded-full bg-green-500/10 text-green-500 border border-green-500/20">Paid</span>
                             )}
                           </div>
                         </div>
@@ -6728,9 +6776,9 @@ function GameDetailsDialog({ gameId, onClose }: { gameId: number; onClose: () =>
               </div>
             )}
 
-            {/* Numbers grid section */}
+            {/* Numbers grid */}
             {activeSection === "numbers" && (
-              <div className="px-6 pb-6 mt-3">
+              <div className="px-6 pb-6 pt-4">
                 <div className="flex items-center gap-4 mb-3 text-xs">
                   <div className="flex items-center gap-1.5">
                     <div className="w-4 h-4 rounded" style={{ background: "rgba(124,58,237,0.4)", border: "1px solid rgba(124,58,237,0.6)" }} />
@@ -6747,7 +6795,7 @@ function GameDetailsDialog({ gameId, onClose }: { gameId: number; onClose: () =>
                     </div>
                   )}
                 </div>
-                <div className="rounded-xl p-4 overflow-auto" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.07)", maxHeight: "420px" }}>
+                <div className="rounded-xl p-4" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.07)" }}>
                   <div className="flex flex-wrap gap-1.5">
                     {Array.from({ length: totalNumbers }, (_, i) => i + 1).map(n => {
                       const isClaimed = allClaimedNumbers.has(n);
@@ -6757,16 +6805,8 @@ function GameDetailsDialog({ gameId, onClose }: { gameId: number; onClose: () =>
                           title={isClaimed ? `#${n} — ${numberOwnerMap[n]}` : `#${n} — Available`}
                           className="w-9 h-9 rounded-lg flex items-center justify-center text-xs font-bold cursor-default transition-all hover:scale-110"
                           style={{
-                            background: isWinnerNum
-                              ? "rgba(250,204,21,0.3)"
-                              : isClaimed
-                              ? "rgba(124,58,237,0.35)"
-                              : "rgba(255,255,255,0.05)",
-                            border: isWinnerNum
-                              ? "1px solid rgba(250,204,21,0.7)"
-                              : isClaimed
-                              ? "1px solid rgba(124,58,237,0.55)"
-                              : "1px solid rgba(255,255,255,0.1)",
+                            background: isWinnerNum ? "rgba(250,204,21,0.3)" : isClaimed ? "rgba(124,58,237,0.35)" : "rgba(255,255,255,0.05)",
+                            border: isWinnerNum ? "1px solid rgba(250,204,21,0.7)" : isClaimed ? "1px solid rgba(124,58,237,0.55)" : "1px solid rgba(255,255,255,0.1)",
                             color: isWinnerNum ? "#facc15" : isClaimed ? "#c4b5fd" : "#374151",
                           }}>
                           {n}
@@ -6779,8 +6819,8 @@ function GameDetailsDialog({ gameId, onClose }: { gameId: number; onClose: () =>
             )}
           </div>
         )}
-      </DialogContent>
-    </Dialog>
+      </div>
+    </div>
   );
 }
 
