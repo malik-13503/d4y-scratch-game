@@ -376,7 +376,7 @@ function GameCard({
         style={{ background: `radial-gradient(ellipse 100% 100% at 50% 0%,${topGlow},transparent 75%)` }} />
 
       {/* ── IMAGE ───────────────────────────────────────────────── */}
-      <div className="relative overflow-hidden h-64 sm:h-72" style={{ background: "#1a1535", flexShrink: 0 }}>
+      <div className="relative overflow-hidden h-72 sm:h-80" style={{ background: "#1a1535", flexShrink: 0 }}>
         <img
           src={game.prizeImageUrl || fallback}
           alt={game.name}
