@@ -1208,11 +1208,11 @@ export default function HomePage() {
 
         {/* ── REFER & EARN ──────────────────────────────────── */}
         <div className="relative overflow-hidden rounded-3xl"
-          style={{ background: "linear-gradient(135deg,#1c0808,#2d1010,#180606)", border: "1px solid rgba(239,68,68,.3)", boxShadow: "0 0 60px rgba(239,68,68,.07), inset 0 1px 0 rgba(255,255,255,.04)" }}>
+          style={{ background: "linear-gradient(135deg,#0e0a22,#180f35,#0c0820)", border: "1px solid rgba(124,58,237,.35)", boxShadow: "0 0 60px rgba(124,58,237,.1), inset 0 1px 0 rgba(255,255,255,.04)" }}>
 
           {/* BG glows */}
-          <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(ellipse 70% 80% at 0% 50%,rgba(239,68,68,.12),transparent 65%)" }} />
-          <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(ellipse 40% 60% at 100% 20%,rgba(245,158,11,.06),transparent 60%)" }} />
+          <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(ellipse 70% 80% at 0% 50%,rgba(124,58,237,.14),transparent 65%)" }} />
+          <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(ellipse 40% 60% at 100% 20%,rgba(245,158,11,.07),transparent 60%)" }} />
 
           {/* Floating token coins (decorative) */}
           <div className="absolute right-4 top-3 text-2xl opacity-10 pointer-events-none float" style={{ animationDuration: "5s" }}>🪙</div>
@@ -1222,8 +1222,8 @@ export default function HomePage() {
             {/* Header */}
             <div className="flex items-center gap-2 mb-3">
               <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
-                style={{ background: "linear-gradient(135deg,rgba(239,68,68,.3),rgba(239,68,68,.15))", border: "1px solid rgba(239,68,68,.4)", boxShadow: "0 0 16px rgba(239,68,68,.3)" }}>
-                <Send className="h-4 w-4 text-red-400" />
+                style={{ background: "linear-gradient(135deg,rgba(124,58,237,.4),rgba(99,102,241,.25))", border: "1px solid rgba(124,58,237,.5)", boxShadow: "0 0 18px rgba(124,58,237,.35)" }}>
+                <Send className="h-4 w-4 text-violet-300" />
               </div>
               <div>
                 <p className="text-white font-black text-sm uppercase tracking-wide">Refer & Earn Tokens!</p>
@@ -1233,14 +1233,14 @@ export default function HomePage() {
 
             {/* Referral code box */}
             <div className="flex items-center gap-2 mb-4 p-3 rounded-2xl"
-              style={{ background: "rgba(0,0,0,.3)", border: "1px solid rgba(239,68,68,.2)" }}>
+              style={{ background: "rgba(0,0,0,.35)", border: "1px solid rgba(124,58,237,.25)" }}>
               <div className="flex-1">
                 <p className="text-gray-600 text-[10px] uppercase tracking-widest mb-0.5">Your Code</p>
                 <p className="text-yellow-400 font-black text-lg tracking-[.2em] font-mono">{referralCode}</p>
               </div>
               <button onClick={copyReferral}
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-black text-xs transition-all hover:scale-105"
-                style={{ background: copied ? "rgba(16,185,129,.2)" : "rgba(245,158,11,.15)", border: `1px solid ${copied ? "rgba(16,185,129,.4)" : "rgba(245,158,11,.35)"}`, color: copied ? "#34d399" : "#fbbf24" }}>
+                style={{ background: copied ? "rgba(16,185,129,.2)" : "rgba(124,58,237,.2)", border: `1px solid ${copied ? "rgba(16,185,129,.4)" : "rgba(124,58,237,.45)"}`, color: copied ? "#34d399" : "#c4b5fd" }}>
                 {copied ? <CheckCircle className="h-3.5 w-3.5" /> : <Hash className="h-3.5 w-3.5" />}
                 {copied ? "Copied!" : "Copy"}
               </button>
@@ -1250,7 +1250,7 @@ export default function HomePage() {
             <div className="flex items-center gap-2 mb-4">
               {[["1 friend","5 🪙"],["3 friends","20 🪙"],["10 friends","75 🪙"]].map(([tier, reward], ti) => (
                 <div key={ti} className="flex-1 text-center py-2 rounded-xl"
-                  style={{ background: "rgba(239,68,68,.08)", border: "1px solid rgba(239,68,68,.15)" }}>
+                  style={{ background: "rgba(124,58,237,.1)", border: "1px solid rgba(124,58,237,.22)" }}>
                   <p className="text-yellow-400 font-black text-xs">{reward}</p>
                   <p className="text-gray-600 text-[9px] mt-0.5">{tier}</p>
                 </div>
@@ -1260,7 +1260,7 @@ export default function HomePage() {
             {/* CTA */}
             <button onClick={copyReferral}
               className="w-full flex items-center justify-center gap-2.5 py-3 rounded-2xl font-black text-sm text-white transition-all hover:scale-[1.02]"
-              style={{ background: "linear-gradient(135deg,#ef4444,#dc2626,#b91c1c)", boxShadow: "0 6px 24px rgba(239,68,68,.45)" }}>
+              style={{ background: "linear-gradient(135deg,#7c3aed,#6d28d9,#5b21b6)", boxShadow: "0 6px 24px rgba(124,58,237,.5)" }}>
               {copied ? <CheckCircle className="h-4 w-4" /> : <Send className="h-4 w-4" />}
               {copied ? "LINK COPIED — SHARE IT!" : "COPY & START EARNING"}
               <Zap className="h-3.5 w-3.5" fill="currentColor" />
