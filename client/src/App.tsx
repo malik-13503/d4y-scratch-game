@@ -1,10 +1,10 @@
-import { Switch, Route } from "wouter";
+import { Switch, Route, useLocation } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useState, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { saveAuthToStorage, getAuthFromStorage, clearAuthFromStorage } from "@/lib/auth";
 import Home from "@/pages/home";
 import GamePage from "@/pages/game";
@@ -30,10 +30,17 @@ import MyNumbers from "@/pages/my-numbers";
 import WalletPage from "@/pages/wallet";
 import AddCreditsPage from "@/pages/add-credits";
 import { TokenPurchase } from "@/components/token-purchase";
-
 import NotFound from "@/pages/not-found";
 import ForgotPassword from "@/pages/forgot-password";
 import ResetPassword from "@/pages/reset-password";
+
+function ScrollToTop() {
+  const [location] = useLocation();
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+  }, [location]);
+  return null;
+}
 
 function Router() {
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
@@ -46,37 +53,31 @@ function Router() {
   });
 
   useEffect(() => {
-    // Initialize from localStorage on app startup ONLY
     const storedAuth = getAuthFromStorage();
     if (storedAuth && storedAuth.isAuthenticated && !user) {
       console.log("Restored authentication from localStorage");
       setUser(storedAuth.user);
     }
-  }, []); // Only run once on app startup
+  }, []);
 
   useEffect(() => {
-    // Handle server authentication responses
     if (serverUser) {
       console.log("Server authenticated user:", serverUser);
       setUser(serverUser);
       saveAuthToStorage(serverUser);
       setIsCheckingAuth(false);
     } else if (error && !serverLoading) {
-      // If we have stored auth and server error, prioritize stored auth
       const storedAuth = getAuthFromStorage();
       if (storedAuth && storedAuth.isAuthenticated) {
-        // Always prioritize localStorage auth during server connectivity issues
         console.log("Server authentication failed, using stored authentication for user:", storedAuth.user?.email);
         setUser(storedAuth.user);
         setIsCheckingAuth(false);
       } else {
-        // No stored auth and server error - user is not authenticated
         console.log("No authentication available");
         setUser(null);
         setIsCheckingAuth(false);
       }
     } else if (!serverLoading && !serverUser && !error) {
-      // Server responded but no user - check localStorage
       const storedAuth = getAuthFromStorage();
       if (storedAuth && storedAuth.isAuthenticated) {
         console.log("No server session, but using stored authentication for user:", storedAuth.user?.email);
@@ -88,7 +89,6 @@ function Router() {
     }
   }, [serverUser, serverLoading, error]);
 
-  // Show loading spinner while checking auth state (but only briefly)
   if (isCheckingAuth) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
@@ -101,7 +101,6 @@ function Router() {
 
   return (
     <Switch>
-      {/* Authentication required routes */}
       {isAuthenticated ? (
         <>
           <Route path="/" component={Home} />
@@ -118,7 +117,6 @@ function Router() {
       ) : (
         <>
           <Route path="/" component={AuthLandingPage} />
-          {/* Redirect authenticated routes to login */}
           <Route path="/games" component={AuthLandingPage} />
           <Route path="/game/:id" component={AuthLandingPage} />
           <Route path="/dashboard" component={AuthLandingPage} />
@@ -131,7 +129,6 @@ function Router() {
         </>
       )}
       
-      {/* Public routes always available */}
       <Route path="/admin" component={AdminPage} />
       <Route path="/admin-login" component={AdminLoginPage} />
       <Route path="/admin-dashboard" component={AdminDashboard} />
@@ -159,6 +156,7 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <Toaster />
+        <ScrollToTop />
         <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50">
           <Router />
         </div>
