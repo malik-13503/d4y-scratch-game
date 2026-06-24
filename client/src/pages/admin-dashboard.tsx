@@ -3116,6 +3116,32 @@ export default function AdminDashboard() {
                   <RefreshCw className="h-4 w-4 mr-2" />
                   Refresh
                 </Button>
+                <Button
+                  onClick={() => {
+                    if (!users || users.length === 0) return;
+                    const header = ["Name", "Email", "Token Balance", "Games Played", "Joined Date"];
+                    const rows = (users as any[]).map((u: any) => [
+                      `${u.firstName ?? ""} ${u.lastName ?? ""}`.trim(),
+                      u.email ?? "",
+                      u.tokenBalance ?? 0,
+                      u.gamesPlayed ?? 0,
+                      u.createdAt ? new Date(u.createdAt).toLocaleDateString() : "",
+                    ]);
+                    const csv = [header, ...rows].map(r => r.map((v: any) => `"${String(v).replace(/"/g, '""')}"`).join(",")).join("\n");
+                    const blob = new Blob([csv], { type: "text/csv" });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement("a");
+                    a.href = url;
+                    a.download = `prizeplugz-emails-${new Date().toISOString().slice(0,10)}.csv`;
+                    a.click();
+                    URL.revokeObjectURL(url);
+                  }}
+                  variant="outline"
+                  className="border-green-500/50 text-green-400 hover:bg-green-500/20 gap-2"
+                >
+                  <Download className="h-4 w-4" />
+                  Export Emails
+                </Button>
               </div>
             </div>
 
