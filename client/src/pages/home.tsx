@@ -376,17 +376,17 @@ function GameCard({
         style={{ background: `radial-gradient(ellipse 100% 100% at 50% 0%,${topGlow},transparent 75%)` }} />
 
       {/* ── IMAGE ───────────────────────────────────────────────── */}
-      <div className="relative overflow-hidden h-48 sm:h-56" style={{ background: "#1a1535", flexShrink: 0 }}>
+      <div className="relative overflow-hidden h-56 sm:h-64" style={{ background: "#1a1535", flexShrink: 0 }}>
         <img
           src={game.prizeImageUrl || fallback}
           alt={game.name}
           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-          style={{ objectPosition: "center top" }}
+          style={{ objectPosition: "center center" }}
         />
 
-        {/* Scrim — lighter at top, heavier only at very bottom for title text */}
+        {/* Minimal scrim — only at very bottom for text, image stays fully visible */}
         <div className="absolute inset-0"
-          style={{ background: "linear-gradient(to top,rgba(8,6,20,.92) 0%,rgba(8,6,20,.45) 28%,rgba(8,6,20,.08) 55%,transparent 100%)" }} />
+          style={{ background: "linear-gradient(to top,rgba(8,6,20,.95) 0%,rgba(8,6,20,.6) 20%,rgba(8,6,20,.1) 40%,transparent 60%)" }} />
 
         {/* ── TOP ROW: LIVE badge (left) + Rank badge (right) ── */}
         <div className="absolute top-3 left-3 right-3 z-20 flex items-center justify-between">
