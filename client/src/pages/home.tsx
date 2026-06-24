@@ -124,6 +124,11 @@ const CSS = `
   .stat-num { animation:countUp .6s ease both; }
 
   .activity-item { animation:slideIn .4s ease both; }
+  @keyframes activityIn { from{opacity:0;transform:translateX(-16px)} to{opacity:1;transform:translateX(0)} }
+  .activity-row { animation:activityIn .38s cubic-bezier(.25,.46,.45,.94) both; }
+  .activity-row:hover { background:rgba(255,255,255,.03) !important; }
+  @keyframes liveDot { 0%,100%{transform:scale(1);opacity:1} 50%{transform:scale(1.6);opacity:.5} }
+  .live-dot { animation:liveDot 1.4s ease-in-out infinite; }
 
   .float { animation:floatY 5s ease-in-out infinite; }
 
@@ -771,42 +776,132 @@ export default function HomePage() {
       ═══════════════════════════════════════════════════════════════ */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 py-8 grid grid-cols-1 lg:grid-cols-2 gap-5 section-in">
 
-        {/* Live Activity */}
-        <div className="rounded-2xl overflow-hidden"
-          style={{ background: "#131124", border: "1px solid rgba(255,255,255,.06)" }}>
-          <div className="flex items-center justify-between px-5 py-4"
-            style={{ borderBottom: "1px solid rgba(255,255,255,.06)" }}>
-            <div className="flex items-center gap-2">
-              <Zap className="h-4 w-4 text-yellow-400" fill="currentColor" />
-              <h3 className="text-white font-black text-sm uppercase tracking-wide">Live Activity</h3>
-              <div className="w-2 h-2 rounded-full bg-green-400" style={{ animation: "blink 1.4s ease-in-out infinite" }} />
-            </div>
-          </div>
-          <div className="divide-y" style={{ borderColor: "rgba(255,255,255,.05)" }}>
-            {LIVE_ACTIVITY.map((item, i) => (
-              <div key={i} className="activity-item flex items-center gap-3 px-5 py-3.5"
-                style={{ animationDelay: `${i * 0.08}s` }}>
-                <img src={item.avatar} alt="" className="w-8 h-8 rounded-full object-cover object-top shrink-0"
-                  style={{ border: "1.5px solid rgba(124,58,237,.4)" }} />
-                <div className="flex-1 min-w-0">
-                  <p className="text-gray-300 text-sm truncate">
-                    <span className="text-white font-bold">{item.text}</span>{" "}
-                    <span className={item.isWin ? "font-black" : "text-violet-400 font-semibold"}
-                      style={item.isWin ? { color: "#10b981" } : {}}>
-                      {item.prize}
-                    </span>
-                  </p>
+        {/* ── LIVE ACTIVITY ───────────────────────────────────────────── */}
+        {(() => {
+          const getType = (text: string, isWin?: boolean) => {
+            if (isWin || text.toLowerCase().includes("won")) return "win";
+            if (text.toLowerCase().includes("purchased") || text.toLowerCase().includes("bought")) return "buy";
+            return "join";
+          };
+          const TYPE_META = {
+            win:  { label: "🏆 WON",    color: "#10b981", glow: "rgba(16,185,129,.35)",  ring: "rgba(16,185,129,.5)",  bg: "rgba(16,185,129,.08)",  stripe: "#10b981" },
+            buy:  { label: "💰 BOUGHT", color: "#f59e0b", glow: "rgba(245,158,11,.35)",  ring: "rgba(245,158,11,.5)",  bg: "rgba(245,158,11,.06)",  stripe: "#f59e0b" },
+            join: { label: "🎮 JOINED", color: "#7c3aed", glow: "rgba(124,58,237,.35)",  ring: "rgba(124,58,237,.5)",  bg: "rgba(124,58,237,.06)",  stripe: "#7c3aed" },
+          };
+          return (
+            <div className="relative rounded-2xl overflow-hidden flex flex-col"
+              style={{ background: "linear-gradient(160deg,#0c0a1e,#111028,#08060f)", border: "1px solid rgba(124,58,237,.2)", boxShadow: "0 0 60px rgba(124,58,237,.06)" }}>
+
+              {/* BG ambient */}
+              <div className="absolute inset-0 pointer-events-none"
+                style={{ background: "radial-gradient(ellipse 80% 50% at 0% 0%,rgba(124,58,237,.08),transparent 60%)" }} />
+              <div className="absolute inset-0 pointer-events-none"
+                style={{ background: "radial-gradient(ellipse 50% 40% at 100% 100%,rgba(16,185,129,.05),transparent 60%)" }} />
+
+              {/* Header */}
+              <div className="relative flex items-center justify-between px-5 py-4"
+                style={{ borderBottom: "1px solid rgba(255,255,255,.06)" }}>
+                <div className="flex items-center gap-2.5">
+                  {/* Animated live orb */}
+                  <div className="relative w-5 h-5 flex items-center justify-center shrink-0">
+                    <div className="absolute inset-0 rounded-full bg-green-500 opacity-25 animate-ping" style={{ animationDuration: "1.8s" }} />
+                    <div className="live-dot w-2.5 h-2.5 rounded-full bg-green-400" />
+                  </div>
+                  <h3 className="text-white font-black text-sm uppercase tracking-wider">Live Activity</h3>
+                  <span className="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest"
+                    style={{ background: "rgba(16,185,129,.12)", border: "1px solid rgba(16,185,129,.25)", color: "#34d399" }}>
+                    Real-Time
+                  </span>
                 </div>
-                <span className="text-gray-600 text-xs shrink-0">{item.time}</span>
+                {/* Mini event count */}
+                <div className="text-right">
+                  <p className="text-white font-black text-sm">247</p>
+                  <p className="text-gray-600 text-[10px]">events/hr</p>
+                </div>
               </div>
-            ))}
-          </div>
-          <div className="px-5 py-3" style={{ borderTop: "1px solid rgba(255,255,255,.05)" }}>
-            <button className="w-full text-center text-violet-400 hover:text-violet-300 text-sm font-bold py-1 transition-colors">
-              VIEW ALL ACTIVITY
-            </button>
-          </div>
-        </div>
+
+              {/* Mini summary strip */}
+              <div className="flex items-center gap-4 px-5 py-2.5"
+                style={{ background: "rgba(255,255,255,.02)", borderBottom: "1px solid rgba(255,255,255,.04)" }}>
+                {[
+                  { icon: "🏆", label: "12 wins",    color: "#10b981" },
+                  { icon: "🎮", label: "89 entries",  color: "#7c3aed" },
+                  { icon: "💰", label: "31 purchases",color: "#f59e0b" },
+                ].map((s, si) => (
+                  <div key={si} className="flex items-center gap-1.5">
+                    <span className="text-xs">{s.icon}</span>
+                    <span className="text-xs font-bold" style={{ color: s.color }}>{s.label}</span>
+                    <span className="text-gray-700 text-xs">today</span>
+                  </div>
+                ))}
+              </div>
+
+              {/* Activity rows */}
+              <div className="flex-1 overflow-hidden">
+                {LIVE_ACTIVITY.map((item, i) => {
+                  const type = getType(item.text, item.isWin) as keyof typeof TYPE_META;
+                  const meta = TYPE_META[type];
+                  return (
+                    <div key={i} className="activity-row relative flex items-center gap-3 px-4 py-3 cursor-pointer transition-all"
+                      style={{ animationDelay: `${i * 0.07}s`, borderBottom: i < LIVE_ACTIVITY.length - 1 ? "1px solid rgba(255,255,255,.04)" : "none" }}>
+
+                      {/* Left accent stripe */}
+                      <div className="absolute left-0 top-2 bottom-2 w-0.5 rounded-full"
+                        style={{ background: meta.stripe, boxShadow: `0 0 8px ${meta.stripe}` }} />
+
+                      {/* Avatar with colored ring */}
+                      <div className="relative shrink-0">
+                        <div className="w-10 h-10 rounded-full overflow-hidden"
+                          style={{ border: `2px solid ${meta.ring}`, boxShadow: `0 0 12px ${meta.glow}` }}>
+                          <img src={item.avatar} alt="" className="w-full h-full object-cover object-top" />
+                        </div>
+                        {/* Type icon badge */}
+                        <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full flex items-center justify-center text-[8px]"
+                          style={{ background: meta.color, border: "1.5px solid #0c0a1e" }}>
+                          {type === "win" ? "🏆" : type === "buy" ? "💰" : "🎮"}
+                        </div>
+                      </div>
+
+                      {/* Content */}
+                      <div className="flex-1 min-w-0">
+                        {/* Type badge */}
+                        <div className="flex items-center gap-2 mb-0.5">
+                          <span className="text-[9px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded"
+                            style={{ background: meta.bg, color: meta.color }}>
+                            {meta.label}
+                          </span>
+                          <span className="text-gray-600 text-[10px]">{item.time}</span>
+                        </div>
+                        <p className="text-sm leading-snug truncate">
+                          <span className="text-white font-bold">{item.text.split(" ").slice(0, 1).join(" ")}</span>
+                          <span className="text-gray-400"> {item.text.split(" ").slice(1).join(" ")} </span>
+                          <span className="font-black" style={{ color: meta.color }}>{item.prize}</span>
+                        </p>
+                      </div>
+
+                      {/* Right arrow hint */}
+                      <ChevronRight className="h-3.5 w-3.5 text-gray-700 shrink-0" />
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Footer */}
+              <div className="relative px-5 py-3 flex items-center justify-between"
+                style={{ borderTop: "1px solid rgba(255,255,255,.05)", background: "rgba(255,255,255,.01)" }}>
+                <div className="flex items-center gap-1.5">
+                  <div className="w-1.5 h-1.5 rounded-full bg-green-400" style={{ animation: "blink 1.4s ease-in-out infinite" }} />
+                  <span className="text-gray-600 text-xs">Powered by real data</span>
+                </div>
+                <button onClick={() => setLocation("/games")}
+                  className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg font-black text-xs text-white transition-all hover:scale-105"
+                  style={{ background: "linear-gradient(135deg,rgba(124,58,237,.4),rgba(99,102,241,.3))", border: "1px solid rgba(124,58,237,.4)" }}>
+                  Join a Game <Zap className="h-3 w-3" fill="currentColor" />
+                </button>
+              </div>
+            </div>
+          );
+        })()}
 
         {/* ── WINNER WALL ─────────────────────────────────────────────── */}
         {(() => {
