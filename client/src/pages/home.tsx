@@ -62,6 +62,21 @@ const CSS = `
   .winner-card { transition:all .2s ease; cursor:pointer; }
   .winner-card:hover { transform:translateY(-4px); }
 
+  @keyframes winnerSlide { from{opacity:0;transform:scale(.96) translateY(8px)} to{opacity:1;transform:scale(1) translateY(0)} }
+  .winner-spotlight { animation:winnerSlide .4s cubic-bezier(.25,.46,.45,.94) both; }
+
+  @keyframes goldPulse { 0%,100%{box-shadow:0 0 20px rgba(245,158,11,.3)} 50%{box-shadow:0 0 40px rgba(245,158,11,.6),0 0 80px rgba(245,158,11,.2)} }
+  .gold-glow { animation:goldPulse 2.5s ease-in-out infinite; }
+
+  @keyframes confettiFall {
+    0%  { transform:translateY(-20px) rotate(0deg); opacity:1; }
+    100%{ transform:translateY(60px) rotate(360deg); opacity:0; }
+  }
+  .confetti-piece { animation:confettiFall 1.4s ease-in both; position:absolute; font-size:14px; pointer-events:none; }
+
+  @keyframes verifiedPop { 0%{transform:scale(0)} 70%{transform:scale(1.15)} 100%{transform:scale(1)} }
+  .verified-pop { animation:verifiedPop .5s cubic-bezier(.25,.46,.45,.94) .15s both; }
+
   .fomo-badge { animation:pulse 2s ease-in-out infinite; }
 
   .ring-live::after {
@@ -268,6 +283,8 @@ export default function HomePage() {
   const [showNotifs, setShowNotifs] = useState(false);
   const [copied, setCopied] = useState(false);
   const notifRef = useRef<HTMLDivElement>(null);
+  const [activeWinner, setActiveWinner] = useState(0);
+  const [wallPaused, setWallPaused] = useState(false);
 
   const { data: user }      = useQuery<any>({ queryKey: ["/api/user"] });
   const { data: tokenData } = useQuery<{ tokenBalance: number }>({ queryKey: ["/api/user/token-balance"], refetchInterval: 15000 });
@@ -315,6 +332,16 @@ export default function HomePage() {
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
   }, []);
+
+  /* Winner Wall auto-rotation */
+  useEffect(() => {
+    if (wallPaused) return;
+    const winners = winnerWallData && winnerWallData.length > 0 ? winnerWallData : FALLBACK_WINNERS;
+    const total = Math.min(winners.length, 6);
+    if (total <= 1) return;
+    const t = setInterval(() => setActiveWinner(p => (p + 1) % total), 3500);
+    return () => clearInterval(t);
+  }, [wallPaused, winnerWallData]);
 
   /* Today's top winner from real data */
   const topWinner = winnersData?.[0];
@@ -637,44 +664,154 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* Winner Wall */}
-        <div className="rounded-2xl overflow-hidden"
-          style={{ background: "#131124", border: "1px solid rgba(255,255,255,.06)" }}>
-          <div className="flex items-center justify-between px-5 py-4"
-            style={{ borderBottom: "1px solid rgba(255,255,255,.06)" }}>
-            <div className="flex items-center gap-2">
-              <Trophy className="h-4 w-4 text-yellow-400" />
-              <h3 className="text-white font-black text-sm uppercase tracking-wide">Winner Wall</h3>
-            </div>
-            <button onClick={() => setLocation("/dashboard")}
-              className="flex items-center gap-1 text-violet-400 hover:text-violet-300 text-xs font-semibold transition-colors">
-              View All Winners <ChevronRight className="h-3.5 w-3.5" />
-            </button>
-          </div>
-          <div className="grid grid-cols-2 gap-3 p-4">
-            {(winnerWallData && winnerWallData.length > 0 ? winnerWallData : FALLBACK_WINNERS).slice(0, 4).map((w, i) => (
-              <div key={i} className="winner-card rounded-xl overflow-hidden"
-                style={{ background: "#1a1535", border: "1px solid rgba(255,255,255,.07)" }}>
-                <div className="overflow-hidden" style={{ height: 130 }}>
-                  {w.imageUrl ? (
-                    <img src={w.imageUrl} alt={w.name} className="w-full h-full object-cover" style={{ objectPosition: "center top" }} />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-4xl" style={{ background: "linear-gradient(135deg,#1a1535,#2d1b69)" }}>🏆</div>
-                  )}
-                </div>
-                <div className="p-2.5">
-                  <div className="flex items-center gap-1 mb-1">
-                    <CheckCircle className="h-2.5 w-2.5 shrink-0" style={{ color: w.prizeColor }} />
-                    <span className="text-[9px] font-black uppercase tracking-wide" style={{ color: w.prizeColor }}>Verified Winner</span>
+        {/* ── WINNER WALL ─────────────────────────────────────────────── */}
+        {(() => {
+          const wallWinners = (winnerWallData && winnerWallData.length > 0 ? winnerWallData : FALLBACK_WINNERS).slice(0, 6);
+          const aw = wallWinners[activeWinner] ?? wallWinners[0];
+          const CONFETTI = ["🎊","✨","🎉","⭐","🌟","💫"];
+          return (
+            <div className="relative rounded-2xl overflow-hidden flex flex-col"
+              style={{ background: "linear-gradient(160deg,#0f0b1f,#13102a,#0a0714)", border: "1px solid rgba(245,158,11,.18)", boxShadow: "0 0 60px rgba(245,158,11,.06)" }}
+              onMouseEnter={() => setWallPaused(true)}
+              onMouseLeave={() => setWallPaused(false)}>
+
+              {/* Background glow */}
+              <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(ellipse 70% 50% at 50% 0%,rgba(245,158,11,.08),transparent 70%)" }} />
+
+              {/* Header */}
+              <div className="relative flex items-center justify-between px-5 py-4"
+                style={{ borderBottom: "1px solid rgba(245,158,11,.1)" }}>
+                <div className="flex items-center gap-2.5">
+                  <div className="relative">
+                    <Trophy className="h-5 w-5 text-yellow-400" fill="currentColor" />
+                    <div className="absolute inset-0 blur-sm" style={{ background: "rgba(245,158,11,.5)" }} />
                   </div>
-                  <p className="text-white font-black text-xs">{w.name}</p>
-                  <p className="text-xs font-bold mt-0.5" style={{ color: w.prizeColor }}>{w.prize}</p>
-                  <p className="text-gray-600 text-[10px] mt-0.5">{new Date(w.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</p>
+                  <h3 className="text-white font-black text-sm uppercase tracking-wider">Winner Wall</h3>
+                  <span className="flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black uppercase"
+                    style={{ background: "rgba(16,185,129,.15)", border: "1px solid rgba(16,185,129,.3)", color: "#34d399" }}>
+                    <span className="w-1.5 h-1.5 rounded-full bg-green-400 inline-block" style={{ animation: "blink 1.4s ease-in-out infinite" }} />
+                    Live
+                  </span>
+                </div>
+                <button onClick={() => setLocation("/dashboard")}
+                  className="flex items-center gap-1 text-yellow-400 hover:text-yellow-300 text-xs font-bold transition-colors">
+                  Hall of Fame <ChevronRight className="h-3.5 w-3.5" />
+                </button>
+              </div>
+
+              {/* Spotlight Card */}
+              <div className="relative flex-1 overflow-hidden" style={{ minHeight: 0 }}>
+                {/* Confetti burst when slide changes */}
+                <div className="absolute inset-x-0 top-0 pointer-events-none overflow-hidden" style={{ height: 60 }}>
+                  {CONFETTI.map((c, ci) => (
+                    <span key={`${activeWinner}-${ci}`} className="confetti-piece"
+                      style={{ left: `${15 + ci * 14}%`, animationDelay: `${ci * 0.1}s`, animationDuration: `${1.2 + ci * 0.1}s` }}>{c}</span>
+                  ))}
+                </div>
+
+                <div key={activeWinner} className="winner-spotlight flex gap-0" style={{ height: "100%" }}>
+                  {/* Big image panel */}
+                  <div className="relative shrink-0 overflow-hidden" style={{ width: "42%", minHeight: 210 }}>
+                    {aw.imageUrl ? (
+                      <img src={aw.imageUrl} alt={aw.name} className="w-full h-full object-cover" style={{ objectPosition: "center top" }} />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-5xl"
+                        style={{ background: "linear-gradient(135deg,#1c1435,#2d1f6e)" }}>🏆</div>
+                    )}
+                    {/* Overlay gradient */}
+                    <div className="absolute inset-0" style={{ background: "linear-gradient(90deg,transparent 60%,rgba(13,10,26,.9))" }} />
+                    {/* Prize badge on image */}
+                    <div className="absolute bottom-3 left-3 px-2.5 py-1 rounded-lg font-black text-xs text-black"
+                      style={{ background: aw.prizeColor || "#f59e0b", boxShadow: `0 4px 14px ${aw.prizeColor || "#f59e0b"}60` }}>
+                      {aw.prize}
+                    </div>
+                  </div>
+
+                  {/* Info panel */}
+                  <div className="flex-1 flex flex-col justify-between p-4">
+                    {/* Verified badge */}
+                    <div className="verified-pop inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full w-fit"
+                      style={{ background: "rgba(16,185,129,.12)", border: "1px solid rgba(16,185,129,.3)" }}>
+                      <CheckCircle className="h-3 w-3 text-green-400" />
+                      <span className="text-[10px] font-black uppercase tracking-widest text-green-400">Verified Winner</span>
+                    </div>
+
+                    {/* Name & prize */}
+                    <div className="mt-3">
+                      <p className="text-white font-black text-base leading-tight">{aw.name}</p>
+                      <p className="font-black text-xl mt-1" style={{ color: aw.prizeColor || "#f59e0b", textShadow: `0 0 20px ${aw.prizeColor || "#f59e0b"}80` }}>
+                        {aw.prize}
+                      </p>
+                      <p className="text-gray-500 text-xs mt-2">
+                        {new Date(aw.createdAt).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}
+                      </p>
+                    </div>
+
+                    {/* Progress dots & arrows */}
+                    <div className="flex items-center justify-between mt-3">
+                      <div className="flex items-center gap-1.5">
+                        {wallWinners.map((_, di) => (
+                          <button key={di} onClick={() => { setActiveWinner(di); setWallPaused(true); setTimeout(() => setWallPaused(false), 6000); }}
+                            className="rounded-full transition-all duration-300"
+                            style={{
+                              width: di === activeWinner ? 18 : 6,
+                              height: 6,
+                              background: di === activeWinner ? (aw.prizeColor || "#f59e0b") : "rgba(255,255,255,.15)",
+                              boxShadow: di === activeWinner ? `0 0 8px ${aw.prizeColor || "#f59e0b"}` : "none",
+                            }} />
+                        ))}
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <button onClick={() => { setActiveWinner(p => (p - 1 + wallWinners.length) % wallWinners.length); setWallPaused(true); setTimeout(() => setWallPaused(false), 6000); }}
+                          className="w-7 h-7 rounded-full flex items-center justify-center transition-all hover:scale-110"
+                          style={{ background: "rgba(255,255,255,.07)", border: "1px solid rgba(255,255,255,.1)" }}>
+                          <ChevronRight className="h-3.5 w-3.5 text-gray-400 rotate-180" />
+                        </button>
+                        <button onClick={() => { setActiveWinner(p => (p + 1) % wallWinners.length); setWallPaused(true); setTimeout(() => setWallPaused(false), 6000); }}
+                          className="w-7 h-7 rounded-full flex items-center justify-center transition-all hover:scale-110"
+                          style={{ background: "rgba(255,255,255,.07)", border: "1px solid rgba(255,255,255,.1)" }}>
+                          <ChevronRight className="h-3.5 w-3.5 text-gray-400" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
-            ))}
-          </div>
-        </div>
+
+              {/* Thumbnail strip */}
+              <div className="flex gap-2 px-4 py-3 overflow-x-auto" style={{ borderTop: "1px solid rgba(245,158,11,.08)" }}>
+                {wallWinners.map((w, ti) => (
+                  <button key={ti} onClick={() => { setActiveWinner(ti); setWallPaused(true); setTimeout(() => setWallPaused(false), 6000); }}
+                    className="shrink-0 relative rounded-xl overflow-hidden transition-all duration-200"
+                    style={{ width: 48, height: 48, border: ti === activeWinner ? `2px solid ${w.prizeColor || "#f59e0b"}` : "2px solid rgba(255,255,255,.08)", boxShadow: ti === activeWinner ? `0 0 12px ${w.prizeColor || "#f59e0b"}60` : "none", transform: ti === activeWinner ? "scale(1.1)" : "scale(1)" }}>
+                    {w.imageUrl ? (
+                      <img src={w.imageUrl} alt={w.name} className="w-full h-full object-cover object-top" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-lg" style={{ background: "linear-gradient(135deg,#1c1435,#2d1f6e)" }}>🏆</div>
+                    )}
+                    {ti === activeWinner && (
+                      <div className="absolute inset-0 rounded-xl" style={{ background: `${w.prizeColor || "#f59e0b"}20` }} />
+                    )}
+                  </button>
+                ))}
+              </div>
+
+              {/* Bottom stat bar */}
+              <div className="flex items-center justify-between px-5 py-3"
+                style={{ background: "rgba(245,158,11,.04)", borderTop: "1px solid rgba(245,158,11,.08)" }}>
+                <div className="flex items-center gap-2">
+                  <Sparkles className="h-3.5 w-3.5 text-yellow-400" />
+                  <span className="text-yellow-400 font-black text-xs">{wallWinners.length}+ Recent Winners</span>
+                </div>
+                <button onClick={() => setLocation("/games")}
+                  className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg font-black text-xs text-black transition-all hover:scale-105"
+                  style={{ background: "linear-gradient(135deg,#f59e0b,#d97706)", boxShadow: "0 4px 14px rgba(245,158,11,.4)" }}>
+                  Play Now <Zap className="h-3 w-3" fill="currentColor" />
+                </button>
+              </div>
+            </div>
+          );
+        })()}
       </section>
 
       {/* ═══════════════════════════════════════════════════════════════
