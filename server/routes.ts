@@ -1531,6 +1531,87 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Bulk email campaign
+  app.post("/api/admin/send-bulk-email", requireAuth, async (req, res) => {
+    try {
+      const { type, recipients, subject, message, specificEmail, gameId, tokenThreshold } = req.body;
+
+      if (!type) return res.status(400).json({ message: "Email type is required" });
+
+      const allUsers = await storage.getAllUsers();
+      let targetUsers = allUsers;
+
+      if (recipients === "specific") {
+        if (!specificEmail) return res.status(400).json({ message: "Specific email address is required" });
+        const found = allUsers.find(u => u.email.toLowerCase() === specificEmail.toLowerCase());
+        if (!found) return res.status(404).json({ message: `No user found with email: ${specificEmail}` });
+        targetUsers = [found];
+      }
+
+      let sent = 0;
+      let skipped = 0;
+      let failed = 0;
+
+      if (type === "custom") {
+        if (!subject || !message) return res.status(400).json({ message: "Subject and message are required" });
+        for (const user of targetUsers) {
+          try {
+            const name = `${user.firstName} ${user.lastName}`.trim() || user.email;
+            await emailService.sendCustomBroadcast(user.email, name, subject, message);
+            sent++;
+          } catch { failed++; }
+        }
+      } else if (type === "new_game") {
+        if (!gameId) return res.status(400).json({ message: "Game ID is required" });
+        const game = await storage.getGame(parseInt(gameId));
+        if (!game) return res.status(404).json({ message: "Game not found" });
+        const prize = game.prizeDescription || game.prize || "Amazing prize";
+        for (const user of targetUsers) {
+          try {
+            const name = `${user.firstName} ${user.lastName}`.trim() || user.email;
+            await emailService.sendNewGameLive(user.email, name, game.name, prize);
+            sent++;
+          } catch { failed++; }
+        }
+      } else if (type === "low_token_warning") {
+        const threshold = parseInt(tokenThreshold) || 5;
+        for (const user of targetUsers) {
+          try {
+            const balance = await storage.getUserTokenBalance(user.id);
+            if (balance <= threshold) {
+              const name = `${user.firstName} ${user.lastName}`.trim() || user.email;
+              await emailService.sendLowTokenWarning(user.email, name, balance);
+              sent++;
+            } else {
+              skipped++;
+            }
+          } catch { failed++; }
+        }
+      } else if (type === "game_closing_soon") {
+        if (!gameId) return res.status(400).json({ message: "Game ID is required" });
+        const game = await storage.getGame(parseInt(gameId));
+        if (!game) return res.status(404).json({ message: "Game not found" });
+        const threshold = Number(game.tokenThreshold) || 1;
+        const collected = Number(game.tokensCollected) || 0;
+        const pctFull = Math.min(100, Math.round((collected / threshold) * 100));
+        for (const user of targetUsers) {
+          try {
+            const name = `${user.firstName} ${user.lastName}`.trim() || user.email;
+            await emailService.sendGameClosingSoon(user.email, name, game.name, pctFull);
+            sent++;
+          } catch { failed++; }
+        }
+      } else {
+        return res.status(400).json({ message: "Invalid email type. Use: custom, new_game, low_token_warning, game_closing_soon" });
+      }
+
+      res.json({ message: "Email campaign complete", sent, skipped, failed, total: targetUsers.length });
+    } catch (error: any) {
+      console.error("Bulk email error:", error);
+      res.status(500).json({ message: "Failed to send emails", error: error?.message || "Unknown error" });
+    }
+  });
+
   // Get all winners - New Winners List API
   app.get("/api/admin/winners", requireAuth, async (req, res) => {
     try {

@@ -18,6 +18,7 @@ export interface EmailService {
   sendGameClosingSoon(userEmail: string, userName: string, gameName: string, pctFull: number): Promise<void>;
   sendNewGameLive(userEmail: string, userName: string, gameName: string, prize: string): Promise<void>;
   sendReferralBonusEmail(userEmail: string, userName: string, referredName: string, tokensEarned: number): Promise<void>;
+  sendCustomBroadcast(userEmail: string, userName: string, subject: string, message: string): Promise<void>;
 }
 
 /* ─── Shared brand shell ─────────────────────────────────────────────────── */
@@ -547,6 +548,35 @@ class ResendEmailService implements EmailService {
         `),
       });
     } catch (error) { console.error('Failed to send new game live email:', error); }
+  }
+
+  async sendCustomBroadcast(userEmail: string, userName: string, subject: string, message: string): Promise<void> {
+    try {
+      const safeMessage = message.replace(/\n/g, '<br>');
+      await resend.emails.send({
+        from: FROM_EMAIL,
+        to: userEmail,
+        subject,
+        html: shell(`
+          ${heroSection('📢', subject, `A message from the Prize Plugz team.`, '#7c3aed', '#4f46e5')}
+          <table width="100%" cellpadding="0" cellspacing="0" border="0">
+            <tr><td style="padding:0 32px 24px;">
+              <p style="margin:0 0 16px;font-size:15px;color:#d1d5db;line-height:1.7;">
+                Hi <strong style="color:#f3f4f6;">${userName}</strong>,
+              </p>
+              <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(124,58,237,0.25);border-radius:12px;padding:20px 24px;margin:0 0 20px;">
+                <p style="margin:0;font-size:15px;color:#e5e7eb;line-height:1.8;">${safeMessage}</p>
+              </div>
+              <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 24px;">
+                <tr><td style="text-align:center;">
+                  ${ctaButton('🎯  Play Now', 'https://prizeplugz.com/games')}
+                </td></tr>
+              </table>
+            </td></tr>
+          </table>
+        `),
+      });
+    } catch (error) { console.error('Failed to send custom broadcast:', error); }
   }
 
   async sendReferralBonusEmail(userEmail: string, userName: string, referredName: string, tokensEarned: number): Promise<void> {

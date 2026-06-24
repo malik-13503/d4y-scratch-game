@@ -885,6 +885,7 @@ export default function AdminDashboard() {
             { label:"Winner Wall",  icon:Star,       tab:"winner-wall" },
             { label:"Overview",     icon:BarChart3,  tab:"overview"    },
             { label:"Analytics",    icon:TrendingUp, tab:"analytics"   },
+            { label:"Email Center", icon:Mail,       tab:"email-center"},
           ] as const).map(item => {
             const isActive = activeTab === item.tab;
             return (
@@ -956,6 +957,7 @@ export default function AdminDashboard() {
               <option value="system">System</option>
               <option value="winners">Winners</option>
               <option value="promo-codes">Promo Codes</option>
+              <option value="email-center">Email Center</option>
             </select>
             <Button onClick={() => logoutMutation.mutate()} variant="outline" size="sm"
               className="border-red-500/50 text-red-400 hover:bg-red-500/20 px-2">
@@ -977,6 +979,7 @@ export default function AdminDashboard() {
               <TabsTrigger value="winners">Winners</TabsTrigger>
               <TabsTrigger value="promo-codes">Promo Codes</TabsTrigger>
               <TabsTrigger value="pending-payments">Payments</TabsTrigger>
+              <TabsTrigger value="email-center">Email Center</TabsTrigger>
             </TabsList>
 
           {/* Overview Tab */}
@@ -5161,6 +5164,11 @@ export default function AdminDashboard() {
           {/* ── Pending Payments Tab ───────────────────────────────────── */}
           <PendingPaymentsTab externalStatus={paymentStatusFilter} />
 
+          {/* ── Email Center Tab ───────────────────────────────────────── */}
+          <TabsContent value="email-center" className="px-4 sm:px-6 py-4 sm:py-6">
+            <EmailCenterTab />
+          </TabsContent>
+
           </Tabs>
         </main>
       </div>
@@ -6448,6 +6456,270 @@ function SendCompletionEmailsButton({ gameId, gameName, onEmailSent }: { gameId:
         </>
       )}
     </Button>
+  );
+}
+
+// ── Email Center Tab ────────────────────────────────────────────────────────
+function EmailCenterTab() {
+  const { toast } = useToast();
+  const [emailType, setEmailType] = useState<"custom" | "new_game" | "low_token_warning" | "game_closing_soon">("custom");
+  const [recipients, setRecipients] = useState<"all" | "specific">("all");
+  const [subject, setSubject] = useState("");
+  const [message, setMessage] = useState("");
+  const [specificEmail, setSpecificEmail] = useState("");
+  const [selectedGameId, setSelectedGameId] = useState("");
+  const [tokenThreshold, setTokenThreshold] = useState("5");
+  const [lastResult, setLastResult] = useState<{ sent: number; skipped: number; failed: number; total: number } | null>(null);
+
+  const { data: games } = useQuery<any[]>({ queryKey: ["/api/admin/games"] });
+
+  const sendMutation = useMutation({
+    mutationFn: async () => {
+      const payload: any = { type: emailType, recipients };
+      if (emailType === "custom") { payload.subject = subject; payload.message = message; }
+      if (emailType === "new_game" || emailType === "game_closing_soon") payload.gameId = selectedGameId;
+      if (emailType === "low_token_warning") payload.tokenThreshold = tokenThreshold;
+      if (recipients === "specific") payload.specificEmail = specificEmail;
+      const res = await apiRequest("POST", "/api/admin/send-bulk-email", payload);
+      return res.json();
+    },
+    onSuccess: (data) => {
+      setLastResult(data);
+      toast({ title: "Campaign sent!", description: `${data.sent} emails delivered${data.skipped ? `, ${data.skipped} skipped` : ""}${data.failed ? `, ${data.failed} failed` : ""}.` });
+    },
+    onError: (err: any) => {
+      toast({ title: "Send failed", description: err.message || "Something went wrong", variant: "destructive" });
+    },
+  });
+
+  const emailTypeOptions = [
+    { value: "custom",            label: "Custom Message",       icon: "✍️", desc: "Write a custom subject & body to send to users" },
+    { value: "new_game",          label: "New Game Announcement",icon: "🎮", desc: "Notify users a new game is now live" },
+    { value: "low_token_warning", label: "Low Token Warning",    icon: "⚠️", desc: "Alert users who have few tokens left" },
+    { value: "game_closing_soon", label: "Game Closing Soon",    icon: "🔥", desc: "Urgency email for a nearly-full game" },
+  ] as const;
+
+  const canSend = (() => {
+    if (sendMutation.isPending) return false;
+    if (recipients === "specific" && !specificEmail.includes("@")) return false;
+    if (emailType === "custom" && (!subject.trim() || !message.trim())) return false;
+    if ((emailType === "new_game" || emailType === "game_closing_soon") && !selectedGameId) return false;
+    return true;
+  })();
+
+  return (
+    <div className="space-y-6 max-w-4xl">
+      {/* Header */}
+      <div className="flex items-center gap-3">
+        <div className="w-10 h-10 rounded-xl bg-purple-600/20 border border-purple-500/30 flex items-center justify-center">
+          <Mail className="h-5 w-5 text-purple-400" />
+        </div>
+        <div>
+          <h2 className="text-xl font-bold text-white">Email Center</h2>
+          <p className="text-sm text-gray-400">Send targeted emails to your users</p>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Left: Compose */}
+        <div className="lg:col-span-2 space-y-5">
+
+          {/* Email Type */}
+          <div className="rounded-xl border border-white/10 p-4" style={{ background: "rgba(255,255,255,0.03)" }}>
+            <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-3">Email Type</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              {emailTypeOptions.map(opt => (
+                <button
+                  key={opt.value}
+                  onClick={() => setEmailType(opt.value)}
+                  className={`flex items-start gap-3 p-3 rounded-lg border text-left transition-all ${
+                    emailType === opt.value
+                      ? "border-purple-500/60 bg-purple-600/10"
+                      : "border-white/8 hover:border-white/20 hover:bg-white/4"
+                  }`}
+                >
+                  <span className="text-lg mt-0.5">{opt.icon}</span>
+                  <div>
+                    <p className={`text-sm font-semibold ${emailType === opt.value ? "text-purple-300" : "text-gray-200"}`}>{opt.label}</p>
+                    <p className="text-xs text-gray-500 mt-0.5 leading-snug">{opt.desc}</p>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Recipients */}
+          <div className="rounded-xl border border-white/10 p-4" style={{ background: "rgba(255,255,255,0.03)" }}>
+            <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-3">Recipients</p>
+            <div className="flex gap-2">
+              {([
+                { value: "all",      label: "All Users",       icon: Users },
+                { value: "specific", label: "Specific Email",  icon: User  },
+              ] as const).map(opt => (
+                <button
+                  key={opt.value}
+                  onClick={() => setRecipients(opt.value)}
+                  className={`flex items-center gap-2 px-4 py-2.5 rounded-lg border text-sm font-medium transition-all ${
+                    recipients === opt.value
+                      ? "border-blue-500/60 bg-blue-600/10 text-blue-300"
+                      : "border-white/10 text-gray-400 hover:border-white/20 hover:text-gray-200"
+                  }`}
+                >
+                  <opt.icon className="h-4 w-4" />
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+            {recipients === "specific" && (
+              <div className="mt-3">
+                <Input
+                  type="email"
+                  placeholder="user@example.com"
+                  value={specificEmail}
+                  onChange={e => setSpecificEmail(e.target.value)}
+                  className="bg-slate-800/50 border-slate-600 text-white placeholder-gray-500"
+                />
+              </div>
+            )}
+          </div>
+
+          {/* Dynamic Fields */}
+          {emailType === "custom" && (
+            <div className="rounded-xl border border-white/10 p-4 space-y-3" style={{ background: "rgba(255,255,255,0.03)" }}>
+              <p className="text-xs font-semibold uppercase tracking-widest text-gray-400">Compose</p>
+              <div>
+                <Label className="text-sm text-gray-300 mb-1 block">Subject Line</Label>
+                <Input
+                  placeholder="e.g. Exciting news from Prize Plugz!"
+                  value={subject}
+                  onChange={e => setSubject(e.target.value)}
+                  className="bg-slate-800/50 border-slate-600 text-white placeholder-gray-500"
+                />
+              </div>
+              <div>
+                <Label className="text-sm text-gray-300 mb-1 block">Message Body</Label>
+                <Textarea
+                  rows={6}
+                  placeholder="Write your message here. Users will be greeted by name automatically."
+                  value={message}
+                  onChange={e => setMessage(e.target.value)}
+                  className="bg-slate-800/50 border-slate-600 text-white placeholder-gray-500 resize-none"
+                />
+                <p className="text-xs text-gray-600 mt-1">New lines are preserved. Each user is greeted by their first name.</p>
+              </div>
+            </div>
+          )}
+
+          {(emailType === "new_game" || emailType === "game_closing_soon") && (
+            <div className="rounded-xl border border-white/10 p-4" style={{ background: "rgba(255,255,255,0.03)" }}>
+              <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-3">Select Game</p>
+              <Select value={selectedGameId} onValueChange={setSelectedGameId}>
+                <SelectTrigger className="bg-slate-800/50 border-slate-600 text-white">
+                  <SelectValue placeholder="Choose a game…" />
+                </SelectTrigger>
+                <SelectContent className="bg-slate-800 border-slate-600">
+                  {(games || []).map((g: any) => (
+                    <SelectItem key={g.id} value={String(g.id)} className="text-white hover:bg-slate-700">
+                      {g.name} — {g.prize}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+
+          {emailType === "low_token_warning" && (
+            <div className="rounded-xl border border-white/10 p-4" style={{ background: "rgba(255,255,255,0.03)" }}>
+              <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-3">Token Threshold</p>
+              <div className="flex items-center gap-3">
+                <Input
+                  type="number"
+                  min="1"
+                  max="100"
+                  value={tokenThreshold}
+                  onChange={e => setTokenThreshold(e.target.value)}
+                  className="bg-slate-800/50 border-slate-600 text-white w-32"
+                />
+                <p className="text-sm text-gray-400">Send warning to users with this many tokens or fewer</p>
+              </div>
+            </div>
+          )}
+
+          {/* Send Button */}
+          <Button
+            onClick={() => sendMutation.mutate()}
+            disabled={!canSend}
+            className="w-full h-12 text-base font-bold bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 disabled:opacity-40"
+          >
+            {sendMutation.isPending ? (
+              <><Loader2 className="h-5 w-5 mr-2 animate-spin" />Sending emails…</>
+            ) : (
+              <><Mail className="h-5 w-5 mr-2" />Send Email Campaign</>
+            )}
+          </Button>
+        </div>
+
+        {/* Right: Info panel */}
+        <div className="space-y-4">
+
+          {/* Last Result */}
+          {lastResult && (
+            <div className="rounded-xl border border-green-500/30 bg-green-500/5 p-4">
+              <p className="text-xs font-semibold uppercase tracking-widest text-green-400 mb-3 flex items-center gap-1.5">
+                <CheckCircle className="h-3.5 w-3.5" /> Last Campaign
+              </p>
+              <div className="space-y-2">
+                {[
+                  { label: "Total targeted", value: lastResult.total, color: "text-white" },
+                  { label: "Successfully sent", value: lastResult.sent, color: "text-green-400" },
+                  { label: "Skipped (criteria)", value: lastResult.skipped, color: "text-yellow-400" },
+                  { label: "Failed", value: lastResult.failed, color: "text-red-400" },
+                ].map(row => (
+                  <div key={row.label} className="flex justify-between text-sm">
+                    <span className="text-gray-400">{row.label}</span>
+                    <span className={`font-bold ${row.color}`}>{row.value}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Email types guide */}
+          <div className="rounded-xl border border-white/10 p-4" style={{ background: "rgba(255,255,255,0.03)" }}>
+            <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-3">Email Templates</p>
+            <div className="space-y-3">
+              {[
+                { icon: "✍️", name: "Custom", detail: "Freeform subject & body with your own message" },
+                { icon: "🎮", name: "New Game", detail: "Branded announcement with prize & CTA" },
+                { icon: "⚠️", name: "Low Tokens", detail: "Sent only to users at or below your threshold" },
+                { icon: "🔥", name: "Closing Soon", detail: "Shows current % full and urgent CTA" },
+              ].map(t => (
+                <div key={t.name} className="flex gap-2.5">
+                  <span className="text-base mt-0.5">{t.icon}</span>
+                  <div>
+                    <p className="text-sm font-medium text-gray-200">{t.name}</p>
+                    <p className="text-xs text-gray-500 leading-snug">{t.detail}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Tips */}
+          <div className="rounded-xl border border-blue-500/20 bg-blue-500/5 p-4">
+            <p className="text-xs font-semibold uppercase tracking-widest text-blue-400 mb-2 flex items-center gap-1.5">
+              <Info className="h-3.5 w-3.5" /> Tips
+            </p>
+            <ul className="text-xs text-gray-400 space-y-1.5 leading-relaxed">
+              <li>• Use <strong className="text-gray-300">Specific Email</strong> to test before blasting all users</li>
+              <li>• Low Token Warning skips users above the threshold automatically</li>
+              <li>• All emails use the branded Prize Plugz template</li>
+              <li>• Users are addressed by their first name in every email</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
 
