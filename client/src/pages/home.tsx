@@ -678,47 +678,149 @@ export default function HomePage() {
       </section>
 
       {/* ═══════════════════════════════════════════════════════════════
-          HOW IT WORKS
+          HOW IT WORKS — PREMIUM
       ═══════════════════════════════════════════════════════════════ */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 py-8 section-in">
-        <div className="rounded-2xl p-6 sm:p-8"
-          style={{ background: "linear-gradient(135deg,#131124,#0f0c22)", border: "1px solid rgba(124,58,237,.15)" }}>
-          <h2 className="text-white font-black text-lg uppercase tracking-wide mb-8">HOW IT WORKS</h2>
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 py-10 section-in">
+        {/* Outer container with layered glow */}
+        <div className="relative rounded-3xl overflow-hidden"
+          style={{ background: "linear-gradient(135deg,#0d0b1e,#130f2e,#0a0818)", border: "1px solid rgba(124,58,237,.2)", boxShadow: "0 0 80px rgba(124,58,237,.08), inset 0 1px 0 rgba(255,255,255,.04)" }}>
 
-          <div className="grid grid-cols-3 gap-4">
-            {[
-              { num: "1", emoji: "🪙", title: "BUY TOKENS",    desc: "Get tokens to enter games." },
-              { num: "2", emoji: "🎮", title: "ENTER GAMES",    desc: "Use tokens to join any game." },
-              { num: "3", emoji: "🏆", title: "WIN PRIZES",     desc: "When the game fills, a winner is picked automatically." },
-            ].map((step, i) => (
-              <div key={step.num} className="flex items-start gap-4 relative">
-                {/* Arrow */}
-                {i < 2 && (
-                  <div className="absolute top-6 left-[calc(50%+28px)] right-0 flex items-center pointer-events-none"
-                    style={{ zIndex: 0 }}>
-                    <div className="flex-1 border-t-2 border-dashed" style={{ borderColor: "rgba(124,58,237,.3)" }} />
-                    <ChevronRight className="h-4 w-4 shrink-0" style={{ color: "rgba(124,58,237,.5)" }} />
-                  </div>
-                )}
+          {/* Background radial glow */}
+          <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(ellipse 80% 60% at 50% 0%,rgba(124,58,237,.12),transparent 70%)" }} />
+          <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(ellipse 40% 40% at 50% 100%,rgba(99,102,241,.06),transparent 70%)" }} />
 
-                <div className="flex flex-col items-center gap-3 flex-1 relative z-10">
-                  <div className="relative">
-                    <div className="w-14 h-14 rounded-full flex items-center justify-center text-2xl"
-                      style={{ background: "linear-gradient(135deg,rgba(124,58,237,.3),rgba(99,102,241,.15))", border: "2px solid rgba(124,58,237,.4)" }}>
-                      {step.emoji}
-                    </div>
-                    <span className="absolute -top-1.5 -left-1.5 w-6 h-6 rounded-full flex items-center justify-center text-xs font-black text-white"
-                      style={{ background: "#7c3aed", boxShadow: "0 2px 8px rgba(124,58,237,.6)" }}>
-                      {step.num}
-                    </span>
-                  </div>
-                  <div className="text-center">
-                    <p className="text-white font-black text-sm">{step.title}</p>
-                    <p className="text-gray-500 text-xs mt-1 leading-snug">{step.desc}</p>
-                  </div>
+          <div className="relative z-10 p-6 sm:p-10">
+
+            {/* Header */}
+            <div className="text-center mb-10">
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full mb-4 text-xs font-black uppercase tracking-widest"
+                style={{ background: "rgba(124,58,237,.15)", border: "1px solid rgba(124,58,237,.3)", color: "#a78bfa" }}>
+                <Sparkles className="h-3.5 w-3.5" />Simple. Fair. Exciting.
+              </div>
+              <h2 className="text-white font-black text-2xl sm:text-3xl uppercase tracking-tight">
+                How It <span style={{ background: "linear-gradient(90deg,#a78bfa,#7c3aed,#6d28d9)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>Works</span>
+              </h2>
+              <p className="text-gray-500 text-sm mt-2">Get started in 3 easy steps — no experience needed</p>
+            </div>
+
+            {/* Steps */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-4 relative">
+
+              {/* Connector line (desktop only) */}
+              <div className="hidden sm:block absolute top-14 left-[calc(33%+16px)] right-[calc(33%+16px)] pointer-events-none" style={{ zIndex: 0 }}>
+                <div className="flex items-center gap-0">
+                  <div className="flex-1 h-px" style={{ background: "linear-gradient(90deg,rgba(124,58,237,.5),rgba(124,58,237,.2))" }} />
+                  <ChevronRight className="h-5 w-5 shrink-0" style={{ color: "rgba(124,58,237,.5)" }} />
+                  <div className="flex-1 h-px" style={{ background: "linear-gradient(90deg,rgba(124,58,237,.2),rgba(124,58,237,.5))" }} />
+                  <ChevronRight className="h-5 w-5 shrink-0" style={{ color: "rgba(124,58,237,.5)" }} />
                 </div>
               </div>
-            ))}
+
+              {[
+                {
+                  num: "01",
+                  emoji: "🪙",
+                  title: "Buy Tokens",
+                  tagline: "Fuel your entries",
+                  desc: "Choose a token package that fits you. Starting from just $5 — the more you buy, the better the value.",
+                  bullets: ["5 packages from $5–$100", "Instant credit to account", "Bonus tokens on bigger packs"],
+                  color: "#f59e0b",
+                  glow: "rgba(245,158,11,.25)",
+                  border: "rgba(245,158,11,.3)",
+                  bg: "rgba(245,158,11,.06)",
+                },
+                {
+                  num: "02",
+                  emoji: "🎮",
+                  title: "Enter Games",
+                  tagline: "Pick your prize",
+                  desc: "Browse live games and spend tokens to claim your spot. Every entry is recorded on our system — fully transparent.",
+                  bullets: ["Cash, gadgets & luxury prizes", "Real-time progress tracking", "One free spin per new game"],
+                  color: "#7c3aed",
+                  glow: "rgba(124,58,237,.3)",
+                  border: "rgba(124,58,237,.4)",
+                  bg: "rgba(124,58,237,.06)",
+                },
+                {
+                  num: "03",
+                  emoji: "🏆",
+                  title: "Win Prizes",
+                  tagline: "Random. Fair. Instant.",
+                  desc: "When all spots fill, our system automatically picks a random winner — no delays, no human bias, no tricks.",
+                  bullets: ["Auto-selected winner", "Email notification sent", "Prize shipped or delivered"],
+                  color: "#10b981",
+                  glow: "rgba(16,185,129,.25)",
+                  border: "rgba(16,185,129,.35)",
+                  bg: "rgba(16,185,129,.06)",
+                },
+              ].map((step, i) => (
+                <div key={step.num} className="relative z-10 group">
+                  <div className="rounded-2xl p-5 flex flex-col gap-4 h-full transition-all duration-300 group-hover:-translate-y-1"
+                    style={{ background: `linear-gradient(135deg,${step.bg},rgba(13,11,30,.8))`, border: `1px solid ${step.border}`, boxShadow: `0 4px 30px ${step.glow}, inset 0 1px 0 rgba(255,255,255,.04)` }}>
+
+                    {/* Step number background watermark */}
+                    <div className="absolute top-3 right-4 font-black text-6xl select-none pointer-events-none"
+                      style={{ color: step.color, opacity: 0.07, lineHeight: 1 }}>{step.num}</div>
+
+                    {/* Icon with pulse rings */}
+                    <div className="relative w-16 h-16 shrink-0">
+                      {/* Pulse ring */}
+                      <div className="absolute inset-0 rounded-full animate-ping opacity-20"
+                        style={{ background: step.color, animationDuration: "2.5s", animationDelay: `${i * 0.4}s` }} />
+                      {/* Glow ring */}
+                      <div className="absolute inset-0 rounded-full" style={{ background: `radial-gradient(circle,${step.glow},transparent 70%)` }} />
+                      {/* Icon circle */}
+                      <div className="absolute inset-1.5 rounded-full flex items-center justify-center text-2xl"
+                        style={{ background: `linear-gradient(135deg,rgba(255,255,255,.08),rgba(255,255,255,.03))`, border: `2px solid ${step.border}`, boxShadow: `0 0 20px ${step.glow}` }}>
+                        {step.emoji}
+                      </div>
+                      {/* Step badge */}
+                      <span className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-black text-white shadow-lg"
+                        style={{ background: step.color }}>{i + 1}</span>
+                    </div>
+
+                    {/* Text */}
+                    <div>
+                      <p className="text-xs font-bold uppercase tracking-widest mb-0.5" style={{ color: step.color }}>{step.tagline}</p>
+                      <h3 className="text-white font-black text-lg leading-tight">{step.title}</h3>
+                      <p className="text-gray-400 text-sm mt-2 leading-relaxed">{step.desc}</p>
+                    </div>
+
+                    {/* Bullets */}
+                    <ul className="space-y-1.5 mt-auto">
+                      {step.bullets.map((b, bi) => (
+                        <li key={bi} className="flex items-center gap-2 text-xs text-gray-400">
+                          <span className="w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-black shrink-0"
+                            style={{ background: step.color, color: "#000" }}>✓</span>
+                          {b}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Trust bar */}
+            <div className="mt-8 pt-6 grid grid-cols-2 sm:grid-cols-4 gap-3"
+              style={{ borderTop: "1px solid rgba(255,255,255,.05)" }}>
+              {[
+                { icon: "🔒", label: "100% Transparent", sub: "Every entry logged" },
+                { icon: "⚡", label: "Instant Winners", sub: "Auto-selected on fill" },
+                { icon: "🎯", label: "Real Prizes", sub: "Cash, tech & luxury" },
+                { icon: "🆓", label: "Free Spin Included", sub: "One per game for new players" },
+              ].map((t, i) => (
+                <div key={i} className="flex items-center gap-3 px-3 py-2.5 rounded-xl"
+                  style={{ background: "rgba(255,255,255,.03)", border: "1px solid rgba(255,255,255,.05)" }}>
+                  <span className="text-xl shrink-0">{t.icon}</span>
+                  <div>
+                    <p className="text-white font-bold text-xs">{t.label}</p>
+                    <p className="text-gray-600 text-[10px]">{t.sub}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+
           </div>
         </div>
       </section>
