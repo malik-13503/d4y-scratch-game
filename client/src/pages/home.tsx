@@ -123,11 +123,12 @@ const LIVE_ACTIVITY = [
   { avatar: imgCreatorJay,    text: "David joined", prize: "LV Bag Game",    time: "3 min ago" },
 ];
 
-const VERIFIED_WINNERS = [
-  { img: imgWinnerMike,   name: "Mike T.",   prize: "Won $500 Cash",   date: "May 12, 2024", color: "#10b981" },
-  { img: imgWinnerSarah,  name: "Sarah L.",  prize: "Won PS5 Bundle",  date: "May 12, 2024", color: "#7c3aed" },
-  { img: imgWinnerJames,  name: "James R.",  prize: "Won $250 Cash",   date: "May 11, 2024", color: "#10b981" },
-  { img: imgWinnerAshley, name: "Ashley M.", prize: "Won LV Bag",      date: "May 11, 2024", color: "#7c3aed" },
+// Fallback winners shown when no admin-curated entries exist yet
+const FALLBACK_WINNERS = [
+  { imageUrl: imgWinnerMike,   name: "Mike T.",   prize: "Won $500 Cash",   prizeColor: "#10b981", createdAt: "2024-05-12" },
+  { imageUrl: imgWinnerSarah,  name: "Sarah L.",  prize: "Won PS5 Bundle",  prizeColor: "#7c3aed", createdAt: "2024-05-12" },
+  { imageUrl: imgWinnerJames,  name: "James R.",  prize: "Won $250 Cash",   prizeColor: "#10b981", createdAt: "2024-05-11" },
+  { imageUrl: imgWinnerAshley, name: "Ashley M.", prize: "Won LV Bag",      prizeColor: "#7c3aed", createdAt: "2024-05-11" },
 ];
 
 /* ─── HELPERS ─────────────────────────────────────────────────────────────── */
@@ -272,6 +273,7 @@ export default function HomePage() {
   const { data: tokenData } = useQuery<{ tokenBalance: number }>({ queryKey: ["/api/user/token-balance"], refetchInterval: 15000 });
   const { data: games, isLoading } = useQuery<Game[]>({ queryKey: ["/api/games"], refetchInterval: 20000 });
   const { data: winnersData } = useQuery<{ winnerName: string; prize: string; completedAt: string }[]>({ queryKey: ["/api/winners"], refetchInterval: 60000 });
+  const { data: winnerWallData } = useQuery<{ id: number; name: string; prize: string; prizeColor: string; imageUrl: string | null; createdAt: string }[]>({ queryKey: ["/api/winner-wall"], refetchInterval: 120000 });
   const { data: notifsData, refetch: refetchNotifs } = useQuery<{ notifications: any[]; unreadCount: number }>({ queryKey: ["/api/notifications"], refetchInterval: 30000 });
   const { data: referralData } = useQuery<{ referralCode: string | null }>({ queryKey: ["/api/user/referral-code"] });
 
@@ -650,42 +652,28 @@ export default function HomePage() {
             </button>
           </div>
           <div className="grid grid-cols-2 gap-3 p-4">
-            {VERIFIED_WINNERS.map((w, i) => (
+            {(winnerWallData && winnerWallData.length > 0 ? winnerWallData : FALLBACK_WINNERS).slice(0, 4).map((w, i) => (
               <div key={i} className="winner-card rounded-xl overflow-hidden"
                 style={{ background: "#1a1535", border: "1px solid rgba(255,255,255,.07)" }}>
-                <div className="relative overflow-hidden" style={{ height: 120 }}>
-                  <img src={w.img} alt={w.name} className="w-full h-full object-cover object-top" />
-                  <div className="absolute bottom-0 inset-x-0 h-8 pointer-events-none" style={{ background: "linear-gradient(to top,rgba(26,21,53,.6),transparent)" }} />
-                  <div className="absolute top-2 left-2 flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[9px] font-black text-white uppercase"
-                    style={{ background: w.color, letterSpacing: ".04em" }}>
-                    <CheckCircle className="h-2.5 w-2.5" />VERIFIED WINNER
-                  </div>
+                <div className="overflow-hidden" style={{ height: 130 }}>
+                  {w.imageUrl ? (
+                    <img src={w.imageUrl} alt={w.name} className="w-full h-full object-cover" style={{ objectPosition: "center top" }} />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-4xl" style={{ background: "linear-gradient(135deg,#1a1535,#2d1b69)" }}>🏆</div>
+                  )}
                 </div>
                 <div className="p-2.5">
+                  <div className="flex items-center gap-1 mb-1">
+                    <CheckCircle className="h-2.5 w-2.5 shrink-0" style={{ color: w.prizeColor }} />
+                    <span className="text-[9px] font-black uppercase tracking-wide" style={{ color: w.prizeColor }}>Verified Winner</span>
+                  </div>
                   <p className="text-white font-black text-xs">{w.name}</p>
-                  <p className="text-xs font-bold mt-0.5" style={{ color: w.color }}>{w.prize}</p>
-                  <p className="text-gray-600 text-[10px] mt-0.5">{w.date}</p>
+                  <p className="text-xs font-bold mt-0.5" style={{ color: w.prizeColor }}>{w.prize}</p>
+                  <p className="text-gray-600 text-[10px] mt-0.5">{new Date(w.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</p>
                 </div>
               </div>
             ))}
           </div>
-          {/* Real winners from DB */}
-          {winnersData && winnersData.length > 0 && (
-            <div className="px-4 pb-4 space-y-2">
-              {winnersData.slice(0, 2).map((w, i) => (
-                <div key={i} className="flex items-center gap-3 px-3 py-2 rounded-xl"
-                  style={{ background: "rgba(124,58,237,.08)", border: "1px solid rgba(124,58,237,.15)" }}>
-                  <div className="w-7 h-7 rounded-full flex items-center justify-center text-sm shrink-0"
-                    style={{ background: "#7c3aed" }}>🏆</div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-white font-bold text-xs truncate">{w.winnerName}</p>
-                    <p className="text-violet-400 text-xs truncate">{w.prize}</p>
-                  </div>
-                  <span className="text-gray-600 text-[10px] shrink-0">{new Date(w.completedAt).toLocaleDateString()}</span>
-                </div>
-              ))}
-            </div>
-          )}
         </div>
       </section>
 

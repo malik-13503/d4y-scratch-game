@@ -879,11 +879,12 @@ export default function AdminDashboard() {
 
           <p className="text-[10px] font-semibold uppercase tracking-widest text-gray-600 px-2 pt-3 pb-1">Management</p>
           {([
-            { label:"Users",     icon:Users,      tab:"users"     },
-            { label:"Games",     icon:Gamepad2,   tab:"games"     },
-            { label:"Winners",   icon:Trophy,     tab:"winners"   },
-            { label:"Overview",  icon:BarChart3,  tab:"overview"  },
-            { label:"Analytics", icon:TrendingUp, tab:"analytics" },
+            { label:"Users",        icon:Users,      tab:"users"       },
+            { label:"Games",        icon:Gamepad2,   tab:"games"       },
+            { label:"Winners",      icon:Trophy,     tab:"winners"     },
+            { label:"Winner Wall",  icon:Star,       tab:"winner-wall" },
+            { label:"Overview",     icon:BarChart3,  tab:"overview"    },
+            { label:"Analytics",    icon:TrendingUp, tab:"analytics"   },
           ] as const).map(item => {
             const isActive = activeTab === item.tab;
             return (
@@ -5123,6 +5124,11 @@ export default function AdminDashboard() {
             <WinnersList />
           </TabsContent>
 
+          {/* Winner Wall Tab */}
+          <TabsContent value="winner-wall" className="space-y-6 px-4 sm:px-6 py-4 sm:py-6">
+            <WinnerWallManager />
+          </TabsContent>
+
           {/* ── Promo Codes Tab ────────────────────────────────────────── */}
           <PromoCodesTab />
 
@@ -6063,6 +6069,182 @@ function PendingPaymentsTab({ externalStatus }: { externalStatus?: string }) {
         </Dialog>
       )}
     </TabsContent>
+  );
+}
+
+// ── Winner Wall Manager Component ────────────────────────────────────────────
+function WinnerWallManager() {
+  const queryClient = useQueryClient();
+  const [showForm, setShowForm] = useState(false);
+  const [editEntry, setEditEntry] = useState<any>(null);
+  const [form, setForm] = useState({ name: "", prize: "", prizeColor: "#10b981", imageUrl: "", displayOrder: 0, isActive: true });
+
+  const { data: entries = [], isLoading } = useQuery<any[]>({
+    queryKey: ["/api/admin/winner-wall"],
+    staleTime: 0,
+  });
+
+  const createMutation = useMutation({
+    mutationFn: (data: any) => fetch("/api/admin/winner-wall", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data), credentials: "include" }).then(r => r.json()),
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["/api/admin/winner-wall"] }); queryClient.invalidateQueries({ queryKey: ["/api/winner-wall"] }); setShowForm(false); resetForm(); },
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: ({ id, data }: { id: number; data: any }) => fetch(`/api/admin/winner-wall/${id}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data), credentials: "include" }).then(r => r.json()),
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["/api/admin/winner-wall"] }); queryClient.invalidateQueries({ queryKey: ["/api/winner-wall"] }); setEditEntry(null); setShowForm(false); resetForm(); },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: number) => fetch(`/api/admin/winner-wall/${id}`, { method: "DELETE", credentials: "include" }).then(r => r.json()),
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ["/api/admin/winner-wall"] }); queryClient.invalidateQueries({ queryKey: ["/api/winner-wall"] }); },
+  });
+
+  function resetForm() { setForm({ name: "", prize: "", prizeColor: "#10b981", imageUrl: "", displayOrder: 0, isActive: true }); }
+
+  function startEdit(entry: any) {
+    setEditEntry(entry);
+    setForm({ name: entry.name, prize: entry.prize, prizeColor: entry.prizeColor, imageUrl: entry.imageUrl ?? "", displayOrder: entry.displayOrder, isActive: entry.isActive });
+    setShowForm(true);
+  }
+
+  function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    const payload = { ...form, displayOrder: Number(form.displayOrder) };
+    if (editEntry) updateMutation.mutate({ id: editEntry.id, data: payload });
+    else createMutation.mutate(payload);
+  }
+
+  const COLOR_PRESETS = ["#10b981","#7c3aed","#f59e0b","#ef4444","#3b82f6","#ec4899","#14b8a6"];
+
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-xl font-bold text-white flex items-center gap-2">
+            <Star className="h-6 w-6 text-yellow-400" /> Winner Wall Manager
+          </h2>
+          <p className="text-gray-400 text-sm mt-1">Curate the winners shown on the homepage winner wall</p>
+        </div>
+        <Button onClick={() => { resetForm(); setEditEntry(null); setShowForm(true); }}
+          className="bg-purple-600 hover:bg-purple-700 text-white gap-2">
+          <Plus className="h-4 w-4" /> Add Winner
+        </Button>
+      </div>
+
+      {/* Add/Edit Form */}
+      {showForm && (
+        <Card className="bg-slate-800 border-slate-600">
+          <CardHeader>
+            <CardTitle className="text-white text-base">{editEntry ? "Edit Winner" : "Add New Winner"}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <Label className="text-gray-300 text-sm">Winner Name *</Label>
+                  <Input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} placeholder="e.g. Mike T." required className="bg-slate-700 border-slate-600 text-white" />
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-gray-300 text-sm">Prize Label *</Label>
+                  <Input value={form.prize} onChange={e => setForm(f => ({ ...f, prize: e.target.value }))} placeholder="e.g. Won $500 Cash" required className="bg-slate-700 border-slate-600 text-white" />
+                </div>
+              </div>
+              <div className="space-y-1">
+                <Label className="text-gray-300 text-sm">Photo URL (paste direct image link)</Label>
+                <Input value={form.imageUrl} onChange={e => setForm(f => ({ ...f, imageUrl: e.target.value }))} placeholder="https://example.com/winner-photo.jpg" className="bg-slate-700 border-slate-600 text-white" />
+                {form.imageUrl && (
+                  <div className="mt-2 rounded-lg overflow-hidden w-24 h-24 border border-slate-600">
+                    <img src={form.imageUrl} alt="preview" className="w-full h-full object-cover" onError={e => (e.currentTarget.style.display = "none")} />
+                  </div>
+                )}
+              </div>
+              <div className="space-y-2">
+                <Label className="text-gray-300 text-sm">Badge Color</Label>
+                <div className="flex items-center gap-2 flex-wrap">
+                  {COLOR_PRESETS.map(c => (
+                    <button type="button" key={c} onClick={() => setForm(f => ({ ...f, prizeColor: c }))}
+                      className="w-7 h-7 rounded-full border-2 transition-transform hover:scale-110"
+                      style={{ background: c, borderColor: form.prizeColor === c ? "white" : "transparent" }} />
+                  ))}
+                  <input type="color" value={form.prizeColor} onChange={e => setForm(f => ({ ...f, prizeColor: e.target.value }))}
+                    className="w-8 h-8 rounded cursor-pointer border-0 bg-transparent" title="Custom color" />
+                  <span className="text-xs text-gray-400 ml-1">{form.prizeColor}</span>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <Label className="text-gray-300 text-sm">Display Order (lower = first)</Label>
+                  <Input type="number" value={form.displayOrder} onChange={e => setForm(f => ({ ...f, displayOrder: Number(e.target.value) }))} className="bg-slate-700 border-slate-600 text-white" />
+                </div>
+                <div className="flex items-center gap-3 pt-5">
+                  <Switch checked={form.isActive} onCheckedChange={v => setForm(f => ({ ...f, isActive: v }))} />
+                  <Label className="text-gray-300 text-sm">Show on homepage</Label>
+                </div>
+              </div>
+              <div className="flex gap-2 pt-2">
+                <Button type="submit" disabled={createMutation.isPending || updateMutation.isPending} className="bg-purple-600 hover:bg-purple-700 text-white">
+                  {createMutation.isPending || updateMutation.isPending ? "Saving..." : editEntry ? "Save Changes" : "Add Winner"}
+                </Button>
+                <Button type="button" variant="outline" onClick={() => { setShowForm(false); setEditEntry(null); resetForm(); }} className="border-slate-600 text-gray-300 hover:bg-slate-700">
+                  Cancel
+                </Button>
+              </div>
+            </form>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Entries Grid */}
+      {isLoading ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {[1,2,3].map(i => <div key={i} className="h-48 rounded-xl animate-pulse bg-slate-800" />)}
+        </div>
+      ) : entries.length === 0 ? (
+        <Card className="bg-slate-800 border-slate-700">
+          <CardContent className="py-12 text-center">
+            <Star className="h-10 w-10 text-gray-600 mx-auto mb-3" />
+            <p className="text-gray-400">No winner wall entries yet. Add your first winner!</p>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {entries.map((entry: any) => (
+            <Card key={entry.id} className={`bg-slate-800 border-slate-700 overflow-hidden ${!entry.isActive ? "opacity-50" : ""}`}>
+              <div className="relative overflow-hidden" style={{ height: 160 }}>
+                {entry.imageUrl ? (
+                  <img src={entry.imageUrl} alt={entry.name} className="w-full h-full object-cover" style={{ objectPosition: "center top" }} />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-5xl" style={{ background: "linear-gradient(135deg,#1e1b4b,#312e81)" }}>🏆</div>
+                )}
+                <div className="absolute top-2 left-2">
+                  <span className="text-[10px] font-black px-2 py-0.5 rounded-md text-white" style={{ background: entry.prizeColor }}>
+                    {entry.isActive ? "VISIBLE" : "HIDDEN"}
+                  </span>
+                </div>
+                <div className="absolute top-2 right-2 text-[10px] text-gray-400 bg-black/60 px-1.5 py-0.5 rounded">
+                  #{entry.displayOrder}
+                </div>
+              </div>
+              <CardContent className="p-3">
+                <p className="text-white font-bold text-sm">{entry.name}</p>
+                <p className="text-sm font-semibold mt-0.5" style={{ color: entry.prizeColor }}>{entry.prize}</p>
+                <p className="text-gray-500 text-xs mt-1">{new Date(entry.createdAt).toLocaleDateString()}</p>
+                <div className="flex gap-2 mt-3">
+                  <Button size="sm" variant="outline" onClick={() => startEdit(entry)} className="flex-1 border-slate-600 text-gray-300 hover:bg-slate-700 text-xs h-7">
+                    <Pencil className="h-3 w-3 mr-1" /> Edit
+                  </Button>
+                  <Button size="sm" variant="outline" onClick={() => deleteMutation.mutate(entry.id)} disabled={deleteMutation.isPending}
+                    className="border-red-800 text-red-400 hover:bg-red-900/30 text-xs h-7">
+                    <Trash2 className="h-3 w-3" />
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
+    </div>
   );
 }
 

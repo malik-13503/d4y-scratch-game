@@ -3167,6 +3167,55 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ── Winner Wall (public GET, admin POST/PUT/DELETE) ──────────────────────
+  app.get("/api/winner-wall", async (_req, res) => {
+    try {
+      const entries = await storage.getWinnerWallEntries();
+      res.json(entries.filter(e => e.isActive));
+    } catch (err) {
+      res.status(500).json({ message: "Failed to fetch winner wall" });
+    }
+  });
+
+  app.get("/api/admin/winner-wall", requireAuth, async (_req, res) => {
+    try {
+      res.json(await storage.getWinnerWallEntries());
+    } catch (err) {
+      res.status(500).json({ message: "Failed to fetch winner wall entries" });
+    }
+  });
+
+  app.post("/api/admin/winner-wall", requireAuth, async (req, res) => {
+    try {
+      const entry = await storage.createWinnerWallEntry(req.body);
+      res.status(201).json(entry);
+    } catch (err) {
+      res.status(500).json({ message: "Failed to create winner wall entry" });
+    }
+  });
+
+  app.put("/api/admin/winner-wall/:id", requireAuth, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const entry = await storage.updateWinnerWallEntry(id, req.body);
+      if (!entry) return res.status(404).json({ message: "Entry not found" });
+      res.json(entry);
+    } catch (err) {
+      res.status(500).json({ message: "Failed to update winner wall entry" });
+    }
+  });
+
+  app.delete("/api/admin/winner-wall/:id", requireAuth, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const ok = await storage.deleteWinnerWallEntry(id);
+      if (!ok) return res.status(404).json({ message: "Entry not found" });
+      res.json({ success: true });
+    } catch (err) {
+      res.status(500).json({ message: "Failed to delete winner wall entry" });
+    }
+  });
+
   const httpServer = createServer(app);
 
   return httpServer;

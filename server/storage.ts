@@ -1,7 +1,7 @@
 import { 
   games, players, gameResults, adminUsers, wheelSegments, systemSettings, adminSessions, notifications, spinResults,
   users, transactions, userSessions, complianceLogs, freePlayUsage, paymentCards, tokenTransactions, userFreeEntries,
-  dailyTokenClaims, promoCodes, promoCodeRedemptions, pendingPayments, userNotifications,
+  dailyTokenClaims, promoCodes, promoCodeRedemptions, pendingPayments, userNotifications, winnerWallEntries,
   type Game, type InsertGame, type Player, type InsertPlayer, type GameResult, type InsertGameResult, 
   type AdminUser, type InsertAdminUser, type WheelSegment, type InsertWheelSegment,
   type SystemSetting, type InsertSystemSetting, type InsertNotification, type Notification,
@@ -10,7 +10,8 @@ import {
   type TokenTransaction, type InsertTokenTransaction, type UserFreeEntry, type InsertUserFreeEntry,
   type DailyTokenClaim, type PromoCode, type InsertPromoCode, type PromoCodeRedemption,
   type PendingPayment, type InsertPendingPayment,
-  type UserNotification, type InsertUserNotification
+  type UserNotification, type InsertUserNotification,
+  type WinnerWallEntry, type InsertWinnerWallEntry
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, sql, asc, and, isNotNull } from "drizzle-orm";
@@ -173,6 +174,13 @@ export interface IStorage {
 
   // Winners feed
   getRecentWinners(limit?: number): Promise<{ winnerName: string; prize: string; prizeValue: string; completedAt: Date; gameName: string }[]>;
+
+  // Winner Wall methods
+  getWinnerWallEntries(): Promise<WinnerWallEntry[]>;
+  getWinnerWallEntry(id: number): Promise<WinnerWallEntry | undefined>;
+  createWinnerWallEntry(entry: InsertWinnerWallEntry): Promise<WinnerWallEntry>;
+  updateWinnerWallEntry(id: number, updates: Partial<WinnerWallEntry>): Promise<WinnerWallEntry | undefined>;
+  deleteWinnerWallEntry(id: number): Promise<boolean>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1685,6 +1693,31 @@ export class DatabaseStorage implements IStorage {
       completedAt: r.completedAt,
       gameName: r.gameName,
     }));
+  }
+
+  // ── Winner Wall ──────────────────────────────────────────────────────────
+  async getWinnerWallEntries(): Promise<WinnerWallEntry[]> {
+    return db.select().from(winnerWallEntries).orderBy(asc(winnerWallEntries.displayOrder), desc(winnerWallEntries.createdAt));
+  }
+
+  async getWinnerWallEntry(id: number): Promise<WinnerWallEntry | undefined> {
+    const [row] = await db.select().from(winnerWallEntries).where(eq(winnerWallEntries.id, id));
+    return row;
+  }
+
+  async createWinnerWallEntry(entry: InsertWinnerWallEntry): Promise<WinnerWallEntry> {
+    const [row] = await db.insert(winnerWallEntries).values(entry).returning();
+    return row;
+  }
+
+  async updateWinnerWallEntry(id: number, updates: Partial<WinnerWallEntry>): Promise<WinnerWallEntry | undefined> {
+    const [row] = await db.update(winnerWallEntries).set(updates).where(eq(winnerWallEntries.id, id)).returning();
+    return row;
+  }
+
+  async deleteWinnerWallEntry(id: number): Promise<boolean> {
+    const result = await db.delete(winnerWallEntries).where(eq(winnerWallEntries.id, id));
+    return (result.rowCount ?? 0) > 0;
   }
 }
 

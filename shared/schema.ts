@@ -286,6 +286,25 @@ export const pendingPayments = pgTable("pending_payments", {
   processedAt: timestamp("processed_at"),
 });
 
+// Winner Wall entries — admin-curated showcase winners
+export const winnerWallEntries = pgTable("winner_wall_entries", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  prize: text("prize").notNull(),
+  prizeColor: text("prize_color").notNull().default("#7c3aed"),
+  imageUrl: text("image_url"),
+  displayOrder: integer("display_order").notNull().default(0),
+  isActive: boolean("is_active").notNull().default(true),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const insertWinnerWallEntrySchema = createInsertSchema(winnerWallEntries).omit({
+  id: true,
+  createdAt: true,
+});
+export type WinnerWallEntry = typeof winnerWallEntries.$inferSelect;
+export type InsertWinnerWallEntry = z.infer<typeof insertWinnerWallEntrySchema>;
+
 // Daily token claims — one per user per day
 export const dailyTokenClaims = pgTable("daily_token_claims", {
   id: serial("id").primaryKey(),
