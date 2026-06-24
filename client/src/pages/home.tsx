@@ -643,24 +643,69 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* Stats — 3 glowing individual cards */}
-            <div className="grid grid-cols-3 gap-3">
+            {/* Stats — 3 premium cards */}
+            <div className="grid grid-cols-3 gap-2.5">
               {[
-                { Icon: Users,  color: "#7c3aed", glow: "rgba(124,58,237,.25)", target: 12458,  prefix: "",  suffix: "",  label: "Online Now" },
-                { Icon: Trophy, color: "#f59e0b", glow: "rgba(245,158,11,.22)", target: 127250, prefix: "$", suffix: "+", label: "Prizes Paid" },
-                { Icon: Gift,   color: "#10b981", glow: "rgba(16,185,129,.22)", target: 583,    prefix: "",  suffix: "",  label: "Winners" },
-              ].map(({ Icon, color, glow, target, prefix, suffix, label }, si) => (
-                <div key={si} className="stat-card relative overflow-hidden rounded-2xl p-3 sm:p-4 text-center flex flex-col items-center gap-1.5"
-                  style={{ background: "linear-gradient(135deg,#131124,#0f0c22)", border: `1px solid ${color}28`, animationDelay: `${si * 0.5}s` }}>
-                  <div className="absolute inset-0 pointer-events-none"
-                    style={{ background: `radial-gradient(ellipse 100% 60% at 50% 0%,${glow},transparent 70%)` }} />
-                  <div className="relative z-10 w-9 h-9 rounded-xl flex items-center justify-center"
-                    style={{ background: `${color}18`, border: `1px solid ${color}35` }}>
-                    <Icon className="h-4 w-4" style={{ color }} />
+                {
+                  Icon: Users,  color: "#7c3aed", glow: "rgba(124,58,237,.3)",
+                  bg: "linear-gradient(135deg,#130f28,#1a1040,#0d0a20)",
+                  target: 12458,  prefix: "",  suffix: "K", divisor: 1000,
+                  label: "Online Now", badge: "🔴 LIVE", badgeBg: "rgba(239,68,68,.15)", badgeFg: "#f87171",
+                  trend: "+284 today", trendColor: "#a78bfa",
+                },
+                {
+                  Icon: Trophy, color: "#f59e0b", glow: "rgba(245,158,11,.3)",
+                  bg: "linear-gradient(135deg,#1a1308,#241a0a,#130f04)",
+                  target: 127250, prefix: "$", suffix: "K+", divisor: 1000,
+                  label: "Prizes Paid", badge: "💰 TOTAL", badgeBg: "rgba(245,158,11,.12)", badgeFg: "#fbbf24",
+                  trend: "↑ Growing", trendColor: "#f59e0b",
+                },
+                {
+                  Icon: Sparkles, color: "#10b981", glow: "rgba(16,185,129,.3)",
+                  bg: "linear-gradient(135deg,#071a12,#0c2418,#05140e)",
+                  target: 583,    prefix: "",  suffix: "", divisor: 1,
+                  label: "Winners", badge: "🏆 TODAY", badgeBg: "rgba(16,185,129,.12)", badgeFg: "#34d399",
+                  trend: "+47 this hr", trendColor: "#10b981",
+                },
+              ].map(({ Icon, color, glow, bg, target, prefix, suffix, divisor, label, badge, badgeBg, badgeFg, trend, trendColor }, si) => (
+                <div key={si} className="stat-card relative overflow-hidden rounded-2xl flex flex-col items-center justify-between text-center"
+                  style={{ background: bg, border: `1px solid ${color}35`, animationDelay: `${si * 0.5}s`, padding: "14px 10px 12px" }}>
+
+                  {/* Top glow bloom */}
+                  <div className="absolute inset-x-0 top-0 h-20 pointer-events-none"
+                    style={{ background: `radial-gradient(ellipse 120% 100% at 50% -10%,${glow},transparent 70%)` }} />
+
+                  {/* Bottom shimmer bar */}
+                  <div className="absolute bottom-0 inset-x-0 h-0.5 pointer-events-none"
+                    style={{ background: `linear-gradient(90deg,transparent,${color},transparent)`, opacity: .6 }} />
+
+                  {/* Badge pill */}
+                  <div className="relative z-10 px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest mb-2"
+                    style={{ background: badgeBg, border: `1px solid ${color}30`, color: badgeFg }}>
+                    {badge}
                   </div>
-                  <div className="relative z-10">
-                    <StatNum target={target} prefix={prefix} suffix={suffix} label={label} />
+
+                  {/* Icon orb */}
+                  <div className="relative z-10 mb-1">
+                    <div className="w-10 h-10 rounded-full flex items-center justify-center"
+                      style={{ background: `radial-gradient(circle,${color}30,${color}10)`, border: `1.5px solid ${color}50`, boxShadow: `0 0 18px ${color}40` }}>
+                      <Icon className="h-4.5 w-4.5" style={{ color }} />
+                    </div>
                   </div>
+
+                  {/* Big number */}
+                  <div className="relative z-10 font-black leading-none mt-1"
+                    style={{ fontSize: "clamp(1.4rem,3.5vw,1.9rem)", background: `linear-gradient(135deg,#fff 30%,${color})`, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>
+                    {prefix}{divisor > 1 ? (target / divisor).toFixed(divisor === 1000 ? 1 : 0) : target.toLocaleString()}{suffix}
+                  </div>
+
+                  {/* Label */}
+                  <p className="relative z-10 text-gray-400 font-bold uppercase tracking-widest mt-0.5"
+                    style={{ fontSize: "9px" }}>{label}</p>
+
+                  {/* Trend tag */}
+                  <div className="relative z-10 mt-2 text-[9px] font-bold"
+                    style={{ color: trendColor, opacity: .85 }}>{trend}</div>
                 </div>
               ))}
             </div>
