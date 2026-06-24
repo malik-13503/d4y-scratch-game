@@ -6476,6 +6476,8 @@ function GameDetailsTab() {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeSection, setActiveSection] = useState<"players" | "numbers">("players");
   const [gameSearch, setGameSearch] = useState("");
+  // Mobile: true = showing details panel, false = showing game list
+  const [mobileShowDetail, setMobileShowDetail] = useState(false);
 
   // Fetch all games for the list panel
   const { data: allGames = [] } = useQuery<any[]>({
@@ -6523,202 +6525,257 @@ function GameDetailsTab() {
   }
   const totalNumbers = game?.totalNumbers || 0;
 
-  return (
-    <div className="flex h-full" style={{ minHeight: "calc(100vh - 130px)" }}>
-      {/* ── Left panel: game list ── */}
-      <div className="w-64 flex-shrink-0 border-r flex flex-col"
-        style={{ borderColor: "rgba(255,255,255,0.07)", background: "rgba(0,0,0,0.2)" }}>
-        <div className="px-3 pt-4 pb-2 flex-shrink-0">
-          <p className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-2">All Games</p>
-          <div className="relative">
-            <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-gray-500" />
-            <input
-              className="w-full text-xs rounded-lg pl-8 pr-3 py-2 bg-white/5 border border-white/10 text-white placeholder-gray-600 focus:outline-none focus:border-purple-500/50"
-              placeholder="Search games…"
-              value={gameSearch}
-              onChange={e => setGameSearch(e.target.value)}
-            />
-          </div>
-        </div>
-        <div className="flex-1 overflow-y-auto px-2 pb-4 space-y-1">
-          {filteredGames.map((g: any) => (
-            <button
-              key={g.id}
-              onClick={() => { setSelectedGameId(g.id); setSearchQuery(""); setActiveSection("players"); }}
-              className={`w-full text-left rounded-lg px-3 py-2.5 transition-all ${
-                selectedGameId === g.id
-                  ? "bg-purple-600/30 border border-purple-500/40"
-                  : "hover:bg-white/5 border border-transparent"
-              }`}
-            >
-              <div className="flex items-center justify-between gap-2">
-                <span className="text-sm font-medium text-white truncate flex items-center gap-1.5">
-                  <span>{g.emoji || "🎮"}</span>
-                  <span className="truncate">{g.name}</span>
-                </span>
-                {selectedGameId === g.id && <ChevronRight className="h-3.5 w-3.5 text-purple-400 flex-shrink-0" />}
-              </div>
-              <div className="flex items-center gap-2 mt-1">
-                <span className="text-[10px] font-mono text-gray-500">{g.code}</span>
-                <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full ${
-                  g.isActive
-                    ? "bg-green-500/20 text-green-400"
-                    : "bg-gray-500/20 text-gray-500"
-                }`}>
-                  {g.isActive ? "LIVE" : "ENDED"}
-                </span>
-              </div>
-            </button>
-          ))}
-          {filteredGames.length === 0 && (
-            <p className="text-gray-600 text-xs text-center py-8">No games found</p>
-          )}
+  // Shared game list panel content
+  const gameListPanel = (
+    <div className="flex flex-col h-full">
+      <div className="px-3 pt-4 pb-2 flex-shrink-0">
+        <p className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-2">All Games</p>
+        <div className="relative">
+          <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-gray-500" />
+          <input
+            className="w-full text-xs rounded-lg pl-8 pr-3 py-2 bg-white/5 border border-white/10 text-white placeholder-gray-600 focus:outline-none focus:border-purple-500/50"
+            placeholder="Search games…"
+            value={gameSearch}
+            onChange={e => setGameSearch(e.target.value)}
+          />
         </div>
       </div>
-
-      {/* ── Right panel: details ── */}
-      <div className="flex-1 overflow-y-auto">
-        {/* Placeholder when nothing selected */}
-        {selectedGameId === null && (
-          <div className="flex flex-col items-center justify-center h-full py-20 text-center">
-            <Hash className="h-16 w-16 text-gray-700 mb-4" />
-            <p className="text-gray-400 font-semibold text-lg">Select a game</p>
-            <p className="text-gray-600 text-sm mt-1">Pick any game from the list to view its full details</p>
-          </div>
+      <div className="flex-1 overflow-y-auto px-2 pb-4 space-y-1">
+        {filteredGames.map((g: any) => (
+          <button
+            key={g.id}
+            onClick={() => {
+              setSelectedGameId(g.id);
+              setSearchQuery("");
+              setActiveSection("players");
+              setMobileShowDetail(true);
+            }}
+            className={`w-full text-left rounded-lg px-3 py-2.5 transition-all ${
+              selectedGameId === g.id
+                ? "bg-purple-600/30 border border-purple-500/40"
+                : "hover:bg-white/5 border border-transparent"
+            }`}
+          >
+            <div className="flex items-center justify-between gap-2">
+              <span className="text-sm font-medium text-white flex items-center gap-1.5 min-w-0">
+                <span className="flex-shrink-0">{g.emoji || "🎮"}</span>
+                <span className="truncate">{g.name}</span>
+              </span>
+              <ChevronRight className="h-3.5 w-3.5 text-gray-600 flex-shrink-0" />
+            </div>
+            <div className="flex items-center gap-2 mt-1">
+              <span className="text-[10px] font-mono text-gray-500">{g.code}</span>
+              <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full ${
+                g.isActive ? "bg-green-500/20 text-green-400" : "bg-gray-500/20 text-gray-500"
+              }`}>
+                {g.isActive ? "LIVE" : "ENDED"}
+              </span>
+            </div>
+          </button>
+        ))}
+        {filteredGames.length === 0 && (
+          <p className="text-gray-600 text-xs text-center py-8">No games found</p>
         )}
+      </div>
+    </div>
+  );
 
-        {selectedGameId !== null && isLoading && (
-          <div className="flex items-center justify-center h-full py-20">
-            <Loader2 className="h-8 w-8 text-purple-400 animate-spin" />
+  // Shared detail panel content
+  const detailPanel = (
+    <div className="flex-1 overflow-y-auto min-w-0">
+      {selectedGameId === null && (
+        <div className="flex flex-col items-center justify-center h-full py-20 text-center px-4">
+          <Hash className="h-16 w-16 text-gray-700 mb-4" />
+          <p className="text-gray-400 font-semibold text-lg">Select a game</p>
+          <p className="text-gray-600 text-sm mt-1">Pick any game from the list to view its full details</p>
+        </div>
+      )}
+
+      {selectedGameId !== null && isLoading && (
+        <div className="flex items-center justify-center py-20">
+          <Loader2 className="h-8 w-8 text-purple-400 animate-spin" />
+        </div>
+      )}
+
+      {selectedGameId !== null && error && (
+        <div className="flex items-center justify-center py-20">
+          <p className="text-red-400">Failed to load game details.</p>
+        </div>
+      )}
+
+      {selectedGameId !== null && data && (
+        <div>
+          {/* Game header — with Back button on mobile */}
+          <div className="px-4 sm:px-6 py-3 sm:py-4 border-b flex items-center gap-3 sticky top-0 z-10"
+            style={{ borderColor: "rgba(124,58,237,0.25)", background: "rgba(11,12,24,0.97)" }}>
+            {/* Back button — mobile only */}
+            <button
+              className="md:hidden flex items-center gap-1 text-purple-400 text-sm font-medium flex-shrink-0"
+              onClick={() => setMobileShowDetail(false)}
+            >
+              <ArrowRight className="h-4 w-4 rotate-180" />
+              <span>Games</span>
+            </button>
+            <span className="text-2xl sm:text-3xl flex-shrink-0">{game?.emoji || "🎮"}</span>
+            <div className="flex-1 min-w-0">
+              <h2 className="text-base sm:text-lg font-bold text-white truncate">{game?.name}</h2>
+              <div className="flex items-center gap-2 flex-wrap mt-0.5">
+                <span className="text-xs font-mono text-gray-400">{game?.code}</span>
+                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${game?.isActive ? "bg-green-500/20 text-green-400 border border-green-500/30" : "bg-gray-500/20 text-gray-400 border border-gray-500/30"}`}>
+                  {game?.isActive ? "● LIVE" : "● ENDED"}
+                </span>
+                <span className="text-xs text-yellow-400 font-semibold truncate">{game?.prize}</span>
+              </div>
+            </div>
           </div>
-        )}
 
-        {selectedGameId !== null && error && (
-          <div className="flex items-center justify-center h-full py-20">
-            <p className="text-red-400">Failed to load game details.</p>
+          {/* Summary stats */}
+          <div className="grid grid-cols-2 gap-2 sm:gap-3 px-3 sm:px-6 py-3 sm:py-4 border-b" style={{ borderColor: "rgba(255,255,255,0.07)" }}>
+            {[
+              { label: "Players",      value: summary?.totalPlayers ?? 0,                  icon: Users,  color: "text-blue-400" },
+              { label: "Total Spins",  value: summary?.totalSpins ?? 0,                    icon: Zap,    color: "text-purple-400" },
+              { label: "Tokens Spent", value: summary?.totalTokensSpent?.toFixed(0) ?? 0, icon: Coins,  color: "text-yellow-400" },
+              { label: "% Full",       value: `${summary?.pctFull ?? 0}%`,                 icon: Target, color: "text-green-400" },
+            ].map(stat => (
+              <div key={stat.label} className="rounded-xl p-2.5 sm:p-3 flex items-center gap-2 sm:gap-3"
+                style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
+                <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+                  style={{ background: "rgba(255,255,255,0.05)" }}>
+                  <stat.icon className={`h-3.5 w-3.5 sm:h-4 sm:w-4 ${stat.color}`} />
+                </div>
+                <div className="min-w-0">
+                  <p className={`text-base sm:text-lg font-bold leading-none ${stat.color}`}>{stat.value}</p>
+                  <p className="text-[10px] sm:text-[11px] text-gray-500 mt-0.5">{stat.label}</p>
+                </div>
+              </div>
+            ))}
           </div>
-        )}
 
-        {selectedGameId !== null && data && (
-          <div>
-            {/* Game header */}
-            <div className="px-6 py-4 border-b flex items-center gap-4 sticky top-0 z-10"
-              style={{ borderColor: "rgba(124,58,237,0.25)", background: "rgba(11,12,24,0.97)" }}>
-              <span className="text-3xl">{game?.emoji || "🎮"}</span>
-              <div className="flex-1 min-w-0">
-                <h2 className="text-lg font-bold text-white truncate">{game?.name}</h2>
-                <div className="flex items-center gap-2 flex-wrap mt-0.5">
-                  <span className="text-xs font-mono text-gray-400">{game?.code}</span>
-                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${game?.isActive ? "bg-green-500/20 text-green-400 border border-green-500/30" : "bg-gray-500/20 text-gray-400 border border-gray-500/30"}`}>
-                    {game?.isActive ? "● LIVE" : "● ENDED"}
+          {/* Progress bar */}
+          <div className="px-3 sm:px-6 py-3 border-b" style={{ borderColor: "rgba(255,255,255,0.07)" }}>
+            <div className="flex justify-between text-xs text-gray-400 mb-1.5">
+              <span>{summary?.claimedNumbers ?? 0} claimed</span>
+              <span>{summary?.numbersLeft ?? 0} left of {totalNumbers}</span>
+            </div>
+            <div className="h-2 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.08)" }}>
+              <div className="h-full rounded-full transition-all duration-500"
+                style={{
+                  width: `${summary?.pctFull ?? 0}%`,
+                  background: (summary?.pctFull ?? 0) >= 95
+                    ? "linear-gradient(90deg,#dc2626,#f97316)"
+                    : (summary?.pctFull ?? 0) >= 80
+                    ? "linear-gradient(90deg,#d97706,#f59e0b)"
+                    : "linear-gradient(90deg,#7c3aed,#3b82f6)",
+                }} />
+            </div>
+          </div>
+
+          {/* Winner banner */}
+          {winner && (
+            <div className="mx-3 sm:mx-6 mt-3 rounded-xl p-3 sm:p-4 flex items-center gap-3"
+              style={{ background: "rgba(250,204,21,0.08)", border: "1px solid rgba(250,204,21,0.3)" }}>
+              <Trophy className="h-5 w-5 sm:h-6 sm:w-6 text-yellow-400 flex-shrink-0" />
+              <div className="min-w-0">
+                <p className="text-yellow-300 font-bold text-sm">Winner: {winner.playerName}</p>
+                <p className="text-yellow-500/80 text-xs truncate">{winner.email} · #{winner.ownedNumbers?.join(", #")}</p>
+              </div>
+            </div>
+          )}
+
+          {/* Section tabs */}
+          <div className="flex gap-1 sm:gap-2 px-3 sm:px-6 pt-3 border-b pb-0" style={{ borderColor: "rgba(255,255,255,0.07)" }}>
+            {([
+              { key: "players", label: "Players", icon: Users },
+              { key: "numbers", label: "Numbers Grid", icon: Hash },
+            ] as const).map(s => (
+              <button key={s.key} onClick={() => setActiveSection(s.key)}
+                className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2.5 text-xs sm:text-sm font-medium transition-all border-b-2 -mb-px ${
+                  activeSection === s.key
+                    ? "border-purple-500 text-purple-300"
+                    : "border-transparent text-gray-500 hover:text-gray-300"
+                }`}>
+                <s.icon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                {s.label}
+                {s.key === "players" && (
+                  <span className="text-[10px] px-1.5 py-0.5 rounded-full"
+                    style={{ background: "rgba(255,255,255,0.1)", color: "#9ca3af" }}>
+                    {players.length}
                   </span>
-                  <span className="text-xs text-yellow-400 font-semibold">{game?.prize}</span>
-                </div>
-              </div>
-            </div>
+                )}
+              </button>
+            ))}
+          </div>
 
-            {/* Summary stats */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 px-6 py-4 border-b" style={{ borderColor: "rgba(255,255,255,0.07)" }}>
-              {[
-                { label: "Players",      value: summary?.totalPlayers ?? 0,                   icon: Users,   color: "text-blue-400" },
-                { label: "Total Spins",  value: summary?.totalSpins ?? 0,                     icon: Zap,     color: "text-purple-400" },
-                { label: "Tokens Spent", value: summary?.totalTokensSpent?.toFixed(0) ?? 0,  icon: Coins,   color: "text-yellow-400" },
-                { label: "% Full",       value: `${summary?.pctFull ?? 0}%`,                  icon: Target,  color: "text-green-400" },
-              ].map(stat => (
-                <div key={stat.label} className="rounded-xl p-3 flex items-center gap-3"
-                  style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
-                  <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
-                    style={{ background: "rgba(255,255,255,0.05)" }}>
-                    <stat.icon className={`h-4 w-4 ${stat.color}`} />
+          {/* Players — card layout on mobile, table on desktop */}
+          {activeSection === "players" && (
+            <div className="px-3 sm:px-6 pb-6 pt-3 sm:pt-4">
+              <div className="relative mb-3">
+                <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-500" />
+                <Input
+                  placeholder="Search by name or email…"
+                  value={searchQuery}
+                  onChange={e => setSearchQuery(e.target.value)}
+                  className="bg-white/5 border-white/10 text-white placeholder-gray-500 pl-9"
+                />
+              </div>
+
+              {filteredPlayers.length === 0 ? (
+                <div className="text-center py-16">
+                  <Users className="h-12 w-12 text-gray-700 mx-auto mb-3" />
+                  <p className="text-gray-400 font-medium">No players yet</p>
+                  <p className="text-gray-600 text-sm mt-1">Players will appear here once they join</p>
+                </div>
+              ) : (
+                <>
+                  {/* Mobile card list */}
+                  <div className="sm:hidden space-y-2">
+                    {filteredPlayers.map(player => (
+                      <div key={player.id} className="rounded-xl p-3"
+                        style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}>
+                        <div className="flex items-center justify-between gap-2 mb-2">
+                          <div className="flex items-center gap-2 min-w-0">
+                            <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 text-xs font-bold"
+                              style={{ background: player.isWinner ? "rgba(250,204,21,0.2)" : "rgba(124,58,237,0.2)", color: player.isWinner ? "#facc15" : "#a78bfa" }}>
+                              {player.playerName?.charAt(0).toUpperCase()}
+                            </div>
+                            <div className="min-w-0">
+                              <p className="text-sm font-semibold text-white truncate">{player.playerName}</p>
+                              <p className="text-[11px] text-gray-500 truncate">{player.email}</p>
+                            </div>
+                          </div>
+                          {player.isWinner ? (
+                            <span className="text-[10px] font-bold px-2 py-1 rounded-full bg-yellow-500/20 text-yellow-400 border border-yellow-500/30 flex-shrink-0">🏆 Winner</span>
+                          ) : player.freeSpins > 0 ? (
+                            <span className="text-[10px] font-bold px-2 py-1 rounded-full bg-blue-500/20 text-blue-400 border border-blue-500/30 flex-shrink-0">Free</span>
+                          ) : (
+                            <span className="text-[10px] font-bold px-2 py-1 rounded-full bg-green-500/10 text-green-500 border border-green-500/20 flex-shrink-0">Paid</span>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-4 text-xs mb-2">
+                          <span className="text-gray-500">Spins: <span className="text-purple-300 font-bold">{player.spinCount}</span></span>
+                          <span className="text-gray-500">Tokens: <span className="text-yellow-400 font-bold">{player.totalSpent?.toFixed(0) ?? 0}</span></span>
+                          <span className="text-gray-500">Nums: <span className="text-white font-bold">{player.numbersCount}</span></span>
+                        </div>
+                        <div className="flex flex-wrap gap-1">
+                          {(player.ownedNumbers || []).slice(0, 10).map((n: string) => (
+                            <span key={n} className="text-[10px] font-bold px-1.5 py-0.5 rounded"
+                              style={{ background: "rgba(124,58,237,0.25)", color: "#c4b5fd", border: "1px solid rgba(124,58,237,0.4)" }}>
+                              {n}
+                            </span>
+                          ))}
+                          {player.ownedNumbers?.length > 10 && (
+                            <span className="text-[10px] text-gray-500 self-center">+{player.ownedNumbers.length - 10} more</span>
+                          )}
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                  <div>
-                    <p className={`text-lg font-bold leading-none ${stat.color}`}>{stat.value}</p>
-                    <p className="text-[11px] text-gray-500 mt-0.5">{stat.label}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
 
-            {/* Progress bar */}
-            <div className="px-6 py-3 border-b" style={{ borderColor: "rgba(255,255,255,0.07)" }}>
-              <div className="flex justify-between text-xs text-gray-400 mb-1.5">
-                <span>{summary?.claimedNumbers ?? 0} claimed</span>
-                <span>{summary?.numbersLeft ?? 0} remaining of {totalNumbers}</span>
-              </div>
-              <div className="h-2 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.08)" }}>
-                <div className="h-full rounded-full transition-all duration-500"
-                  style={{
-                    width: `${summary?.pctFull ?? 0}%`,
-                    background: (summary?.pctFull ?? 0) >= 95
-                      ? "linear-gradient(90deg,#dc2626,#f97316)"
-                      : (summary?.pctFull ?? 0) >= 80
-                      ? "linear-gradient(90deg,#d97706,#f59e0b)"
-                      : "linear-gradient(90deg,#7c3aed,#3b82f6)",
-                  }} />
-              </div>
-            </div>
-
-            {/* Winner banner */}
-            {winner && (
-              <div className="mx-6 mt-4 rounded-xl p-4 flex items-center gap-3"
-                style={{ background: "rgba(250,204,21,0.08)", border: "1px solid rgba(250,204,21,0.3)" }}>
-                <Trophy className="h-6 w-6 text-yellow-400 flex-shrink-0" />
-                <div>
-                  <p className="text-yellow-300 font-bold text-sm">Winner: {winner.playerName}</p>
-                  <p className="text-yellow-500/80 text-xs">{winner.email} · Winning number: {winner.ownedNumbers?.join(", ")}</p>
-                </div>
-              </div>
-            )}
-
-            {/* Section tabs */}
-            <div className="flex gap-2 px-6 pt-4 border-b pb-0" style={{ borderColor: "rgba(255,255,255,0.07)" }}>
-              {([
-                { key: "players", label: "Players", icon: Users },
-                { key: "numbers", label: "Numbers Grid", icon: Hash },
-              ] as const).map(s => (
-                <button key={s.key} onClick={() => setActiveSection(s.key)}
-                  className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium transition-all border-b-2 -mb-px ${
-                    activeSection === s.key
-                      ? "border-purple-500 text-purple-300"
-                      : "border-transparent text-gray-500 hover:text-gray-300"
-                  }`}>
-                  <s.icon className="h-4 w-4" />
-                  {s.label}
-                  {s.key === "players" && (
-                    <span className="text-[10px] px-1.5 py-0.5 rounded-full"
-                      style={{ background: "rgba(255,255,255,0.1)", color: "#9ca3af" }}>
-                      {players.length}
-                    </span>
-                  )}
-                </button>
-              ))}
-            </div>
-
-            {/* Players table */}
-            {activeSection === "players" && (
-              <div className="px-6 pb-6 pt-4">
-                <div className="relative mb-3">
-                  <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-500" />
-                  <Input
-                    placeholder="Search by name or email…"
-                    value={searchQuery}
-                    onChange={e => setSearchQuery(e.target.value)}
-                    className="bg-white/5 border-white/10 text-white placeholder-gray-500 pl-9"
-                  />
-                </div>
-
-                {filteredPlayers.length === 0 ? (
-                  <div className="text-center py-16">
-                    <Users className="h-12 w-12 text-gray-700 mx-auto mb-3" />
-                    <p className="text-gray-400 font-medium">No players yet</p>
-                    <p className="text-gray-600 text-sm mt-1">Players will appear here once they join</p>
-                  </div>
-                ) : (
-                  <div className="rounded-xl overflow-hidden border" style={{ borderColor: "rgba(255,255,255,0.08)" }}>
+                  {/* Desktop table */}
+                  <div className="hidden sm:block rounded-xl overflow-hidden border" style={{ borderColor: "rgba(255,255,255,0.08)" }}>
                     <div className="grid text-[11px] font-semibold uppercase tracking-widest text-gray-500 px-4 py-2.5"
                       style={{ gridTemplateColumns: "1fr 1fr auto auto auto auto", background: "rgba(255,255,255,0.03)", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
-                      <span>Player</span>
-                      <span>Email</span>
+                      <span>Player</span><span>Email</span>
                       <span className="text-center">Numbers</span>
                       <span className="text-center">Spins</span>
                       <span className="text-center">Tokens</span>
@@ -6772,53 +6829,77 @@ function GameDetailsTab() {
                       ))}
                     </div>
                   </div>
+                </>
+              )}
+            </div>
+          )}
+
+          {/* Numbers grid */}
+          {activeSection === "numbers" && (
+            <div className="px-3 sm:px-6 pb-6 pt-3 sm:pt-4">
+              <div className="flex flex-wrap items-center gap-3 sm:gap-4 mb-3 text-xs">
+                <div className="flex items-center gap-1.5">
+                  <div className="w-4 h-4 rounded" style={{ background: "rgba(124,58,237,0.4)", border: "1px solid rgba(124,58,237,0.6)" }} />
+                  <span className="text-gray-400">Claimed ({allClaimedNumbers.size})</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <div className="w-4 h-4 rounded" style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.12)" }} />
+                  <span className="text-gray-400">Available ({totalNumbers - allClaimedNumbers.size})</span>
+                </div>
+                {winner && (
+                  <div className="flex items-center gap-1.5">
+                    <div className="w-4 h-4 rounded" style={{ background: "rgba(250,204,21,0.3)", border: "1px solid rgba(250,204,21,0.6)" }} />
+                    <span className="text-yellow-400">Winner</span>
+                  </div>
                 )}
               </div>
-            )}
-
-            {/* Numbers grid */}
-            {activeSection === "numbers" && (
-              <div className="px-6 pb-6 pt-4">
-                <div className="flex items-center gap-4 mb-3 text-xs">
-                  <div className="flex items-center gap-1.5">
-                    <div className="w-4 h-4 rounded" style={{ background: "rgba(124,58,237,0.4)", border: "1px solid rgba(124,58,237,0.6)" }} />
-                    <span className="text-gray-400">Claimed ({allClaimedNumbers.size})</span>
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    <div className="w-4 h-4 rounded" style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.12)" }} />
-                    <span className="text-gray-400">Available ({totalNumbers - allClaimedNumbers.size})</span>
-                  </div>
-                  {winner && (
-                    <div className="flex items-center gap-1.5">
-                      <div className="w-4 h-4 rounded" style={{ background: "rgba(250,204,21,0.3)", border: "1px solid rgba(250,204,21,0.6)" }} />
-                      <span className="text-yellow-400">Winner</span>
-                    </div>
-                  )}
-                </div>
-                <div className="rounded-xl p-4" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.07)" }}>
-                  <div className="flex flex-wrap gap-1.5">
-                    {Array.from({ length: totalNumbers }, (_, i) => i + 1).map(n => {
-                      const isClaimed = allClaimedNumbers.has(n);
-                      const isWinnerNum = winner && winner.ownedNumbers?.includes(String(n));
-                      return (
-                        <div key={n}
-                          title={isClaimed ? `#${n} — ${numberOwnerMap[n]}` : `#${n} — Available`}
-                          className="w-9 h-9 rounded-lg flex items-center justify-center text-xs font-bold cursor-default transition-all hover:scale-110"
-                          style={{
-                            background: isWinnerNum ? "rgba(250,204,21,0.3)" : isClaimed ? "rgba(124,58,237,0.35)" : "rgba(255,255,255,0.05)",
-                            border: isWinnerNum ? "1px solid rgba(250,204,21,0.7)" : isClaimed ? "1px solid rgba(124,58,237,0.55)" : "1px solid rgba(255,255,255,0.1)",
-                            color: isWinnerNum ? "#facc15" : isClaimed ? "#c4b5fd" : "#374151",
-                          }}>
-                          {n}
-                        </div>
-                      );
-                    })}
-                  </div>
+              <div className="rounded-xl p-3 sm:p-4" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.07)" }}>
+                <div className="flex flex-wrap gap-1 sm:gap-1.5">
+                  {Array.from({ length: totalNumbers }, (_, i) => i + 1).map(n => {
+                    const isClaimed = allClaimedNumbers.has(n);
+                    const isWinnerNum = winner && winner.ownedNumbers?.includes(String(n));
+                    return (
+                      <div key={n}
+                        title={isClaimed ? `#${n} — ${numberOwnerMap[n]}` : `#${n} — Available`}
+                        className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg flex items-center justify-center text-[10px] sm:text-xs font-bold cursor-default transition-all hover:scale-110"
+                        style={{
+                          background: isWinnerNum ? "rgba(250,204,21,0.3)" : isClaimed ? "rgba(124,58,237,0.35)" : "rgba(255,255,255,0.05)",
+                          border: isWinnerNum ? "1px solid rgba(250,204,21,0.7)" : isClaimed ? "1px solid rgba(124,58,237,0.55)" : "1px solid rgba(255,255,255,0.1)",
+                          color: isWinnerNum ? "#facc15" : isClaimed ? "#c4b5fd" : "#374151",
+                        }}>
+                        {n}
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
-            )}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+
+  return (
+    <div style={{ minHeight: "calc(100vh - 130px)" }}>
+      {/* Mobile: single-panel toggle */}
+      <div className="md:hidden h-full flex flex-col" style={{ minHeight: "calc(100vh - 130px)" }}>
+        {!mobileShowDetail ? (
+          <div className="flex-1 overflow-y-auto" style={{ background: "rgba(0,0,0,0.2)" }}>
+            {gameListPanel}
           </div>
+        ) : (
+          detailPanel
         )}
+      </div>
+
+      {/* Desktop: split-pane */}
+      <div className="hidden md:flex h-full" style={{ minHeight: "calc(100vh - 130px)" }}>
+        <div className="w-64 flex-shrink-0 border-r"
+          style={{ borderColor: "rgba(255,255,255,0.07)", background: "rgba(0,0,0,0.2)" }}>
+          {gameListPanel}
+        </div>
+        {detailPanel}
       </div>
     </div>
   );
