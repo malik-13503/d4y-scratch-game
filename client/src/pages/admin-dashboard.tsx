@@ -100,6 +100,7 @@ export default function AdminDashboard() {
   const [userToDelete, setUserToDelete] = useState<any>(null);
   const [isWinnerSelectionOpen, setIsWinnerSelectionOpen] = useState(false);
   const [winnerSelectionGame, setWinnerSelectionGame] = useState<any>(null);
+  const [gameDetailsId, setGameDetailsId] = useState<number | null>(null);
 
   // Edit form data state
   const [editFormData, setEditFormData] = useState({
@@ -3002,6 +3003,15 @@ export default function AdminDashboard() {
                           <Button
                             size="sm"
                             variant="outline"
+                            className="flex-1 border-green-500/50 text-green-400 hover:bg-green-500/20 text-xs sm:text-sm"
+                            onClick={() => setGameDetailsId(game.id)}
+                          >
+                            <Users className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
+                            <span>Details</span>
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
                             className="flex-1 border-blue-500/50 text-blue-400 hover:bg-blue-500/20 text-xs sm:text-sm"
                             onClick={() => handleEditGame(game)}
                           >
@@ -5173,6 +5183,11 @@ export default function AdminDashboard() {
         </main>
       </div>
 
+      {/* Game Details Dialog */}
+      {gameDetailsId !== null && (
+        <GameDetailsDialog gameId={gameDetailsId} onClose={() => setGameDetailsId(null)} />
+      )}
+
       {/* Eye-catching Delete Game Confirmation Dialog */}
       <Dialog open={isDeleteGameOpen} onOpenChange={setIsDeleteGameOpen}>
         <DialogContent className="bg-gradient-to-br from-red-900/95 via-slate-900/95 to-red-900/95 border-red-500/50 text-white max-w-md">
@@ -6456,6 +6471,316 @@ function SendCompletionEmailsButton({ gameId, gameName, onEmailSent }: { gameId:
         </>
       )}
     </Button>
+  );
+}
+
+// ── Game Details Dialog ─────────────────────────────────────────────────────
+function GameDetailsDialog({ gameId, onClose }: { gameId: number; onClose: () => void }) {
+  const [searchQuery, setSearchQuery] = useState("");
+  const [activeSection, setActiveSection] = useState<"players" | "numbers">("players");
+
+  const { data, isLoading, error } = useQuery<any>({
+    queryKey: ["/api/admin/games", gameId, "full-details"],
+    queryFn: async () => {
+      const res = await fetch(`/api/admin/games/${gameId}/full-details`, { credentials: "include" });
+      if (!res.ok) throw new Error("Failed to load");
+      return res.json();
+    },
+    refetchInterval: 15000,
+  });
+
+  const game = data?.game;
+  const players: any[] = data?.players || [];
+  const summary = data?.summary;
+  const winner = data?.winner;
+
+  const filtered = players.filter(p =>
+    !searchQuery ||
+    p.playerName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    p.email.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  // Build a set of all claimed numbers for the grid view
+  const allClaimedNumbers = new Set<number>();
+  const numberOwnerMap: Record<number, string> = {};
+  for (const p of players) {
+    for (const n of (p.ownedNumbers || [])) {
+      const num = parseInt(n);
+      allClaimedNumbers.add(num);
+      numberOwnerMap[num] = p.playerName;
+    }
+  }
+
+  const totalNumbers = game?.totalNumbers || 0;
+
+  return (
+    <Dialog open onOpenChange={(open) => { if (!open) onClose(); }}>
+      <DialogContent
+        className="text-white border-purple-500/30 p-0 flex flex-col"
+        style={{ background: "#0b0c18", maxWidth: "95vw", width: "1100px", maxHeight: "92vh" }}
+      >
+        {/* Header */}
+        <div className="flex-shrink-0 px-6 py-4 border-b flex items-center justify-between"
+          style={{ borderColor: "rgba(124,58,237,0.25)", background: "rgba(124,58,237,0.07)" }}>
+          <div className="flex items-center gap-3 min-w-0">
+            <span className="text-3xl">{game?.emoji || "🎮"}</span>
+            <div className="min-w-0">
+              <h2 className="text-lg font-bold text-white truncate">{game?.name || "Loading…"}</h2>
+              <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+                <span className="text-xs font-mono text-gray-400">{game?.code}</span>
+                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${game?.isActive ? "bg-green-500/20 text-green-400 border border-green-500/30" : "bg-gray-500/20 text-gray-400 border border-gray-500/30"}`}>
+                  {game?.isActive ? "● LIVE" : "● ENDED"}
+                </span>
+                <span className="text-xs text-yellow-400 font-semibold">{game?.prize}</span>
+              </div>
+            </div>
+          </div>
+          <button onClick={onClose} className="text-gray-400 hover:text-white transition-colors flex-shrink-0 ml-4">
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+
+        {isLoading && (
+          <div className="flex-1 flex items-center justify-center py-20">
+            <Loader2 className="h-8 w-8 text-purple-400 animate-spin" />
+          </div>
+        )}
+
+        {error && (
+          <div className="flex-1 flex items-center justify-center py-20">
+            <p className="text-red-400">Failed to load game details.</p>
+          </div>
+        )}
+
+        {data && (
+          <div className="flex-1 overflow-auto">
+            {/* Summary Stats */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 px-6 py-4 border-b" style={{ borderColor: "rgba(255,255,255,0.07)" }}>
+              {[
+                { label: "Players",        value: summary?.totalPlayers ?? 0,          icon: Users,       color: "text-blue-400" },
+                { label: "Total Spins",    value: summary?.totalSpins ?? 0,            icon: Zap,         color: "text-purple-400" },
+                { label: "Tokens Spent",   value: summary?.totalTokensSpent?.toFixed(0) ?? 0, icon: Coins, color: "text-yellow-400" },
+                { label: "% Full",         value: `${summary?.pctFull ?? 0}%`,         icon: Target,      color: "text-green-400" },
+              ].map(stat => (
+                <div key={stat.label} className="rounded-xl p-3 flex items-center gap-3"
+                  style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
+                  <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+                    style={{ background: "rgba(255,255,255,0.05)" }}>
+                    <stat.icon className={`h-4 w-4 ${stat.color}`} />
+                  </div>
+                  <div>
+                    <p className={`text-lg font-bold leading-none ${stat.color}`}>{stat.value}</p>
+                    <p className="text-[11px] text-gray-500 mt-0.5">{stat.label}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Progress bar */}
+            <div className="px-6 py-3 border-b" style={{ borderColor: "rgba(255,255,255,0.07)" }}>
+              <div className="flex justify-between text-xs text-gray-400 mb-1.5">
+                <span>{summary?.claimedNumbers ?? 0} claimed</span>
+                <span>{summary?.numbersLeft ?? 0} remaining of {totalNumbers}</span>
+              </div>
+              <div className="h-2 rounded-full overflow-hidden" style={{ background: "rgba(255,255,255,0.08)" }}>
+                <div className="h-full rounded-full transition-all duration-500"
+                  style={{
+                    width: `${summary?.pctFull ?? 0}%`,
+                    background: (summary?.pctFull ?? 0) >= 95
+                      ? "linear-gradient(90deg,#dc2626,#f97316)"
+                      : (summary?.pctFull ?? 0) >= 80
+                      ? "linear-gradient(90deg,#d97706,#f59e0b)"
+                      : "linear-gradient(90deg,#7c3aed,#3b82f6)"
+                  }} />
+              </div>
+            </div>
+
+            {/* Winner banner */}
+            {winner && (
+              <div className="mx-6 mt-4 rounded-xl p-4 flex items-center gap-3"
+                style={{ background: "rgba(250,204,21,0.08)", border: "1px solid rgba(250,204,21,0.3)" }}>
+                <Trophy className="h-6 w-6 text-yellow-400 flex-shrink-0" />
+                <div>
+                  <p className="text-yellow-300 font-bold text-sm">Winner: {winner.playerName}</p>
+                  <p className="text-yellow-500/80 text-xs">{winner.email} · Winning number: {winner.ownedNumbers?.join(", ")}</p>
+                </div>
+              </div>
+            )}
+
+            {/* Section tabs */}
+            <div className="flex gap-2 px-6 pt-4">
+              {([
+                { key: "players", label: "Players", icon: Users },
+                { key: "numbers", label: "Numbers Grid", icon: Hash },
+              ] as const).map(s => (
+                <button key={s.key} onClick={() => setActiveSection(s.key)}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                    activeSection === s.key
+                      ? "bg-purple-600 text-white"
+                      : "text-gray-400 hover:text-gray-200 hover:bg-white/5"
+                  }`}>
+                  <s.icon className="h-4 w-4" />
+                  {s.label}
+                  {s.key === "players" && <span className="text-[10px] bg-white/20 px-1.5 py-0.5 rounded-full">{players.length}</span>}
+                </button>
+              ))}
+            </div>
+
+            {/* Players section */}
+            {activeSection === "players" && (
+              <div className="px-6 pb-6 mt-3">
+                {/* Search */}
+                <div className="relative mb-3">
+                  <Input
+                    placeholder="Search by name or email…"
+                    value={searchQuery}
+                    onChange={e => setSearchQuery(e.target.value)}
+                    className="bg-white/5 border-white/10 text-white placeholder-gray-500 pl-4"
+                  />
+                </div>
+
+                {filtered.length === 0 ? (
+                  <div className="text-center py-12">
+                    <Users className="h-12 w-12 text-gray-600 mx-auto mb-3" />
+                    <p className="text-gray-400 font-medium">No players yet</p>
+                    <p className="text-gray-600 text-sm mt-1">Players will appear here once they join the game</p>
+                  </div>
+                ) : (
+                  <div className="rounded-xl overflow-hidden border" style={{ borderColor: "rgba(255,255,255,0.08)" }}>
+                    {/* Table header */}
+                    <div className="grid text-[11px] font-semibold uppercase tracking-widest text-gray-500 px-4 py-2.5"
+                      style={{ gridTemplateColumns: "1fr 1fr auto auto auto auto", background: "rgba(255,255,255,0.03)", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+                      <span>Player</span>
+                      <span>Email</span>
+                      <span className="text-center">Numbers</span>
+                      <span className="text-center">Spins</span>
+                      <span className="text-center">Tokens</span>
+                      <span className="text-center">Status</span>
+                    </div>
+
+                    {/* Table rows */}
+                    <div className="divide-y" style={{ divideColor: "rgba(255,255,255,0.05)" }}>
+                      {filtered.map((player, idx) => (
+                        <div key={player.id}
+                          className="grid items-center px-4 py-3 hover:bg-white/3 transition-colors"
+                          style={{ gridTemplateColumns: "1fr 1fr auto auto auto auto", background: idx % 2 === 0 ? "transparent" : "rgba(255,255,255,0.01)" }}>
+                          {/* Name */}
+                          <div className="flex items-center gap-2 min-w-0 pr-3">
+                            <div className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 text-xs font-bold"
+                              style={{ background: player.isWinner ? "rgba(250,204,21,0.2)" : "rgba(124,58,237,0.2)", color: player.isWinner ? "#facc15" : "#a78bfa" }}>
+                              {player.playerName?.charAt(0).toUpperCase()}
+                            </div>
+                            <span className="text-sm text-white font-medium truncate">{player.playerName}</span>
+                          </div>
+
+                          {/* Email */}
+                          <div className="min-w-0 pr-3">
+                            <span className="text-xs text-gray-400 truncate block">{player.email}</span>
+                          </div>
+
+                          {/* Numbers owned */}
+                          <div className="text-center px-3">
+                            <div className="inline-flex flex-wrap gap-1 justify-center max-w-[160px]">
+                              {(player.ownedNumbers || []).slice(0, 6).map((n: string) => (
+                                <span key={n} className="text-[10px] font-bold px-1.5 py-0.5 rounded"
+                                  style={{ background: "rgba(124,58,237,0.25)", color: "#c4b5fd", border: "1px solid rgba(124,58,237,0.4)" }}>
+                                  {n}
+                                </span>
+                              ))}
+                              {player.ownedNumbers?.length > 6 && (
+                                <span className="text-[10px] text-gray-500">+{player.ownedNumbers.length - 6}</span>
+                              )}
+                            </div>
+                            <p className="text-[10px] text-gray-600 mt-0.5">{player.numbersCount} total</p>
+                          </div>
+
+                          {/* Spins */}
+                          <div className="text-center px-3">
+                            <span className="text-sm font-bold text-purple-300">{player.spinCount}</span>
+                          </div>
+
+                          {/* Tokens spent */}
+                          <div className="text-center px-3">
+                            <span className="text-sm font-bold text-yellow-400">{player.totalSpent.toFixed(0)}</span>
+                          </div>
+
+                          {/* Status */}
+                          <div className="text-center">
+                            {player.isWinner ? (
+                              <span className="text-[10px] font-bold px-2 py-1 rounded-full bg-yellow-500/20 text-yellow-400 border border-yellow-500/30">
+                                🏆 Winner
+                              </span>
+                            ) : player.freeSpins > 0 ? (
+                              <span className="text-[10px] font-bold px-2 py-1 rounded-full bg-blue-500/20 text-blue-400 border border-blue-500/30">
+                                Free
+                              </span>
+                            ) : (
+                              <span className="text-[10px] font-bold px-2 py-1 rounded-full bg-green-500/10 text-green-500 border border-green-500/20">
+                                Paid
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Numbers grid section */}
+            {activeSection === "numbers" && (
+              <div className="px-6 pb-6 mt-3">
+                <div className="flex items-center gap-4 mb-3 text-xs">
+                  <div className="flex items-center gap-1.5">
+                    <div className="w-4 h-4 rounded" style={{ background: "rgba(124,58,237,0.4)", border: "1px solid rgba(124,58,237,0.6)" }} />
+                    <span className="text-gray-400">Claimed ({allClaimedNumbers.size})</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <div className="w-4 h-4 rounded" style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.12)" }} />
+                    <span className="text-gray-400">Available ({totalNumbers - allClaimedNumbers.size})</span>
+                  </div>
+                  {winner && (
+                    <div className="flex items-center gap-1.5">
+                      <div className="w-4 h-4 rounded" style={{ background: "rgba(250,204,21,0.3)", border: "1px solid rgba(250,204,21,0.6)" }} />
+                      <span className="text-yellow-400">Winner</span>
+                    </div>
+                  )}
+                </div>
+                <div className="rounded-xl p-4 overflow-auto" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.07)", maxHeight: "420px" }}>
+                  <div className="flex flex-wrap gap-1.5">
+                    {Array.from({ length: totalNumbers }, (_, i) => i + 1).map(n => {
+                      const isClaimed = allClaimedNumbers.has(n);
+                      const isWinnerNum = winner && winner.ownedNumbers?.includes(String(n));
+                      return (
+                        <div key={n}
+                          title={isClaimed ? `#${n} — ${numberOwnerMap[n]}` : `#${n} — Available`}
+                          className="w-9 h-9 rounded-lg flex items-center justify-center text-xs font-bold cursor-default transition-all hover:scale-110"
+                          style={{
+                            background: isWinnerNum
+                              ? "rgba(250,204,21,0.3)"
+                              : isClaimed
+                              ? "rgba(124,58,237,0.35)"
+                              : "rgba(255,255,255,0.05)",
+                            border: isWinnerNum
+                              ? "1px solid rgba(250,204,21,0.7)"
+                              : isClaimed
+                              ? "1px solid rgba(124,58,237,0.55)"
+                              : "1px solid rgba(255,255,255,0.1)",
+                            color: isWinnerNum ? "#facc15" : isClaimed ? "#c4b5fd" : "#374151",
+                          }}>
+                          {n}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </DialogContent>
+    </Dialog>
   );
 }
 

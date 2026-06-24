@@ -1044,6 +1044,69 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Comprehensive game details for admin
+  app.get("/api/admin/games/:id/full-details", requireAuth, async (req, res) => {
+    try {
+      const gameId = parseInt(req.params.id);
+      const game = await storage.getGame(gameId);
+      if (!game) return res.status(404).json({ message: "Game not found" });
+
+      const gamePlayers = await storage.getPlayersByGameId(gameId);
+      const spinResults = await storage.getSpinResultsByGameId(gameId);
+      const gameResult = await storage.getGameResult(gameId);
+
+      // Build spin count map per player
+      const spinCountMap: Record<number, number> = {};
+      for (const spin of spinResults) {
+        spinCountMap[spin.playerId] = (spinCountMap[spin.playerId] || 0) + 1;
+      }
+
+      // Build players with full user details
+      const playersWithDetails = await Promise.all(gamePlayers.map(async (player) => {
+        const user = await storage.getUser(player.userId);
+        return {
+          id: player.id,
+          userId: player.userId,
+          playerName: player.playerName,
+          email: user?.email || "N/A",
+          firstName: user?.firstName || "",
+          lastName: user?.lastName || "",
+          ownedNumbers: player.ownedNumbers,
+          numbersCount: player.ownedNumbers.length,
+          totalSpent: parseFloat(player.totalSpent as any) || 0,
+          spinCount: spinCountMap[player.id] || 0,
+          isWinner: player.isWinner,
+          joinedAt: player.joinedAt,
+          freeSpins: player.freeSpins,
+        };
+      }));
+
+      // Summary stats
+      const totalTokensSpent = playersWithDetails.reduce((sum, p) => sum + p.totalSpent, 0);
+      const totalSpins = spinResults.length;
+      const claimedCount = gamePlayers.reduce((sum, p) => sum + p.ownedNumbers.length, 0);
+      const winner = gameResult ? playersWithDetails.find(p => p.isWinner) : null;
+
+      res.json({
+        game,
+        players: playersWithDetails.sort((a, b) => b.numbersCount - a.numbersCount),
+        summary: {
+          totalPlayers: playersWithDetails.length,
+          totalSpins,
+          totalTokensSpent,
+          claimedNumbers: claimedCount,
+          numbersLeft: Number(game.totalNumbers) - claimedCount,
+          pctFull: game.totalNumbers > 0 ? Math.round((claimedCount / Number(game.totalNumbers)) * 100) : 0,
+        },
+        winner: winner || null,
+        gameResult: gameResult || null,
+      });
+    } catch (error: any) {
+      console.error("Failed to fetch game full details:", error);
+      res.status(500).json({ message: "Failed to fetch game details", error: error?.message });
+    }
+  });
+
   app.get("/api/admin/dashboard/stats", requireAuth, async (req, res) => {
     try {
       // Use the same analytics calculation as getAnalytics for consistency
