@@ -376,59 +376,57 @@ function GameCard({
         style={{ background: `radial-gradient(ellipse 100% 100% at 50% 0%,${topGlow},transparent 75%)` }} />
 
       {/* ── IMAGE ───────────────────────────────────────────────── */}
-      <div className="relative overflow-hidden" style={{ height: 220, background: "#1a1535", flexShrink: 0 }}>
+      <div className="relative overflow-hidden h-48 sm:h-56" style={{ background: "#1a1535", flexShrink: 0 }}>
         <img
           src={game.prizeImageUrl || fallback}
           alt={game.name}
           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-          style={{ objectPosition: "center" }}
+          style={{ objectPosition: "center top" }}
         />
 
-        {/* Deep scrim — bottom heavy for text */}
+        {/* Scrim — lighter at top, heavier only at very bottom for title text */}
         <div className="absolute inset-0"
-          style={{ background: "linear-gradient(to top,rgba(8,6,20,.97) 0%,rgba(8,6,20,.5) 38%,rgba(8,6,20,.05) 65%,transparent 100%)" }} />
+          style={{ background: "linear-gradient(to top,rgba(8,6,20,.92) 0%,rgba(8,6,20,.45) 28%,rgba(8,6,20,.08) 55%,transparent 100%)" }} />
 
-        {/* Side glow tint matching urgency */}
-        <div className="absolute inset-0 pointer-events-none"
-          style={{ background: `linear-gradient(to right,${borderCol.replace('.5)', '.12)').replace('.45)', '.08)').replace('.25)', '.06)')},transparent 40%)` }} />
-
-        {/* ── TOP BADGES ── */}
-        {/* LIVE badge */}
-        <div className="absolute top-3 left-3 z-20 flex items-center gap-1.5 px-2.5 py-1 rounded-full"
-          style={{ background: "rgba(0,0,0,.7)", backdropFilter: "blur(10px)", border: "1px solid rgba(52,211,153,.25)" }}>
-          <div className="relative w-2 h-2 shrink-0">
-            <div className="absolute inset-0 rounded-full bg-green-400 animate-ping opacity-70" style={{ animationDuration: "1.6s" }} />
-            <div className="w-2 h-2 rounded-full bg-green-400" />
+        {/* ── TOP ROW: LIVE badge (left) + Rank badge (right) ── */}
+        <div className="absolute top-3 left-3 right-3 z-20 flex items-center justify-between">
+          {/* LIVE badge */}
+          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full"
+            style={{ background: "rgba(0,0,0,.65)", backdropFilter: "blur(10px)", border: "1px solid rgba(52,211,153,.3)" }}>
+            <div className="relative w-2 h-2 shrink-0">
+              <div className="absolute inset-0 rounded-full bg-green-400 animate-ping opacity-70" style={{ animationDuration: "1.6s" }} />
+              <div className="w-2 h-2 rounded-full bg-green-400" />
+            </div>
+            <span className="text-green-300 font-black text-[9px] uppercase tracking-widest">Live</span>
           </div>
-          <span className="text-green-300 font-black text-[9px] uppercase tracking-widest">Live Now</span>
+
+          {/* Rank badge */}
+          {rank !== undefined && rank < 3 && (
+            <div className="flex items-center gap-1 px-2.5 py-1 rounded-full font-black text-[10px] text-white"
+              style={{
+                background: rank === 0 ? "linear-gradient(135deg,#f59e0b,#d97706)" : "rgba(0,0,0,.6)",
+                border: rank === 0 ? "1px solid rgba(245,158,11,.6)" : "1px solid rgba(255,255,255,.18)",
+                backdropFilter: "blur(8px)",
+                boxShadow: rank === 0 ? "0 0 14px rgba(245,158,11,.4)" : "none",
+              }}>
+              {RANK_LABELS[rank]}
+            </div>
+          )}
         </div>
 
-        {/* Rank badge */}
-        {rank !== undefined && rank < 3 && (
-          <div className="absolute top-3 right-3 z-20 flex items-center gap-1 px-2.5 py-1 rounded-full font-black text-[10px] text-white"
-            style={{
-              background: rank === 0 ? "linear-gradient(135deg,#f59e0b,#d97706)" : rank === 1 ? "rgba(148,163,184,.15)" : "rgba(180,120,60,.15)",
-              border: rank === 0 ? "1px solid rgba(245,158,11,.6)" : "1px solid rgba(255,255,255,.15)",
-              backdropFilter: "blur(8px)",
-              boxShadow: rank === 0 ? "0 0 14px rgba(245,158,11,.4)" : "none",
-            }}>
-            {RANK_LABELS[rank]}
-          </div>
-        )}
-
-        {/* Countdown badge — bottom left */}
-        <div className="absolute bottom-14 left-3 z-20 flex items-center gap-1.5 px-2.5 py-1 rounded-full"
-          style={{ background: "rgba(0,0,0,.7)", backdropFilter: "blur(10px)", border: `1px solid ${borderCol}` }}>
-          <Timer className="h-3 w-3 shrink-0" style={{ color: barColor }} />
-          <span className="text-white font-black text-xs">{countdown}</span>
-        </div>
-
-        {/* ── GAME TITLE overlaid on image bottom ── */}
-        <div className="absolute bottom-3 left-3 right-3 z-20">
-          <h3 className="text-white font-black text-base uppercase tracking-wide leading-tight line-clamp-2"
-            style={{ textShadow: "0 2px 12px rgba(0,0,0,.9)" }}>
+        {/* ── BOTTOM ROW: Title (left) + Countdown (right) ── */}
+        <div className="absolute bottom-0 left-0 right-0 z-20 px-3 pb-3 flex items-end justify-between gap-2">
+          {/* Game title */}
+          <h3 className="text-white font-black text-sm sm:text-base uppercase tracking-wide leading-tight line-clamp-2 flex-1"
+            style={{ textShadow: "0 2px 16px rgba(0,0,0,1)" }}>
             {game.name}
           </h3>
+          {/* Countdown — pinned bottom-right, never floating in middle */}
+          <div className="flex items-center gap-1 px-2 py-1 rounded-full shrink-0"
+            style={{ background: "rgba(0,0,0,.75)", backdropFilter: "blur(10px)", border: `1px solid ${borderCol}` }}>
+            <Timer className="h-2.5 w-2.5 shrink-0" style={{ color: barColor }} />
+            <span className="text-white font-black text-[10px] whitespace-nowrap">{countdown}</span>
+          </div>
         </div>
       </div>
 
