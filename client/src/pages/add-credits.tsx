@@ -22,13 +22,6 @@ const PACKAGES = [
   { id: 7, dollars: 500, credits: 3000, popular: true,  bonus: "⭐ Best Value", label: "Best Value",  icon: Star,    color: "#f59e0b", glow: "rgba(245,158,11,0.5)",    bg: "from-amber-900/80 to-yellow-950/90"  },
 ];
 
-// Static method metadata (colors/icons) — destination comes from API
-const METHOD_META: Record<string, { label: string; color: string; bgColor: string; icon: string; hint: string }> = {
-  cashapp:  { label: "Cash App",      color: "#00c244", bgColor: "rgba(0,194,68,0.12)",    icon: "💵", hint: "Instant transfer" },
-  venmo:    { label: "Venmo",         color: "#3d95ce", bgColor: "rgba(61,149,206,0.12)",  icon: "💳", hint: "Fast & easy"      },
-  chime:    { label: "Chime",         color: "#00c6a0", bgColor: "rgba(0,198,160,0.12)",   icon: "🏦", hint: "Bank transfer"    },
-  applepay: { label: "Apple Pay/Cash",color: "#aaaaaa", bgColor: "rgba(170,170,170,0.12)", icon: "🍎", hint: "Apple devices"    },
-};
 
 type Step = "package" | "method" | "send" | "confirm" | "done" | "card-done";
 
@@ -37,21 +30,8 @@ export default function AddCreditsPage() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  // Fetch live payment destinations from server (admin can change them anytime)
-  const { data: destinationsData } = useQuery<Record<string, { label: string; destination: string; hint: string }>>({
-    queryKey: ["/api/wallet/destinations"],
-  });
-
-  // Merge API destinations with static metadata
-  const METHODS = Object.entries(METHOD_META).map(([id, meta]) => ({
-    id,
-    ...meta,
-    destination: destinationsData?.[id]?.destination ?? "",
-  }));
-
   const [step, setStep]               = useState<Step>("package");
   const [pkg, setPkg]                 = useState<typeof PACKAGES[0] | null>(null);
-  const [method, setMethod]           = useState<(typeof METHODS)[0] | null>(null);
   const [paymentName, setPaymentName] = useState("");
   const [paymentHandle, setPaymentHandle] = useState("");
   const [copied, setCopied]           = useState(false);
@@ -82,22 +62,6 @@ export default function AddCreditsPage() {
   const showFlash = flashSecsLeft > 0;
   const FLASH_PKG = PACKAGES[2]; // Power pack — $20 base, show as 75 tokens
 
-  const submitMutation = useMutation({
-    mutationFn: async () => {
-      if (!pkg || !method) throw new Error("Missing selection");
-      return apiRequest("POST", "/api/wallet/submit-payment", {
-        dollarAmount:   pkg.dollars,
-        creditsAmount:  pkg.credits,
-        paymentMethod:  method.id,
-        paymentName:    paymentName.trim(),
-        paymentHandle:  paymentHandle.trim(),
-      });
-    },
-    onSuccess: () => setStep("done"),
-    onError: (err: any) => {
-      toast({ title: "Submission failed", description: err.message || "Please try again.", variant: "destructive" });
-    },
-  });
 
   async function handleCardSuccess(descriptor: string, value: string) {
     if (!pkg) return;
@@ -371,34 +335,6 @@ export default function AddCreditsPage() {
         </div>
       </button>
 
-      <div className="flex items-center gap-3 my-3">
-        <div className="flex-1 h-px" style={{ background: "rgba(255,255,255,0.08)" }} />
-        <span className="text-gray-600 text-xs font-semibold">or pay manually</span>
-        <div className="flex-1 h-px" style={{ background: "rgba(255,255,255,0.08)" }} />
-      </div>
-
-      <div className="space-y-3">
-        {METHODS.map(m => (
-          <button key={m.id} onClick={() => { setMethod(m); setStep("send"); }}
-            className="w-full rounded-2xl p-4 text-left flex items-center gap-4 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] group"
-            style={{
-              background: m.bgColor,
-              border: `1px solid ${m.color}40`,
-              boxShadow: `0 4px 20px ${m.color}15`,
-            }}>
-            <span className="text-4xl">{m.icon}</span>
-            <div className="flex-1">
-              <p className="font-bold text-white text-base">{m.label}</p>
-              <p className="text-xs mt-0.5" style={{ color: m.color }}>{m.hint}</p>
-              <p className="text-gray-500 text-xs mt-0.5">{m.destination}</p>
-            </div>
-            <div className="p-2 rounded-xl transition-all group-hover:translate-x-1"
-              style={{ background: `${m.color}20` }}>
-              <ChevronRight className="h-4 w-4" style={{ color: m.color }} />
-            </div>
-          </button>
-        ))}
-      </div>
 
       <DisclaimerBox />
 
@@ -413,156 +349,6 @@ export default function AddCreditsPage() {
           isProcessing={isProcessingCard}
         />
       )}
-    </Shell>
-  );
-
-  // ── STEP: Send instructions ───────────────────────────────────────────────
-  if (step === "send" && pkg && method) return (
-    <Shell onBack={() => setStep("method")}>
-      <div className="space-y-4">
-        {/* Big amount card */}
-        <div className="rounded-3xl p-6 text-center relative overflow-hidden"
-          style={{ background: "linear-gradient(135deg,#1a0545,#0e1d6b)", border: "1px solid rgba(255,255,255,0.1)" }}>
-          <div className="absolute inset-0 opacity-20"
-            style={{ background: "radial-gradient(circle at 50% 0%,#7c3aed,transparent 60%)" }} />
-          <div className="relative">
-            <p className="text-gray-400 text-sm mb-2 font-semibold uppercase tracking-wider">Send Exactly</p>
-            <p className="text-6xl font-black text-white mb-1">${pkg.dollars}<span className="text-3xl">.00</span></p>
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full mt-2"
-              style={{ background: "rgba(124,58,237,0.25)", border: "1px solid rgba(124,58,237,0.4)" }}>
-              <span className="text-purple-300 text-sm font-semibold">→ {pkg.credits.toLocaleString()} tokens added after approval</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Send-to card */}
-        <div className="rounded-2xl overflow-hidden" style={{ border: `1px solid ${method.color}40` }}>
-          <div className="px-4 py-2 flex items-center gap-2"
-            style={{ background: `${method.color}18` }}>
-            <span className="text-lg">{method.icon}</span>
-            <span className="text-sm font-bold" style={{ color: method.color }}>{method.label}</span>
-          </div>
-          <div className="p-4 flex items-center justify-between"
-            style={{ background: "rgba(255,255,255,0.03)" }}>
-            <div>
-              <p className="text-gray-400 text-xs uppercase tracking-wide mb-1">Send to</p>
-              <p className="text-white font-black text-xl">{method.destination}</p>
-            </div>
-            <button onClick={() => copy(method.destination)}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl font-semibold text-sm transition-all active:scale-95"
-              style={{
-                background: copied ? "rgba(16,185,129,0.2)" : "rgba(255,255,255,0.1)",
-                border:     copied ? "1px solid rgba(16,185,129,0.4)" : "1px solid rgba(255,255,255,0.15)",
-                color:      copied ? "#10b981" : "#d1d5db",
-              }}>
-              {copied ? <CheckCircle className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-              {copied ? "Copied!" : "Copy"}
-            </button>
-          </div>
-        </div>
-
-        {/* Instructions */}
-        <div className="rounded-2xl p-4"
-          style={{ background: "rgba(251,191,36,0.07)", border: "1px solid rgba(251,191,36,0.25)" }}>
-          <div className="flex items-center gap-2 mb-3">
-            <AlertCircle className="h-4 w-4 text-yellow-400 shrink-0" />
-            <p className="text-yellow-300 text-sm font-bold">Before You Send</p>
-          </div>
-          <div className="space-y-2">
-            {[
-              "Send the EXACT amount shown above",
-              "Do NOT include a note or memo",
-              "Click \"I Sent Payment\" after sending",
-              "Tokens are added within 1–2 minutes after verification",
-            ].map((tip, i) => (
-              <div key={i} className="flex items-start gap-2.5">
-                <div className="w-5 h-5 rounded-full flex items-center justify-center shrink-0 mt-0.5 text-xs font-black"
-                  style={{ background: "rgba(251,191,36,0.2)", color: "#fbbf24" }}>
-                  {i + 1}
-                </div>
-                <p className="text-yellow-200/75 text-sm">{tip}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <button onClick={() => setStep("confirm")}
-          className="w-full py-4 rounded-2xl font-black text-white text-lg transition-all hover:opacity-90 active:scale-[0.98] flex items-center justify-center gap-2"
-          style={{ background: "linear-gradient(135deg,#7c3aed,#2563eb)", boxShadow: "0 0 30px rgba(124,58,237,0.4)" }}>
-          I Sent the Payment →
-        </button>
-      </div>
-
-      <DisclaimerBox />
-    </Shell>
-  );
-
-  // ── STEP: Confirm ─────────────────────────────────────────────────────────
-  if (step === "confirm" && pkg && method) return (
-    <Shell onBack={() => setStep("send")}>
-      <div className="space-y-5">
-        {/* Summary */}
-        <div className="rounded-2xl p-4 flex items-center gap-4 relative overflow-hidden"
-          style={{ background: "rgba(124,58,237,0.12)", border: "1px solid rgba(124,58,237,0.35)" }}>
-          <div className="absolute inset-0 opacity-10"
-            style={{ background: "radial-gradient(circle at 0% 50%,#7c3aed,transparent 60%)" }} />
-          <span className="text-4xl relative">{method.icon}</span>
-          <div className="relative">
-            <p className="text-white font-black">${pkg.dollars} via {method.label}</p>
-            <p className="text-purple-300 text-sm">{pkg.credits.toLocaleString()} tokens after approval</p>
-          </div>
-          <CheckCircle className="h-6 w-6 text-purple-400 ml-auto relative" />
-        </div>
-
-        {/* Form */}
-        <div>
-          <p className="text-white font-bold text-base mb-4">Confirm your payment details</p>
-          <div className="space-y-4">
-            <div className="space-y-1.5">
-              <label className="text-gray-300 text-sm font-semibold">Your Name on Payment</label>
-              <Input
-                placeholder="e.g. John Smith"
-                value={paymentName}
-                onChange={e => setPaymentName(e.target.value)}
-                className="bg-gray-900 border-gray-600 text-white placeholder-gray-500 focus:border-purple-400 h-12 rounded-xl text-base"
-                style={{ color: "#ffffff", backgroundColor: "#111827" }}
-              />
-              <p className="text-gray-600 text-xs">Name shown on your {method.label} profile</p>
-            </div>
-
-            <div className="space-y-1.5">
-              <label className="text-gray-300 text-sm font-semibold">
-                Your {method.id === "cashapp" ? "Cash App $cashtag" : method.id === "venmo" ? "Venmo @handle" : "Email / Phone"}
-              </label>
-              <Input
-                placeholder={method.id === "cashapp" ? "$YourCashtag" : method.id === "venmo" ? "@YourHandle" : "your@email.com"}
-                value={paymentHandle}
-                onChange={e => setPaymentHandle(e.target.value)}
-                className="bg-gray-900 border-gray-600 text-white placeholder-gray-500 focus:border-purple-400 h-12 rounded-xl text-base"
-                style={{ color: "#ffffff", backgroundColor: "#111827" }}
-              />
-              <p className="text-gray-600 text-xs">So our team can match the payment to your account</p>
-            </div>
-          </div>
-        </div>
-
-        <button
-          onClick={() => submitMutation.mutate()}
-          disabled={!paymentName.trim() || !paymentHandle.trim() || submitMutation.isPending}
-          className="w-full py-4 rounded-2xl font-black text-white text-lg transition-all hover:opacity-90 active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-          style={{ background: "linear-gradient(135deg,#7c3aed,#2563eb)", boxShadow: "0 0 30px rgba(124,58,237,0.35)" }}>
-          {submitMutation.isPending ? (
-            <><div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />Submitting...</>
-          ) : (
-            <><CheckCircle className="h-5 w-5" />Submit Payment Confirmation</>
-          )}
-        </button>
-
-        <p className="text-gray-600 text-xs text-center">
-          By submitting you confirm you sent the payment and agree to the{" "}
-          <a href="/terms" className="text-purple-400 hover:underline">Terms</a>.
-        </p>
-      </div>
     </Shell>
   );
 
@@ -594,7 +380,7 @@ export default function AddCreditsPage() {
           style={{ background: "rgba(16,185,129,0.08)", border: "1px solid rgba(16,185,129,0.25)" }}>
           {[
             ["Package", `$${pkg?.dollars} → ${pkg?.credits?.toLocaleString()} tokens`],
-            ["Method",  method?.label ?? ""],
+            ["Method",  "Credit / Debit Card"],
             ["Status",  null],
           ].map(([label, value]) => (
             <div key={label} className="flex items-center justify-between">

@@ -18,12 +18,6 @@ interface TokenPackage {
   valueLabel: string;
 }
 
-const PAYMENT_METHODS = [
-  { icon: "💵", label: "Cash App",  color: "#00c244", bg: "rgba(0,194,68,0.12)"   },
-  { icon: "💳", label: "Venmo",     color: "#3d95ce", bg: "rgba(61,149,206,0.12)" },
-  { icon: "🏦", label: "Chime",     color: "#00c6a0", bg: "rgba(0,198,160,0.12)"  },
-  { icon: "🍎", label: "Apple Pay", color: "#888888", bg: "rgba(136,136,136,0.12)"},
-];
 
 export function TokenPurchase() {
   const [, setLocation] = useLocation();
@@ -130,22 +124,6 @@ export function TokenPurchase() {
             </div>
           </div>
 
-          {/* Payment notice */}
-          <div className="rounded-2xl px-5 py-4 flex items-center gap-3"
-            style={{ background: "rgba(124,58,237,0.08)", border: "1px solid rgba(139,92,246,0.25)" }}>
-            <Shield className="h-5 w-5 text-violet-400 flex-shrink-0" />
-            <div>
-              <p className="text-violet-300 text-xs font-bold uppercase tracking-wide">Accepted Payment Methods</p>
-              <div className="flex items-center gap-2 mt-1.5 flex-wrap">
-                {PAYMENT_METHODS.map(m => (
-                  <span key={m.label} className="flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full"
-                    style={{ background: m.bg, color: m.color, border: `1px solid ${m.color}40` }}>
-                    {m.icon} {m.label}
-                  </span>
-                ))}
-              </div>
-            </div>
-          </div>
         </div>
 
         {/* ── PACKAGE GRID ── */}
@@ -216,7 +194,7 @@ export function TokenPurchase() {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
             {[
               { step:"1", icon:"🎯", title:"Pick a Package",   desc:"Choose the token bundle that fits your budget — more tokens per dollar with larger packs." },
-              { step:"2", icon:"💸", title:"Send Payment",     desc:"Pay via Cash App, Venmo, Chime, or Apple Pay using the addresses provided." },
+              { step:"2", icon:"💸", title:"Complete Payment",  desc:"Pay securely by credit or debit card — tokens are credited instantly the moment payment clears." },
               { step:"3", icon:"⚡", title:"Tokens Credited",  desc:"Our team verifies your payment and credits your tokens — usually within minutes." },
             ].map(({ step, icon, title, desc }) => (
               <div key={step} className="flex gap-4">
@@ -259,7 +237,7 @@ export function TokenPurchase() {
             style={{ background: "rgba(74,222,128,0.08)", border: "1px solid rgba(74,222,128,0.2)" }}>
             <Zap className="h-4 w-4 text-green-400 flex-shrink-0" />
             <p className="text-green-400 font-medium text-sm">
-              No card payments — pay via Cash App, Venmo, Chime, or Apple Pay. Tokens credited after verification.
+              Secure card payments — tokens are credited instantly the moment payment clears.
             </p>
           </div>
         </div>
