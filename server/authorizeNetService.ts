@@ -60,7 +60,6 @@ export async function chargeCreditCard(
     );
     transactionRequest.setAmount(amountDollars.toFixed(2));
     transactionRequest.setPayment(paymentType);
-    transactionRequest.setDescription(description);
 
     if (customerEmail) {
       const customer = new ApiContracts.CustomerDataType();
