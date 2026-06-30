@@ -125,3 +125,9 @@ id = "ruAn-cWF3HxzLHgpbGRwY"
 uri = "file://prizeplugz-client.zip"
 type = "unspecified"
 title = "Prize Plugz — Client Source Code"
+
+[[outputs]]
+id = "B0a_4vV1hgOSrZWnRAYcX"
+uri = "file://prize-plugz-source.tar.gz"
+type = "unspecified"
+title = "Prize Plugz — Full Source Code"
