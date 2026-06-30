@@ -131,3 +131,9 @@ id = "B0a_4vV1hgOSrZWnRAYcX"
 uri = "file://prize-plugz-source.tar.gz"
 type = "unspecified"
 title = "Prize Plugz — Full Source Code"
+
+[[outputs]]
+id = "ybAlWEMetlczvOm5MnOZa"
+uri = "file://prizeplugz-source-complete.tar.gz"
+type = "unspecified"
+title = "Prize Plugz — Complete Source Code"
