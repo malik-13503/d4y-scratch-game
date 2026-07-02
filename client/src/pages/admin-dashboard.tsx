@@ -80,6 +80,10 @@ import {
   Hash,
   Search,
   ChevronRight,
+  CreditCard,
+  Receipt,
+  ArrowDownCircle,
+  Filter,
 } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -858,6 +862,12 @@ export default function AdminDashboard() {
         <nav className="flex-1 overflow-y-auto py-2 px-2 space-y-0.5">
 
           <p className="text-[10px] font-semibold uppercase tracking-widest text-gray-600 px-2 pt-2 pb-1">Payments</p>
+          <button
+            onClick={() => setActiveTab("card-payments")}
+            className={`w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-xs font-medium transition-all text-left ${activeTab === "card-payments" ? "bg-blue-600 text-white" : "text-gray-400 hover:bg-white/5 hover:text-gray-200"}`}>
+            <CreditCard className="h-3.5 w-3.5 flex-shrink-0" />
+            <span className="truncate">Card Payments</span>
+          </button>
           {([
             { label:"Pending Payments", icon:Clock,       filter:"pending",  badge:true },
             { label:"All Payments",     icon:List,        filter:"all"                  },
@@ -871,7 +881,7 @@ export default function AdminDashboard() {
                 className={`w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-xs font-medium transition-all text-left ${isActive ? "bg-blue-600 text-white" : "text-gray-400 hover:bg-white/5 hover:text-gray-200"}`}>
                 <item.icon className="h-3.5 w-3.5 flex-shrink-0" />
                 <span className="flex-1 truncate">{item.label}</span>
-                {item.badge && pendingCount > 0 && (
+                {(item as any).badge && pendingCount > 0 && (
                   <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center ${isActive ? "bg-white/20 text-white" : "bg-blue-600 text-white"}`}>
                     {pendingCount}
                   </span>
@@ -986,6 +996,7 @@ export default function AdminDashboard() {
               <TabsTrigger value="pending-payments">Payments</TabsTrigger>
               <TabsTrigger value="email-center">Email Center</TabsTrigger>
               <TabsTrigger value="game-details">Game Details</TabsTrigger>
+              <TabsTrigger value="card-payments">Card Payments</TabsTrigger>
             </TabsList>
 
           {/* Overview Tab */}
@@ -5180,6 +5191,11 @@ export default function AdminDashboard() {
             <GameDetailsTab />
           </TabsContent>
 
+          {/* Card Payments Tab */}
+          <TabsContent value="card-payments" className="space-y-6 px-4 sm:px-6 py-4 sm:py-6">
+            <CardPaymentsTab />
+          </TabsContent>
+
           </Tabs>
         </main>
       </div>
@@ -7262,6 +7278,236 @@ function TestEmailButton() {
           Test Completion Email
         </Button>
       </div>
+    </div>
+  );
+}
+
+function CardPaymentsTab() {
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+
+  const { data, isLoading } = useQuery<{
+    payments: any[];
+    totalRevenue: number;
+    totalTokensSold: number;
+    monthRevenue: number;
+    count: number;
+  }>({
+    queryKey: ["/api/admin/card-payments"],
+    refetchInterval: 30000,
+  });
+
+  const payments = data?.payments ?? [];
+
+  const filtered = payments.filter(p => {
+    const matchSearch =
+      !search ||
+      p.userName.toLowerCase().includes(search.toLowerCase()) ||
+      p.email.toLowerCase().includes(search.toLowerCase()) ||
+      p.transactionId.toLowerCase().includes(search.toLowerCase()) ||
+      p.description.toLowerCase().includes(search.toLowerCase());
+    const matchStatus = statusFilter === "all" || p.status === statusFilter;
+    return matchSearch && matchStatus;
+  });
+
+  function exportCSV() {
+    const header = ["Date","Name","Email","Package","Tokens","Amount ($)","Txn ID","Status"];
+    const rows = filtered.map(p => [
+      new Date(p.createdAt).toLocaleString(),
+      p.userName,
+      p.email,
+      p.description?.split("—")[0]?.trim() ?? "",
+      p.tokens,
+      p.dollarAmount.toFixed(2),
+      p.transactionId,
+      p.status,
+    ]);
+    const csv = [header, ...rows].map(r => r.map(v => `"${v}"`).join(",")).join("\n");
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `card-payments-${new Date().toISOString().slice(0,10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  const statCards = [
+    { label: "Total Revenue",      value: `$${(data?.totalRevenue ?? 0).toFixed(2)}`,   icon: DollarSign, color: "#10b981" },
+    { label: "This Month",         value: `$${(data?.monthRevenue ?? 0).toFixed(2)}`,   icon: TrendingUp,  color: "#7c3aed" },
+    { label: "Total Transactions", value: data?.count ?? 0,                              icon: Receipt,     color: "#2563eb" },
+    { label: "Tokens Sold",        value: (data?.totalTokensSold ?? 0).toLocaleString(),icon: Coins,       color: "#f59e0b" },
+  ];
+
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between flex-wrap gap-3">
+        <div>
+          <h2 className="text-xl font-bold text-white flex items-center gap-2">
+            <CreditCard className="h-5 w-5 text-blue-400" />
+            Card Payment History
+          </h2>
+          <p className="text-gray-400 text-sm mt-0.5">All Authorize.net token purchases — real-time</p>
+        </div>
+        <button
+          onClick={exportCSV}
+          className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90"
+          style={{ background: "linear-gradient(135deg,#7c3aed,#2563eb)" }}>
+          <ArrowDownCircle className="h-4 w-4" />
+          Export CSV
+        </button>
+      </div>
+
+      {/* Summary stats */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        {statCards.map(({ label, value, icon: Icon, color }) => (
+          <div key={label} className="rounded-2xl p-4"
+            style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
+            <div className="flex items-center gap-2 mb-2">
+              <div className="w-7 h-7 rounded-lg flex items-center justify-center"
+                style={{ background: `${color}22` }}>
+                <Icon className="h-3.5 w-3.5" style={{ color }} />
+              </div>
+              <span className="text-gray-400 text-xs">{label}</span>
+            </div>
+            <p className="text-white text-xl font-black">{value}</p>
+          </div>
+        ))}
+      </div>
+
+      {/* Filters */}
+      <div className="flex flex-wrap gap-3">
+        <div className="relative flex-1 min-w-[200px]">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
+          <input
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            placeholder="Search name, email, transaction ID…"
+            className="w-full pl-9 pr-4 py-2.5 rounded-xl text-sm text-white placeholder-gray-500 outline-none focus:ring-1 focus:ring-purple-500"
+            style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)" }}
+          />
+        </div>
+        <div className="flex items-center gap-2">
+          <Filter className="h-4 w-4 text-gray-500" />
+          {["all","completed","pending","failed","refunded"].map(s => (
+            <button key={s} onClick={() => setStatusFilter(s)}
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold capitalize transition-all ${statusFilter === s ? "bg-purple-600 text-white" : "text-gray-400 hover:text-white"}`}
+              style={statusFilter !== s ? { background: "rgba(255,255,255,0.05)" } : {}}>
+              {s}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Table */}
+      {isLoading ? (
+        <div className="flex items-center justify-center py-16">
+          <div className="w-8 h-8 border-2 border-purple-500 border-t-transparent rounded-full animate-spin" />
+        </div>
+      ) : filtered.length === 0 ? (
+        <div className="text-center py-16 text-gray-500">
+          <CreditCard className="h-10 w-10 mx-auto mb-3 opacity-30" />
+          <p>No card payments found</p>
+        </div>
+      ) : (
+        <>
+          {/* Desktop table */}
+          <div className="hidden md:block rounded-2xl overflow-hidden"
+            style={{ border: "1px solid rgba(255,255,255,0.08)" }}>
+            <table className="w-full text-sm">
+              <thead>
+                <tr style={{ background: "rgba(255,255,255,0.05)" }}>
+                  {["Date & Time","Customer","Package","Tokens","Amount","Txn ID","Status"].map(h => (
+                    <th key={h} className="text-left px-4 py-3 text-gray-400 text-xs font-semibold uppercase tracking-wide">{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {filtered.map((p, i) => (
+                  <tr key={p.id}
+                    style={{ background: i % 2 === 0 ? "rgba(255,255,255,0.02)" : "transparent", borderTop: "1px solid rgba(255,255,255,0.04)" }}>
+                    <td className="px-4 py-3 text-gray-300 text-xs whitespace-nowrap">
+                      {new Date(p.createdAt).toLocaleDateString()}<br />
+                      <span className="text-gray-500">{new Date(p.createdAt).toLocaleTimeString([], { hour:"2-digit", minute:"2-digit" })}</span>
+                    </td>
+                    <td className="px-4 py-3">
+                      <p className="text-white font-semibold text-xs">{p.userName}</p>
+                      <p className="text-gray-500 text-xs">{p.email}</p>
+                    </td>
+                    <td className="px-4 py-3 text-gray-300 text-xs max-w-[180px] truncate">
+                      {p.description?.split("—")[0]?.trim() ?? "—"}
+                    </td>
+                    <td className="px-4 py-3">
+                      <span className="text-yellow-400 font-bold text-xs">+{p.tokens}</span>
+                    </td>
+                    <td className="px-4 py-3">
+                      <span className="text-green-400 font-bold text-sm">${p.dollarAmount.toFixed(2)}</span>
+                    </td>
+                    <td className="px-4 py-3 text-gray-400 text-xs font-mono">
+                      {p.transactionId === "—" ? <span className="text-gray-600">—</span> : p.transactionId}
+                    </td>
+                    <td className="px-4 py-3">
+                      <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide ${
+                        p.status === "completed" ? "bg-green-500/20 text-green-400" :
+                        p.status === "pending"   ? "bg-yellow-500/20 text-yellow-400" :
+                        p.status === "failed"    ? "bg-red-500/20 text-red-400" :
+                        p.status === "refunded"  ? "bg-blue-500/20 text-blue-400" :
+                                                   "bg-gray-500/20 text-gray-400"
+                      }`}>
+                        {p.status}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Mobile cards */}
+          <div className="md:hidden space-y-3">
+            {filtered.map(p => (
+              <div key={p.id} className="rounded-2xl p-4 space-y-3"
+                style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
+                <div className="flex items-start justify-between gap-2">
+                  <div>
+                    <p className="text-white font-semibold text-sm">{p.userName}</p>
+                    <p className="text-gray-500 text-xs">{p.email}</p>
+                  </div>
+                  <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase shrink-0 ${
+                    p.status === "completed" ? "bg-green-500/20 text-green-400" :
+                    p.status === "pending"   ? "bg-yellow-500/20 text-yellow-400" :
+                    p.status === "failed"    ? "bg-red-500/20 text-red-400" :
+                    p.status === "refunded"  ? "bg-blue-500/20 text-blue-400" :
+                                               "bg-gray-500/20 text-gray-400"
+                  }`}>{p.status}</span>
+                </div>
+                <div className="grid grid-cols-3 gap-2 text-center">
+                  <div className="rounded-lg p-2" style={{ background: "rgba(16,185,129,0.08)" }}>
+                    <p className="text-green-400 font-black text-base">${p.dollarAmount.toFixed(2)}</p>
+                    <p className="text-gray-500 text-[10px]">Charged</p>
+                  </div>
+                  <div className="rounded-lg p-2" style={{ background: "rgba(245,158,11,0.08)" }}>
+                    <p className="text-yellow-400 font-black text-base">+{p.tokens}</p>
+                    <p className="text-gray-500 text-[10px]">Tokens</p>
+                  </div>
+                  <div className="rounded-lg p-2" style={{ background: "rgba(255,255,255,0.04)" }}>
+                    <p className="text-gray-300 font-semibold text-xs truncate">{new Date(p.createdAt).toLocaleDateString()}</p>
+                    <p className="text-gray-500 text-[10px]">Date</p>
+                  </div>
+                </div>
+                {p.transactionId !== "—" && (
+                  <p className="text-gray-600 text-[10px] font-mono truncate">Txn: {p.transactionId}</p>
+                )}
+              </div>
+            ))}
+          </div>
+
+          <p className="text-gray-600 text-xs text-center">
+            Showing {filtered.length} of {payments.length} transaction{payments.length !== 1 ? "s" : ""}
+          </p>
+        </>
+      )}
     </div>
   );
 }

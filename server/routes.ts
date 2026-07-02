@@ -1447,6 +1447,60 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Card payment history — all Authorize.net token purchases
+  app.get("/api/admin/card-payments", requireAuth, async (req, res) => {
+    try {
+      const rows = await db
+        .select({
+          id:              tokenTransactions.id,
+          userId:          tokenTransactions.userId,
+          amount:          tokenTransactions.amount,
+          dollarAmount:    tokenTransactions.dollarAmount,
+          description:     tokenTransactions.description,
+          status:          tokenTransactions.status,
+          createdAt:       tokenTransactions.createdAt,
+          firstName:       users.firstName,
+          lastName:        users.lastName,
+          email:           users.email,
+        })
+        .from(tokenTransactions)
+        .leftJoin(users, eq(tokenTransactions.userId, users.id))
+        .where(eq(tokenTransactions.transactionType, "purchase"))
+        .orderBy(desc(tokenTransactions.createdAt));
+
+      const formatted = rows.map(r => {
+        // Extract Authorize.net transaction ID from description e.g. "... — txn 60123456789"
+        const txnMatch = r.description?.match(/txn\s+([^\s)]+)/i);
+        return {
+          id:            r.id,
+          userId:        r.userId,
+          userName:      `${r.firstName || ""} ${r.lastName || ""}`.trim() || "Unknown",
+          email:         r.email || "—",
+          tokens:        r.amount,
+          dollarAmount:  r.dollarAmount ? parseFloat(r.dollarAmount as string) : 0,
+          description:   r.description,
+          status:        r.status,
+          transactionId: txnMatch ? txnMatch[1] : "—",
+          createdAt:     r.createdAt,
+        };
+      });
+
+      // Summary stats
+      const totalRevenue   = formatted.reduce((s, r) => s + r.dollarAmount, 0);
+      const totalTokensSold = formatted.reduce((s, r) => s + r.tokens, 0);
+      const now = new Date();
+      const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+      const monthRevenue = formatted
+        .filter(r => new Date(r.createdAt) >= monthStart)
+        .reduce((s, r) => s + r.dollarAmount, 0);
+
+      res.json({ payments: formatted, totalRevenue, totalTokensSold, monthRevenue, count: formatted.length });
+    } catch (error) {
+      console.error("Failed to fetch card payments:", error);
+      res.status(500).json({ message: "Failed to fetch card payments" });
+    }
+  });
+
   // System settings
   app.get("/api/admin/settings", requireAuth, async (req, res) => {
     try {
