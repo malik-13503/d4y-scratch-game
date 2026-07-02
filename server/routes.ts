@@ -2537,25 +2537,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      // Create or get player record (using same logic as process-payment)
-      let player = await storage.getPlayer(userId);
-      if (!player) {
-        player = await storage.createPlayer({
-          userId: userId,
-          gameId: gameId,
-          playerName: `${user.firstName} ${user.lastName}`,
-          ownedNumbers: [],
-          totalSpent: "0",
-          freeSpins: 0,
-          referralCount: 0,
-          ipAddress: req.ip || 'unknown',
-          userAgent: req.headers['user-agent'] || "",
-          createdAt: new Date()
-        });
-      }
-
       // IMMEDIATE NUMBER CLAIMING: Create spin result and claim the number
-      const spinResult = await storage.createSpinResultWithNumber(gameId, player.id, spunNumber, "0"); // $0 since using tokens
+      // Pass userId (not player.id) — createSpinResultWithNumber auto-creates the player record if needed
+      let spinResult;
+      try {
+        spinResult = await storage.createSpinResultWithNumber(gameId, userId, spunNumber, "0"); // $0 since using tokens
+      } catch (spinError: any) {
+        // Refund tokens if spin failed after deduction
+        try {
+          await storage.updateUserTokenBalance(userId, tokenCost);
+          console.log(`🔄 Refunded ${tokenCost} tokens to user ${userId} after spin failure`);
+        } catch (refundError) {
+          console.error(`❌ Failed to refund tokens to user ${userId}:`, refundError);
+        }
+        return res.status(400).json({ message: "Spin failed", error: spinError.message });
+      }
       
       // Record token transaction for the spin
       await storage.createTokenTransaction({
