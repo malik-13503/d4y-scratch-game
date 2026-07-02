@@ -7282,9 +7282,28 @@ function TestEmailButton() {
   );
 }
 
+function StatusBadge({ status }: { status: string }) {
+  const cfg: Record<string, { bg: string; text: string; label: string }> = {
+    completed: { bg: "rgba(16,185,129,0.15)", text: "#10b981", label: "✓ Completed" },
+    pending:   { bg: "rgba(251,191,36,0.15)", text: "#fbbf24", label: "⏳ Pending" },
+    failed:    { bg: "rgba(239,68,68,0.15)",  text: "#ef4444", label: "✗ Failed" },
+    refunded:  { bg: "rgba(59,130,246,0.15)", text: "#3b82f6", label: "↩ Refunded" },
+  };
+  const c = cfg[status] ?? { bg: "rgba(255,255,255,0.08)", text: "#9ca3af", label: status };
+  return (
+    <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide whitespace-nowrap"
+      style={{ background: c.bg, color: c.text }}>
+      {c.label}
+    </span>
+  );
+}
+
 function CardPaymentsTab() {
-  const [search, setSearch] = useState("");
+  const [search, setSearch]             = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [typeFilter, setTypeFilter]     = useState("all"); // all | real | manual
+  const [page, setPage]                 = useState(1);
+  const PAGE_SIZE = 25;
 
   const { data, isLoading } = useQuery<{
     payments: any[];
@@ -7299,48 +7318,69 @@ function CardPaymentsTab() {
 
   const payments = data?.payments ?? [];
 
+  // Derived counts for stat bar
+  const realCount     = payments.filter(p => p.transactionId !== "—").length;
+  const completedCount = payments.filter(p => p.status === "completed").length;
+  const failedCount   = payments.filter(p => p.status === "failed").length;
+  const pendingCount2  = payments.filter(p => p.status === "pending").length;
+
   const filtered = payments.filter(p => {
-    const matchSearch =
-      !search ||
-      p.userName.toLowerCase().includes(search.toLowerCase()) ||
-      p.email.toLowerCase().includes(search.toLowerCase()) ||
-      p.transactionId.toLowerCase().includes(search.toLowerCase()) ||
-      p.description.toLowerCase().includes(search.toLowerCase());
+    const q = search.toLowerCase();
+    const matchSearch = !q ||
+      p.userName.toLowerCase().includes(q) ||
+      p.email.toLowerCase().includes(q) ||
+      (p.transactionId !== "—" && p.transactionId.toLowerCase().includes(q)) ||
+      p.description.toLowerCase().includes(q);
     const matchStatus = statusFilter === "all" || p.status === statusFilter;
-    return matchSearch && matchStatus;
+    const matchType   = typeFilter === "all"
+      || (typeFilter === "real"   && p.transactionId !== "—")
+      || (typeFilter === "manual" && p.transactionId === "—");
+    return matchSearch && matchStatus && matchType;
   });
 
+  // Reset to page 1 on filter change
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const safePage   = Math.min(page, totalPages);
+  const paginated  = filtered.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
+
   function exportCSV() {
-    const header = ["Date","Name","Email","Package","Tokens","Amount ($)","Txn ID","Status"];
-    const rows = filtered.map(p => [
-      new Date(p.createdAt).toLocaleString(),
+    const header = ["#","Date","Time","Name","Email","Package","Tokens","Amount ($)","Payment Type","Txn ID","Status"];
+    const rows = filtered.map((p, i) => [
+      i + 1,
+      new Date(p.createdAt).toLocaleDateString(),
+      new Date(p.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
       p.userName,
       p.email,
       p.description?.split("—")[0]?.trim() ?? "",
       p.tokens,
       p.dollarAmount.toFixed(2),
+      p.transactionId !== "—" ? "Real Card Payment" : "Manual / Other",
       p.transactionId,
       p.status,
     ]);
     const csv = [header, ...rows].map(r => r.map(v => `"${v}"`).join(",")).join("\n");
     const blob = new Blob([csv], { type: "text/csv" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement("a");
     a.href = url;
-    a.download = `card-payments-${new Date().toISOString().slice(0,10)}.csv`;
+    a.download = `card-payments-${new Date().toISOString().slice(0, 10)}.csv`;
     a.click();
     URL.revokeObjectURL(url);
   }
 
   const statCards = [
-    { label: "Total Revenue",      value: `$${(data?.totalRevenue ?? 0).toFixed(2)}`,   icon: DollarSign, color: "#10b981" },
-    { label: "This Month",         value: `$${(data?.monthRevenue ?? 0).toFixed(2)}`,   icon: TrendingUp,  color: "#7c3aed" },
-    { label: "Total Transactions", value: data?.count ?? 0,                              icon: Receipt,     color: "#2563eb" },
-    { label: "Tokens Sold",        value: (data?.totalTokensSold ?? 0).toLocaleString(),icon: Coins,       color: "#f59e0b" },
+    { label: "Total Revenue",       value: `$${(data?.totalRevenue ?? 0).toFixed(2)}`,    icon: DollarSign,  color: "#10b981" },
+    { label: "This Month",          value: `$${(data?.monthRevenue ?? 0).toFixed(2)}`,    icon: TrendingUp,  color: "#7c3aed" },
+    { label: "Real Card Payments",  value: realCount,                                      icon: CreditCard,  color: "#2563eb" },
+    { label: "Completed",           value: completedCount,                                 icon: CheckCircle, color: "#10b981" },
+    { label: "Failed",              value: failedCount,                                    icon: XCircle,     color: "#ef4444" },
+    { label: "Pending",             value: pendingCount2,                                  icon: Clock,       color: "#fbbf24" },
+    { label: "Total Transactions",  value: data?.count ?? 0,                               icon: Receipt,     color: "#6b7280" },
+    { label: "Tokens Sold",         value: (data?.totalTokensSold ?? 0).toLocaleString(), icon: Coins,       color: "#f59e0b" },
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
@@ -7348,10 +7388,11 @@ function CardPaymentsTab() {
             <CreditCard className="h-5 w-5 text-blue-400" />
             Card Payment History
           </h2>
-          <p className="text-gray-400 text-sm mt-0.5">All Authorize.net token purchases — real-time</p>
+          <p className="text-gray-400 text-sm mt-0.5">
+            All token purchases — real card charges include an Authorize.net Transaction ID
+          </p>
         </div>
-        <button
-          onClick={exportCSV}
+        <button onClick={exportCSV}
           className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-white transition-all hover:opacity-90"
           style={{ background: "linear-gradient(135deg,#7c3aed,#2563eb)" }}>
           <ArrowDownCircle className="h-4 w-4" />
@@ -7359,48 +7400,57 @@ function CardPaymentsTab() {
         </button>
       </div>
 
-      {/* Summary stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+      {/* Stats grid */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2">
         {statCards.map(({ label, value, icon: Icon, color }) => (
-          <div key={label} className="rounded-2xl p-4"
-            style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
-            <div className="flex items-center gap-2 mb-2">
-              <div className="w-7 h-7 rounded-lg flex items-center justify-center"
-                style={{ background: `${color}22` }}>
-                <Icon className="h-3.5 w-3.5" style={{ color }} />
-              </div>
-              <span className="text-gray-400 text-xs">{label}</span>
+          <div key={label} className="rounded-xl p-3"
+            style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)" }}>
+            <div className="flex items-center gap-1.5 mb-1.5">
+              <Icon className="h-3 w-3 flex-shrink-0" style={{ color }} />
+              <span className="text-gray-500 text-[10px] leading-tight">{label}</span>
             </div>
-            <p className="text-white text-xl font-black">{value}</p>
+            <p className="text-white text-base font-black">{value}</p>
           </div>
         ))}
       </div>
 
-      {/* Filters */}
-      <div className="flex flex-wrap gap-3">
+      {/* Filters row */}
+      <div className="flex flex-wrap gap-2">
+        {/* Search */}
         <div className="relative flex-1 min-w-[200px]">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
-          <input
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            placeholder="Search name, email, transaction ID…"
-            className="w-full pl-9 pr-4 py-2.5 rounded-xl text-sm text-white placeholder-gray-500 outline-none focus:ring-1 focus:ring-purple-500"
-            style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)" }}
-          />
+          <input value={search} onChange={e => { setSearch(e.target.value); setPage(1); }}
+            placeholder="Search name, email, Txn ID…"
+            className="w-full pl-9 pr-4 py-2 rounded-xl text-sm text-white placeholder-gray-500 outline-none focus:ring-1 focus:ring-purple-500"
+            style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)" }} />
         </div>
-        <div className="flex items-center gap-2">
-          <Filter className="h-4 w-4 text-gray-500" />
+
+        {/* Type filter */}
+        <div className="flex items-center gap-1 rounded-xl p-1" style={{ background: "rgba(255,255,255,0.05)" }}>
+          {[
+            { v: "all",    l: "All Types" },
+            { v: "real",   l: "💳 Real Card" },
+            { v: "manual", l: "📋 Manual" },
+          ].map(({ v, l }) => (
+            <button key={v} onClick={() => { setTypeFilter(v); setPage(1); }}
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${typeFilter === v ? "bg-blue-600 text-white" : "text-gray-400 hover:text-white"}`}>
+              {l}
+            </button>
+          ))}
+        </div>
+
+        {/* Status filter */}
+        <div className="flex items-center gap-1 rounded-xl p-1" style={{ background: "rgba(255,255,255,0.05)" }}>
           {["all","completed","pending","failed","refunded"].map(s => (
-            <button key={s} onClick={() => setStatusFilter(s)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold capitalize transition-all ${statusFilter === s ? "bg-purple-600 text-white" : "text-gray-400 hover:text-white"}`}
-              style={statusFilter !== s ? { background: "rgba(255,255,255,0.05)" } : {}}>
+            <button key={s} onClick={() => { setStatusFilter(s); setPage(1); }}
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold capitalize transition-all ${statusFilter === s ? "bg-purple-600 text-white" : "text-gray-400 hover:text-white"}`}>
               {s}
             </button>
           ))}
         </div>
       </div>
 
-      {/* Table */}
+      {/* Content */}
       {isLoading ? (
         <div className="flex items-center justify-center py-16">
           <div className="w-8 h-8 border-2 border-purple-500 border-t-transparent rounded-full animate-spin" />
@@ -7408,103 +7458,212 @@ function CardPaymentsTab() {
       ) : filtered.length === 0 ? (
         <div className="text-center py-16 text-gray-500">
           <CreditCard className="h-10 w-10 mx-auto mb-3 opacity-30" />
-          <p>No card payments found</p>
+          <p className="text-sm">No payments match your filters</p>
         </div>
       ) : (
         <>
-          {/* Desktop table */}
-          <div className="hidden md:block rounded-2xl overflow-hidden"
+          {/* Results count + page info */}
+          <div className="flex items-center justify-between text-xs text-gray-500">
+            <span>{filtered.length} result{filtered.length !== 1 ? "s" : ""} · page {safePage} of {totalPages}</span>
+            <span>Showing {(safePage - 1) * PAGE_SIZE + 1}–{Math.min(safePage * PAGE_SIZE, filtered.length)} of {filtered.length}</span>
+          </div>
+
+          {/* ── Desktop table ─────────────────────────────────────────── */}
+          <div className="hidden md:block rounded-2xl overflow-x-auto"
             style={{ border: "1px solid rgba(255,255,255,0.08)" }}>
-            <table className="w-full text-sm">
+            <table className="w-full text-sm min-w-[900px]">
               <thead>
-                <tr style={{ background: "rgba(255,255,255,0.05)" }}>
-                  {["Date & Time","Customer","Package","Tokens","Amount","Txn ID","Status"].map(h => (
-                    <th key={h} className="text-left px-4 py-3 text-gray-400 text-xs font-semibold uppercase tracking-wide">{h}</th>
+                <tr style={{ background: "rgba(255,255,255,0.05)", borderBottom: "1px solid rgba(255,255,255,0.07)" }}>
+                  {["#","Date & Time","Customer","Package","Tokens","Amount","Payment Type","Txn ID","Status"].map(h => (
+                    <th key={h} className="text-left px-3 py-3 text-gray-400 text-[10px] font-bold uppercase tracking-wider whitespace-nowrap">{h}</th>
                   ))}
                 </tr>
               </thead>
               <tbody>
-                {filtered.map((p, i) => (
-                  <tr key={p.id}
-                    style={{ background: i % 2 === 0 ? "rgba(255,255,255,0.02)" : "transparent", borderTop: "1px solid rgba(255,255,255,0.04)" }}>
-                    <td className="px-4 py-3 text-gray-300 text-xs whitespace-nowrap">
-                      {new Date(p.createdAt).toLocaleDateString()}<br />
-                      <span className="text-gray-500">{new Date(p.createdAt).toLocaleTimeString([], { hour:"2-digit", minute:"2-digit" })}</span>
-                    </td>
-                    <td className="px-4 py-3">
-                      <p className="text-white font-semibold text-xs">{p.userName}</p>
-                      <p className="text-gray-500 text-xs">{p.email}</p>
-                    </td>
-                    <td className="px-4 py-3 text-gray-300 text-xs max-w-[180px] truncate">
-                      {p.description?.split("—")[0]?.trim() ?? "—"}
-                    </td>
-                    <td className="px-4 py-3">
-                      <span className="text-yellow-400 font-bold text-xs">+{p.tokens}</span>
-                    </td>
-                    <td className="px-4 py-3">
-                      <span className="text-green-400 font-bold text-sm">${p.dollarAmount.toFixed(2)}</span>
-                    </td>
-                    <td className="px-4 py-3 text-gray-400 text-xs font-mono">
-                      {p.transactionId === "—" ? <span className="text-gray-600">—</span> : p.transactionId}
-                    </td>
-                    <td className="px-4 py-3">
-                      <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide ${
-                        p.status === "completed" ? "bg-green-500/20 text-green-400" :
-                        p.status === "pending"   ? "bg-yellow-500/20 text-yellow-400" :
-                        p.status === "failed"    ? "bg-red-500/20 text-red-400" :
-                        p.status === "refunded"  ? "bg-blue-500/20 text-blue-400" :
-                                                   "bg-gray-500/20 text-gray-400"
-                      }`}>
-                        {p.status}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
+                {paginated.map((p, i) => {
+                  const isReal = p.transactionId !== "—";
+                  const rowN   = (safePage - 1) * PAGE_SIZE + i + 1;
+                  return (
+                    <tr key={p.id}
+                      style={{
+                        background: isReal
+                          ? (i % 2 === 0 ? "rgba(37,99,235,0.04)" : "rgba(37,99,235,0.02)")
+                          : (i % 2 === 0 ? "rgba(255,255,255,0.02)" : "transparent"),
+                        borderTop: "1px solid rgba(255,255,255,0.04)",
+                      }}>
+                      {/* # */}
+                      <td className="px-3 py-3 text-gray-600 text-xs">{rowN}</td>
+                      {/* Date */}
+                      <td className="px-3 py-3 text-gray-300 text-xs whitespace-nowrap">
+                        <p>{new Date(p.createdAt).toLocaleDateString("en-US", { month:"short", day:"numeric", year:"numeric" })}</p>
+                        <p className="text-gray-500">{new Date(p.createdAt).toLocaleTimeString([], { hour:"2-digit", minute:"2-digit" })}</p>
+                      </td>
+                      {/* Customer */}
+                      <td className="px-3 py-3">
+                        <p className="text-white font-semibold text-xs">{p.userName}</p>
+                        <p className="text-gray-500 text-[11px]">{p.email}</p>
+                      </td>
+                      {/* Package */}
+                      <td className="px-3 py-3 text-gray-300 text-xs max-w-[160px]">
+                        <span className="line-clamp-2">{p.description?.split("—")[0]?.trim() ?? "—"}</span>
+                      </td>
+                      {/* Tokens */}
+                      <td className="px-3 py-3">
+                        <span className="text-yellow-400 font-bold text-xs">
+                          {p.tokens > 0 ? `+${p.tokens}` : p.tokens}
+                        </span>
+                      </td>
+                      {/* Amount */}
+                      <td className="px-3 py-3">
+                        <span className={`font-bold text-sm ${p.dollarAmount > 0 ? "text-green-400" : "text-gray-500"}`}>
+                          {p.dollarAmount > 0 ? `$${p.dollarAmount.toFixed(2)}` : "—"}
+                        </span>
+                      </td>
+                      {/* Payment Type */}
+                      <td className="px-3 py-3">
+                        {isReal ? (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold"
+                            style={{ background: "rgba(37,99,235,0.2)", color: "#60a5fa" }}>
+                            💳 Real Card
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold"
+                            style={{ background: "rgba(255,255,255,0.07)", color: "#9ca3af" }}>
+                            📋 Manual
+                          </span>
+                        )}
+                      </td>
+                      {/* Txn ID */}
+                      <td className="px-3 py-3">
+                        {isReal ? (
+                          <span className="font-mono text-[11px] text-blue-300 select-all">{p.transactionId}</span>
+                        ) : (
+                          <span className="text-gray-600 text-xs">—</span>
+                        )}
+                      </td>
+                      {/* Status */}
+                      <td className="px-3 py-3">
+                        <StatusBadge status={p.status} />
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
 
-          {/* Mobile cards */}
+          {/* ── Mobile cards ──────────────────────────────────────────── */}
           <div className="md:hidden space-y-3">
-            {filtered.map(p => (
-              <div key={p.id} className="rounded-2xl p-4 space-y-3"
-                style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
-                <div className="flex items-start justify-between gap-2">
-                  <div>
-                    <p className="text-white font-semibold text-sm">{p.userName}</p>
-                    <p className="text-gray-500 text-xs">{p.email}</p>
+            {paginated.map((p, i) => {
+              const isReal = p.transactionId !== "—";
+              const rowN   = (safePage - 1) * PAGE_SIZE + i + 1;
+              return (
+                <div key={p.id} className="rounded-2xl p-4 space-y-3"
+                  style={{
+                    background: isReal ? "rgba(37,99,235,0.07)" : "rgba(255,255,255,0.04)",
+                    border: `1px solid ${isReal ? "rgba(59,130,246,0.25)" : "rgba(255,255,255,0.08)"}`,
+                  }}>
+                  {/* Top row */}
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-gray-600 text-[10px]">#{rowN}</span>
+                        {isReal ? (
+                          <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full"
+                            style={{ background: "rgba(37,99,235,0.2)", color: "#60a5fa" }}>💳 Real Card</span>
+                        ) : (
+                          <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full"
+                            style={{ background: "rgba(255,255,255,0.07)", color: "#9ca3af" }}>📋 Manual</span>
+                        )}
+                      </div>
+                      <p className="text-white font-semibold text-sm mt-1">{p.userName}</p>
+                      <p className="text-gray-500 text-xs">{p.email}</p>
+                    </div>
+                    <StatusBadge status={p.status} />
                   </div>
-                  <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase shrink-0 ${
-                    p.status === "completed" ? "bg-green-500/20 text-green-400" :
-                    p.status === "pending"   ? "bg-yellow-500/20 text-yellow-400" :
-                    p.status === "failed"    ? "bg-red-500/20 text-red-400" :
-                    p.status === "refunded"  ? "bg-blue-500/20 text-blue-400" :
-                                               "bg-gray-500/20 text-gray-400"
-                  }`}>{p.status}</span>
+
+                  {/* Stats */}
+                  <div className="grid grid-cols-3 gap-2 text-center">
+                    <div className="rounded-lg p-2" style={{ background: "rgba(16,185,129,0.08)" }}>
+                      <p className={`font-black text-base ${p.dollarAmount > 0 ? "text-green-400" : "text-gray-500"}`}>
+                        {p.dollarAmount > 0 ? `$${p.dollarAmount.toFixed(2)}` : "—"}
+                      </p>
+                      <p className="text-gray-500 text-[10px]">Charged</p>
+                    </div>
+                    <div className="rounded-lg p-2" style={{ background: "rgba(245,158,11,0.08)" }}>
+                      <p className="text-yellow-400 font-black text-base">+{p.tokens}</p>
+                      <p className="text-gray-500 text-[10px]">Tokens</p>
+                    </div>
+                    <div className="rounded-lg p-2" style={{ background: "rgba(255,255,255,0.04)" }}>
+                      <p className="text-gray-300 font-semibold text-xs">{new Date(p.createdAt).toLocaleDateString()}</p>
+                      <p className="text-gray-500 text-[10px]">{new Date(p.createdAt).toLocaleTimeString([], { hour:"2-digit", minute:"2-digit" })}</p>
+                    </div>
+                  </div>
+
+                  {/* Package */}
+                  <p className="text-gray-400 text-xs">{p.description?.split("—")[0]?.trim() ?? "—"}</p>
+
+                  {/* Txn ID — always shown for real payments */}
+                  {isReal && (
+                    <div className="rounded-lg px-3 py-2" style={{ background: "rgba(37,99,235,0.1)", border: "1px solid rgba(59,130,246,0.2)" }}>
+                      <p className="text-gray-500 text-[10px] mb-0.5">Authorize.net Transaction ID</p>
+                      <p className="text-blue-300 font-mono text-xs select-all break-all">{p.transactionId}</p>
+                    </div>
+                  )}
                 </div>
-                <div className="grid grid-cols-3 gap-2 text-center">
-                  <div className="rounded-lg p-2" style={{ background: "rgba(16,185,129,0.08)" }}>
-                    <p className="text-green-400 font-black text-base">${p.dollarAmount.toFixed(2)}</p>
-                    <p className="text-gray-500 text-[10px]">Charged</p>
-                  </div>
-                  <div className="rounded-lg p-2" style={{ background: "rgba(245,158,11,0.08)" }}>
-                    <p className="text-yellow-400 font-black text-base">+{p.tokens}</p>
-                    <p className="text-gray-500 text-[10px]">Tokens</p>
-                  </div>
-                  <div className="rounded-lg p-2" style={{ background: "rgba(255,255,255,0.04)" }}>
-                    <p className="text-gray-300 font-semibold text-xs truncate">{new Date(p.createdAt).toLocaleDateString()}</p>
-                    <p className="text-gray-500 text-[10px]">Date</p>
-                  </div>
-                </div>
-                {p.transactionId !== "—" && (
-                  <p className="text-gray-600 text-[10px] font-mono truncate">Txn: {p.transactionId}</p>
-                )}
-              </div>
-            ))}
+              );
+            })}
           </div>
 
-          <p className="text-gray-600 text-xs text-center">
-            Showing {filtered.length} of {payments.length} transaction{payments.length !== 1 ? "s" : ""}
+          {/* ── Pagination ────────────────────────────────────────────── */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-center gap-2 pt-2">
+              <button onClick={() => setPage(1)} disabled={safePage === 1}
+                className="px-3 py-1.5 rounded-lg text-xs font-semibold disabled:opacity-30 transition-all text-gray-400 hover:text-white"
+                style={{ background: "rgba(255,255,255,0.06)" }}>
+                «
+              </button>
+              <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={safePage === 1}
+                className="px-3 py-1.5 rounded-lg text-xs font-semibold disabled:opacity-30 transition-all text-gray-400 hover:text-white"
+                style={{ background: "rgba(255,255,255,0.06)" }}>
+                ‹ Prev
+              </button>
+
+              {/* Page numbers */}
+              {Array.from({ length: totalPages }, (_, i) => i + 1)
+                .filter(n => n === 1 || n === totalPages || Math.abs(n - safePage) <= 2)
+                .reduce<(number | "…")[]>((acc, n, idx, arr) => {
+                  if (idx > 0 && n - (arr[idx - 1] as number) > 1) acc.push("…");
+                  acc.push(n);
+                  return acc;
+                }, [])
+                .map((n, idx) =>
+                  n === "…" ? (
+                    <span key={`e${idx}`} className="text-gray-600 text-xs px-1">…</span>
+                  ) : (
+                    <button key={n} onClick={() => setPage(n as number)}
+                      className={`w-8 h-8 rounded-lg text-xs font-bold transition-all ${safePage === n ? "bg-purple-600 text-white" : "text-gray-400 hover:text-white"}`}
+                      style={safePage !== n ? { background: "rgba(255,255,255,0.06)" } : {}}>
+                      {n}
+                    </button>
+                  )
+                )}
+
+              <button onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={safePage === totalPages}
+                className="px-3 py-1.5 rounded-lg text-xs font-semibold disabled:opacity-30 transition-all text-gray-400 hover:text-white"
+                style={{ background: "rgba(255,255,255,0.06)" }}>
+                Next ›
+              </button>
+              <button onClick={() => setPage(totalPages)} disabled={safePage === totalPages}
+                className="px-3 py-1.5 rounded-lg text-xs font-semibold disabled:opacity-30 transition-all text-gray-400 hover:text-white"
+                style={{ background: "rgba(255,255,255,0.06)" }}>
+                »
+              </button>
+            </div>
+          )}
+
+          <p className="text-gray-600 text-xs text-center pb-2">
+            {filtered.length} total · {PAGE_SIZE} per page
           </p>
         </>
       )}
